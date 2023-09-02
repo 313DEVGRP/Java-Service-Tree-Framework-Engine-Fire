@@ -30,4 +30,5 @@ public interface 지라이슈_서비스 {
 
     public int 이슈_링크드이슈_서브테스크_벌크로_추가하기(Long 지라서버_아이디, String 이슈_키) throws Exception;
 
+    public List<지라이슈> 페이징_이슈_조회하기(Long 지라서버_아이디, String 이슈_키, int 페이지_번호);
 }

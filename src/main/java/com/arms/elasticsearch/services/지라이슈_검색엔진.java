@@ -1,6 +1,5 @@
 package com.arms.elasticsearch.services;
 
-import com.arms.elasticsearch.helper.인덱스자료;
 import com.arms.elasticsearch.models.지라이슈;
 import com.arms.elasticsearch.repositories.지라이슈_저장소;
 import com.arms.elasticsearch.util.검색결과;
@@ -20,6 +19,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.arms.elasticsearch.helper.인덱스자료.지라이슈_인덱스명;
 
 @Slf4j
 @Service("지라이슈_서비스")
@@ -48,7 +49,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                 .map(지라이슈 -> new IndexQueryBuilder().withId(String.valueOf(지라이슈.getId()))
                         .withObject(지라이슈).build())
                 .collect(Collectors.toList());
-        검색엔진_실행기.bulkIndex(검색엔진_쿼리, IndexCoordinates.of(인덱스자료.지라이슈_인덱스명));
+        검색엔진_실행기.bulkIndex(검색엔진_쿼리, IndexCoordinates.of(지라이슈_인덱스명));
 
         return 검색엔진_쿼리.size();
     }
@@ -91,7 +92,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     @Override
     public List<지라이슈> 이슈_검색하기(검색조건 검색조건) {
         final SearchRequest request = 검색엔진_유틸.buildSearchRequest(
-                인덱스자료.지라이슈_인덱스명,
+                지라이슈_인덱스명,
                 검색조건
         );
 
@@ -268,6 +269,27 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         이슈.generateId();
 
         return 이슈;
+    }
+
+    @Override
+    public List<지라이슈> 페이징_이슈_조회하기(Long 지라서버_아이디, String 이슈_키, int 페이지_번호) {
+
+        List<String> 검색_필드 = new ArrayList<>(Arrays.asList("key", "parentReqKey"));
+        int 페이지_단위 = 10;
+
+        검색조건 검색조건 = new 검색조건();
+        검색조건.setFields(검색_필드);
+        검색조건.setSearchTerm(이슈_키);
+        검색조건.setPage(페이지_번호);
+        검색조건.setSize(페이지_단위);
+
+        final SearchRequest request = 검색엔진_유틸.buildSearchRequest(
+                지라이슈_인덱스명,
+                검색조건,
+                지라서버_아이디
+        );
+
+        return 검색엔진_유틸.searchInternal(request, 지라이슈.class);
     }
 }
 

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -144,4 +145,85 @@ public class 엘라스틱_지라이슈_컨트롤러 {
         return 지라이슈_검색엔진.이슈_링크드이슈_서브테스크_벌크로_추가하기(지라서버_아이디, 이슈_키);
     }
 
+    @ResponseBody
+    @RequestMapping(
+            value = {"/loadToEStest/{issueKey}"},
+            method = {RequestMethod.GET}
+    )
+    public int 이슈_검색엔진_저장(@PathVariable("connectId") Long 지라서버_아이디,
+                          @PathVariable("issueKey") String 이슈_키) throws Exception {
+        로그.info("지라 이슈_상세정보_가져오기");
+
+        지라이슈_데이터 받아온_이슈 = 지라이슈_전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키);
+        List<지라이슈_데이터> 받아온_이슈링크_목록 = 지라이슈_전략_호출.이슈링크_가져오기(지라서버_아이디, 이슈_키);
+        List<지라이슈_데이터> 받아온_서브테스크_목록 = 지라이슈_전략_호출.서브테스크_가져오기(지라서버_아이디, 이슈_키);
+        List<지라이슈> 저장할_리스트 = new ArrayList<>();
+
+        지라이슈.프로젝트 프로젝트 = 프로젝트_정보(받아온_이슈);
+
+        지라이슈 이슈 = 지라이슈.builder()
+                .jira_server_id(지라서버_아이디)
+                .self(받아온_이슈.getSelf())
+                .key(받아온_이슈.getKey())
+                .issueID(받아온_이슈.getId().toString())
+                .project(프로젝트)
+                .parentReqKey("iAmParent")
+                .isReq(true)
+                .build();
+
+        이슈.generateId();
+        저장할_리스트.add(이슈);
+
+        for (지라이슈_데이터 이슈링크 : 받아온_이슈링크_목록) {
+            지라이슈 이슈링크_이슈 = 지라이슈.builder()
+                    .jira_server_id(지라서버_아이디)
+                    .self(이슈링크.getSelf())
+                    .key(이슈링크.getId().toString())
+                    .project(프로젝트_정보(이슈링크))
+                    .parentReqKey(이슈_키)
+                    .isReq(false)
+                    .build();
+
+            이슈링크_이슈.generateId();
+            저장할_리스트.add(이슈링크_이슈);
+        }
+
+        for (지라이슈_데이터 서브테스크 : 받아온_서브테스크_목록) {
+            지라이슈 이슈링크_이슈 = 지라이슈.builder()
+                    .jira_server_id(지라서버_아이디)
+                    .self(서브테스크.getSelf())
+                    .key(서브테스크.getId().toString())
+                    .project(프로젝트_정보(서브테스크))
+                    .parentReqKey(이슈_키)
+                    .isReq(false)
+                    .build();
+
+            이슈링크_이슈.generateId();
+            저장할_리스트.add(이슈링크_이슈);
+        }
+
+        return 지라이슈_검색엔진.대량이슈_추가하기(저장할_리스트);
+    }
+
+    public 지라이슈.프로젝트 프로젝트_정보(지라이슈_데이터 받아온_이슈) {
+
+        return 지라이슈.프로젝트.builder()
+                .id(받아온_이슈.getFields().getProject().getId())
+                .key(받아온_이슈.getFields().getProject().getKey())
+                .name(받아온_이슈.getFields().getProject().getName())
+                .self(받아온_이슈.getFields().getProject().getSelf())
+                .build();
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/paging/{issueKey}/{pageNum}"},
+            method = {RequestMethod.GET}
+    )
+    public List<지라이슈> 페이징_이슈_조회하기(@PathVariable("connectId") Long 지라서버_아이디,
+                                  @PathVariable("issueKey") String 이슈_키,
+                                  @PathVariable("pageNum") int 페이지_번호) {
+
+        return 지라이슈_검색엔진.페이징_이슈_조회하기(지라서버_아이디, 이슈_키, 페이지_번호);
+    }
 }

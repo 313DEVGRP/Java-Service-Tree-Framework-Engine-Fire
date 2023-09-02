@@ -258,6 +258,41 @@ public final class 검색엔진_유틸 {
         }
     }
 
+    public static SearchRequest buildSearchRequest(final String indexName,
+                                                   final 검색조건 dto,
+                                                   final Long 지라서버_아이디) {
+        try {
+            final int page = dto.getPage();
+            final int size = dto.getSize();
+            final int from = page <= 0 ? 0 : page * size;
+
+            String 지라서버_아이디_패턴 = 지라서버_아이디 + "_*";
+            BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+            boolQuery.must(QueryBuilders.wildcardQuery("id", 지라서버_아이디_패턴));
+
+            SearchSourceBuilder builder = new SearchSourceBuilder()
+                    .from(from)
+                    .size(size)
+                    .postFilter(getQueryBuilder(dto))
+                    .query(boolQuery);
+
+            if (dto.getSortBy() != null) {
+                builder = builder.sort(
+                        dto.getSortBy(),
+                        dto.getOrder() != null ? dto.getOrder() : SortOrder.ASC
+                );
+            }
+
+            final SearchRequest request = new SearchRequest(indexName);
+            request.source(builder);
+
+            return request;
+        } catch (final Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     private static QueryBuilder getQueryBuilder(final 검색조건 dto) {
         if (dto == null) {
             return null;
