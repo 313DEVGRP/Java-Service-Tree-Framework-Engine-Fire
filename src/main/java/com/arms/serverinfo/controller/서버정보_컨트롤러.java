@@ -25,7 +25,7 @@ public class 서버정보_컨트롤러 {
             value = {""},
             method = {RequestMethod.POST}
     )
-    public 서버정보_엔티티 서버정보_저장(@RequestBody 서버정보_데이터 서버정보_데이터,
+    public 서버정보_엔티티 서버정보_저장_또는_수정(@RequestBody 서버정보_데이터 서버정보_데이터,
                             ModelMap model, HttpServletRequest request) throws Exception {
 
         로그.info("서버정보 저장");

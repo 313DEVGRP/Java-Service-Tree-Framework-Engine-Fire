@@ -101,13 +101,15 @@ public class 엘라스틱_지라이슈_컨트롤러 {
 
     @ResponseBody
     @RequestMapping(
-            value = {"/search/req/subAndLinks"},
-            method = {RequestMethod.POST}
+            value = {"/search/{issueKey}/subAndLinks"},
+            method = {RequestMethod.GET}
     )
     public List<지라이슈> 요구사항_링크드이슈_서브테스크_검색하기(@PathVariable("connectId") Long 지라서버_아이디,
-                                                @RequestBody final 검색조건 검색조건) {
+                                                @PathVariable("issueKey") String 이슈_키,
+                                                @RequestParam("page") int 페이지_번호,
+                                                @RequestParam("size") int 페이지_사이즈 ) {
 
-        return 지라이슈_검색엔진.요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디, 검색조건);
+        return 지라이슈_검색엔진.요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디, 이슈_키, 페이지_번호, 페이지_사이즈);
     }
 
     @ResponseBody

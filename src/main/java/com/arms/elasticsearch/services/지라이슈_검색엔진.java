@@ -209,19 +209,9 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
             벌크_저장_목록.add(ELK_데이터로_변환(지라서버_아이디, 반환된_이슈, true, "", 제품서비스_아이디, 제품서비스_버전));
 
-            검색조건 검색조건 = new 검색조건();
-            String field = "parentReqKey";
-            List<String> fields = new ArrayList<>();
-            fields.add(field);
-
-            검색조건.setFields(fields);
-            검색조건.setOrder(SortOrder.valueOf("ASC"));
-            검색조건.setSearchTerm(이슈_키);
-            검색조건.setPage(0);
-            검색조건.setSize(0);
-
             try {
-                List<지라이슈> 링크드이슈_서브테스크_목록 = Optional.ofNullable(요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디, 검색조건))
+                List<지라이슈> 링크드이슈_서브테스크_목록 = Optional.ofNullable(요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디,
+                                                                                        이슈_키, 0, 0))
                         .orElse(Collections.emptyList())
                         .stream()
                         .map(링크드이슈_서브테스크 -> {
@@ -407,7 +397,16 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     }
 
     @Override
-    public List<지라이슈> 요구사항_링크드이슈_서브테스크_검색하기(Long 서버_아이디, 검색조건 검색조건) {
+    public List<지라이슈> 요구사항_링크드이슈_서브테스크_검색하기(Long 서버_아이디, String 이슈_키, int 페이지_번호, int 페이지_사이즈) {
+        List<String> 검색_필드 = new ArrayList<>();
+        검색_필드.add("parentReqKey");
+
+        검색조건 검색조건 = new 검색조건();
+        검색조건.setFields(검색_필드);
+        검색조건.setOrder(SortOrder.valueOf("ASC"));
+        검색조건.setSearchTerm(이슈_키);
+        검색조건.setPage(페이지_번호);
+        검색조건.setSize(페이지_사이즈);
 
         final SearchRequest request = 검색엔진_유틸.buildSearchRequest(
                 인덱스자료.지라이슈_인덱스명,
