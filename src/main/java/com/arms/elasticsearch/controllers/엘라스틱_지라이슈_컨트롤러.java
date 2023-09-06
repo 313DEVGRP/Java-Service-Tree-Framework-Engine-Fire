@@ -140,4 +140,16 @@ public class 엘라스틱_지라이슈_컨트롤러 {
         로그.info("프로젝트별 상태값 통계");
         return 지라이슈_검색엔진.요구사항_릴레이션이슈_상태값_프로젝트별통계(지라서버_아이디);
     }
+
+    /*
+    *  하위 이슈
+    * */
+    @ResponseBody
+    @GetMapping("/getSubFrequency/{pdServiceId}/{parentReqKey}")
+    public Map<String, Long> 하위이슈_할당자_빈도수(@PathVariable("connectId") Long 지라서버_아이디,
+                                              @PathVariable("parentReqKey") String 이슈_키,
+                                              @PathVariable("pdServiceId") Long 제품서비스_아이디) throws IOException {
+
+        return 지라이슈_검색엔진.하위이슈_할당자_빈도수(이슈_키,제품서비스_아이디);
+    }
 }

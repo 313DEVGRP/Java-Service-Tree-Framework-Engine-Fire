@@ -39,4 +39,6 @@ public interface 지라이슈_서비스 {
     public Map<String, Map<String, Integer>> 요구사항_릴레이션이슈_상태값_프로젝트별통계(Long 지라서버_아이디) throws IOException;
 
     public Map<String, Long> 제품서비스_버전별_상태값_통계(Long 제품서비스_아이디, Long 버전_아이디) throws IOException;
+
+    public Map<String, Long> 하위이슈_할당자_빈도수(String 이슈_키, Long 제품서비스_아이디)throws IOException;
 }
