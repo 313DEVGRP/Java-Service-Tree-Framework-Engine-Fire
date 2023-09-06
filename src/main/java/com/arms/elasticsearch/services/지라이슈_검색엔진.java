@@ -540,39 +540,53 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     }
 
     @Override
-    public Map<String, Long> 하위이슈_할당자_빈도수(String 이슈_키, Long 제품서비스_아이디)throws IOException {
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+    public Map<String, Long> 제품서비스별_하위이슈_담당자_통계(Long 지라서버_아이디, Long 제품서비스_아이디, String 이슈_키) throws IOException {
 
-        MatchQueryBuilder 서비스별_조회 = QueryBuilders.matchQuery("pdServiceId", 제품서비스_아이디);
-        MatchQueryBuilder 연관된이슈_조회 = QueryBuilders.matchQuery("parentReqKey", 이슈_키);
+        SearchSourceBuilder 검색조건 = new SearchSourceBuilder();
+        BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
 
-        BoolQueryBuilder 복합조건_조회 = QueryBuilders.boolQuery()
-                .must(서비스별_조회)
-                .must(연관된이슈_조회);
-        sourceBuilder.query(복합조건_조회);
+        if ( 지라서버_아이디 != null ) {
+            MatchQueryBuilder 지라서버_조회 = QueryBuilders.matchQuery("jira_server_id", 지라서버_아이디);
+            복합조회.must(지라서버_조회);
+        }
 
-        sourceBuilder.aggregation(
-                AggregationBuilders.terms("담당자별집계").field("assignee.assignee_emailAddress.keyword")
+        if ( 제품서비스_아이디 != null && 제품서비스_아이디 > 9L) {
+            MatchQueryBuilder 제품서비스_조회 = QueryBuilders.matchQuery("pdServiceId", 제품서비스_아이디);
+            복합조회.must(제품서비스_조회);
+        }
+
+        if ( 이슈_키 != null ) {
+            MatchQueryBuilder 하위이슈_조회 = QueryBuilders.matchQuery("parentReqKey", 이슈_키);
+            복합조회.must(하위이슈_조회);
+        }
+
+        검색조건.query(복합조회);
+        검색조건.size(0); // 모든 검색 결과를 가져오기 위함
+
+        검색조건.aggregation(
+                AggregationBuilders.terms("담당자별_집계").field("assignee.assignee_emailAddress.keyword")
         );
 
-        SearchRequest searchRequest = new SearchRequest();
-        searchRequest.indices("jiraissue");
-        searchRequest.source(sourceBuilder);
+        SearchRequest 검색요청 = new SearchRequest();
+        검색요청.indices("jiraissue");
+        검색요청.source(검색조건);
 
-        SearchResponse 검색결과 = 검색엔진_유틸.getClient().search(searchRequest, RequestOptions.DEFAULT);
-        long value = 검색결과.getHits().getTotalHits().value;
-        System.out.println("value"+value);
+        SearchResponse 검색결과 = 검색엔진_유틸.getClient().search(검색요청, RequestOptions.DEFAULT);
+        long 결과 = 검색결과.getHits().getTotalHits().value;
+        로그.info("검색결과 개수: " + 결과);
 
-        Terms 담당자별집계결과= 검색결과.getAggregations().get("담당자별집계");
+        Terms 담당자별_집계 = 검색결과.getAggregations().get("담당자별_집계");
 
-        Map<String, Long> 집계결과= new HashMap<>();
-        for (Terms.Bucket 담당자 : 담당자별집계결과.getBuckets()) {
-            String emailAddress= 담당자.getKeyAsString();
-            long docCount=  담당자.getDocCount();
-            집계결과.put(emailAddress, docCount);
+        Map<String, Long> 제품서비스별_하위이슈_담당자_집계 = new HashMap<>();
+        for (Terms.Bucket 담당자 : 담당자별_집계.getBuckets()) {
+            String 담당자_이메일 = 담당자.getKeyAsString();
+            long 개수 = 담당자.getDocCount();
+            log.info("담당자: " + 담당자_이메일 + ", Count: " + 개수);
+
+            제품서비스별_하위이슈_담당자_집계.put(담당자_이메일, 개수);
         }
-        return 집계결과;
+
+        return 제품서비스별_하위이슈_담당자_집계;
     }
 
 }
-
