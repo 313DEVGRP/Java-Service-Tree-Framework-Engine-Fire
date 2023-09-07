@@ -18,6 +18,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.net.URI;
@@ -27,12 +29,18 @@ import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@SpringBootTest
 class 통합이슈조회테스트 {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
     ObjectMapper objectMapper = new ObjectMapper();
 
-    String fieldsParam = "project,issuetype,creator,reporter,assignee,labels,priority,status,resolution,resolutiondate,created,worklogs,timespent,summary";
+    @Autowired
+    지라이슈_전략_호출 지라이슈_전략_호출;
+
+    String fieldsParam = "project,issuetype,creator,reporter,assignee,labels,priority,status,resolution,resolutiondate,created,worklogs,timespent,fixVersions";
+
+    int 페이지_사이즈 = 10;
 
     // 온프레미스
     JiraRestClient restClient;
@@ -40,10 +48,9 @@ class 통합이슈조회테스트 {
     private String o_url = "http://www.313.co.kr/jira";
     private String o_id = "admin";
     private String o_pass = "flexjava";
-
     public String o_projectKey = "JSTFFW";
     public String o_issueKey = "JSTFFW-124";
-    
+    public Long o_serverId = 313L;
 
     // 클라우드
     WebClient webClient;
@@ -53,6 +60,7 @@ class 통합이슈조회테스트 {
     public String c_pass = "";
     public String c_projectKey = "T3";
     public String c_issueKey = "T3-5";
+    public Long c_serverId = 1L;
 
     @BeforeEach
     void setUp () throws URISyntaxException {
@@ -409,6 +417,74 @@ class 통합이슈조회테스트 {
         로그.info(json);
 
         return 지라이슈_데이터;
+    }
+
+    @Test
+    public void 클라우드_요구사항이슈_이슈링크_서브테스크_조회() throws Exception {
+
+        List<지라이슈_데이터> 지라이슈_목록 = 연관된_지라이슈_목록(c_serverId, c_issueKey);
+
+        int 전체_페이지_수 = 페이지_수(지라이슈_목록, 페이지_사이즈);
+
+        if (전체_페이지_수 == 0) {
+            로그.info("조회할 데이터가 없습니다.");
+        }
+
+        for (int 페이지_번호 = 1; 페이지_번호 <= 전체_페이지_수; 페이지_번호++) {
+            로그.info(페이지_번호 + "번째 페이지: " + 페이징_지라이슈_목록(지라이슈_목록, 페이지_사이즈, 페이지_번호));
+        }
+    }
+
+    @Test
+    public void 온프레미스_요구사항이슈_이슈링크_서브테스크_조회() throws Exception {
+
+        List<지라이슈_데이터> 지라이슈_목록 = 연관된_지라이슈_목록(o_serverId, o_issueKey);
+
+        int 전체_페이지_수 = 페이지_수(지라이슈_목록, 페이지_사이즈);
+
+        if (전체_페이지_수 == 0) {
+            로그.info("조회할 데이터가 없습니다.");
+        }
+
+        for (int 페이지_번호 = 1; 페이지_번호 <= 전체_페이지_수; 페이지_번호++) {
+            로그.info(페이지_번호 + "번째 페이지: " + 페이징_지라이슈_목록(지라이슈_목록, 페이지_사이즈, 페이지_번호));
+        }
+    }
+
+    public int 페이지_수(List<지라이슈_데이터> 받아온_지라이슈_목록, int 페이지_사이즈) {
+
+        if (받아온_지라이슈_목록.isEmpty()) {
+            return 0;
+        }
+
+        return (int) Math.ceil((double) 받아온_지라이슈_목록.size()/페이지_사이즈);
+    }
+
+    public List<지라이슈_데이터> 페이징_지라이슈_목록(List<지라이슈_데이터> 받아온_지라이슈_목록, int 페이지_사이즈, int 페이지_번호) {
+
+        int 조회_시작_지점 = (페이지_번호-1) * 페이지_사이즈;
+        int 지라이슈_목록_개수 = 받아온_지라이슈_목록.size();
+
+        if (조회_시작_지점 >= 지라이슈_목록_개수 || 조회_시작_지점 < 0) {
+            로그.info("잘못된 페이지 번호입니다.");
+        }
+
+        return 받아온_지라이슈_목록.subList(조회_시작_지점, Math.min(조회_시작_지점+페이지_사이즈, 지라이슈_목록_개수));
+    }
+
+    public List<지라이슈_데이터> 연관된_지라이슈_목록(Long 지라서버_아이디, String 이슈_키) throws Exception {
+
+        List<지라이슈_데이터> 연관된_지라이슈_목록 = new ArrayList<>();
+
+        지라이슈_데이터 이슈 = 지라이슈_전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키);
+        List<지라이슈_데이터> 이슈링크_목록 = 지라이슈_전략_호출.이슈링크_가져오기(지라서버_아이디, 이슈_키);
+        List<지라이슈_데이터> 서브테스크_목록 = 지라이슈_전략_호출.서브테스크_가져오기(지라서버_아이디, 이슈_키);
+
+        연관된_지라이슈_목록.add(이슈);
+        연관된_지라이슈_목록.addAll(이슈링크_목록);
+        연관된_지라이슈_목록.addAll(서브테스크_목록);
+
+        return 연관된_지라이슈_목록;
     }
 
 }

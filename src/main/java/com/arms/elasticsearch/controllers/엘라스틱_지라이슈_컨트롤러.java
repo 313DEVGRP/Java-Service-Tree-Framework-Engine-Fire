@@ -145,11 +145,11 @@ public class 엘라스틱_지라이슈_컨트롤러 {
     *  하위 이슈
     * */
     @ResponseBody
-    @GetMapping("/getSubFrequency/{pdServiceId}/{parentReqKey}")
-    public Map<String, Long> 하위이슈_할당자_빈도수(@PathVariable("connectId") Long 지라서버_아이디,
-                                              @PathVariable("parentReqKey") String 이슈_키,
-                                              @PathVariable("pdServiceId") Long 제품서비스_아이디) throws IOException {
+    @GetMapping("/getAssignee/{pdServiceId}/{issueKey}")
+    public Map<String, Long> 제품서비스별_하위이슈_담당자_통계(@PathVariable("connectId") Long 지라서버_아이디,
+                                                @PathVariable("pdServiceId") Long 제품서비스_아이디,
+                                                @PathVariable("issueKey") String 이슈_키) throws IOException {
 
-        return 지라이슈_검색엔진.하위이슈_할당자_빈도수(이슈_키,제품서비스_아이디);
+        return 지라이슈_검색엔진.제품서비스별_하위이슈_담당자_통계(지라서버_아이디, 제품서비스_아이디, 이슈_키);
     }
 }
