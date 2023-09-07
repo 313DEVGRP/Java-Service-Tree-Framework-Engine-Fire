@@ -577,16 +577,19 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
         Terms 담당자별_집계 = 검색결과.getAggregations().get("담당자별_집계");
 
+        long 담당자_총합 = 0;
         Map<String, Long> 제품서비스별_하위이슈_담당자_집계 = new HashMap<>();
         for (Terms.Bucket 담당자 : 담당자별_집계.getBuckets()) {
             String 담당자_이메일 = 담당자.getKeyAsString();
             long 개수 = 담당자.getDocCount();
             log.info("담당자: " + 담당자_이메일 + ", Count: " + 개수);
-
+            담당자_총합+= 개수;
             제품서비스별_하위이슈_담당자_집계.put(담당자_이메일, 개수);
         }
+        제품서비스별_하위이슈_담당자_집계.put("담당자 미지정",결과-담당자_총합);
 
         return 제품서비스별_하위이슈_담당자_집계;
     }
 
 }
+
