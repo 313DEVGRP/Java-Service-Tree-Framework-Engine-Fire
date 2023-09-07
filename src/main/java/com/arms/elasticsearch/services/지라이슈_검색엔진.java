@@ -556,7 +556,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         }
 
         if ( 이슈_키 != null ) {
-            MatchQueryBuilder 하위이슈_조회 = QueryBuilders.matchQuery("parentReqKey", 이슈_키);
+            MatchQueryBuilder 하위이슈_조회 = QueryBuilders.matchQuery("parentReqKey.keyword", 이슈_키);
             복합조회.must(하위이슈_조회);
         }
 
