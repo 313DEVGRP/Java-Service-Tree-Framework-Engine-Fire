@@ -3,9 +3,7 @@ package com.arms.elasticsearch.models;
 import com.arms.elasticsearch.helper.인덱스자료;
 import com.fasterxml.jackson.annotation.*;
 import lombok.*;
-import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.*;
 
 import java.util.Date;
 import java.util.List;
@@ -64,31 +62,31 @@ public class 지라이슈 {
     @Field(type = FieldType.Percolator, name = "queries")
     private List<String> percolatorQueries;
 
-    @Field(type = FieldType.Nested)
+//    @Field(type = FieldType.Nested)
     private 지라이슈.프로젝트 project;
 
-    @Field(type = FieldType.Nested)
+//    @Field(type = FieldType.Nested)
     private 지라이슈.이슈유형 issuetype;
 
-    @Field(type = FieldType.Nested)
+//    @Field(type = FieldType.Nested)
     private 지라이슈.생성자 creator;
 
-    @Field(type = FieldType.Nested)
+//    @Field(type = FieldType.Nested)
     private 지라이슈.보고자 reporter;
 
-    @Field(type = FieldType.Nested)
+//    @Field(type = FieldType.Nested, fielddata = true)
     private 지라이슈.담당자 assignee;
 
     @Field(type = FieldType.Text)
     private List<String> labels;
 
-    @Field(type = FieldType.Nested)
+//    @Field(type = FieldType.Nested)
     private 지라이슈.우선순위 priority;
 
-    @Field(type = FieldType.Nested, fielddata = true)
+//    @Field(type = FieldType.Nested, fielddata = true)
     private 지라이슈.상태 status;
 
-    @Field(type = FieldType.Nested)
+//    @Field(type = FieldType.Nested)
     private 지라이슈.해결책 resolution;
 
     @Field(type = FieldType.Text, name = "resolutiondate")
@@ -100,7 +98,7 @@ public class 지라이슈 {
     @Field(type = FieldType.Text, name = "updated")
     private String updated;
 
-    @Field(type = FieldType.Nested)
+//    @Field(type = FieldType.Nested)
     private List<지라이슈.워크로그> worklogs;
 
     @Field(type = FieldType.Integer, name = "timespent")
@@ -109,10 +107,10 @@ public class 지라이슈 {
     @Field(type = FieldType.Text, name = "summary")
     private String summary;
 
-    @Field(type = FieldType.Long, name = "pdServiceId", fielddata = true)
+    @Field(type = FieldType.Text, name = "pdServiceId", fielddata = true)
     private Long pdServiceId;
 
-    @Field(type = FieldType.Long, name = "pdServiceVersion", fielddata = true)
+    @Field(type = FieldType.Text, name = "pdServiceVersion", fielddata = true)
     private Long pdServiceVersion;
 
     @Getter
@@ -230,7 +228,7 @@ public class 지라이슈 {
         @JsonProperty("assignee_accountId")
         private String accountId;
 
-        @Field(type = FieldType.Text, name = "assignee_emailAddress")
+        @Field(type = FieldType.Text, name = "assignee_emailAddress", fielddata = true)
         @JsonProperty("assignee_emailAddress")
         private String emailAddress;
 
