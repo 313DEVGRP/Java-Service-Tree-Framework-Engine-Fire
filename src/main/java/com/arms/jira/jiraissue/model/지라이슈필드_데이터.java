@@ -40,6 +40,8 @@ public class 지라이슈필드_데이터 {
 
     private String created;
 
+    private String updated;
+
     private List<지라이슈워크로그_데이터> worklogs;
 
     private Integer timespent;

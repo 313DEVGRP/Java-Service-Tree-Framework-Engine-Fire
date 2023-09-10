@@ -20,6 +20,7 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
@@ -34,6 +35,10 @@ import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -384,6 +389,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                 .resolution(해결책)
                 .resolutiondate(Optional.ofNullable(지라이슈_데이터.getFields().getResolutiondate()).orElse(null))
                 .created(Optional.ofNullable(지라이슈_데이터.getFields().getCreated()).orElse(null))
+                .updated(Optional.ofNullable(지라이슈_데이터.getFields().getUpdated()).orElse(null))
                 .worklogs(워크로그)
                 .timespent(Optional.ofNullable(지라이슈_데이터.getFields().getTimespent()).orElse(null))
                 .summary(Optional.ofNullable(지라이슈_데이터.getFields().getSummary()).orElse(null))
@@ -540,25 +546,25 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     }
 
     @Override
-    public Map<String, Long> 제품서비스별_하위이슈_담당자_통계(Long 지라서버_아이디, Long 제품서비스_아이디, String 이슈_키) throws IOException {
+    public Map<String, Long> 제품서비스별_담당자_통계(Long 지라서버_아이디, Long 제품서비스_아이디, String 이슈_키) throws IOException {
 
         SearchSourceBuilder 검색조건 = new SearchSourceBuilder();
         BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
 
-        if ( 지라서버_아이디 != null ) {
-            MatchQueryBuilder 지라서버_조회 = QueryBuilders.matchQuery("jira_server_id", 지라서버_아이디);
-            복합조회.must(지라서버_조회);
-        }
+//        if ( 지라서버_아이디 != null ) {
+//            MatchQueryBuilder 지라서버_조회 = QueryBuilders.matchQuery("jira_server_id", 지라서버_아이디);
+//            복합조회.must(지라서버_조회);
+//        }
 
         if ( 제품서비스_아이디 != null && 제품서비스_아이디 > 9L) {
             MatchQueryBuilder 제품서비스_조회 = QueryBuilders.matchQuery("pdServiceId", 제품서비스_아이디);
             복합조회.must(제품서비스_조회);
         }
 
-        if ( 이슈_키 != null ) {
-            MatchQueryBuilder 하위이슈_조회 = QueryBuilders.matchQuery("parentReqKey.keyword", 이슈_키);
-            복합조회.must(하위이슈_조회);
-        }
+//        if ( 이슈_키 != null ) {
+//            MatchQueryBuilder 하위이슈_조회 = QueryBuilders.matchQuery("parentReqKey.keyword", 이슈_키);
+//            복합조회.must(하위이슈_조회);
+//        }
 
         검색조건.query(복합조회);
         검색조건.size(0); // 모든 검색 결과를 가져오기 위함
@@ -589,6 +595,81 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         제품서비스별_하위이슈_담당자_집계.put("담당자 미지정",결과-담당자_총합);
 
         return 제품서비스별_하위이슈_담당자_집계;
+    }
+
+    @Override
+    public Map<String, Long> 제품서비스별_소요일_통계(Long 지라서버_아이디, Long 제품서비스_아이디) throws IOException {
+
+        SearchSourceBuilder 검색조건 = new SearchSourceBuilder();
+        BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
+
+//        if ( 지라서버_아이디 != null ) {
+//            MatchQueryBuilder 지라서버_조회 = QueryBuilders.matchQuery("jira_server_id", 지라서버_아이디);
+//            복합조회.must(지라서버_조회);
+//        }
+
+        if ( 제품서비스_아이디 != null && 제품서비스_아이디 > 9L) {
+            MatchQueryBuilder 제품서비스_조회 = QueryBuilders.matchQuery("pdServiceId", 제품서비스_아이디);
+            복합조회.must(제품서비스_조회);
+        }
+
+//        if ( 이슈_키 != null ) {
+//            MatchQueryBuilder 하위이슈_조회 = QueryBuilders.matchQuery("parentReqKey.keyword", 이슈_키);
+//            복합조회.must(하위이슈_조회);
+//        }
+
+        검색조건.query(복합조회);
+        검색조건.size(10000); // 모든 검색 결과를 가져오기 위함
+
+        SearchRequest 검색요청 = new SearchRequest();
+        검색요청.indices("jiraissue");
+        검색요청.source(검색조건);
+
+        SearchResponse 검색결과 = 검색엔진_유틸.getClient().search(검색요청, RequestOptions.DEFAULT);
+
+        long 결과 = 검색결과.getHits().getTotalHits().value;
+        로그.info("검색결과 개수: " + 결과);
+
+        Map<String, Long> 업데이트날짜차이_결과 = new HashMap<>();
+
+        for (SearchHit hit : 검색결과.getHits()) {
+            Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+
+            String 생성일 = (String) sourceAsMap.get("created");
+            String 수정일 = (String) sourceAsMap.get("updated");
+
+            if (생성일 == null || 수정일 == null || 생성일.isEmpty()|| 수정일.isEmpty()) {
+                continue;
+            }
+
+            LocalDateTime 생성일_날짜포맷 = parseDateTime(생성일);
+            LocalDateTime 수정일_날짜포맷 = parseDateTime(수정일);
+
+            long 날짜차이 = ChronoUnit.DAYS.between(생성일_날짜포맷, 수정일_날짜포맷);
+
+            String key = 날짜차이 + "일";
+
+            if (업데이트날짜차이_결과.containsKey(key)) {
+                업데이트날짜차이_결과.put(key, 업데이트날짜차이_결과.get(key) + 1);
+            } else {
+                업데이트날짜차이_결과.put(key, 1L);
+            }
+        }
+
+        return 업데이트날짜차이_결과;
+    }
+
+    private static LocalDateTime parseDateTime(String dateTimeStr) {
+
+        try {
+            // 온프레미스 날짜형식
+            return LocalDateTime.parse(dateTimeStr, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        } catch (DateTimeParseException e) {
+            // 클라우드 날짜형식
+            DateTimeFormatter formatterWithoutColonInTimeZone =
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+            return LocalDateTime.parse(dateTimeStr, formatterWithoutColonInTimeZone);
+        }
     }
 
 }
