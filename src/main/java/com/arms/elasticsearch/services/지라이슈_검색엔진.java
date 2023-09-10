@@ -546,7 +546,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     }
 
     @Override
-    public Map<String, Long> 제품서비스별_담당자_통계(Long 지라서버_아이디, Long 제품서비스_아이디, String 이슈_키) throws IOException {
+    public Map<String, Long> 제품서비스별_담당자_통계(Long 지라서버_아이디, Long 제품서비스_아이디) throws IOException {
 
         SearchSourceBuilder 검색조건 = new SearchSourceBuilder();
         BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
