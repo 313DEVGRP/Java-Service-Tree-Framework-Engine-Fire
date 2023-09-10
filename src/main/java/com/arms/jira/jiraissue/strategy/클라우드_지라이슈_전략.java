@@ -31,11 +31,13 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
 
     @Override
     public List<지라이슈_데이터> 이슈_목록_가져오기(Long 연결_아이디, String 프로젝트_키_또는_아이디) {
+
         로그.info("클라우드 이슈 전체 조회");
 
         if (프로젝트_키_또는_아이디==null || 프로젝트_키_또는_아이디.isEmpty()) {
             throw new IllegalArgumentException(에러코드.파라미터_NULL_오류.getErrorMsg());
         }
+
         try {
             int 검색_시작_지점 = 0;
             int 최대_검색수 = 지라유틸.최대_검색수_가져오기();

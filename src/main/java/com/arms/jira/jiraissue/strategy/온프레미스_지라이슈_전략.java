@@ -412,6 +412,11 @@ public class 온프레미스_지라이슈_전략 implements 지라이슈_전략 
             지라이슈필드_데이터.setCreated(이슈생성날짜);
         }
 
+        if (지라이슈.getUpdateDate() != null) {
+            String 이슈수정날짜 = String.valueOf(지라이슈.getUpdateDate());
+            지라이슈필드_데이터.setUpdated(이슈수정날짜);
+        }
+
         // worklogs
         // BasicUser 타입에서 이메일 데이터를 받아올 수 없어서 고민 중...
         if (지라이슈.getWorklogs() != null) {

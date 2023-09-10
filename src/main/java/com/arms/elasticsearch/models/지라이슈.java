@@ -97,6 +97,9 @@ public class 지라이슈 {
     @Field(type = FieldType.Text, name = "created")
     private String created;
 
+    @Field(type = FieldType.Text, name = "updated")
+    private String updated;
+
     @Field(type = FieldType.Nested)
     private List<지라이슈.워크로그> worklogs;
 

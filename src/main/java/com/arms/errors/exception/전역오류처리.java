@@ -83,10 +83,9 @@ public class 전역오류처리 {
 
     @ExceptionHandler(IllegalArgumentException.class)
     protected ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException 에러) {
-        로그.error("비정상적인 정보가 조회되었습니다.", 에러);
+        로그.error(에러.getMessage());
         return newResponse(에러.getMessage(), HttpStatus.BAD_REQUEST);
     }
-
 
     /**
      * [Exception] NULL 값이 발생한 경우
