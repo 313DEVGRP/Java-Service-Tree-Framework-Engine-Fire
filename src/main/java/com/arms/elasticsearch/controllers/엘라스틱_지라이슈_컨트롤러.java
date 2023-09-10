@@ -147,10 +147,9 @@ public class 엘라스틱_지라이슈_컨트롤러 {
     @ResponseBody
     @GetMapping("/getAssignee/{pdServiceId}")
     public Map<String, Long> 제품서비스별_담당자_통계(@PathVariable("connectId") Long 지라서버_아이디,
-                                                @PathVariable("pdServiceId") Long 제품서비스_아이디,
-                                                @PathVariable("issueKey") String 이슈_키) throws IOException {
+                                                @PathVariable("pdServiceId") Long 제품서비스_아이디) throws IOException {
 
-        return 지라이슈_검색엔진.제품서비스별_담당자_통계(지라서버_아이디, 제품서비스_아이디, 이슈_키);
+        return 지라이슈_검색엔진.제품서비스별_담당자_통계(지라서버_아이디, 제품서비스_아이디);
     }
 
     @ResponseBody
