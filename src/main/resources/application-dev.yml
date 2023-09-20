@@ -2,11 +2,6 @@ spring:
   config:
     active:
       on-profile: dev
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://svc.sel3.cloudtype.app:32203/engine?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: mysqluser
-    password: mysqluserpassword
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
