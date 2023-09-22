@@ -291,7 +291,7 @@ publishing {
 }
 
 docker {
-	name "www.313.co.kr:5550/${image}:latest"
+	name "313.co.kr:5550/${image}:latest"
 	noCache true
 	tags "${project.version}"
 	files tasks.bootJar.outputs.files, 'docker-entrypoint.sh'
