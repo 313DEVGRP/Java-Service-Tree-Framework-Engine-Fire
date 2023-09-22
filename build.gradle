@@ -19,7 +19,7 @@ plugins {
 sonarqube {
 	properties {
 		property "sonar.projectKey", "Java-Service-Tree-Framework-Engine-Fire"
-		property "sonar.host.url", "http://127.0.0.1/sonar"
+		property "sonar.host.url", "http://www.313.co.kr/sonar"
 		property "sonar.login", "admin"
 		property "sonar.password", "qwe123"
 	}
@@ -97,7 +97,7 @@ configurations {
 repositories {
 	mavenCentral()
 	maven {
-		url 'http://127.0.0.1/nexus/repository/ple-releases/'
+		url 'http://www.313.co.kr/nexus/repository/ple-releases/'
 		allowInsecureProtocol true
 	}
 }
@@ -168,7 +168,7 @@ ext {
 	//artifactType = System.getenv("ARTIFACT_TYPE") ? System.getenv("ARTIFACT_TYPE").toUpperCase() : "SNAPSHOT"
 	//repositoryType = "${artifactType}".equalsIgnoreCase("RELEASE") ? "release" : "snapshot"
 	//업로드 타입 정의 ( maven-release, maven-snapshot, ${repositoryType})
-	repositoryUrl = "http://127.0.0.1/nexus/repository/ple-releases/"
+	repositoryUrl = "http://www.313.co.kr/nexus/repository/ple-releases/"
 	metadataUrl = "${repositoryUrl}313devgrp/Java-Service-Tree-Framework-Engine-Fire/maven-metadata.xml"
 
 	//version 정보
@@ -291,7 +291,7 @@ publishing {
 }
 
 docker {
-	name "127.0.0.1:5550/${image}:${project.version}"
+	name "313.co.kr:5550/${image}:${project.version}"
 	noCache true
 	tags "${project.version}"
 	files tasks.bootJar.outputs.files, 'docker-entrypoint.sh'
