@@ -2,31 +2,29 @@ spring:
   config:
     active:
       on-profile: live
-  mvc:
-    pathmatch:
-      matching-strategy: ant_path_matcher
-
-#    throw-exception-if-no-handler-found: true
-#  web:
-#    resources:
-#      add-mappings: false
+  data:
+    elasticsearch:
+      repositories:
+        enabled: true
+  datasource:
+    url: http://localhost:9200 # Elasticsearch 클러스터의 URL
+    username: # Elasticsearch에 대한 사용자 이름 (필요한 경우)
+    password: # Elasticsearch에 대한 비밀번호 (필요한 경우)
   jpa:
     open-in-view: true
+    database-platform: org.hibernate.dialect.ElasticsearchDialect
     hibernate:
       ddl-auto: none  # option type: create, create-drop, update, validate, none
       # create로 하게되면 기존 테이블을 삭제후 다시 생성하게 된다.
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
       use-new-id-generator-mappings: false
-    show-sql: true  # sql 쿼리를 보여줍니다.
-    generate-ddl: true
-    properties:
-      hibernate.format_sql: true    # JPA의 구현체인 Hibernate가 동작하면서 발생한 SQL의 가독성을 높여준다.
-      dialect: org.hibernate.dialect.MySQL5InnoDBDialect    # 쿼리의 기준이 되는 데이터베이스 엔진을 설정합니다.
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 
 elasticsearch:
   url: es-coordinating:9200
-
 
 jira:
   maxResults: 50
