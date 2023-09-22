@@ -1,8 +1,6 @@
 package com.arms.config;
 
 import com.fasterxml.classmate.TypeResolver;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,7 +27,6 @@ public class Swagger2Config {
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .ignoredParameterTypes(ModelMap.class, HttpServletRequest.class)
-                .directModelSubstitute(Projection.class, Enum.class)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com"))
                 .paths(PathSelectors.any())
@@ -38,7 +35,7 @@ public class Swagger2Config {
                 .enable(true)
                 .alternateTypeRules(
                         AlternateTypeRules.newRule(
-                                typeResolver.resolve(List.class, Order.class),
+                                typeResolver.resolve(List.class),
                                 typeResolver.resolve(Enum.class)
                         )
                 );

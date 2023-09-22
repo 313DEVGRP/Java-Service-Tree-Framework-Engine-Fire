@@ -2,23 +2,6 @@ spring:
   config:
     active:
       on-profile: live
-  data:
-    elasticsearch:
-      repositories:
-        enabled: true
-  datasource:
-    url: http://localhost:9200 # Elasticsearch 클러스터의 URL
-    username: # Elasticsearch에 대한 사용자 이름 (필요한 경우)
-    password: # Elasticsearch에 대한 비밀번호 (필요한 경우)
-  jpa:
-    open-in-view: true
-    database-platform: org.hibernate.dialect.ElasticsearchDialect
-    hibernate:
-      ddl-auto: none  # option type: create, create-drop, update, validate, none
-      # create로 하게되면 기존 테이블을 삭제후 다시 생성하게 된다.
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-      use-new-id-generator-mappings: false
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher

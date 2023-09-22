@@ -2,8 +2,4 @@ server:
   port: 33333
   servlet:
     session:
-      timeout: 1800
-
-spring:
-  profiles:
-    active: dev
+      timeout: 7200
