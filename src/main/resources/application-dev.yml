@@ -26,7 +26,7 @@ spring:
       dialect: org.hibernate.dialect.MySQL5InnoDBDialect    # 쿼리의 기준이 되는 데이터베이스 엔진을 설정합니다.
 
 elasticsearch:
-  url: 313.co.kr:9200
+  url: www.313.co.kr:9200
 
 
 jira:
