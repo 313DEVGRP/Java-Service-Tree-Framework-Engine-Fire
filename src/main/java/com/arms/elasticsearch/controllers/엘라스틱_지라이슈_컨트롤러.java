@@ -4,6 +4,7 @@ import com.arms.elasticsearch.helper.인덱스자료;
 import com.arms.elasticsearch.models.지라이슈;
 import com.arms.elasticsearch.services.지라이슈_서비스;
 import com.arms.elasticsearch.util.검색결과;
+import com.arms.elasticsearch.util.검색결과_목록;
 import com.arms.elasticsearch.util.검색조건;
 import com.arms.jira.jiraissue.service.지라이슈_전략_호출;
 import lombok.extern.slf4j.Slf4j;
@@ -56,14 +57,14 @@ public class 엘라스틱_지라이슈_컨트롤러 {
 
     @ResponseBody
     @GetMapping("/test/{groupByField}")
-    public Map<String, Long> 테스트_조회(@PathVariable("groupByField") String 조회조건_필드) throws IOException {
+    public 검색결과_목록 테스트_조회(@PathVariable("groupByField") String 조회조건_필드) throws IOException {
 
         return 지라이슈_검색엔진.특정필드의_값들을_그룹화하여_빈도수가져오기(인덱스자료.지라이슈_인덱스명, 조회조건_필드);
     }
 
     @ResponseBody
     @GetMapping("/test/{searchField}/{searchTerm}/{groupField}")
-    public List<검색결과> 테스트2_조회(@PathVariable("searchField") String 특정필드, @PathVariable("searchTerm") String 특정필드검색어, @PathVariable("groupField") String 그룹할필드) throws IOException {
+    public 검색결과_목록 테스트2_조회(@PathVariable("searchField") String 특정필드, @PathVariable("searchTerm") String 특정필드검색어, @PathVariable("groupField") String 그룹할필드) throws IOException {
 
         return 지라이슈_검색엔진.특정필드_검색후_다른필드_그룹결과(인덱스자료.지라이슈_인덱스명, 특정필드, 특정필드검색어, 그룹할필드 );
     }
