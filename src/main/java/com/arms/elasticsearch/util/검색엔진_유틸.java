@@ -1,191 +1,24 @@
 package com.arms.elasticsearch.util;
-import com.arms.elasticsearch.helper.인덱스자료;
-import com.arms.elasticsearch.models.지라이슈;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.action.get.GetRequest;
-import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.*;
-import org.elasticsearch.rest.RestStatus;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.SortOrder;
-import org.elasticsearch.xcontent.XContentType;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-import org.elasticsearch.index.query.ExistsQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-@Component
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
+import org.elasticsearch.index.query.Operator;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.util.CollectionUtils;
+
+import lombok.extern.slf4j.Slf4j;
+
+
 @Slf4j
 public final class 검색엔진_유틸 {
-
-    public RestHighLevelClient getClient() {
-        return client;
-    }
-
-    private final RestHighLevelClient client;
-
-
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    public 검색엔진_유틸(RestHighLevelClient client) {
-        this.client = client;
-    }
-
-
-
-
-    public <T> List<T>  searchInternal(final SearchRequest request,Class<T> valueType) {
-        if (request == null) {
-            log.error("Failed to build search request");
-            return Collections.emptyList();
-        }
-
-        try {
-            final SearchResponse response = client.search(request, RequestOptions.DEFAULT);
-
-            final SearchHit[] searchHits = response.getHits().getHits();
-            final List<T> vehicles = new ArrayList<>(searchHits.length);
-
-            for (SearchHit hit : searchHits) {
-
-                vehicles.add(
-                        MAPPER.readValue(hit.getSourceAsString(), valueType)
-                );
-            }
-
-            return vehicles;
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return Collections.emptyList();
-        }
-    }
-
-    public Map<String, Long> 특정필드의_값들을_그룹화하여_빈도수가져오기(String indexName, String groupByField) throws IOException {
-        SearchRequest searchRequest = new SearchRequest(indexName);
-
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.query(QueryBuilders.matchAllQuery());
-        searchSourceBuilder.aggregation(
-                AggregationBuilders.terms("group_by")
-                        .field(groupByField)
-                        .size(100)  // Change the size as needed
-        );
-        searchRequest.source(searchSourceBuilder);
-
-        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-
-        ParsedStringTerms groupByAgg = searchResponse.getAggregations().get("group_by");
-        Map<String, Long> result = new HashMap<>();
-
-        for (Terms.Bucket bucket : groupByAgg.getBuckets()) {
-            String groupValue = bucket.getKeyAsString();
-            long docCount = bucket.getDocCount();
-            result.put(groupValue, docCount);
-        }
-
-        return result;
-    }
-
-    public List<검색결과> 특정필드_검색후_다른필드_그룹결과(String 인덱스이름, String 특정필드, String 특정필드검색어, String 그룹할필드) throws IOException {
-        SearchRequest searchRequest = new SearchRequest(인덱스이름);
-
-        ExistsQueryBuilder existsQuery = QueryBuilders.existsQuery(특정필드);
-        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery().must(existsQuery).filter(QueryBuilders.termQuery(특정필드, 특정필드검색어));
-        searchRequest.source().query(boolQuery);
-
-        TermsAggregationBuilder termsAggregation = AggregationBuilders.terms("group_by_" + 특정필드)
-                .field(그룹할필드)
-                .size(1000); // Change the size as needed
-        searchRequest.source().aggregation(termsAggregation);
-
-        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-
-        List<검색결과> groupedCounts = new ArrayList<>();
-        Terms terms = searchResponse.getAggregations().get("group_by_" + 특정필드);
-        for (Terms.Bucket bucket : terms.getBuckets()) {
-            String bValue = bucket.getKeyAsString();
-            long count = bucket.getDocCount();
-            groupedCounts.add(new 검색결과(bValue, count));
-        }
-
-        return groupedCounts;
-    }
-
-
-    public <T> List<T>  getAllCreatedSince(final Date date,Class<T> valueType) {
-        final SearchRequest request = this.buildSearchRequest(
-                인덱스자료.지라이슈_인덱스명,
-                "created",
-                date
-        );
-
-        return searchInternal(request,valueType);
-    }
-
-    public <T> List<T>  searchCreatedSince(final 검색조건 dto, final Date date, Class<T> valueType) {
-        final SearchRequest request = 검색엔진_유틸.buildSearchRequest(
-                인덱스자료.지라이슈_인덱스명,
-                dto,
-                date
-        );
-
-        return searchInternal(request,valueType);
-    }
-
-    public Boolean index(final 지라이슈 지라_이슈) {
-        try {
-            final String vehicleAsString = MAPPER.writeValueAsString(지라_이슈);
-
-            final IndexRequest request = new IndexRequest(인덱스자료.지라이슈_인덱스명);
-            request.id(지라_이슈.getId());
-            request.source(vehicleAsString, XContentType.JSON);
-
-            final IndexResponse response = client.index(request, RequestOptions.DEFAULT);
-
-            return response != null && response.status().equals(RestStatus.OK);
-        } catch (final Exception e) {
-            log.error(e.getMessage(), e);
-            return false;
-        }
-    }
-
-    public <T> T getById(final String 이슈_아이디,Class<T> valueType) {
-        try {
-            final GetResponse documentFields = client.get(
-                    new GetRequest(인덱스자료.지라이슈_인덱스명, 이슈_아이디),
-                    RequestOptions.DEFAULT
-            );
-            if (documentFields == null || documentFields.isSourceEmpty()) {
-                return null;
-            }
-
-            return MAPPER.readValue(documentFields.getSourceAsString(), valueType);
-        } catch (final Exception e) {
-            log.error(e.getMessage(), e);
-            return null;
-        }
-    }
 
     public static SearchRequest buildSearchRequest(final String indexName,
                                                    final 검색조건 dto) {
@@ -338,6 +171,20 @@ public final class 검색엔진_유틸 {
 
     private static QueryBuilder getQueryBuilder(final String field, final Long serverId) {
         return QueryBuilders.matchQuery(field, serverId);
+    }
+
+    public static SearchRequest getSearchRequest(String indexName, String groupByField) {
+        SearchRequest searchRequest = new SearchRequest(indexName);
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(QueryBuilders.matchAllQuery());
+        searchSourceBuilder.aggregation(
+            AggregationBuilders.terms("group_by")
+                .field(groupByField)
+                .size(100)  // Change the size as needed
+        );
+        searchRequest.source(searchSourceBuilder);
+        return searchRequest;
     }
 
 }
