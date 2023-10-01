@@ -21,7 +21,7 @@ public interface ElasticsearchCustom {
 
 	<T> List<T>  searchCreatedSince(검색조건 dto, Date date, Class<T> valueType);
 
-	Boolean index(지라이슈 지라_이슈);
+	<T>Boolean index(T t);
 
 	<T> T getById(String 이슈_아이디, Class<T> valueType);
 }

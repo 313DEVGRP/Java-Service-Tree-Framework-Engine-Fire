@@ -3,6 +3,7 @@ package com.arms.elasticsearch.repositories;
 import static java.util.stream.Collectors.*;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -19,10 +20,11 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.xcontent.XContentType;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
-import com.arms.elasticsearch.helper.인덱스자료;
-import com.arms.elasticsearch.models.지라이슈;
 import com.arms.elasticsearch.util.검색엔진_유틸;
 import com.arms.elasticsearch.util.검색조건;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -31,7 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@Repository
+@Component
 @AllArgsConstructor
 @Slf4j
 public class ElasticsearchCustomImpl implements ElasticsearchCustom {
@@ -72,33 +74,49 @@ public class ElasticsearchCustomImpl implements ElasticsearchCustom {
 
 	@Override
 	public <T> List<T>  getAllCreatedSince(final Date date,Class<T> valueType) {
-		final SearchRequest request = 검색엔진_유틸.buildSearchRequest(
-			인덱스자료.지라이슈_인덱스명,
-			"created",
-			date
-		);
 
-		return this.internalSearch(request,valueType);
+
+		try{
+			Document document = Class.forName(valueType.getTypeName()).getAnnotation(Document.class);
+			final SearchRequest request = 검색엔진_유틸.buildSearchRequest(
+				document.indexName(),
+				"created",
+				date
+			);
+			return this.internalSearch(request,valueType);
+		}catch (ClassNotFoundException cnf){
+			log.error(cnf.getMessage());
+			throw new RuntimeException(cnf.getMessage());
+		}
 	}
 
 	@Override
 	public <T> List<T>  searchCreatedSince(final 검색조건 dto, final Date date, Class<T> valueType) {
-		final SearchRequest request = 검색엔진_유틸.buildSearchRequest(
-			인덱스자료.지라이슈_인덱스명,
-			dto,
-			date
-		);
 
-		return this.internalSearch(request,valueType);
+		try{
+			Document document = Class.forName(valueType.getTypeName()).getAnnotation(Document.class);
+			final SearchRequest request = 검색엔진_유틸.buildSearchRequest(
+				document.indexName(),
+				dto,
+				date
+			);
+			return this.internalSearch(request,valueType);
+		}catch (ClassNotFoundException cnf){
+			log.error(cnf.getMessage());
+			throw new RuntimeException(cnf.getMessage());
+		}
+
 	}
 
 	@Override
-	public Boolean index(final 지라이슈 지라_이슈) {
+	public <T>Boolean index(T t) {
 		try {
-			final String vehicleAsString = objectMapper.writeValueAsString(지라_이슈);
+			Document annotation = t.getClass().getAnnotation(Document.class);
 
-			final IndexRequest request = new IndexRequest(인덱스자료.지라이슈_인덱스명);
-			request.id(지라_이슈.getId());
+			final String vehicleAsString = objectMapper.writeValueAsString(t);
+
+			final IndexRequest request = new IndexRequest(annotation.indexName());
+			request.id(this.getIdValue(t));
 			request.source(vehicleAsString, XContentType.JSON);
 
 			final IndexResponse response = client.index(request, RequestOptions.DEFAULT);
@@ -113,8 +131,9 @@ public class ElasticsearchCustomImpl implements ElasticsearchCustom {
 	@Override
 	public <T> T getById(final String 이슈_아이디,Class<T> valueType) {
 		try {
+			Document document = Class.forName(valueType.getTypeName()).getAnnotation(Document.class);
 			final GetResponse documentFields = client.get(
-				new GetRequest(인덱스자료.지라이슈_인덱스명, 이슈_아이디),
+				new GetRequest(document.indexName(), 이슈_아이디),
 				RequestOptions.DEFAULT
 			);
 			if (documentFields == null || documentFields.isSourceEmpty()) {
@@ -126,6 +145,29 @@ public class ElasticsearchCustomImpl implements ElasticsearchCustom {
 			log.error(e.getMessage(), e);
 			return null;
 		}
+	}
+
+
+	private <T> String getIdValue(T t) {
+		Field[] fields = t.getClass().getDeclaredFields();
+
+		return Arrays.stream(fields).flatMap(field ->
+			Arrays.stream(field.getDeclaredAnnotations())
+				.filter(annotation -> (annotation.annotationType()== Id.class))
+				.map(annotation -> {
+					try {
+						field.setAccessible(true);
+						if(field.get(t)!=null){
+							return (String)field.get(t);
+						}else{
+							throw new RuntimeException("Id 값이 없습니다.");
+						}
+					} catch (IllegalAccessException e) {
+						throw new RuntimeException(e);
+					}
+				})
+		).findFirst().orElseThrow();
+
 	}
 
 
