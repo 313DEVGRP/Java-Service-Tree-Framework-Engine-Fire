@@ -155,6 +155,8 @@ dependencies {
 	// Swagger
 	implementation('io.springfox:springfox-swagger2:2.9.2')
 	implementation('io.springfox:springfox-swagger-ui:2.9.2')
+
+	implementation("jakarta.json:jakarta.json-api:2.0.1")
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os

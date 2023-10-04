@@ -17,11 +17,11 @@ public interface ElasticsearchCustom {
 
 	SearchResponse search(SearchRequest searchRequest, RequestOptions options) throws IOException;
 
-	<T> List<T>  getAllCreatedSince(Date date, Class<T> valueType);
+	<T> List<T>  getAllCreatedSince(Date date, Class<T> clazz);
 
-	<T> List<T>  searchCreatedSince(검색조건 dto, Date date, Class<T> valueType);
+	<T> List<T>  searchCreatedSince(검색조건 dto, Date date, Class<T> clazz);
 
 	<T>Boolean index(T t);
 
-	<T> T getById(String 이슈_아이디, Class<T> valueType);
+	<T> T getById(String 이슈_아이디, Class<T> clazz);
 }
