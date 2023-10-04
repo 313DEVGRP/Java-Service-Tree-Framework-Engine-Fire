@@ -15,6 +15,7 @@ import com.arms.jira.jiraissue.service.지라이슈_전략_호출;
 import com.arms.jira.jiraissuestatus.model.지라이슈상태_데이터;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -24,6 +25,7 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
@@ -31,10 +33,15 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.core.AggregationsContainer;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -121,6 +128,38 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                 검색조건
         );
         return 지라이슈저장소.internalSearch(request,지라이슈.class);
+    }
+
+    @Override
+    public 검색결과_목록 특정필드의_값들을_그룹화하여_빈도수가져오기(String fieldName) throws IOException {
+
+        String groupId = String.valueOf(UUID.randomUUID());
+        TermsAggregationBuilder aggregationBuilders =
+            AggregationBuilders.terms(groupId)
+                .field(fieldName)
+                .size(1000);
+
+        Query query = new NativeSearchQueryBuilder()
+            .withQuery(QueryBuilders.termQuery("isReq", true))
+            .withPageable(PageRequest.of(0, 1000))
+            .withAggregations(aggregationBuilders)
+            .build();
+
+        SearchHits<지라이슈> searchHits = 검색엔진_실행기.search(query, 지라이슈.class);
+
+        AggregationsContainer<Aggregations> aggregationsContainer = AggregationsContainer.class.cast(searchHits.getAggregations());
+        ParsedStringTerms parsedStringTerms = aggregationsContainer.aggregations().get(groupId);
+
+        검색결과_목록 검색결과_목록 = new 검색결과_목록();
+
+        for (Terms.Bucket bucket : parsedStringTerms.getBuckets()) {
+            String groupValue = bucket.getKeyAsString();
+            long docCount = bucket.getDocCount();
+            검색결과_목록.중복허용_추가(new 검색결과(groupValue, docCount));
+        }
+
+        return 검색결과_목록;
+
     }
 
     @Override
