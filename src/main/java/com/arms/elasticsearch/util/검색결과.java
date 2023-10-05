@@ -1,5 +1,8 @@
 package com.arms.elasticsearch.util;
 
+import lombok.EqualsAndHashCode;
+
+@EqualsAndHashCode(exclude = "count")
 public class 검색결과 {
 
     private String value;

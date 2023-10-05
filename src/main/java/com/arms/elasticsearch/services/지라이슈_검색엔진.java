@@ -4,6 +4,7 @@ import com.arms.elasticsearch.helper.인덱스자료;
 import com.arms.elasticsearch.models.지라이슈;
 import com.arms.elasticsearch.repositories.지라이슈_저장소;
 import com.arms.elasticsearch.util.검색결과;
+import com.arms.elasticsearch.util.검색결과_목록;
 import com.arms.elasticsearch.util.검색엔진_유틸;
 import com.arms.elasticsearch.util.검색조건;
 import com.arms.errors.codes.에러코드;
@@ -18,10 +19,12 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -51,11 +54,10 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
     private 지라이슈_저장소 지라이슈저장소;
 
-    private 검색엔진_유틸 검색엔진_유틸;
-
     private ElasticsearchOperations 검색엔진_실행기;
 
     private 지라이슈_전략_호출 지라이슈_전략_호출;
+
 
     @Override
     public 지라이슈 이슈_추가하기(지라이슈 지라이슈) {
@@ -108,6 +110,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
     @Override
     public 지라이슈 이슈_조회하기(String 조회조건_아이디) {
+        // 지라이슈저장소.test();
         return 지라이슈저장소.findById(조회조건_아이디).orElse(null);
     }
 
@@ -117,18 +120,61 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                 인덱스자료.지라이슈_인덱스명,
                 검색조건
         );
-
-        return 검색엔진_유틸.searchInternal(request,지라이슈.class);
+        return 지라이슈저장소.internalSearch(request,지라이슈.class);
     }
 
     @Override
-    public Map<String, Long> 특정필드의_값들을_그룹화하여_빈도수가져오기(String indexName, String groupByField) throws IOException {
-        return 검색엔진_유틸.특정필드의_값들을_그룹화하여_빈도수가져오기(indexName, groupByField);
+    public 검색결과_목록 특정필드의_값들을_그룹화하여_빈도수가져오기(String indexName, String groupByField) throws IOException {
+        SearchRequest searchRequest = new SearchRequest(indexName);
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(QueryBuilders.matchAllQuery());
+        searchSourceBuilder.aggregation(
+            AggregationBuilders.terms("group_by")
+                .field(groupByField)
+                .size(100)  // Change the size as needed
+        );
+        searchRequest.source(searchSourceBuilder);
+
+
+        SearchResponse searchResponse = 지라이슈저장소.search(searchRequest, RequestOptions.DEFAULT);
+
+        ParsedStringTerms groupByAgg = searchResponse.getAggregations().get("group_by");
+        검색결과_목록 검색결과_목록 = new 검색결과_목록();
+
+        for (Terms.Bucket bucket : groupByAgg.getBuckets()) {
+            String groupValue = bucket.getKeyAsString();
+            long docCount = bucket.getDocCount();
+            검색결과_목록.중복시_기존_목록_삭제_추가(new 검색결과(groupValue, docCount));
+        }
+
+        return 검색결과_목록;
     }
 
     @Override
-    public List<검색결과> 특정필드_검색후_다른필드_그룹결과(String 인덱스이름, String 특정필드, String 특정필드검색어, String 그룹할필드) throws IOException {
-        return 검색엔진_유틸.특정필드_검색후_다른필드_그룹결과(인덱스이름, 특정필드, 특정필드검색어, 그룹할필드 );
+    public 검색결과_목록 특정필드_검색후_다른필드_그룹결과(String 인덱스이름, String 특정필드, String 특정필드검색어, String 그룹할필드) throws IOException {
+        SearchRequest searchRequest = new SearchRequest(인덱스이름);
+
+        ExistsQueryBuilder existsQuery = QueryBuilders.existsQuery(특정필드);
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery().must(existsQuery).filter(QueryBuilders.termQuery(특정필드, 특정필드검색어));
+        searchRequest.source().query(boolQuery);
+
+        TermsAggregationBuilder termsAggregation = AggregationBuilders.terms("group_by_" + 특정필드)
+            .field(그룹할필드)
+            .size(1000); // Change the size as needed
+        searchRequest.source().aggregation(termsAggregation);
+
+        SearchResponse searchResponse = 지라이슈저장소.search(searchRequest, RequestOptions.DEFAULT);
+
+        검색결과_목록 검색결과_목록 = new 검색결과_목록();
+        Terms terms = searchResponse.getAggregations().get("group_by_" + 특정필드);
+        for (Terms.Bucket bucket : terms.getBuckets()) {
+            String bValue = bucket.getKeyAsString();
+            long count = bucket.getDocCount();
+            검색결과_목록.중복허용_추가(new 검색결과(bValue, count));
+        }
+
+        return 검색결과_목록;
     }
 
     @Override
@@ -420,9 +466,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                 서버_아이디
         );
 
-        List<지라이슈> 전체결과 = 검색엔진_유틸.searchInternal(request, 지라이슈.class);
-
-        return 전체결과;
+        return 지라이슈저장소.internalSearch(request,지라이슈.class);
     }
 
     @Override
@@ -440,7 +484,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         searchRequest.indices("jiraissue"); // Replace with your actual index name
         searchRequest.source(sourceBuilder);
 
-        SearchResponse 검색결과 = 검색엔진_유틸.getClient().search(searchRequest, RequestOptions.DEFAULT);
+        SearchResponse 검색결과 = 지라이슈저장소.search(searchRequest, RequestOptions.DEFAULT);
 
         Terms 상태별집계_결과 = 검색결과.getAggregations().get("이슈_상태별_집계");
 
@@ -475,7 +519,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         searchRequest.indices("jiraissue");
         searchRequest.source(sourceBuilder);
 
-        SearchResponse searchResponse = 검색엔진_유틸.getClient().search(searchRequest, RequestOptions.DEFAULT);
+        SearchResponse searchResponse = 지라이슈저장소.search(searchRequest, RequestOptions.DEFAULT);
 
         Terms 종합집계_결과 = searchResponse.getAggregations().get("프로젝트키별_집계");
         Map<String, Map<String, Integer>> 프로젝트별상태값_집계= new HashMap<>();
@@ -525,7 +569,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         searchRequest.source(sourceBuilder);
 
         // Execute the search request
-        SearchResponse searchResponse = 검색엔진_유틸.getClient().search(searchRequest, RequestOptions.DEFAULT);
+        SearchResponse searchResponse = 지라이슈저장소.search(searchRequest, RequestOptions.DEFAULT);
 
         // Extract the Terms aggregation results
         Terms statusNameAggregation = searchResponse.getAggregations().get("status_name_agg");
@@ -577,7 +621,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         검색요청.indices("jiraissue");
         검색요청.source(검색조건);
 
-        SearchResponse 검색결과 = 검색엔진_유틸.getClient().search(검색요청, RequestOptions.DEFAULT);
+        SearchResponse 검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
         long 결과 = 검색결과.getHits().getTotalHits().value;
         로그.info("검색결과 개수: " + 결과);
 
@@ -625,7 +669,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         검색요청.indices("jiraissue");
         검색요청.source(검색조건);
 
-        SearchResponse 검색결과 = 검색엔진_유틸.getClient().search(검색요청, RequestOptions.DEFAULT);
+        SearchResponse 검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
 
         long 결과 = 검색결과.getHits().getTotalHits().value;
         로그.info("검색결과 개수: " + 결과);
