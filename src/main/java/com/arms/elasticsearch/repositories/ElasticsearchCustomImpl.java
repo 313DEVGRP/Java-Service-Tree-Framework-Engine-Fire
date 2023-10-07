@@ -20,10 +20,10 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.xcontent.XContentType;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 
 import com.arms.elasticsearch.util.검색엔진_유틸;
 import com.arms.elasticsearch.util.검색조건;
@@ -73,44 +73,36 @@ public class ElasticsearchCustomImpl implements ElasticsearchCustom {
 	}
 
 	@Override
-	public <T> List<T>  getAllCreatedSince(final Date date,Class<T> valueType) {
+	public <T> List<T>  getAllCreatedSince(final Date date,Class<T> clazz) {
 
+		Document document = AnnotationUtils.findAnnotation(clazz, Document.class);
+		final SearchRequest request = 검색엔진_유틸.buildSearchRequest(
+			document.indexName(),
+			"created",
+			date
+		);
+		return this.internalSearch(request,clazz);
 
-		try{
-			Document document = Class.forName(valueType.getTypeName()).getAnnotation(Document.class);
-			final SearchRequest request = 검색엔진_유틸.buildSearchRequest(
-				document.indexName(),
-				"created",
-				date
-			);
-			return this.internalSearch(request,valueType);
-		}catch (ClassNotFoundException cnf){
-			log.error(cnf.getMessage());
-			throw new RuntimeException(cnf.getMessage());
-		}
 	}
 
 	@Override
-	public <T> List<T>  searchCreatedSince(final 검색조건 dto, final Date date, Class<T> valueType) {
+	public <T> List<T>  searchCreatedSince(final 검색조건 dto, final Date date, Class<T> clazz) {
 
-		try{
-			Document document = Class.forName(valueType.getTypeName()).getAnnotation(Document.class);
-			final SearchRequest request = 검색엔진_유틸.buildSearchRequest(
-				document.indexName(),
-				dto,
-				date
-			);
-			return this.internalSearch(request,valueType);
-		}catch (ClassNotFoundException cnf){
-			log.error(cnf.getMessage());
-			throw new RuntimeException(cnf.getMessage());
-		}
+		Document document = AnnotationUtils.findAnnotation(clazz, Document.class);
+		final SearchRequest request = 검색엔진_유틸.buildSearchRequest(
+			document.indexName(),
+			dto,
+			date
+		);
+		return this.internalSearch(request,clazz);
+
 
 	}
 
 	@Override
 	public <T>Boolean index(T t) {
 		try {
+
 			Document annotation = t.getClass().getAnnotation(Document.class);
 
 			final String vehicleAsString = objectMapper.writeValueAsString(t);
@@ -129,9 +121,9 @@ public class ElasticsearchCustomImpl implements ElasticsearchCustom {
 	}
 
 	@Override
-	public <T> T getById(final String 이슈_아이디,Class<T> valueType) {
+	public <T> T getById(final String 이슈_아이디,Class<T> clazz) {
 		try {
-			Document document = Class.forName(valueType.getTypeName()).getAnnotation(Document.class);
+			Document document = AnnotationUtils.findAnnotation(clazz, Document.class);
 			final GetResponse documentFields = client.get(
 				new GetRequest(document.indexName(), 이슈_아이디),
 				RequestOptions.DEFAULT
@@ -140,7 +132,7 @@ public class ElasticsearchCustomImpl implements ElasticsearchCustom {
 				return null;
 			}
 
-			return objectMapper.readValue(documentFields.getSourceAsString(), valueType);
+			return objectMapper.readValue(documentFields.getSourceAsString(), clazz);
 		} catch (final Exception e) {
 			log.error(e.getMessage(), e);
 			return null;
