@@ -113,6 +113,7 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
+	implementation 'com.google.guava:guava:32.0.1-jre'
 
 	//jira
 	implementation 'com.atlassian.event:atlassian-event:3.0.0'
@@ -143,7 +144,7 @@ dependencies {
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.12.5'
 
 	// jpa
-//	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	//	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	// elasticsearch
 	implementation 'org.springframework.data:spring-data-elasticsearch:4.4.14'
 
@@ -153,10 +154,12 @@ dependencies {
 	implementation 'org.modelmapper:modelmapper:3.1.1'
 
 	// Swagger
-	implementation('io.springfox:springfox-swagger2:2.9.2')
-	implementation('io.springfox:springfox-swagger-ui:2.9.2')
+
+	implementation('io.springfox:springfox-boot-starter:3.0.0')
+	implementation('io.springfox:springfox-swagger-ui:3.0.0')
 
 	implementation("jakarta.json:jakarta.json-api:2.0.1")
+
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os

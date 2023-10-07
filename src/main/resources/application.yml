@@ -3,3 +3,11 @@ server:
   servlet:
     session:
       timeout: 7200
+
+springfox:
+  documentation:
+    swagger:
+      v2:
+        path: /engine-fire-api
+    swagger-ui:
+      base-url: /engine-fire-api
