@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
@@ -19,10 +20,18 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.xcontent.XContentType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.core.AggregationsContainer;
+import org.springframework.data.elasticsearch.core.ElasticsearchAggregations;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.arms.elasticsearch.util.검색엔진_유틸;
@@ -41,6 +50,8 @@ public class ElasticsearchCustomImpl implements ElasticsearchCustom {
 	private final RestHighLevelClient client;
 
 	private final ObjectMapper objectMapper;
+
+	private ElasticsearchOperations elasticsearchOperations;
 
 
 	@Override
@@ -161,6 +172,32 @@ public class ElasticsearchCustomImpl implements ElasticsearchCustom {
 		).findFirst().orElseThrow();
 
 	}
+	@Override
+	public <T> SearchHits search(Query query, Class<T> clazz) {
+		return elasticsearchOperations.search(query,clazz);
+	}
 
+	@Override
+	public <T,B> List<B> getBucket(Query query, Class<T> clazz, BucketRowMapper<B> bucketRowMapper) {
+		AtomicReference<String> groupName = new AtomicReference<>();
+		((NativeSearchQuery)query).getAggregations()
+			.stream()
+			.findFirst().ifPresent(a -> {
+				groupName.set(a.getName());
+			});
+
+		List<Terms.Bucket> buckets = (List<Terms.Bucket>)aggregations(
+			elasticsearchOperations.search(query, clazz).getAggregations(), groupName.get())
+			.getBuckets();
+
+		return buckets.stream()
+			.map(a-> bucketRowMapper.bucketRow(a))
+			.collect(toList());
+	}
+
+	private Terms aggregations(AggregationsContainer aggregationsContainer,String groupId){
+		Aggregations aggregations = ((ElasticsearchAggregations) aggregationsContainer).aggregations();
+		return aggregations.get(groupId);
+	}
 
 }

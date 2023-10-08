@@ -1,7 +1,10 @@
 package com.arms.elasticsearch.services;
 
+import static java.util.stream.Collectors.*;
+
 import com.arms.elasticsearch.helper.인덱스자료;
 import com.arms.elasticsearch.models.지라이슈;
+import com.arms.elasticsearch.repositories.BucketRowMapper;
 import com.arms.elasticsearch.repositories.지라이슈_저장소;
 import com.arms.elasticsearch.util.검색결과;
 import com.arms.elasticsearch.util.검색결과_목록;
@@ -35,13 +38,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.AggregationsContainer;
+import org.springframework.data.elasticsearch.core.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -79,7 +82,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         List<IndexQuery> 검색엔진_쿼리 = 대량이슈_리스트.stream()
                 .map(지라이슈 -> new IndexQueryBuilder().withId(String.valueOf(지라이슈.getId()))
                         .withObject(지라이슈).build())
-                .collect(Collectors.toList());
+                .collect(toList());
         검색엔진_실행기.bulkIndex(검색엔진_쿼리, IndexCoordinates.of(인덱스자료.지라이슈_인덱스명));
 
         return 검색엔진_쿼리.size();
@@ -133,33 +136,22 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     @Override
     public 검색결과_목록 특정필드의_값들을_그룹화하여_빈도수가져오기(String fieldName) throws IOException {
 
-        String groupId = String.valueOf(UUID.randomUUID());
+        String groupId = "groupId";
         TermsAggregationBuilder aggregationBuilders =
             AggregationBuilders.terms(groupId)
                 .field(fieldName)
                 .size(1000);
 
-        Query query = new NativeSearchQueryBuilder()
+        NativeSearchQuery query = new NativeSearchQueryBuilder()
             .withQuery(QueryBuilders.termQuery("isReq", true))
             .withPageable(PageRequest.of(0, 1000))
             .withAggregations(aggregationBuilders)
             .build();
 
-        SearchHits<지라이슈> searchHits = 검색엔진_실행기.search(query, 지라이슈.class);
+        List<검색결과> buckets = 지라이슈저장소.getBucket(query, 지라이슈.class,
+            bucket -> new 검색결과(bucket.getKeyAsString(), bucket.getDocCount()));
 
-        AggregationsContainer<Aggregations> aggregationsContainer = AggregationsContainer.class.cast(searchHits.getAggregations());
-        ParsedStringTerms parsedStringTerms = aggregationsContainer.aggregations().get(groupId);
-
-        검색결과_목록 검색결과_목록 = new 검색결과_목록();
-
-        for (Terms.Bucket bucket : parsedStringTerms.getBuckets()) {
-            String groupValue = bucket.getKeyAsString();
-            long docCount = bucket.getDocCount();
-            검색결과_목록.중복허용_추가(new 검색결과(groupValue, docCount));
-        }
-
-        return 검색결과_목록;
-
+        return new 검색결과_목록(buckets).중복제거();
     }
 
     @Override
@@ -175,19 +167,17 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         );
         searchRequest.source(searchSourceBuilder);
 
-
         SearchResponse searchResponse = 지라이슈저장소.search(searchRequest, RequestOptions.DEFAULT);
 
-        ParsedStringTerms groupByAgg = searchResponse.getAggregations().get("group_by");
-        검색결과_목록 검색결과_목록 = new 검색결과_목록();
+        Terms terms = searchResponse.getAggregations().get("group_by");
 
-        for (Terms.Bucket bucket : groupByAgg.getBuckets()) {
-            String groupValue = bucket.getKeyAsString();
-            long docCount = bucket.getDocCount();
-            검색결과_목록.중복시_기존_목록_삭제_추가(new 검색결과(groupValue, docCount));
-        }
+        List<검색결과> buckets
+            = terms.getBuckets()
+                .stream()
+                .map(bucket -> new 검색결과(bucket.getKeyAsString(), bucket.getDocCount()))
+                .collect(toList());
 
-        return 검색결과_목록;
+        return new 검색결과_목록(buckets).중복제거();
     }
 
     @Override
@@ -205,15 +195,15 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
         SearchResponse searchResponse = 지라이슈저장소.search(searchRequest, RequestOptions.DEFAULT);
 
-        검색결과_목록 검색결과_목록 = new 검색결과_목록();
         Terms terms = searchResponse.getAggregations().get("group_by_" + 특정필드);
-        for (Terms.Bucket bucket : terms.getBuckets()) {
-            String bValue = bucket.getKeyAsString();
-            long count = bucket.getDocCount();
-            검색결과_목록.중복허용_추가(new 검색결과(bValue, count));
-        }
 
-        return 검색결과_목록;
+        List<검색결과> buckets
+            = terms.getBuckets()
+                .stream()
+                .map(bucket -> new 검색결과(bucket.getKeyAsString(), bucket.getDocCount()))
+                .collect(toList());
+
+        return new 검색결과_목록(buckets);
     }
 
     @Override
@@ -313,7 +303,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                             }
                             return 링크드이슈_서브테스크;
                         })
-                        .collect(Collectors.toList());
+                        .collect(toList());
 
                 벌크_저장_목록.addAll(링크드이슈_서브테스크_목록);
             } catch (Exception e) {
@@ -344,7 +334,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                             return 변환된_이슈;
                         })
                         .filter(Objects::nonNull)
-                        .collect(Collectors.toList());
+                        .collect(toList());
             }
         }
 
@@ -454,7 +444,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                             Optional.ofNullable(워크로그아이템.getIssueId()).orElse(null)
                     );
                 })
-                .collect(Collectors.toList());
+                .collect(toList());
 
         지라이슈 이슈 = 지라이슈.builder()
                 .jira_server_id(지라서버_아이디)
