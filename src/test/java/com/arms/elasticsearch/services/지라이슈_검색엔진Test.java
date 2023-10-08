@@ -18,6 +18,6 @@ class 지라이슈_검색엔진Test {
 
 	@Test
 	public void test() throws IOException {
-		지라이슈_서비스.특정필드의_값들을_그룹화하여_빈도수가져오기("pdServiceVersion");
+		지라이슈_서비스.특정필드의_값들을_그룹화하여_빈도수가져오기();
 	}
 }

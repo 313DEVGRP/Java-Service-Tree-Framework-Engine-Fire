@@ -4,7 +4,7 @@ import static java.util.stream.Collectors.*;
 
 import com.arms.elasticsearch.helper.인덱스자료;
 import com.arms.elasticsearch.models.지라이슈;
-import com.arms.elasticsearch.repositories.BucketRowMapper;
+import com.arms.elasticsearch.repositories.QueryAbstractFactory;
 import com.arms.elasticsearch.repositories.지라이슈_저장소;
 import com.arms.elasticsearch.util.검색결과;
 import com.arms.elasticsearch.util.검색결과_목록;
@@ -28,23 +28,17 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.elasticsearch.core.AggregationsContainer;
-import org.springframework.data.elasticsearch.core.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -53,7 +47,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service("지라이슈_서비스")
@@ -134,22 +127,15 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     }
 
     @Override
-    public 검색결과_목록 특정필드의_값들을_그룹화하여_빈도수가져오기(String fieldName) throws IOException {
+    public 검색결과_목록 버킷집계_가져오기(QueryAbstractFactory queryAbstractFactory) throws IOException {
 
-        String groupId = "groupId";
-        TermsAggregationBuilder aggregationBuilders =
-            AggregationBuilders.terms(groupId)
-                .field(fieldName)
-                .size(1000);
+        NativeSearchQuery query = queryAbstractFactory.create();
 
-        NativeSearchQuery query = new NativeSearchQueryBuilder()
-            .withQuery(QueryBuilders.termQuery("isReq", true))
-            .withPageable(PageRequest.of(0, 1000))
-            .withAggregations(aggregationBuilders)
-            .build();
-
-        List<검색결과> buckets = 지라이슈저장소.getBucket(query, 지라이슈.class,
-            bucket -> new 검색결과(bucket.getKeyAsString(), bucket.getDocCount()));
+        List<검색결과> buckets = 지라이슈저장소.getBucket(
+            query,
+            지라이슈.class,
+            bucket -> new 검색결과(bucket.getKeyAsString(), bucket.getDocCount())
+        );
 
         return new 검색결과_목록(buckets).중복제거();
     }

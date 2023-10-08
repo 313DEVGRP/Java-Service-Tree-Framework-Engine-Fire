@@ -2,8 +2,8 @@ package com.arms.elasticsearch.controllers;
 
 import com.arms.elasticsearch.helper.인덱스자료;
 import com.arms.elasticsearch.models.지라이슈;
+import com.arms.elasticsearch.models.지라이슈_검색_요청;
 import com.arms.elasticsearch.services.지라이슈_서비스;
-import com.arms.elasticsearch.util.검색결과;
 import com.arms.elasticsearch.util.검색결과_목록;
 import com.arms.elasticsearch.util.검색조건;
 import com.arms.jira.jiraissue.service.지라이슈_전략_호출;
@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
@@ -67,6 +68,12 @@ public class 엘라스틱_지라이슈_컨트롤러 {
     public 검색결과_목록 테스트2_조회(@PathVariable("searchField") String 특정필드, @PathVariable("searchTerm") String 특정필드검색어, @PathVariable("groupField") String 그룹할필드) throws IOException {
 
         return 지라이슈_검색엔진.특정필드_검색후_다른필드_그룹결과(인덱스자료.지라이슈_인덱스명, 특정필드, 특정필드검색어, 그룹할필드 );
+    }
+
+    @ResponseBody
+    @GetMapping("/search/single-bucket")
+    public ResponseEntity<검색결과_목록> 단일버킷(지라이슈_검색_요청 지라이슈_검색_요청) throws IOException {
+        return ResponseEntity.ok(지라이슈_검색엔진.버킷집계_가져오기(지라이슈_검색_요청));
     }
 
     @ResponseBody

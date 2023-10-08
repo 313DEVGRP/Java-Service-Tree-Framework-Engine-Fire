@@ -1,6 +1,7 @@
 package com.arms.elasticsearch.services;
 
 import com.arms.elasticsearch.models.지라이슈;
+import com.arms.elasticsearch.repositories.QueryAbstractFactory;
 import com.arms.elasticsearch.util.검색결과;
 import com.arms.elasticsearch.util.검색결과_목록;
 import com.arms.elasticsearch.util.검색조건;
@@ -25,7 +26,7 @@ public interface 지라이슈_서비스 {
 
     public List<지라이슈> 이슈_검색하기(검색조건 검색조건);
 
-    검색결과_목록 특정필드의_값들을_그룹화하여_빈도수가져오기(String fieldName) throws IOException;
+    검색결과_목록 버킷집계_가져오기(QueryAbstractFactory queryAbstractFactory) throws IOException;
 
     public 검색결과_목록 특정필드의_값들을_그룹화하여_빈도수가져오기(String indexName, String groupByField) throws IOException;
 
