@@ -18,6 +18,7 @@ public class 검색결과_목록 {
 	}
 
 	public 검색결과_목록 중복제거(){
+
 		return new 검색결과_목록(결과.stream().distinct().collect(toList()));
 	}
 

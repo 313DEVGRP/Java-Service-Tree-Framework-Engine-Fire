@@ -141,6 +141,20 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     }
 
     @Override
+    public 검색결과_목록 특정필드의_값들을_그룹화하여_버킷집계_서버집계_포함하여_가져오기(QueryAbstractFactory queryAbstractFactory) throws IOException {
+
+        NativeSearchQuery query = queryAbstractFactory.create();
+
+        List<검색결과> buckets = 지라이슈저장소.getBucket(
+            query,
+            지라이슈.class,
+            bucket -> new 검색결과(bucket.getKeyAsString(), bucket.getDocCount(),bucket)
+        );
+
+        return new 검색결과_목록(buckets).중복제거();
+    }
+
+    @Override
     public 검색결과_목록 특정필드의_값들을_그룹화하여_빈도수가져오기(String indexName, String groupByField) throws IOException {
         SearchRequest searchRequest = new SearchRequest(indexName);
 

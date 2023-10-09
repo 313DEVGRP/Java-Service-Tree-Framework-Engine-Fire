@@ -2,6 +2,7 @@ package com.arms.elasticsearch.controllers;
 
 import com.arms.elasticsearch.helper.인덱스자료;
 import com.arms.elasticsearch.models.지라이슈;
+import com.arms.elasticsearch.models.지라이슈_검색_버킷_안에_서브버킷_요청;
 import com.arms.elasticsearch.models.지라이슈_검색_요청;
 import com.arms.elasticsearch.services.지라이슈_서비스;
 import com.arms.elasticsearch.util.검색결과_목록;
@@ -75,6 +76,13 @@ public class 엘라스틱_지라이슈_컨트롤러 {
     public ResponseEntity<검색결과_목록> 단일버킷(지라이슈_검색_요청 지라이슈_검색_요청) throws IOException {
         return ResponseEntity.ok(지라이슈_검색엔진.버킷집계_가져오기(지라이슈_검색_요청));
     }
+
+    @ResponseBody
+    @GetMapping("/search/single-bucket/sub-bucket")
+    public ResponseEntity<검색결과_목록> 버킷_안에_서브버킷(지라이슈_검색_버킷_안에_서브버킷_요청 지라이슈_검색_버킷_안에_서브버킷_요청) throws IOException {
+        return ResponseEntity.ok(지라이슈_검색엔진.특정필드의_값들을_그룹화하여_버킷집계_서버집계_포함하여_가져오기(지라이슈_검색_버킷_안에_서브버킷_요청));
+    }
+
 
     @ResponseBody
     @RequestMapping(

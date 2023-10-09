@@ -28,7 +28,9 @@ public interface 지라이슈_서비스 {
 
     검색결과_목록 버킷집계_가져오기(QueryAbstractFactory queryAbstractFactory) throws IOException;
 
-    public 검색결과_목록 특정필드의_값들을_그룹화하여_빈도수가져오기(String indexName, String groupByField) throws IOException;
+	검색결과_목록 특정필드의_값들을_그룹화하여_버킷집계_서버집계_포함하여_가져오기(QueryAbstractFactory queryAbstractFactory) throws IOException;
+
+	public 검색결과_목록 특정필드의_값들을_그룹화하여_빈도수가져오기(String indexName, String groupByField) throws IOException;
 
     public 검색결과_목록 특정필드_검색후_다른필드_그룹결과(String 인덱스이름, String 특정필드, String 특정필드검색어, String 그룹할필드) throws IOException;
 

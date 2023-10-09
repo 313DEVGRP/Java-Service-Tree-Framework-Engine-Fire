@@ -10,7 +10,7 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.arms.elasticsearch.models.지라이슈;
-import com.arms.elasticsearch.models.지라이슈_검색_멀티버킷_요청;
+import com.arms.elasticsearch.models.지라이슈_검색_버킷_안에_서브버킷_요청;
 import com.arms.elasticsearch.models.지라이슈_검색_요청;
 import com.arms.elasticsearch.repositories.QueryAbstractFactory;
 import com.arms.elasticsearch.repositories.지라이슈_저장소;
@@ -43,7 +43,7 @@ class 지라이슈_검색엔진Test {
 	@Test
 	public void test() throws IOException {
 		QueryAbstractFactory queryAbstractFactory
-			= 지라이슈_검색_멀티버킷_요청.builder()
+			= 지라이슈_검색_버킷_안에_서브버킷_요청.builder()
 				.특정필드("isReq")
 				.특정필드검색어("true")
 				.그룹할필드("pdServiceVersion")
@@ -55,8 +55,6 @@ class 지라이슈_검색엔진Test {
 		List<검색결과> multiBucket = 지라이슈저장소.getBucket(query,
 			지라이슈.class,
 			bucket -> new 검색결과(bucket.getKeyAsString(), bucket.getDocCount(), bucket));
-
-
 
 	}
 

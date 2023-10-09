@@ -10,12 +10,11 @@ import com.arms.elasticsearch.repositories.QueryAbstractFactory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 @Builder
 @Getter
 @AllArgsConstructor
-public class 지라이슈_검색_멀티버킷_요청 implements QueryAbstractFactory {
+public class 지라이슈_검색_버킷_안에_서브버킷_요청 implements QueryAbstractFactory {
 
 
 	// NativeSearchQuery query = new NativeSearchQueryBuilder()
@@ -38,11 +37,10 @@ public class 지라이슈_검색_멀티버킷_요청 implements QueryAbstractFac
 
 	private boolean historyView;
 
-	private NativeSearchQuery nativeSearchQuery;
 
 	@Override
 	public NativeSearchQuery create() {
-		this.nativeSearchQuery =  new NativeSearchQueryBuilder()
+		return new NativeSearchQueryBuilder()
 		    .withQuery(QueryBuilders.termQuery(특정필드, 특정필드검색어))
 			.withMaxResults(historyView?size:0)
 		    .withAggregations(
@@ -54,7 +52,6 @@ public class 지라이슈_검색_멀티버킷_요청 implements QueryAbstractFac
 						.size(size))
 		    )
 		    .build();
-		return nativeSearchQuery;
 	}
 
 
