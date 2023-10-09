@@ -8,6 +8,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.Query;
 
 import com.arms.elasticsearch.util.검색조건;
@@ -28,5 +29,5 @@ public interface ElasticsearchCustom {
 
 	<T> SearchHits search(Query query, Class<T> clazz) ;
 
-	<T,B> List<B> getBucket(Query query, Class<T> clazz, BucketRowMapper<B> bucketRowMapper);
+	<T,B> List<B> getBucket(NativeSearchQuery query, Class<T> clazz, BucketRowMapper<B> bucketRowMapper);
 }
