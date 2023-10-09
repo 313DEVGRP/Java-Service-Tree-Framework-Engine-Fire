@@ -178,26 +178,62 @@ public class ElasticsearchCustomImpl implements ElasticsearchCustom {
 	}
 
 	@Override
-	public <T,B> List<B> getBucket(Query query, Class<T> clazz, BucketRowMapper<B> bucketRowMapper) {
-		AtomicReference<String> groupName = new AtomicReference<>();
-		((NativeSearchQuery)query).getAggregations()
-			.stream()
-			.findFirst().ifPresent(a -> {
-				groupName.set(a.getName());
-			});
-
-		List<Terms.Bucket> buckets = (List<Terms.Bucket>)aggregations(
-			elasticsearchOperations.search(query, clazz).getAggregations(), groupName.get())
-			.getBuckets();
+	public <T,B> List<B> getBucket(NativeSearchQuery query, Class<T> clazz, BucketRowMapper<B> bucketRowMapper) {
+		String groupName = bucketGroupName(query);
+		List<? extends Terms.Bucket> buckets
+			= getTerm(
+				elasticsearchOperations.search(query, clazz).getAggregations()
+				, groupName).getBuckets();
 
 		return buckets.stream()
 			.map(a-> bucketRowMapper.bucketRow(a))
 			.collect(toList());
 	}
 
-	private Terms aggregations(AggregationsContainer aggregationsContainer,String groupId){
-		Aggregations aggregations = ((ElasticsearchAggregations) aggregationsContainer).aggregations();
-		return aggregations.get(groupId);
+
+	//방향성 고민으로 임시 주석
+	//List<? extends Terms.Bucket> buckets = ((Terms)bucket.getAggregations().get(groupName)).getBuckets();
+/*	@Override
+	public <T> List<Terms.Bucket> getMultiBucket(NativeSearchQuery query, Class<T> clazz) {
+
+		String groupName = bucketGroupName(query);
+
+		return (List<Terms.Bucket>)getTerm(
+			elasticsearchOperations.search(query, clazz).getAggregations()
+			, groupName).getBuckets();
+
+	}*/
+
+	private Terms getTerm(AggregationsContainer aggregationsContainer,String groupName){
+		Aggregations aggregations = getAggregations(aggregationsContainer);
+		return aggregations.get(groupName);
 	}
+
+	private Terms getTerm(Aggregations aggregations,String groupName){
+		return aggregations.get(groupName);
+	}
+
+	private Aggregations getAggregations(AggregationsContainer aggregationsContainer){
+		return ((ElasticsearchAggregations) aggregationsContainer).aggregations();
+	}
+
+	private String bucketGroupName(NativeSearchQuery query) {
+		return query.getAggregations()
+			.stream()
+			.findAny()
+			.map(a->a.getName())
+			.orElse("");
+	}
+
+	private String bucketSubGroupName(NativeSearchQuery query) {
+		 return query.getAggregations()
+			.stream()
+			.findAny()
+			.map(a->a.getSubAggregations().stream().map(b->b.getName()).findAny().orElse(""))
+			 .orElse("");
+	}
+
+
+
 
 }

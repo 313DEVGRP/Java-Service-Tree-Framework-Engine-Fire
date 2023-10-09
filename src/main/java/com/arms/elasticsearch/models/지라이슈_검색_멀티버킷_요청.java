@@ -13,10 +13,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Builder
-@Setter
 @Getter
 @AllArgsConstructor
-public class 지라이슈_검색_요청 implements QueryAbstractFactory {
+public class 지라이슈_검색_멀티버킷_요청 implements QueryAbstractFactory {
 
 
 	// NativeSearchQuery query = new NativeSearchQueryBuilder()
@@ -31,24 +30,32 @@ public class 지라이슈_검색_요청 implements QueryAbstractFactory {
 
 	private String 특정필드;
 	private String 특정필드검색어;
-
 	private String 그룹할필드;
-	private int page = 0;
-	private int size = 1000;
+	private String 하위_그룹할필드;
 
-	private boolean historyView = false;
+	private int page;
+	private int size;
+
+	private boolean historyView;
+
+	private NativeSearchQuery nativeSearchQuery;
 
 	@Override
 	public NativeSearchQuery create() {
-
-		return new NativeSearchQueryBuilder()
+		this.nativeSearchQuery =  new NativeSearchQueryBuilder()
 		    .withQuery(QueryBuilders.termQuery(특정필드, 특정필드검색어))
 			.withMaxResults(historyView?size:0)
 		    .withAggregations(
 		        AggregationBuilders.terms( "group_by_"+그룹할필드)
 		            .field(그룹할필드)
 		            .size(size)
+					.subAggregation(AggregationBuilders.terms( "group_by_"+하위_그룹할필드)
+						.field(하위_그룹할필드)
+						.size(size))
 		    )
 		    .build();
+		return nativeSearchQuery;
 	}
+
+
 }
