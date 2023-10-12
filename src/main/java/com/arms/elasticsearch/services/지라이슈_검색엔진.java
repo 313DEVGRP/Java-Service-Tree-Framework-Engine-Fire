@@ -141,7 +141,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     }
 
     @Override
-    public 검색결과_목록 특정필드의_값들을_그룹화하여_버킷집계_서버집계_포함하여_가져오기(QueryAbstractFactory queryAbstractFactory) throws IOException {
+    public 검색결과_목록 특정필드의_값들을_그룹화하여_버킷집계_서브집계_포함하여_가져오기(QueryAbstractFactory queryAbstractFactory) throws IOException {
 
         NativeSearchQuery query = queryAbstractFactory.create();
 

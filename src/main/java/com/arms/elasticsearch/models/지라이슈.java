@@ -92,10 +92,10 @@ public class 지라이슈 {
     @Field(type = FieldType.Text, name = "resolutiondate")
     private String resolutiondate;
 
-    @Field(type = FieldType.Text, name = "created")
+    @Field(type = FieldType.Date, name = "created")
     private String created;
 
-    @Field(type = FieldType.Text, name = "updated")
+    @Field(type = FieldType.Date, name = "updated")
     private String updated;
 
 //    @Field(type = FieldType.Nested)

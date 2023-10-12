@@ -21,6 +21,8 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
+import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.xcontent.XContentType;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -180,10 +182,10 @@ public class ElasticsearchCustomImpl implements ElasticsearchCustom {
 	@Override
 	public <T,B> List<B> getBucket(NativeSearchQuery query, Class<T> clazz, BucketRowMapper<B> bucketRowMapper) {
 		String groupName = bucketGroupName(query);
-		List<? extends Terms.Bucket> buckets
-			= getTerm(
-				elasticsearchOperations.search(query, clazz).getAggregations()
-				, groupName).getBuckets();
+
+		List<? extends MultiBucketsAggregation.Bucket> buckets = getTerm(
+			elasticsearchOperations.search(query, clazz).getAggregations()
+			, groupName).getBuckets();
 
 		return buckets.stream()
 			.map(a-> bucketRowMapper.bucketRow(a))
@@ -204,7 +206,7 @@ public class ElasticsearchCustomImpl implements ElasticsearchCustom {
 
 	}*/
 
-	private Terms getTerm(AggregationsContainer aggregationsContainer,String groupName){
+	private MultiBucketsAggregation getTerm(AggregationsContainer aggregationsContainer,String groupName){
 		Aggregations aggregations = getAggregations(aggregationsContainer);
 		return aggregations.get(groupName);
 	}

@@ -14,7 +14,7 @@ import lombok.Getter;
 @Builder
 @Getter
 @AllArgsConstructor
-public class 지라이슈_검색_버킷_안에_서브버킷_요청 implements QueryAbstractFactory {
+public class 지라이슈_검색_서브버킷_요청 implements QueryAbstractFactory {
 
 
 	// NativeSearchQuery query = new NativeSearchQueryBuilder()

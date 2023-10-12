@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 
@@ -19,7 +20,7 @@ public class 검색결과 {
     private long 개수;
     private 검색결과_목록 검색결과_목록;
 
-    public 검색결과(String 필드명,long 개수,Terms.Bucket subBucket) {
+    public 검색결과(String 필드명,long 개수, MultiBucketsAggregation.Bucket subBucket) {
         this.필드명 = 필드명;
         this.개수 = 개수;
         this.검색결과_목록 = new 검색결과_목록(subBucket.getAggregations()
