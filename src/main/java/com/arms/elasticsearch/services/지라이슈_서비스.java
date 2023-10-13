@@ -49,4 +49,8 @@ public interface 지라이슈_서비스 {
 
     public Map<String, Long> 제품서비스별_소요일_통계(Long 서버_아이디, Long 제품서비스_아이디) throws IOException;
 
+    Map<String, Long> 제품서비스별_담당자_요구사항_통계(Long 제품서비스_아이디, String 담당자_이메일) throws IOException;
+
+    Map<String, Long> 제품서비스별_담당자_연관된_요구사항_통계(Long 지라서버_아이디, Long 제품서비스_아이디, String 이슈키, String 담당자_이메일) throws IOException;
+
 }

@@ -745,5 +745,140 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         }
     }
 
+    @Override
+    public Map<String, Long> 제품서비스별_담당자_요구사항_통계(Long 제품서비스_아이디, String 담당자_이메일) throws IOException {
+
+        SearchSourceBuilder 검색조건 = new SearchSourceBuilder();
+        BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
+        SearchRequest 검색요청 = new SearchRequest();
+        SearchResponse 검색결과;
+
+        if ( 제품서비스_아이디 != null && 제품서비스_아이디 > 9L) {
+            MatchQueryBuilder 제품서비스_조회 = QueryBuilders.matchQuery("pdServiceId", 제품서비스_아이디);
+            복합조회.must(제품서비스_조회);
+        }
+
+        검색조건.query(복합조회);
+        검색조건.size(10000); // 모든 검색 결과를 가져오기 위함
+
+        검색요청.indices("jiraissue");
+        검색요청.source(검색조건);
+
+        검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
+        long 요구사항_개수 = 검색결과.getHits().getTotalHits().value;
+
+
+        if ( 담당자_이메일 != null ) {
+            MatchQueryBuilder 담당자_조회 = QueryBuilders.matchQuery("assignee.assignee_emailAddress.keyword", 담당자_이메일);
+            복합조회.must(담당자_조회);
+        }
+
+        검색조건.query(복합조회);
+        검색조건.size(10000); // 모든 검색 결과를 가져오기 위함
+
+        // 상태값 집계
+        검색조건.aggregation(
+                AggregationBuilders.terms("상태값_집계").field("status.status_name.keyword")
+        );
+
+        검색요청.indices("jiraissue");
+        검색요청.source(검색조건);
+
+        검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
+        long 할당된_요구사항_개수 = 검색결과.getHits().getTotalHits().value;
+
+        로그.info("요구사항 개수: " + 요구사항_개수);
+        로그.info("할당된 요구사항 개수: " + 할당된_요구사항_개수);
+
+        Terms 상태값_집계 = 검색결과.getAggregations().get("상태값_집계");
+
+        Map<String, Long> 제품서비스별_담당자_요구사항_통계 = new HashMap<>();
+        제품서비스별_담당자_요구사항_통계.put("allReq", 요구사항_개수);
+        제품서비스별_담당자_요구사항_통계.put("myReq", 할당된_요구사항_개수);
+
+        for (Terms.Bucket 상태값 : 상태값_집계.getBuckets()) {
+            String 상태 = 상태값.getKeyAsString();
+            long 개수 = 상태값.getDocCount();
+            log.info("상태값: " + 상태 + ", Count: " + 개수);
+
+            제품서비스별_담당자_요구사항_통계.put(상태, 개수);
+        }
+
+        return 제품서비스별_담당자_요구사항_통계;
+    }
+
+    @Override
+    public Map<String, Long> 제품서비스별_담당자_연관된_요구사항_통계(Long 지라서버_아이디, Long 제품서비스_아이디, String 이슈키, String 담당자_이메일) throws IOException {
+
+        SearchSourceBuilder 검색조건 = new SearchSourceBuilder();
+        BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
+        SearchRequest 검색요청 = new SearchRequest();
+        SearchResponse 검색결과;
+
+        if ( 지라서버_아이디 != null ) {
+            MatchQueryBuilder 지라서버_조회 = QueryBuilders.matchQuery("jira_server_id", 지라서버_아이디);
+            복합조회.must(지라서버_조회);
+        }
+
+        if ( 제품서비스_아이디 != null && 제품서비스_아이디 > 9L) {
+            MatchQueryBuilder 제품서비스_조회 = QueryBuilders.matchQuery("pdServiceId", 제품서비스_아이디);
+            복합조회.must(제품서비스_조회);
+        }
+
+        if ( 이슈키 != null ) {
+            MatchQueryBuilder 요구사항_조회 = QueryBuilders.matchQuery("key.keyword", 이슈키);
+            MatchQueryBuilder 하위_요구사항_조회 = QueryBuilders.matchQuery("parentReqKey.keyword", 이슈키);
+
+            복합조회.should(요구사항_조회);
+            복합조회.should(하위_요구사항_조회);
+        }
+
+        검색조건.query(복합조회);
+        검색조건.size(10000); // 모든 검색 결과를 가져오기 위함
+
+        검색요청.indices("jiraissue");
+        검색요청.source(검색조건);
+
+        검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
+        long 연관된_요구사항_개수 = 검색결과.getHits().getTotalHits().value;
+
+        if ( 담당자_이메일 != null ) {
+            MatchQueryBuilder 담당자_조회 = QueryBuilders.matchQuery("assignee.assignee_emailAddress.keyword", 담당자_이메일);
+            복합조회.must(담당자_조회);
+        }
+
+        검색조건.query(복합조회);
+        검색조건.size(10000); // 모든 검색 결과를 가져오기 위함
+
+        // 상태값 집계
+        검색조건.aggregation(
+                AggregationBuilders.terms("상태값_집계").field("status.status_name.keyword")
+        );
+
+        검색요청.indices("jiraissue");
+        검색요청.source(검색조건);
+
+        검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
+        long 할당된_요구사항_개수 = 검색결과.getHits().getTotalHits().value;
+
+        로그.info("연관된 요구사항 개수: " + 연관된_요구사항_개수);
+        로그.info("할당된 요구사항 개수: " + 할당된_요구사항_개수);
+
+        Terms 상태값_집계 = 검색결과.getAggregations().get("상태값_집계");
+
+        Map<String, Long> 제품서비스별_담당자_연관된_요구사항_통계 = new HashMap<>();
+        제품서비스별_담당자_연관된_요구사항_통계.put("allReq", 연관된_요구사항_개수);
+        제품서비스별_담당자_연관된_요구사항_통계.put("myReq", 할당된_요구사항_개수);
+
+        for (Terms.Bucket 상태값 : 상태값_집계.getBuckets()) {
+            String 상태 = 상태값.getKeyAsString();
+            long 개수 = 상태값.getDocCount();
+            log.info("상태값: " + 상태 + ", Count: " + 개수);
+
+            제품서비스별_담당자_연관된_요구사항_통계.put(상태, 개수);
+        }
+
+        return 제품서비스별_담당자_연관된_요구사항_통계;
+    }
 }
 
