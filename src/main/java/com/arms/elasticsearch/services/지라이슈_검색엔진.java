@@ -831,6 +831,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
             복합조회.should(요구사항_조회);
             복합조회.should(하위_요구사항_조회);
+            복합조회.minimumShouldMatch(1);
         }
 
         검색조건.query(복합조회);
