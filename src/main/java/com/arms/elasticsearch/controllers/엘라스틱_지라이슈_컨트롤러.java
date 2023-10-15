@@ -187,12 +187,13 @@ public class 엘라스틱_지라이슈_컨트롤러 {
 
     @ResponseBody
     @GetMapping("/getReqCount/{pdServiceId}")
-    public Map<String, Long> 제품서비스별_담당자_요구사항_통계(@PathVariable("pdServiceId") Long 제품서비스_아이디,
+    public Map<String, Long> 제품서비스별_담당자_요구사항_통계(@PathVariable("connectId") Long 지라서버_아이디,
+                                                @PathVariable("pdServiceId") Long 제품서비스_아이디,
                                                 @RequestParam("assigneeEmail") String 담당자_이메일) throws IOException {
 
         로그.info("제품서비스별 요구사항 개수");
 
-        return 지라이슈_검색엔진.제품서비스별_담당자_요구사항_통계(제품서비스_아이디, 담당자_이메일);
+        return 지라이슈_검색엔진.제품서비스별_담당자_요구사항_통계(지라서버_아이디, 제품서비스_아이디, 담당자_이메일);
     }
 
     @ResponseBody
