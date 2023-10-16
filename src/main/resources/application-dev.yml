@@ -12,4 +12,4 @@ elasticsearch:
 jira:
   maxResults: 50
   issue:
-    fields: fields=project,issuetype,creator,reporter,assignee,labels,priority,status,resolution,resolutiondate,created,worklogs,timespent,summary
+    fields: fields=project,issuetype,creator,reporter,assignee,labels,priority,status,resolution,resolutiondate,created,updated,worklogs,timespent,summary

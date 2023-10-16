@@ -352,6 +352,7 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
         return 지라사용자_데이터.builder()
                 .accountId(사용자_정보.getAccountId())
                 .emailAddress(사용자_정보.getEmailAddress())
+                .displayName(사용자_정보.getDisplayName())
                 .build();
     }
 

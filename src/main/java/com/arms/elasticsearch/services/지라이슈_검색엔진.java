@@ -1,9 +1,8 @@
 package com.arms.elasticsearch.services;
 
-import static java.util.stream.Collectors.*;
-
 import com.arms.elasticsearch.helper.인덱스자료;
 import com.arms.elasticsearch.models.지라이슈;
+import com.arms.elasticsearch.models.지라이슈_검색요청;
 import com.arms.elasticsearch.repositories.QueryAbstractFactory;
 import com.arms.elasticsearch.repositories.지라이슈_저장소;
 import com.arms.elasticsearch.util.검색결과;
@@ -18,7 +17,6 @@ import com.arms.jira.jiraissue.service.지라이슈_전략_호출;
 import com.arms.jira.jiraissuestatus.model.지라이슈상태_데이터;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -35,10 +33,12 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -47,6 +47,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service("지라이슈_서비스")
@@ -61,6 +63,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
     private 지라이슈_전략_호출 지라이슈_전략_호출;
 
+    private ElasticsearchRestTemplate elasticsearchRestTemplate;
 
     @Override
     public 지라이슈 이슈_추가하기(지라이슈 지라이슈) {
@@ -370,6 +373,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                 .map(creator -> 지라이슈.생성자.builder()
                         .accountId(Optional.ofNullable(creator.getAccountId()).orElse(null))
                         .emailAddress(Optional.ofNullable(creator.getEmailAddress()).orElse(null))
+                        .displayName(Optional.ofNullable(creator.getDisplayName()).orElse(null))
                         .build())
                 .orElse(null);
 
@@ -377,6 +381,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                 .map(reporter -> 지라이슈.보고자.builder()
                         .accountId(Optional.ofNullable(reporter.getAccountId()).orElse(null))
                         .emailAddress(Optional.ofNullable(reporter.getEmailAddress()).orElse(null))
+                        .displayName(Optional.ofNullable(reporter.getDisplayName()).orElse(null))
                         .build())
                 .orElse(null);
 
@@ -384,6 +389,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                 .map(assignee -> 지라이슈.담당자.builder()
                         .accountId(Optional.ofNullable(assignee.getAccountId()).orElse(null))
                         .emailAddress(Optional.ofNullable(assignee.getEmailAddress()).orElse(null))
+                        .displayName(Optional.ofNullable(assignee.getDisplayName()).orElse(null))
                         .build())
                 .orElse(null);
 
@@ -881,5 +887,46 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
         return 제품서비스별_담당자_연관된_요구사항_통계;
     }
+
+    @Override
+    public List<지라이슈> 이슈_다중검색하기(List<지라이슈_검색요청> 다중검색목록) throws IOException {
+
+        if (다중검색목록 == null || 다중검색목록.size() < 1) {
+            return null;
+        }
+
+        final SearchRequest request = 검색엔진_유틸.buildSearchRequest(
+                인덱스자료.지라이슈_인덱스명,
+                다중검색목록
+        );
+
+        SearchResponse 검색결과 = 지라이슈저장소.search(request, RequestOptions.DEFAULT);
+        long totalHits = 검색결과.getHits().getTotalHits().value;
+        로그.info(String.valueOf(totalHits));
+
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+
+        for (지라이슈_검색요청 검색요청 : 다중검색목록) {
+            if (검색요청.getType().equals("must")) {
+                boolQuery.must(QueryBuilders.matchQuery(검색요청.getField(), 검색요청.getFieldKeyword()));
+            }
+            else if (검색요청.getType().equals("should")) {
+                boolQuery.should(QueryBuilders.matchQuery(검색요청.getField(), 검색요청.getFieldKeyword()));
+            }
+            else if (검색요청.getType().equals("must not")) {
+                boolQuery.mustNot(QueryBuilders.matchQuery(검색요청.getField(), 검색요청.getFieldKeyword()));
+            }
+        }
+
+        NativeSearchQuery query = new NativeSearchQueryBuilder()
+                .withQuery(boolQuery)
+                .build();
+
+        long count = elasticsearchRestTemplate.count(query, 지라이슈.class);
+        로그.info(String.valueOf(count) + "입니다.");
+
+        return 지라이슈저장소.internalSearch(request,지라이슈.class);
+    }
+
 }
 

@@ -194,6 +194,9 @@ public class 지라이슈 {
         @JsonProperty("creator_emailAddress")
         private String emailAddress;
 
+        @Field(type = FieldType.Text, name = "creator_displayName")
+        @JsonProperty("creator_displayName")
+        private String displayName;
     }
 
     @Getter
@@ -213,6 +216,9 @@ public class 지라이슈 {
         @JsonProperty("reporter_emailAddress")
         private String emailAddress;
 
+        @Field(type = FieldType.Text, name = "reporter_displayName")
+        @JsonProperty("reporter_displayName")
+        private String displayName;
     }
 
     @Getter
@@ -232,6 +238,9 @@ public class 지라이슈 {
         @JsonProperty("assignee_emailAddress")
         private String emailAddress;
 
+        @Field(type = FieldType.Text, name = "assignee_displayName")
+        @JsonProperty("assignee_displayName")
+        private String displayName;
     }
 
     @Getter
