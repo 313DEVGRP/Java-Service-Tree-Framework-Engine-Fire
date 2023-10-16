@@ -1,5 +1,6 @@
 package com.arms.elasticsearch.controllers;
 
+import com.arms.elasticsearch.models.요구사항_지라이슈상태_월별_집계;
 import com.arms.elasticsearch.models.집계_응답;
 import com.arms.elasticsearch.services.지라이슈_대시보드_서비스;
 import lombok.extern.slf4j.Slf4j;
@@ -34,5 +35,19 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         List<집계_응답> 요구사항이슈집계 = 지라이슈_검색엔진.이슈상태집계(pdServiceLink, pdServiceVersionLinks);
         return 요구사항이슈집계;
     }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/requirements-jira-issue-statuses"},
+            method = {RequestMethod.GET}
+    )
+    public Map<String, 요구사항_지라이슈상태_월별_집계> 요구사항이슈월별집계(
+            @RequestParam Long pdServiceLink,
+            @RequestParam List<Long> pdServiceVersionLinks
+    ) throws IOException {
+        Map<String, 요구사항_지라이슈상태_월별_집계> 요구사항이슈월별집계 = 지라이슈_검색엔진.요구사항_지라이슈상태_월별_집계(pdServiceLink, pdServiceVersionLinks);
+        return 요구사항이슈월별집계;
+    }
+
 
 }
