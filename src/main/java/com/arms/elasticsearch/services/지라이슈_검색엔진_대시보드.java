@@ -81,26 +81,26 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         }
 
         // DateHistogramAggregation 설정
-        DateHistogramAggregationBuilder dateHistogramAgg = AggregationBuilders
+        DateHistogramAggregationBuilder monthlyAggregationBuilder = AggregationBuilders
                 .dateHistogram("aggregation_by_month")
                 .field("created")
                 .calendarInterval(DateHistogramInterval.MONTH);
 
         // 요구사항과 지라 이슈 상태에 대한 집계
-        dateHistogramAgg.subAggregation(AggregationBuilders.terms("statuses").field("status.status_name.keyword"));
-        dateHistogramAgg.subAggregation(AggregationBuilders.terms("requirements").field("isReq"));
+        monthlyAggregationBuilder.subAggregation(AggregationBuilders.terms("statuses").field("status.status_name.keyword"));
+        monthlyAggregationBuilder.subAggregation(AggregationBuilders.terms("requirements").field("isReq"));
 
         // Query 및 Aggregation 반영
-        SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource().query(boolQuery).aggregation(dateHistogramAgg);
+        SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource().query(boolQuery).aggregation(monthlyAggregationBuilder);
 
         // Elasticsearch 쿼리 실행
         SearchResponse searchResponse = 지라이슈저장소.search(getSearchRequest(sourceBuilder), RequestOptions.DEFAULT);
 
         // Aggregation 결과 처리
-        Histogram issuesByMonth = searchResponse.getAggregations().get("aggregation_by_month");
+        Histogram aggregationByMonth = searchResponse.getAggregations().get("aggregation_by_month");
 
         // 월 별 요구사항, 지라 이슈 상태 집계
-        Map<String, 요구사항_지라이슈상태_월별_집계> monthlyDatas = issuesByMonth.getBuckets().stream()
+        Map<String, 요구사항_지라이슈상태_월별_집계> monthlyIssueAndRequirementData = aggregationByMonth.getBuckets().stream()
                 .collect(Collectors.toMap(
                         Histogram.Bucket::getKeyAsString,
                         this::createMonthlyData
@@ -110,15 +110,15 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         // 월별 누적 처리
         long totalIssues = 0;
         long totalRequirements = 0;
-        for (요구사항_지라이슈상태_월별_집계 monthlyData : monthlyDatas.values()) {
-            totalIssues += monthlyData.getTotalIssues();
-            totalRequirements += monthlyData.getTotalRequirements();
-            monthlyData.setTotalIssues(totalIssues);
-            monthlyData.setTotalRequirements(totalRequirements);
+        for (요구사항_지라이슈상태_월별_집계 monthlyAggregation : monthlyIssueAndRequirementData.values()) {
+            totalIssues += monthlyAggregation.getTotalIssues();
+            totalRequirements += monthlyAggregation.getTotalRequirements();
+            monthlyAggregation.setTotalIssues(totalIssues);
+            monthlyAggregation.setTotalRequirements(totalRequirements);
         }
 
         // 날짜 형식 변환 2023-10-01T00:00:00.000Z -> 2023-10
-        return monthlyDatas.entrySet().stream()
+        return monthlyIssueAndRequirementData.entrySet().stream()
                 .collect(Collectors.toMap(
                         entry -> transformDateKey(entry.getKey()),
                         Map.Entry::getValue
