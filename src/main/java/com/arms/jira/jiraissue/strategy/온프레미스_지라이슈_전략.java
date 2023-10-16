@@ -326,6 +326,7 @@ public class 온프레미스_지라이슈_전략 implements 지라이슈_전략 
 
             보고자.setAccountId(지라이슈.getReporter().getName());
             보고자.setEmailAddress(지라이슈.getReporter().getEmailAddress());
+            보고자.setDisplayName(지라이슈.getReporter().getDisplayName());
 
             지라이슈필드_데이터.setReporter(보고자);
         }
@@ -335,6 +336,7 @@ public class 온프레미스_지라이슈_전략 implements 지라이슈_전략 
 
             담당자.setAccountId(지라이슈.getAssignee().getName());
             담당자.setEmailAddress(지라이슈.getAssignee().getEmailAddress());
+            담당자.setDisplayName(지라이슈.getAssignee().getDisplayName());
 
             지라이슈필드_데이터.setAssignee(담당자);
         }

@@ -1,10 +1,7 @@
 package com.arms.elasticsearch.controllers;
 
 import com.arms.elasticsearch.helper.인덱스자료;
-import com.arms.elasticsearch.models.지라이슈;
-import com.arms.elasticsearch.models.지라이슈_검색_서브버킷_요청;
-import com.arms.elasticsearch.models.지라이슈_검색_요청;
-import com.arms.elasticsearch.models.지라이슈_검색_요청_시계열;
+import com.arms.elasticsearch.models.*;
 import com.arms.elasticsearch.services.지라이슈_서비스;
 import com.arms.elasticsearch.util.검색결과_목록;
 import com.arms.elasticsearch.util.검색조건;
@@ -206,5 +203,15 @@ public class 엘라스틱_지라이슈_컨트롤러 {
         로그.info("제품서비스별 연관된 요구사항 개수");
 
         return 지라이슈_검색엔진.제품서비스별_담당자_연관된_요구사항_통계(지라서버_아이디, 제품서비스_아이디, 이슈키, 담당자_이메일);
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/search/list"},
+            method = {RequestMethod.POST}
+    )
+    public List<지라이슈> 요구사항이슈_다중검색(@RequestBody final List<지라이슈_검색요청> 다중검색목록) throws IOException {
+
+        return 지라이슈_검색엔진.이슈_다중검색하기(다중검색목록);
     }
 }

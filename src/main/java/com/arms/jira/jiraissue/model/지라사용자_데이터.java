@@ -16,4 +16,6 @@ public class 지라사용자_데이터 {
 
     private String emailAddress;
 
+    private String displayName;
+
 }
