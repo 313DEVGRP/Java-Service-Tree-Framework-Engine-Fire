@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 @Service("지라이슈_대시보드_서비스")
 @AllArgsConstructor
 public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대시보드_서비스 {
-
+    public static final String STATUS_AGG_NAME = "statuses";
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     private 지라이슈_저장소 지라이슈저장소;
@@ -48,18 +48,16 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
             boolQuery.filter(QueryBuilders.termsQuery("pdServiceVersion", pdServiceVersionLinks));
         }
 
-        TermsAggregationBuilder issueStatusAgg = AggregationBuilders.terms("statuses").field("status.status_name.keyword");
+        TermsAggregationBuilder issueStatusAgg = AggregationBuilders.terms(STATUS_AGG_NAME).field("status.status_name.keyword");
 
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource().query(boolQuery).aggregation(issueStatusAgg);
 
         SearchResponse searchResponse = 지라이슈저장소.search(getSearchRequest(sourceBuilder), RequestOptions.DEFAULT);
 
-        Terms status = searchResponse.getAggregations().get("statuses");
+        Terms status = searchResponse.getAggregations().get(STATUS_AGG_NAME);
 
         return status.getBuckets().stream()
-                .map(bucket -> {
-                    return new 집계_응답(bucket.getKeyAsString(), bucket.getDocCount());
-                })
+                .map(bucket -> new 집계_응답(bucket.getKeyAsString(), bucket.getDocCount()))
                 .collect(Collectors.toList());
     }
 
@@ -87,7 +85,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 .calendarInterval(DateHistogramInterval.MONTH);
 
         // 요구사항과 지라 이슈 상태에 대한 집계
-        monthlyAggregationBuilder.subAggregation(AggregationBuilders.terms("statuses").field("status.status_name.keyword"));
+        monthlyAggregationBuilder.subAggregation(AggregationBuilders.terms(STATUS_AGG_NAME).field("status.status_name.keyword"));
         monthlyAggregationBuilder.subAggregation(AggregationBuilders.terms("requirements").field("isReq"));
 
         // Query 및 Aggregation 반영
@@ -129,7 +127,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         요구사항_지라이슈상태_월별_집계 monthlyData = new 요구사항_지라이슈상태_월별_집계();
         monthlyData.setTotalIssues(entry.getDocCount());
 
-        Map<String, Long> statuses = ((Terms) entry.getAggregations().get("statuses")).getBuckets().stream()
+        Map<String, Long> statuses = ((Terms) entry.getAggregations().get(STATUS_AGG_NAME)).getBuckets().stream()
                 .collect(Collectors.toMap(Terms.Bucket::getKeyAsString, Terms.Bucket::getDocCount));
 
         monthlyData.setStatuses(statuses);
