@@ -58,7 +58,7 @@ public class 지라이슈_검색_요청_시계열 implements 쿼리_추상_팩�
 
 	public BoolQueryBuilder searchService(BoolQueryBuilder boolQuery){
 
-		if(!ObjectUtils.isEmpty(특정필드)){
+		if(!ObjectUtils.isEmpty(서비스아이디)){
 			boolQuery.must(QueryBuilders.termQuery("pdServiceId", 서비스아이디));
 		}
 		return boolQuery;

@@ -1,5 +1,7 @@
 package com.arms.elasticsearch.models;
 
+import java.util.List;
+
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -25,6 +27,8 @@ public class 지라이슈_검색_서브버킷_요청 implements 쿼리_추상_�
 	private int size;
 	private boolean historyView;
 	private boolean isReq;
+	private String 필터필드;
+	private List<?> 필터필드검색어;
 
 	@Override
 	public NativeSearchQuery 생성() {
@@ -32,6 +36,7 @@ public class 지라이슈_검색_서브버킷_요청 implements 쿼리_추상_�
 		searchService(boolQuery);
 		isReqQuery(boolQuery);
 		searchField(boolQuery);
+		searchFilter(boolQuery);
 
 		return new NativeSearchQueryBuilder()
 		    .withQuery(boolQuery)
@@ -48,15 +53,13 @@ public class 지라이슈_검색_서브버킷_요청 implements 쿼리_추상_�
 	}
 
 	public BoolQueryBuilder searchService(BoolQueryBuilder boolQuery){
-
-		if(!ObjectUtils.isEmpty(특정필드)){
+		if(!ObjectUtils.isEmpty(서비스아이디)){
 			boolQuery.must(QueryBuilders.termQuery("pdServiceId", 서비스아이디));
 		}
 		return boolQuery;
 	}
 
 	public BoolQueryBuilder searchField(BoolQueryBuilder boolQuery){
-
 		if(!ObjectUtils.isEmpty(특정필드)){
 			boolQuery.must(QueryBuilders.termQuery(특정필드, 특정필드검색어));
 		}
@@ -65,6 +68,11 @@ public class 지라이슈_검색_서브버킷_요청 implements 쿼리_추상_�
 
 	public BoolQueryBuilder isReqQuery(BoolQueryBuilder boolQuery){
 		boolQuery.must(QueryBuilders.termQuery("isReq", isReq));
+		return boolQuery;
+	}
+
+	public BoolQueryBuilder searchFilter(BoolQueryBuilder boolQuery){
+		boolQuery.filter(QueryBuilders.termQuery(필터필드, 필터필드검색어));
 		return boolQuery;
 	}
 
