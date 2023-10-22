@@ -9,9 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
@@ -39,6 +37,49 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     private 지라이슈_저장소 지라이슈저장소;
+
+    @Override
+    public Map<String, Long> 제품서비스별_담당자_이름_통계(Long 지라서버_아이디, Long 제품서비스_아이디) throws IOException {
+
+        BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
+        if ( 제품서비스_아이디 != null && 제품서비스_아이디 > 9L) {
+            MatchQueryBuilder 제품서비스_조회 = QueryBuilders.matchQuery("pdServiceId", 제품서비스_아이디);
+            복합조회.must(제품서비스_조회);
+        }
+
+        SearchSourceBuilder 검색조건 = new SearchSourceBuilder();
+
+        검색조건.query(복합조회);
+        검색조건.size(0); // 모든 검색 결과를 가져오기 위함
+
+        검색조건.aggregation(
+                AggregationBuilders.terms("담당자별_집계").field("assignee.assignee_displayName.keyword")
+        );
+
+        SearchRequest 검색요청 = new SearchRequest();
+        검색요청.indices("jiraissue"); //인덱스 공간에서 해당 인덱스 설정
+        검색요청.source(검색조건);
+
+        // 요구사항 vs 연결된이슈&서브테스크 구분안하고 한번에
+        SearchResponse 검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
+        long 결과 = 검색결과.getHits().getTotalHits().value;
+        로그.info("검색결과 개수: " + 결과);
+
+        Terms 담당자별_집계 = 검색결과.getAggregations().get("담당자별_집계");
+
+        long 담당자_총합 = 0;
+        Map<String, Long> 제품서비스별_하위이슈_담당자_집계 = new HashMap<>();
+        for (Terms.Bucket 담당자 : 담당자별_집계.getBuckets()) {
+            String 담당자_이메일 = 담당자.getKeyAsString();
+            long 개수 = 담당자.getDocCount();
+            log.info("담당자: " + 담당자_이메일 + ", Count: " + 개수);
+            담당자_총합+= 개수;
+            제품서비스별_하위이슈_담당자_집계.put(담당자_이메일, 개수);
+        }
+        제품서비스별_하위이슈_담당자_집계.put("담당자 미지정",결과-담당자_총합);
+
+        return 제품서비스별_하위이슈_담당자_집계;
+    }
 
     @Override
     public List<집계_응답> 이슈상태집계(Long pdServiceLink, List<Long> pdServiceVersionLinks) throws IOException {

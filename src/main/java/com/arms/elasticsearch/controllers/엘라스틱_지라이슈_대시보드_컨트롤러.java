@@ -59,4 +59,15 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         Map<String, Map<String, Map<String, Integer>>> 담당자_요구사항여부_상태별_집계결과 = 지라이슈_검색엔진.담당자_요구사항여부_상태별집계(pdServiceLink);
         return 담당자_요구사항여부_상태별_집계결과;
     }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/issue-assignee/{pdServiceId}"},
+            method = {RequestMethod.GET}
+    )
+    public Map<String, Long> 제품서비스별_담당자_이름_통계(
+            @PathVariable("pdServiceId") Long 제품서비스_아이디 ) throws Exception {
+        return 지라이슈_검색엔진.제품서비스별_담당자_이름_통계(0L, 제품서비스_아이디);
+    }
+
 }

@@ -70,20 +70,22 @@ public class 엘라스틱_지라이슈_컨트롤러 {
     }
 
     @ResponseBody
-    @GetMapping("/search/single-bucket")
-    public ResponseEntity<검색결과_목록_메인> 단일버킷(지라이슈_검색_요청 지라이슈_검색_요청) throws IOException {
+    @PostMapping("/search/single-bucket")
+    public ResponseEntity<검색결과_목록_메인> 단일버킷(@RequestBody 지라이슈_검색_요청 지라이슈_검색_요청) throws IOException {
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(지라이슈_검색_요청));
     }
 
     @ResponseBody
-    @GetMapping("/search/sub-bucket")
-    public ResponseEntity<검색결과_목록_메인> 서브버킷(지라이슈_검색_서브버킷_요청 지라이슈_검색_서브버킷_요청) throws IOException {
-        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(지라이슈_검색_서브버킷_요청));
+    @PostMapping("/search/sub-bucket")
+    public ResponseEntity<검색결과_목록_메인> 서브버킷(
+            @RequestBody 지라이슈_검색_서브버킷_요청 지라이슈_검색_서브버킷_요청) throws IOException {
+        검색결과_목록_메인 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(지라이슈_검색_서브버킷_요청);
+        return ResponseEntity.ok(집계결과_가져오기);
     }
 
     @ResponseBody
-    @GetMapping("/search/single-bucket/date")
-    public ResponseEntity<검색결과_목록_메인> 단일버킷_시계열(지라이슈_검색_요청_시계열 지라이슈_검색_요청_시계열) throws IOException {
+    @PostMapping("/search/single-bucket/date")
+    public ResponseEntity<검색결과_목록_메인> 단일버킷_시계열(@RequestBody 지라이슈_검색_요청_시계열 지라이슈_검색_요청_시계열) throws IOException {
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(지라이슈_검색_요청_시계열));
     }
 
