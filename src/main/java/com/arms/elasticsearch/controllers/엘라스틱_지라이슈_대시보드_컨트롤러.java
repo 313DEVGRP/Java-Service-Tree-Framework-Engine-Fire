@@ -49,5 +49,14 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         return 요구사항이슈월별집계;
     }
 
-
+    @ResponseBody
+    @RequestMapping(
+            value = {"/assignee-jira-issue-statuses"},
+            method = {RequestMethod.GET}
+    )
+    public Map<String, Map<String, Map<String, Integer>>> 담당자_요구사항여부_상태별집계(
+            @RequestParam Long pdServiceLink) throws IOException {
+        Map<String, Map<String, Map<String, Integer>>> 담당자_요구사항여부_상태별_집계결과 = 지라이슈_검색엔진.담당자_요구사항여부_상태별집계(pdServiceLink);
+        return 담당자_요구사항여부_상태별_집계결과;
+    }
 }
