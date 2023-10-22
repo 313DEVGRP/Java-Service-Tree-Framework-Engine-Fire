@@ -10,6 +10,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
@@ -156,5 +157,57 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         searchRequest.indices(인덱스자료.지라이슈_인덱스명);
         searchRequest.source(sourceBuilder);
         return searchRequest;
+    }
+
+    @Override
+    public Map<String, Map<String, Map<String, Integer>>> 담당자_요구사항여부_상태별집계(Long pdServiceLink) throws IOException {
+
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+        MatchQueryBuilder 제품아이디별_조회 = QueryBuilders.matchQuery("pdServiceId", pdServiceLink);
+
+        sourceBuilder.query(제품아이디별_조회);
+
+        TermsAggregationBuilder 상태별_집계 = AggregationBuilders.terms("상태별_집계").field("status.status_name.keyword");
+
+        TermsAggregationBuilder 요구사항_여부별_집계 = AggregationBuilders.terms("요구사항_여부별_집계").field("isReq")
+                .subAggregation(상태별_집계);
+
+        TermsAggregationBuilder 담당자별_집계 = AggregationBuilders.terms("담당자별_집계").field("assignee.assignee_emailAddress.keyword")
+                .subAggregation(요구사항_여부별_집계);
+
+        sourceBuilder.aggregation(담당자별_집계);
+
+        SearchRequest searchRequest = new SearchRequest();
+        searchRequest.indices("jiraissue");
+        searchRequest.source(sourceBuilder);
+
+        SearchResponse searchResponse = 지라이슈저장소.search(searchRequest, RequestOptions.DEFAULT);
+
+        Terms 종합집계결과 = searchResponse.getAggregations().get("담당자별_집계");
+
+        Map<String, Map<String, Map<String, Integer>>> 담당자별_요구사항여부별_상태값_집계 = 종합집계결과.getBuckets().stream().collect(Collectors.toMap(
+                Terms.Bucket::getKeyAsString,
+                담당자 -> {
+                    Terms 요구사항_여부별집계 = 담당자.getAggregations().get("요구사항_여부별_집계");
+                    return 요구사항_여부별집계.getBuckets().stream().collect(Collectors.toMap(
+                            bucket -> {
+                                String 여부 = bucket.getKeyAsString();
+                                if (여부.equals("true")) {
+                                    return "requirement";
+                                } else {
+                                    return "relation_issue";
+                                }
+                            },
+                            bucket -> {
+                                Terms 상태별집계 = bucket.getAggregations().get("상태별_집계");
+                                return 상태별집계.getBuckets().stream()
+                                        .collect(Collectors.toMap(Terms.Bucket::getKeyAsString,
+                                                상태 -> (int) 상태.getDocCount()));
+                            }
+                    ));
+                }
+        ));
+
+        return 담당자별_요구사항여부별_상태값_집계;
     }
 }
