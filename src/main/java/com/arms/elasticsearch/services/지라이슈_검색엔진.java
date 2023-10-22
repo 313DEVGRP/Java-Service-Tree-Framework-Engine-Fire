@@ -1,12 +1,15 @@
 package com.arms.elasticsearch.services;
 
+import static java.util.stream.Collectors.*;
+
 import com.arms.elasticsearch.helper.인덱스자료;
 import com.arms.elasticsearch.models.지라이슈;
 import com.arms.elasticsearch.models.지라이슈_검색요청;
-import com.arms.elasticsearch.repositories.QueryAbstractFactory;
+import com.arms.elasticsearch.util.쿼리_추상_팩토리;
 import com.arms.elasticsearch.repositories.지라이슈_저장소;
 import com.arms.elasticsearch.util.검색결과;
 import com.arms.elasticsearch.util.검색결과_목록;
+import com.arms.elasticsearch.util.검색결과_목록_메인;
 import com.arms.elasticsearch.util.검색엔진_유틸;
 import com.arms.elasticsearch.util.검색조건;
 import com.arms.errors.codes.에러코드;
@@ -47,8 +50,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-
-import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service("지라이슈_서비스")
@@ -130,31 +131,12 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     }
 
     @Override
-    public 검색결과_목록 버킷집계_가져오기(QueryAbstractFactory queryAbstractFactory) throws IOException {
+    public 검색결과_목록_메인 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) throws IOException {
 
-        NativeSearchQuery query = queryAbstractFactory.create();
-
-        List<검색결과> buckets = 지라이슈저장소.getBucket(
-            query,
-            지라이슈.class,
-            bucket -> new 검색결과(bucket.getKeyAsString(), bucket.getDocCount())
-        );
-
-        return new 검색결과_목록(buckets).중복제거();
-    }
-
-    @Override
-    public 검색결과_목록 특정필드의_값들을_그룹화하여_버킷집계_서브집계_포함하여_가져오기(QueryAbstractFactory queryAbstractFactory) throws IOException {
-
-        NativeSearchQuery query = queryAbstractFactory.create();
-
-        List<검색결과> buckets = 지라이슈저장소.getBucket(
-            query,
-            지라이슈.class,
-            bucket -> new 검색결과(bucket.getKeyAsString(), bucket.getDocCount(),bucket)
-        );
-
-        return new 검색결과_목록(buckets).중복제거();
+        return new 검색결과_목록_메인(지라이슈저장소.getBucket(
+            쿼리추상팩토리.생성(),
+            지라이슈.class
+        ));
     }
 
     @Override

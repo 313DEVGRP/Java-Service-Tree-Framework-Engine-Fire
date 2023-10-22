@@ -3,10 +3,12 @@ package com.arms.elasticsearch.repositories;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.search.aggregations.Aggregation;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.Query;
@@ -30,4 +32,7 @@ public interface ElasticsearchCustom {
 	<T> SearchHits search(Query query, Class<T> clazz) ;
 
 	<T,B> List<B> getBucket(NativeSearchQuery query, Class<T> clazz, BucketRowMapper<B> bucketRowMapper);
+
+	//상속 관계 Aggregation > MultiBucketsAggregation > ParseTerm.......
+	<T> Map<String, Aggregation> getBucket(NativeSearchQuery query, Class<T> clazz);
 }

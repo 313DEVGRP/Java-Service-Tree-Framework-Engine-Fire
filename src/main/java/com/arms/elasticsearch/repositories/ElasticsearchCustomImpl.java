@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Map;
 
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
@@ -20,10 +20,9 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
-import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.xcontent.XContentType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.annotation.Id;
@@ -179,7 +178,7 @@ public class ElasticsearchCustomImpl implements ElasticsearchCustom {
 		return elasticsearchOperations.search(query,clazz);
 	}
 
-	@Override
+	//@Override
 	public <T,B> List<B> getBucket(NativeSearchQuery query, Class<T> clazz, BucketRowMapper<B> bucketRowMapper) {
 		String groupName = bucketGroupName(query);
 
@@ -193,27 +192,23 @@ public class ElasticsearchCustomImpl implements ElasticsearchCustom {
 	}
 
 
-	//방향성 고민으로 임시 주석
-	//List<? extends Terms.Bucket> buckets = ((Terms)bucket.getAggregations().get(groupName)).getBuckets();
-/*	@Override
-	public <T> List<Terms.Bucket> getMultiBucket(NativeSearchQuery query, Class<T> clazz) {
-
-		String groupName = bucketGroupName(query);
-
-		return (List<Terms.Bucket>)getTerm(
-			elasticsearchOperations.search(query, clazz).getAggregations()
-			, groupName).getBuckets();
-
-	}*/
+	//Aggregation > MultiBucketsAggregation > Parse...
+	@Override
+	public <T> Map<String,Aggregation> getBucket(NativeSearchQuery query, Class<T> clazz) {
+		 return getTerm(elasticsearchOperations.search(query, clazz).getAggregations())
+			 .entrySet().stream().collect(toMap(aggregation->aggregation.getKey(),a->(MultiBucketsAggregation)a.getValue()));
+	}
 
 	private MultiBucketsAggregation getTerm(AggregationsContainer aggregationsContainer,String groupName){
 		Aggregations aggregations = getAggregations(aggregationsContainer);
 		return aggregations.get(groupName);
 	}
 
-	private Terms getTerm(Aggregations aggregations,String groupName){
-		return aggregations.get(groupName);
+	private Map<String, Aggregation> getTerm(AggregationsContainer aggregationsContainer){
+		Aggregations aggregations = getAggregations(aggregationsContainer);
+		return aggregations.getAsMap();
 	}
+
 
 	private Aggregations getAggregations(AggregationsContainer aggregationsContainer){
 		return ((ElasticsearchAggregations) aggregationsContainer).aggregations();
@@ -226,16 +221,5 @@ public class ElasticsearchCustomImpl implements ElasticsearchCustom {
 			.map(a->a.getName())
 			.orElse("");
 	}
-
-	private String bucketSubGroupName(NativeSearchQuery query) {
-		 return query.getAggregations()
-			.stream()
-			.findAny()
-			.map(a->a.getSubAggregations().stream().map(b->b.getName()).findAny().orElse(""))
-			 .orElse("");
-	}
-
-
-
 
 }

@@ -50,7 +50,7 @@ public class 지라이슈 {
     @Field(type = FieldType.Text, name = "self")
     private String self;
 
-    @Field(type = FieldType.Text, name = "parentReqKey")
+    @Field(type = FieldType.Keyword, name = "parentReqKey")
     private String parentReqKey;
 
     @Field(type = FieldType.Boolean, name = "isReq")

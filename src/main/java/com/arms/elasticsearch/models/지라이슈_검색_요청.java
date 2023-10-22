@@ -1,48 +1,39 @@
 package com.arms.elasticsearch.models;
 
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.util.ObjectUtils;
 
-import com.arms.elasticsearch.repositories.QueryAbstractFactory;
+import com.arms.elasticsearch.util.쿼리_추상_팩토리;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-@Builder
+
 @Setter
 @Getter
-@AllArgsConstructor
-public class 지라이슈_검색_요청 implements QueryAbstractFactory {
+public class 지라이슈_검색_요청 implements 쿼리_추상_팩토리 {
 
-
-	// NativeSearchQuery query = new NativeSearchQueryBuilder()
-	//     .withQuery(QueryBuilders.termQuery("isReq", true))
-	//     .withPageable(PageRequest.of(0, 1000))
-	//     .withAggregations(
-	//         AggregationBuilders.terms( "groupId")
-	//             .field("pdServiceVersion")
-	//             .size(1000)
-	//     )
-	//     .build();
-
+	private String 서비스아이디;
 	private String 특정필드;
 	private String 특정필드검색어;
-
 	private String 그룹할필드;
-	private int page = 0;
-	private int size = 1000;
 
+	private int size = 1000;
 	private boolean historyView = false;
 
 	@Override
-	public NativeSearchQuery create() {
+	public NativeSearchQuery 생성() {
+
+		BoolQueryBuilder boolQuery
+			= boolQuery().must(QueryBuilders.termQuery("issuetype.issuetype_subtask", true));
+		boolQuery.must(QueryBuilders.termQuery("pdServiceId", 서비스아이디));
 
 		return new NativeSearchQueryBuilder()
-		    .withQuery(QueryBuilders.termQuery(특정필드, 특정필드검색어))
+		    .withQuery(boolQuery)
 			.withMaxResults(historyView?size:0)
 		    .withAggregations(
 		        AggregationBuilders.terms( "group_by_"+그룹할필드)
@@ -50,5 +41,13 @@ public class 지라이슈_검색_요청 implements QueryAbstractFactory {
 		            .size(size)
 		    )
 		    .build();
+	}
+
+	public BoolQueryBuilder boolQuery(){
+		BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+		if(!ObjectUtils.isEmpty(특정필드)){
+			boolQuery.must(QueryBuilders.termQuery(특정필드, 특정필드검색어));
+		}
+		return boolQuery;
 	}
 }
