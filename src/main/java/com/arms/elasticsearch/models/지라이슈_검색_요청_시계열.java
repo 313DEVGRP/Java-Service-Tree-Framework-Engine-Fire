@@ -28,7 +28,7 @@ public class 지라이슈_검색_요청_시계열 implements 쿼리_추상_팩�
 	private int size = 1000;
 	private boolean historyView = false;
 
-	private boolean isReq;
+	private boolean issueRequest;
 
 	@Override
 	public NativeSearchQuery 생성() {
@@ -73,7 +73,7 @@ public class 지라이슈_검색_요청_시계열 implements 쿼리_추상_팩�
 	}
 
 	public BoolQueryBuilder isReqQuery(BoolQueryBuilder boolQuery){
-		boolQuery.must(QueryBuilders.termQuery("isReq", isReq));
+		boolQuery.must(QueryBuilders.termQuery("isReq", issueRequest));
 		return boolQuery;
 	}
 

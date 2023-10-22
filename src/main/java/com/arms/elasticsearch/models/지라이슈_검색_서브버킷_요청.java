@@ -26,7 +26,7 @@ public class 지라이슈_검색_서브버킷_요청 implements 쿼리_추상_�
 	private String 하위_그룹할필드;
 	private int size;
 	private boolean historyView;
-	private boolean isReq;
+	private boolean issueRequest;
 	private String 필터필드;
 	private List<?> 필터필드검색어;
 
@@ -67,7 +67,7 @@ public class 지라이슈_검색_서브버킷_요청 implements 쿼리_추상_�
 	}
 
 	public BoolQueryBuilder isReqQuery(BoolQueryBuilder boolQuery){
-		boolQuery.must(QueryBuilders.termQuery("isReq", isReq));
+		boolQuery.must(QueryBuilders.termQuery("isReq", issueRequest));
 		return boolQuery;
 	}
 
