@@ -25,12 +25,13 @@ public class 지라이슈_검색_요청 implements 쿼리_추상_팩토리 {
 	private int size = 1000;
 	private boolean historyView = false;
 
+	private boolean isReq;
+
 	@Override
 	public NativeSearchQuery 생성() {
-
-		BoolQueryBuilder boolQuery
-			= boolQuery().must(QueryBuilders.termQuery("issuetype.issuetype_subtask", true));
-		boolQuery.must(QueryBuilders.termQuery("pdServiceId", 서비스아이디));
+		BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+		isReqQuery(boolQuery);
+		searchService(boolQuery);
 
 		return new NativeSearchQueryBuilder()
 		    .withQuery(boolQuery)
@@ -43,11 +44,24 @@ public class 지라이슈_검색_요청 implements 쿼리_추상_팩토리 {
 		    .build();
 	}
 
-	public BoolQueryBuilder boolQuery(){
-		BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+	public BoolQueryBuilder searchService(BoolQueryBuilder boolQuery){
+
+		if(!ObjectUtils.isEmpty(특정필드)){
+			boolQuery.must(QueryBuilders.termQuery("pdServiceId", 서비스아이디));
+		}
+		return boolQuery;
+	}
+
+	public BoolQueryBuilder searchField(BoolQueryBuilder boolQuery){
+
 		if(!ObjectUtils.isEmpty(특정필드)){
 			boolQuery.must(QueryBuilders.termQuery(특정필드, 특정필드검색어));
 		}
+		return boolQuery;
+	}
+
+	public BoolQueryBuilder isReqQuery(BoolQueryBuilder boolQuery){
+		boolQuery.must(QueryBuilders.termQuery("isReq", isReq));
 		return boolQuery;
 	}
 }
