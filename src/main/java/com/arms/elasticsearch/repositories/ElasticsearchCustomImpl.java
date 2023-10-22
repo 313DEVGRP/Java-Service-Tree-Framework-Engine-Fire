@@ -178,7 +178,7 @@ public class ElasticsearchCustomImpl implements ElasticsearchCustom {
 		return elasticsearchOperations.search(query,clazz);
 	}
 
-	//@Override
+	@Override
 	public <T,B> List<B> getBucket(NativeSearchQuery query, Class<T> clazz, BucketRowMapper<B> bucketRowMapper) {
 		String groupName = bucketGroupName(query);
 
@@ -191,8 +191,6 @@ public class ElasticsearchCustomImpl implements ElasticsearchCustom {
 			.collect(toList());
 	}
 
-
-	//Aggregation > MultiBucketsAggregation > Parse...
 	@Override
 	public <T> Map<String,Aggregation> getBucket(NativeSearchQuery query, Class<T> clazz) {
 		 return getTerm(elasticsearchOperations.search(query, clazz).getAggregations())
@@ -208,7 +206,6 @@ public class ElasticsearchCustomImpl implements ElasticsearchCustom {
 		Aggregations aggregations = getAggregations(aggregationsContainer);
 		return aggregations.getAsMap();
 	}
-
 
 	private Aggregations getAggregations(AggregationsContainer aggregationsContainer){
 		return ((ElasticsearchAggregations) aggregationsContainer).aggregations();
