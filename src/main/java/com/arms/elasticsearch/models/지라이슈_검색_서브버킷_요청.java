@@ -72,7 +72,9 @@ public class 지라이슈_검색_서브버킷_요청 implements 쿼리_추상_�
 	}
 
 	public BoolQueryBuilder searchFilter(BoolQueryBuilder boolQuery){
-		boolQuery.filter(QueryBuilders.termQuery(필터필드, 필터필드검색어));
+		if(!ObjectUtils.isEmpty(필터필드)){
+			boolQuery.filter(QueryBuilders.termQuery(필터필드, 필터필드검색어));
+		}
 		return boolQuery;
 	}
 
