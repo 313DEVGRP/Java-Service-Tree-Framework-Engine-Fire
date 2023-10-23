@@ -1,11 +1,13 @@
 package com.arms.elasticsearch.models;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.util.ObjectUtils;
@@ -32,22 +34,33 @@ public class 지라이슈_검색_일반_요청 implements 쿼리_추상_팩토�
 
 	@Override
 	public NativeSearchQuery 생성() {
+
 		BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 		isReqQuery(boolQuery);
 		searchService(boolQuery);
 
-		return new NativeSearchQueryBuilder()
-		    .withQuery(boolQuery)
-			.withMaxResults(historyView?size:0)
-		    .withAggregations(
-		        AggregationBuilders.terms( "group_by_"+메인그룹필드)
-		            .field(메인그룹필드)
-					.subAggregation(
-						this.createNestedAggregation(하위그룹필드들,size)
-					)
-		            .size(size)
-		    )
-		    .build();
+		NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+			.withQuery(boolQuery)
+			.withMaxResults(historyView ? size : 0);
+
+		Optional.ofNullable(메인그룹필드)
+			.ifPresent(그룹_필드 -> {
+				TermsAggregationBuilder termsAggregationBuilder = AggregationBuilders.terms("group_by_" + 그룹_필드)
+					.field(그룹_필드)
+					.size(size);
+				nativeSearchQueryBuilder.withAggregations(
+					termsAggregationBuilder
+				);
+				Optional.ofNullable(하위그룹필드들)
+					.ifPresent(하위그룹필드들->{
+						if(!하위그룹필드들.isEmpty()){
+							termsAggregationBuilder.subAggregation(this.createNestedAggregation(하위그룹필드들, size));
+						}
+					});
+			});
+
+		return nativeSearchQueryBuilder.build();
+
 	}
 
 	public AggregationBuilder createNestedAggregation(List<String> 하위_그룹필드들, int size) {

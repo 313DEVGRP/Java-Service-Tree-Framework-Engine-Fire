@@ -13,8 +13,9 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.util.ObjectUtils;
 
+import java.util.Arrays;
 import java.util.List;
-
+import java.util.Optional;
 
 @Setter
 @Getter
@@ -31,8 +32,34 @@ public class 지라이슈_검색_일자별_요청 implements 쿼리_추상_팩�
 	private String 필터필드;
 	private List<?> 필터필드검색어;
 
+	// @Override
+	// public NativeSearchQuery 생성() {
+	//
+	// 	BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+	// 	searchService(boolQuery);
+	// 	isReqQuery(boolQuery);
+	// 	searchField(boolQuery);
+	// 	searchFilter(boolQuery);
+	//
+	// 	return new NativeSearchQueryBuilder()
+	// 	    .withQuery(boolQuery)
+	// 		.withMaxResults(historyView?size:0)
+	// 		.withAggregations(
+	// 			new DateHistogramAggregationBuilder("date_group_by_"+시간그룹필드)
+	// 				.field(시간그룹필드)  // 날짜 필드 이름을 지정
+	// 				.calendarInterval(DateHistogramInterval.DAY)  // 집계 간격을 지정
+	// 				.subAggregation(
+	// 					this.createNestedAggregation(그룹필드들,size)
+	// 				)
+	// 				.minDocCount(0)
+	// 		)
+	// 	    .build();
+	// }
+
+
 	@Override
 	public NativeSearchQuery 생성() {
+
 
 		BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 		searchService(boolQuery);
@@ -40,25 +67,36 @@ public class 지라이슈_검색_일자별_요청 implements 쿼리_추상_팩�
 		searchField(boolQuery);
 		searchFilter(boolQuery);
 
-		return new NativeSearchQueryBuilder()
-		    .withQuery(boolQuery)
-			.withMaxResults(historyView?size:0)
-			.withAggregations(
-				new DateHistogramAggregationBuilder("date_group_by_"+시간그룹필드)
-					.field(시간그룹필드)  // 날짜 필드 이름을 지정
-					.calendarInterval(DateHistogramInterval.DAY)  // 집계 간격을 지정
-					.subAggregation(
-						this.createNestedAggregation(하위그룹필드들,size)
-					)
-					.minDocCount(0)
-			)
-		    .build();
+		NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+			.withQuery(boolQuery)
+			.withMaxResults(historyView ? size : 0);
+
+		Optional.ofNullable(시간그룹필드)
+			.ifPresent(시간그룹필드 -> {
+				DateHistogramAggregationBuilder dateHistogramAggregationBuilder = new DateHistogramAggregationBuilder(
+					"date_group_by_" + 시간그룹필드)
+					.field(시간그룹필드)
+					.calendarInterval(DateHistogramInterval.DAY)
+					.minDocCount(0); // 집계 간격을 지정
+				nativeSearchQueryBuilder.withAggregations(
+					dateHistogramAggregationBuilder
+				);
+				Optional.ofNullable(하위그룹필드들)
+					.ifPresent(하위그룹필드들->{
+						if(!하위그룹필드들.isEmpty()){
+							dateHistogramAggregationBuilder.subAggregation(this.createNestedAggregation(하위그룹필드들, size));
+						}
+					});
+			});
+
+		return nativeSearchQueryBuilder.build();
+
 	}
 
 
-	public AggregationBuilder createNestedAggregation(List<String> 하위_그룹필드들, int size) {
+	public AggregationBuilder createNestedAggregation(List<String> 그룹필드들, int size) {
 		return
-			하위_그룹필드들
+			 그룹필드들
 			.stream()
 			.map(groupField ->
 					AggregationBuilders.terms("group_by_" + groupField)
