@@ -21,10 +21,8 @@ public class 지라이슈_검색_요청 implements 쿼리_추상_팩토리 {
 	private String 특정필드;
 	private String 특정필드검색어;
 	private String 그룹할필드;
-
 	private int size = 1000;
 	private boolean historyView = false;
-
 	private boolean issueRequest;
 
 	@Override
