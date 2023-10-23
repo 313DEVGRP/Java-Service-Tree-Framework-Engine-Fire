@@ -83,7 +83,7 @@ public class 엘라스틱_지라이슈_컨트롤러 {
     }
 
     @ResponseBody
-    @PostMapping("/search")
+    @PostMapping("/search/normal")
     public ResponseEntity<검색결과_목록_메인> 일반_검색(@RequestBody 지라이슈_검색_일반_요청 지라이슈_검색_일반_요청) throws IOException {
         검색결과_목록_메인 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(지라이슈_검색_일반_요청);
         return ResponseEntity.ok(집계결과_가져오기);
