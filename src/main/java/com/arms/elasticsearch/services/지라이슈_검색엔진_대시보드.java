@@ -1,6 +1,7 @@
 package com.arms.elasticsearch.services;
 
 import com.arms.elasticsearch.helper.인덱스자료;
+import com.arms.elasticsearch.models.SankeyElasticSearchData;
 import com.arms.elasticsearch.models.요구사항_지라이슈상태_월별_집계;
 import com.arms.elasticsearch.models.집계_응답;
 import com.arms.elasticsearch.repositories.지라이슈_저장소;
@@ -250,5 +251,51 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         ));
 
         return 담당자별_요구사항여부별_상태값_집계;
+    }
+
+    @Override
+    public Map<String, List<SankeyElasticSearchData>> 제품_버전별_담당자_목록(Long pdServiceLink, List<Long> pdServiceVersionLinks) throws IOException {
+        TermsAggregationBuilder versionsAgg = AggregationBuilders.terms("versions").field("pdServiceVersion");
+        TermsAggregationBuilder assigneesAgg = AggregationBuilders.terms("assignees").field("assignee.assignee_accountId.keyword");
+        assigneesAgg.subAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"));
+        versionsAgg.subAggregation(assigneesAgg);
+
+
+        BoolQueryBuilder query = QueryBuilders.boolQuery()
+                .filter(QueryBuilders.termQuery("pdServiceId", pdServiceLink))
+                .filter(QueryBuilders.termQuery("isReq", false))
+                .filter(QueryBuilders.existsQuery("assignee"));
+
+        if (pdServiceVersionLinks != null && !pdServiceVersionLinks.isEmpty()) {
+            query.filter(QueryBuilders.termsQuery("pdServiceVersion", pdServiceVersionLinks));
+        }
+
+        SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource().query(query).aggregation(versionsAgg);
+
+        SearchResponse searchResponse = 지라이슈저장소.search(getSearchRequest(sourceBuilder), RequestOptions.DEFAULT);
+
+        Map<String, List<SankeyElasticSearchData>> versionAssigneesMap = new HashMap<>();
+        Terms versions = searchResponse.getAggregations().get("versions");
+
+        for (Terms.Bucket versionBucket : versions.getBuckets()) {
+            String version = versionBucket.getKeyAsString();
+
+            Terms assignees = versionBucket.getAggregations().get("assignees");
+
+            List<SankeyElasticSearchData> assigneeList = new ArrayList<>();
+
+            for (Terms.Bucket assigneeBucket : assignees.getBuckets()) {
+                String accountId = assigneeBucket.getKeyAsString();
+
+                Terms displayNames = assigneeBucket.getAggregations().get("displayNames");
+                String displayName = displayNames.getBuckets().get(0).getKeyAsString();
+
+                assigneeList.add(new SankeyElasticSearchData(accountId, displayName));
+            }
+
+            versionAssigneesMap.put(version, assigneeList);
+        }
+
+        return versionAssigneesMap;
     }
 }
