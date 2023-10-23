@@ -1,5 +1,6 @@
 package com.arms.elasticsearch.controllers;
 
+import com.arms.elasticsearch.models.SankeyElasticSearchData;
 import com.arms.elasticsearch.models.요구사항_지라이슈상태_월별_집계;
 import com.arms.elasticsearch.models.집계_응답;
 import com.arms.elasticsearch.services.지라이슈_대시보드_서비스;
@@ -70,4 +71,16 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         return 지라이슈_검색엔진.제품서비스별_담당자_이름_통계(0L, 제품서비스_아이디);
     }
 
+    @ResponseBody
+    @RequestMapping(
+            value = {"/version-assignee"},
+            method = {RequestMethod.GET}
+    )
+    public Map<String, List<SankeyElasticSearchData>> 제품별_버전_및_작업자(
+            @RequestParam Long pdServiceLink,
+            @RequestParam List<Long> pdServiceVersionLinks
+    ) throws IOException {
+        Map<String, List<SankeyElasticSearchData>> sankeyElasticSearchData = 지라이슈_검색엔진.제품_버전별_담당자_목록(pdServiceLink, pdServiceVersionLinks);
+        return sankeyElasticSearchData;
+    }
 }
