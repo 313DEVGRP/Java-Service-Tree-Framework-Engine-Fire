@@ -70,15 +70,8 @@ public class 엘라스틱_지라이슈_컨트롤러 {
     }
 
     @ResponseBody
-    @PostMapping("/search/single-bucket")
-    public ResponseEntity<검색결과_목록_메인> 단일버킷(@RequestBody 지라이슈_검색_요청 지라이슈_검색_요청) throws IOException {
-        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(지라이슈_검색_요청));
-    }
-
-    @ResponseBody
     @PostMapping("/search/sub-bucket")
-    public ResponseEntity<검색결과_목록_메인> 서브버킷(
-            @RequestBody 지라이슈_검색_서브버킷_요청 지라이슈_검색_서브버킷_요청) throws IOException {
+    public ResponseEntity<검색결과_목록_메인> 서브버킷(@RequestBody 지라이슈_검색_서브버킷_요청 지라이슈_검색_서브버킷_요청) throws IOException {
         검색결과_목록_메인 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(지라이슈_검색_서브버킷_요청);
         return ResponseEntity.ok(집계결과_가져오기);
     }
@@ -88,6 +81,14 @@ public class 엘라스틱_지라이슈_컨트롤러 {
     public ResponseEntity<검색결과_목록_메인> 일자별_검색(@RequestBody 지라이슈_검색_일자별_요청 지라이슈_검색_일자별_요청) throws IOException {
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(지라이슈_검색_일자별_요청));
     }
+
+    @ResponseBody
+    @PostMapping("/search")
+    public ResponseEntity<검색결과_목록_메인> 일반_검색(@RequestBody 지라이슈_검색_일반_요청 지라이슈_검색_일반_요청) throws IOException {
+        검색결과_목록_메인 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(지라이슈_검색_일반_요청);
+        return ResponseEntity.ok(집계결과_가져오기);
+    }
+
 
     @ResponseBody
     @RequestMapping(

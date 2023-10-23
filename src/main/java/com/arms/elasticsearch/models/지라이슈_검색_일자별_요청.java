@@ -13,7 +13,6 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.util.ObjectUtils;
 
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -24,7 +23,7 @@ public class 지라이슈_검색_일자별_요청 implements 쿼리_추상_팩�
 	private String 서비스아이디;
 	private String 특정필드;
 	private String 특정필드검색어;
-	private List<String> 그룹필드들;
+	private List<String> 하위그룹필드들;
 	private String 시간그룹필드;
 	private int size = 1000;
 	private boolean historyView = false;
@@ -49,7 +48,7 @@ public class 지라이슈_검색_일자별_요청 implements 쿼리_추상_팩�
 					.field(시간그룹필드)  // 날짜 필드 이름을 지정
 					.calendarInterval(DateHistogramInterval.DAY)  // 집계 간격을 지정
 					.subAggregation(
-						this.createNestedAggregation(그룹필드들,size)
+						this.createNestedAggregation(하위그룹필드들,size)
 					)
 					.minDocCount(0)
 			)
@@ -57,9 +56,9 @@ public class 지라이슈_검색_일자별_요청 implements 쿼리_추상_팩�
 	}
 
 
-	public AggregationBuilder createNestedAggregation(List<String> 그룹필드들, int size) {
+	public AggregationBuilder createNestedAggregation(List<String> 하위_그룹필드들, int size) {
 		return
-			 그룹필드들
+			하위_그룹필드들
 			.stream()
 			.map(groupField ->
 					AggregationBuilders.terms("group_by_" + groupField)
