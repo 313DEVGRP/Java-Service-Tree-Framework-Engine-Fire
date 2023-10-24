@@ -30,7 +30,7 @@ public class 지라이슈_검색_일반_요청 implements 쿼리_추상_팩토�
 	private String 메인그룹필드;
 	private int size = 1000;
 	private boolean historyView = false;
-	private boolean issueRequest;
+	private boolean issueRequirement;
 
 	@Override
 	public NativeSearchQuery 생성() {
@@ -98,7 +98,7 @@ public class 지라이슈_검색_일반_요청 implements 쿼리_추상_팩토�
 	}
 
 	public BoolQueryBuilder isReqQuery(BoolQueryBuilder boolQuery){
-		boolQuery.must(QueryBuilders.termQuery("isReq", issueRequest));
+		boolQuery.must(QueryBuilders.termQuery("isReq", issueRequirement));
 		return boolQuery;
 	}
 }
