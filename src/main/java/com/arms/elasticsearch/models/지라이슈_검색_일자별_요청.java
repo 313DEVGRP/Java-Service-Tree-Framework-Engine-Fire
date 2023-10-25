@@ -20,7 +20,7 @@ import java.util.Optional;
 @Getter
 public class 지라이슈_검색_일자별_요청 implements 쿼리_추상_팩토리 {
 
-	private String 서비스아이디;
+	private Long 서비스아이디;
 	private String 특정필드;
 	private String 특정필드검색어;
 	private List<String> 하위그룹필드들;
