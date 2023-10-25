@@ -73,7 +73,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
 
     @ResponseBody
     @RequestMapping(
-            value = {"/version-assignee"},
+            value = {"/version-assignees"},
             method = {RequestMethod.GET}
     )
     public Map<String, List<SankeyElasticSearchData>> 제품별_버전_및_작업자(
