@@ -77,18 +77,17 @@ public class 엘라스틱_지라이슈_컨트롤러 {
     }
 
     @ResponseBody
-    @PostMapping("/search/date")
-    public ResponseEntity<검색결과_목록_메인> 일자별_검색(@RequestBody 지라이슈_검색_일자별_요청 지라이슈_검색_일자별_요청) throws IOException {
+    @GetMapping("/search/date/{pdServiceId}")
+    public ResponseEntity<검색결과_목록_메인> 일자별_검색(@PathVariable String pdServiceId, 지라이슈_검색_일자별_요청 지라이슈_검색_일자별_요청) throws IOException {
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(지라이슈_검색_일자별_요청));
     }
 
     @ResponseBody
-    @PostMapping("/search/normal")
-    public ResponseEntity<검색결과_목록_메인> 일반_검색(@RequestBody 지라이슈_검색_일반_요청 지라이슈_검색_일반_요청) throws IOException {
+    @GetMapping("/search/normal/{pdServiceId}")
+    public ResponseEntity<검색결과_목록_메인> 일반_검색(@PathVariable String pdServiceId, 지라이슈_검색_일반_요청 지라이슈_검색_일반_요청) throws IOException {
         검색결과_목록_메인 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(지라이슈_검색_일반_요청);
         return ResponseEntity.ok(집계결과_가져오기);
     }
-
 
     @ResponseBody
     @RequestMapping(

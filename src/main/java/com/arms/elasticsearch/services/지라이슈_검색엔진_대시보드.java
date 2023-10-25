@@ -3,8 +3,12 @@ package com.arms.elasticsearch.services;
 import com.arms.elasticsearch.helper.인덱스자료;
 import com.arms.elasticsearch.models.SankeyElasticSearchData;
 import com.arms.elasticsearch.models.요구사항_지라이슈상태_월별_집계;
+import com.arms.elasticsearch.models.지라이슈;
 import com.arms.elasticsearch.models.집계_응답;
 import com.arms.elasticsearch.repositories.지라이슈_저장소;
+import com.arms.elasticsearch.util.검색결과_목록_메인;
+import com.arms.elasticsearch.util.쿼리_추상_팩토리;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchRequest;
@@ -297,5 +301,14 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         }
 
         return versionAssigneesMap;
+    }
+
+    @Override
+    public 검색결과_목록_메인 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) throws IOException {
+
+        return new 검색결과_목록_메인(지라이슈저장소.getBucket(
+            쿼리추상팩토리.생성(),
+            지라이슈.class
+        ));
     }
 }

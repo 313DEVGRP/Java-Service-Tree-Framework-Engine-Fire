@@ -2,12 +2,17 @@ package com.arms.elasticsearch.controllers;
 
 import com.arms.elasticsearch.models.SankeyElasticSearchData;
 import com.arms.elasticsearch.models.요구사항_지라이슈상태_월별_집계;
+import com.arms.elasticsearch.models.지라이슈_검색_일반_요청;
+import com.arms.elasticsearch.models.지라이슈_검색_일자별_요청;
 import com.arms.elasticsearch.models.집계_응답;
 import com.arms.elasticsearch.services.지라이슈_대시보드_서비스;
+import com.arms.elasticsearch.util.검색결과_목록_메인;
+
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -82,5 +87,18 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     ) throws IOException {
         Map<String, List<SankeyElasticSearchData>> sankeyElasticSearchData = 지라이슈_검색엔진.제품_버전별_담당자_목록(pdServiceLink, pdServiceVersionLinks);
         return sankeyElasticSearchData;
+    }
+
+    @ResponseBody
+    @GetMapping("/date/{pdServiceId}")
+    public ResponseEntity<검색결과_목록_메인> 일자별_검색(@PathVariable String pdServiceId, 지라이슈_검색_일자별_요청 지라이슈_검색_일자별_요청) throws IOException {
+        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(지라이슈_검색_일자별_요청));
+    }
+
+    @ResponseBody
+    @GetMapping("/normal/{pdServiceId}")
+    public ResponseEntity<검색결과_목록_메인> 일반_검색(@PathVariable String pdServiceId, 지라이슈_검색_일반_요청 지라이슈_검색_일반_요청) throws IOException {
+        검색결과_목록_메인 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(지라이슈_검색_일반_요청);
+        return ResponseEntity.ok(집계결과_가져오기);
     }
 }

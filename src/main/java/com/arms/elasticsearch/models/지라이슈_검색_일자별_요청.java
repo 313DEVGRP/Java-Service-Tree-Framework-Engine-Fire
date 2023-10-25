@@ -34,7 +34,6 @@ public class 지라이슈_검색_일자별_요청 implements 쿼리_추상_팩�
 	@Override
 	public NativeSearchQuery 생성() {
 
-
 		BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 		searchService(boolQuery);
 		isReqQuery(boolQuery);
