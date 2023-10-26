@@ -26,11 +26,11 @@ public class 지라이슈_검색_일반_요청 implements 쿼리_추상_팩토�
 	private String 특정필드검색어;
 
 	private List<String> 하위그룹필드들;
-
 	private String 메인그룹필드;
 	private int 크기 = 1000;
-	private boolean 컨텐츠보기여부 = false;
-	private boolean 요구사항인지여부;
+	private boolean 컨텐츠보기여부;
+
+	private Boolean 요구사항인지여부;
 
 	@Override
 	public NativeSearchQuery 생성() {
@@ -38,47 +38,40 @@ public class 지라이슈_검색_일반_요청 implements 쿼리_추상_팩토�
 		BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 		isReqQuery(boolQuery);
 		searchService(boolQuery);
+		서브_집계_요청 서브_집계_요청 = new 서브_집계_요청(하위그룹필드들, 크기);
 
 		NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
-			.withQuery(boolQuery)
 			.withMaxResults(컨텐츠보기여부 ? 크기 : 0);
+
+		Optional.of(boolQuery)
+			.ifPresent(query->{
+				nativeSearchQueryBuilder
+				.withQuery(boolQuery);
+			});
 
 		Optional.ofNullable(메인그룹필드)
 			.ifPresent(그룹_필드 -> {
-				TermsAggregationBuilder termsAggregationBuilder = AggregationBuilders.terms("group_by_" + 그룹_필드)
-					.field(그룹_필드)
-					.size(크기);
+				TermsAggregationBuilder termsAggregationBuilder
+					= AggregationBuilders.terms("group_by_" + 그룹_필드)
+						.field(그룹_필드)
+						.size(크기);
 				nativeSearchQueryBuilder.withAggregations(
 					termsAggregationBuilder
 				);
 				Optional.ofNullable(하위그룹필드들)
 					.ifPresent(하위그룹필드들->{
 						if(!하위그룹필드들.isEmpty()){
-							termsAggregationBuilder.subAggregation(this.createNestedAggregation(하위그룹필드들, 크기));
+							termsAggregationBuilder
+								.subAggregation(
+										서브_집계_요청.createNestedAggregation(하위그룹필드들, 크기)
+								);
 						}
 					});
 			});
 
 		return nativeSearchQueryBuilder.build();
-
 	}
 
-	public AggregationBuilder createNestedAggregation(List<String> 하위_그룹필드들, int size) {
-		return
-			하위_그룹필드들
-				.stream()
-				.map(groupField ->
-					AggregationBuilders.terms("group_by_" + groupField)
-						.field(groupField)
-						.size(size))
-				.reduce(null, (agg1, agg2) -> {
-					if (agg1 == null) {
-						return agg2;
-					} else {
-						return agg1.subAggregation(agg2);
-					}
-				});
-	}
 
 
 	public BoolQueryBuilder searchService(BoolQueryBuilder boolQuery){
@@ -98,7 +91,9 @@ public class 지라이슈_검색_일반_요청 implements 쿼리_추상_팩토�
 	}
 
 	public BoolQueryBuilder isReqQuery(BoolQueryBuilder boolQuery){
-		boolQuery.must(QueryBuilders.termQuery("isReq", 요구사항인지여부));
+		if(!ObjectUtils.isEmpty(요구사항인지여부)){
+			boolQuery.must(QueryBuilders.termQuery("isReq", 요구사항인지여부));
+		}
 		return boolQuery;
 	}
 }

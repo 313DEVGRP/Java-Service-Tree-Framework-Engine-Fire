@@ -39,6 +39,7 @@ public class 지라이슈_검색_일자별_요청 implements 쿼리_추상_팩�
 		isReqQuery(boolQuery);
 		searchField(boolQuery);
 		searchFilter(boolQuery);
+		서브_집계_요청 서브_집계_요청 = new 서브_집계_요청(하위그룹필드들, 크기);
 
 		NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
 			.withQuery(boolQuery)
@@ -57,31 +58,13 @@ public class 지라이슈_검색_일자별_요청 implements 쿼리_추상_팩�
 				Optional.ofNullable(하위그룹필드들)
 					.ifPresent(하위그룹필드들->{
 						if(!하위그룹필드들.isEmpty()){
-							dateHistogramAggregationBuilder.subAggregation(this.createNestedAggregation(하위그룹필드들, 크기));
+							dateHistogramAggregationBuilder.subAggregation(서브_집계_요청.createNestedAggregation(하위그룹필드들, 크기));
 						}
 					});
 			});
 
 		return nativeSearchQueryBuilder.build();
 
-	}
-
-
-	public AggregationBuilder createNestedAggregation(List<String> 그룹필드들, int size) {
-		return
-			 그룹필드들
-			.stream()
-			.map(groupField ->
-					AggregationBuilders.terms("group_by_" + groupField)
-						.field(groupField)
-						.size(size))
-			.reduce(null, (agg1, agg2) -> {
-				if (agg1 == null) {
-					return agg2;
-				} else {
-					return agg1.subAggregation(agg2);
-				}
-			});
 	}
 
 
@@ -102,7 +85,9 @@ public class 지라이슈_검색_일자별_요청 implements 쿼리_추상_팩�
 	}
 
 	public BoolQueryBuilder isReqQuery(BoolQueryBuilder boolQuery){
-		boolQuery.must(QueryBuilders.termQuery("isReq", 요구사항인지여부));
+		if(!ObjectUtils.isEmpty(특정필드)){
+			boolQuery.must(QueryBuilders.termQuery("isReq", 특정필드));
+		}
 		return boolQuery;
 	}
 
