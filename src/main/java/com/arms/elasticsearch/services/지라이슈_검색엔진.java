@@ -814,8 +814,8 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         }
 
         if ( 이슈키 != null ) {
-            MatchQueryBuilder 요구사항_조회 = QueryBuilders.matchQuery("key.keyword", 이슈키);
-            MatchQueryBuilder 하위_요구사항_조회 = QueryBuilders.matchQuery("parentReqKey.keyword", 이슈키);
+            MatchQueryBuilder 요구사항_조회 = QueryBuilders.matchQuery("key", 이슈키);
+            MatchQueryBuilder 하위_요구사항_조회 = QueryBuilders.matchQuery("parentReqKey", 이슈키);
 
             복합조회.should(요구사항_조회);
             복합조회.should(하위_요구사항_조회);
