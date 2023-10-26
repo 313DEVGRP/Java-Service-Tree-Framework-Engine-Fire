@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
@@ -20,21 +19,17 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.aggregations.Aggregation;
-import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
 import org.elasticsearch.xcontent.XContentType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.core.AggregationsContainer;
-import org.springframework.data.elasticsearch.core.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.arms.elasticsearch.repositories.ElasticsearchCustom;
 import com.arms.elasticsearch.util.검색엔진_유틸;
 import com.arms.elasticsearch.util.검색조건;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -152,6 +147,7 @@ public class ElasticsearchCustomImpl implements ElasticsearchCustom {
 	}
 
 
+
 	private <T> String getIdValue(T t) {
 		Field[] fields = t.getClass().getDeclaredFields();
 
@@ -173,50 +169,11 @@ public class ElasticsearchCustomImpl implements ElasticsearchCustom {
 		).findFirst().orElseThrow();
 
 	}
+
 	@Override
 	public <T> SearchHits search(Query query, Class<T> clazz) {
 		return elasticsearchOperations.search(query,clazz);
 	}
 
-	@Override
-	public <T,B> List<B> getBucket(NativeSearchQuery query, Class<T> clazz, BucketRowMapper<B> bucketRowMapper) {
-		String groupName = bucketGroupName(query);
-
-		List<? extends MultiBucketsAggregation.Bucket> buckets = getTerm(
-			elasticsearchOperations.search(query, clazz).getAggregations()
-			, groupName).getBuckets();
-
-		return buckets.stream()
-			.map(a-> bucketRowMapper.bucketRow(a))
-			.collect(toList());
-	}
-
-	@Override
-	public <T> Map<String,Aggregation> getBucket(NativeSearchQuery query, Class<T> clazz) {
-		 return getTerm(elasticsearchOperations.search(query, clazz).getAggregations())
-			 .entrySet().stream().collect(toMap(aggregation->aggregation.getKey(),a->(MultiBucketsAggregation)a.getValue()));
-	}
-
-	private MultiBucketsAggregation getTerm(AggregationsContainer aggregationsContainer,String groupName){
-		Aggregations aggregations = getAggregations(aggregationsContainer);
-		return aggregations.get(groupName);
-	}
-
-	private Map<String, Aggregation> getTerm(AggregationsContainer aggregationsContainer){
-		Aggregations aggregations = getAggregations(aggregationsContainer);
-		return aggregations.getAsMap();
-	}
-
-	private Aggregations getAggregations(AggregationsContainer aggregationsContainer){
-		return ((ElasticsearchAggregations) aggregationsContainer).aggregations();
-	}
-
-	private String bucketGroupName(NativeSearchQuery query) {
-		return query.getAggregations()
-			.stream()
-			.findAny()
-			.map(a->a.getName())
-			.orElse("");
-	}
 
 }

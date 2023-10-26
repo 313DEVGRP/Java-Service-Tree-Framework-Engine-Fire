@@ -31,8 +31,4 @@ public interface ElasticsearchCustom {
 
 	<T> SearchHits search(Query query, Class<T> clazz) ;
 
-	<T,B> List<B> getBucket(NativeSearchQuery query, Class<T> clazz, BucketRowMapper<B> bucketRowMapper);
-
-	//상속 관계 Aggregation > MultiBucketsAggregation > ParseTerm.......
-	<T> Map<String, Aggregation> getBucket(NativeSearchQuery query, Class<T> clazz);
 }

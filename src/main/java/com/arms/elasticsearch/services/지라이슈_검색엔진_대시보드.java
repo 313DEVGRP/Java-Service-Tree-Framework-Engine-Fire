@@ -24,6 +24,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilde
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -306,9 +307,11 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     @Override
     public 검색결과_목록_메인 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) throws IOException {
 
-        return new 검색결과_목록_메인(지라이슈저장소.getBucket(
+        SearchHits searchHits = 지라이슈저장소.search(
             쿼리추상팩토리.생성(),
             지라이슈.class
-        ));
+        );
+
+        return new 검색결과_목록_메인(searchHits);
     }
 }

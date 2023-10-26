@@ -27,7 +27,6 @@ public interface 지라이슈_서비스 {
 
     public List<지라이슈> 이슈_검색하기(검색조건 검색조건);
 
-    검색결과_목록_메인 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) throws IOException;
 
 
 	public 검색결과_목록 특정필드의_값들을_그룹화하여_빈도수가져오기(String indexName, String groupByField) throws IOException;
