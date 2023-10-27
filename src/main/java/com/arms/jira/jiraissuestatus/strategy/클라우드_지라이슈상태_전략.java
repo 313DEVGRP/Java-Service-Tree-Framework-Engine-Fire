@@ -9,10 +9,13 @@ import com.arms.serverinfo.service.서버정보_서비스;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -63,8 +66,18 @@ public class 클라우드_지라이슈상태_전략 implements 지라이슈상�
             return 반환할_지라이슈상태_데이터_목록;
 
         } catch (Exception e) {
-            로그.error("클라우드 이슈 상태 목록 조회에 실패하였습니다" +e.getMessage());
-            throw new IllegalArgumentException(에러코드.이슈상태_조회_오류.getErrorMsg());
+            로그.error("클라우드 이슈 상태 목록 조회에 실패하였습니다");
+            로그.error(e.getClass().getName() + " : "+ e.getMessage());
+
+            if (e instanceof WebClientResponseException) {
+                WebClientResponseException wcException = (WebClientResponseException) e;
+                HttpStatus status = wcException.getStatusCode();
+                String body = wcException.getResponseBodyAsString();
+
+                로그.error(status + " : " + body);
+            }
+
+            return Collections.emptyList();
         }
     }
 
@@ -110,8 +123,18 @@ public class 클라우드_지라이슈상태_전략 implements 지라이슈상�
             return 반환할_지라이슈상태_데이터_목록;
 
         } catch (Exception e) {
-            로그.error("클라우드 이슈 상태 목록 조회에 실패하였습니다" +e.getMessage());
-            throw new IllegalArgumentException(에러코드.이슈상태_조회_오류.getErrorMsg());
+            로그.error("클라우드 이슈 상태 목록 조회에 실패하였습니다");
+            로그.error(e.getClass().getName() + " : "+ e.getMessage());
+
+            if (e instanceof WebClientResponseException) {
+                WebClientResponseException wcException = (WebClientResponseException) e;
+                HttpStatus status = wcException.getStatusCode();
+                String body = wcException.getResponseBodyAsString();
+
+                로그.error(status + " : " + body);
+            }
+
+            return Collections.emptyList();
         }
     }
 

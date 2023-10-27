@@ -1,42 +1,28 @@
 package com.arms.elasticsearch.controllers;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.arms.elasticsearch.models.boolquery.서비스_조건;
-import com.arms.elasticsearch.models.boolquery.요구사항인지_여부_조건;
-import com.arms.elasticsearch.models.boolquery.진행사항_필터_조건;
 import com.arms.elasticsearch.models.dashboard.bar.요구사항_지라이슈상태_주별_집계;
 import com.arms.elasticsearch.models.dashboard.donut.집계_응답;
 import com.arms.elasticsearch.models.dashboard.sankey.SankeyElasticSearchData;
 import com.arms.elasticsearch.models.dashboard.treemap.Worker;
-import com.arms.elasticsearch.models.지라이슈_일반_검색요청;
-import com.arms.elasticsearch.models.지라이슈_일자별_검색요청;
+import com.arms.elasticsearch.models.지라이슈_검색_일반_요청;
+import com.arms.elasticsearch.models.지라이슈_검색_일반_요청_요구사항여부제외;
+import com.arms.elasticsearch.models.지라이슈_검색_일자별_요청;
 import com.arms.elasticsearch.services.dashboard.bar.BarChart;
 import com.arms.elasticsearch.services.dashboard.donut.DonutChart;
 import com.arms.elasticsearch.services.dashboard.sankey.SankeyChart;
 import com.arms.elasticsearch.services.dashboard.treemap.TreeMapChart;
 import com.arms.elasticsearch.services.지라이슈_대시보드_서비스;
-import com.arms.elasticsearch.util.query.bool.조건_쿼리_생성자;
-import com.arms.elasticsearch.util.query.bool.조건_쿼리_컴포넌트;
-import com.arms.elasticsearch.util.query.검색_일반_요청;
-import com.arms.elasticsearch.util.query.검색_일자별_요청;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
-
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/engine/jira/dashboard")
@@ -156,12 +142,18 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
             value = {"/assignees-requirements-involvement"},
             method = {RequestMethod.GET}
     )
-    public List<Worker> abc(
+    public List<Worker> 작업자_별_요구사항_별_관여도(
             @RequestParam Long pdServiceLink,
             @RequestParam List<Long> pdServiceVersionLinks
     ) throws IOException {
         return treeMapChart.작업자_별_요구사항_별_관여도(pdServiceLink, pdServiceVersionLinks);
     }
 
-
+    @ResponseBody
+    @GetMapping("/exclusion-isreq-normal/{pdServiceId}")
+    public ResponseEntity<검색결과_목록_메인> 요구사항여부제외_일반_검색(@PathVariable Long pdServiceId, 지라이슈_검색_일반_요청_요구사항여부제외 지라이슈_검색_일반_요청_요구사항여부제외) throws IOException {
+        지라이슈_검색_일반_요청_요구사항여부제외.set서비스아이디(pdServiceId);
+        검색결과_목록_메인 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(지라이슈_검색_일반_요청_요구사항여부제외);
+        return ResponseEntity.ok(집계결과_가져오기);
+    }
 }
