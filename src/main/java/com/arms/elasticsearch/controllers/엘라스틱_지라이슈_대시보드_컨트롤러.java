@@ -1,13 +1,15 @@
 package com.arms.elasticsearch.controllers;
 
-import com.arms.elasticsearch.models.SankeyElasticSearchData;
-import com.arms.elasticsearch.models.요구사항_지라이슈상태_월별_집계;
+import com.arms.elasticsearch.models.dashboard.bar.요구사항_지라이슈상태_주별_집계;
+import com.arms.elasticsearch.models.dashboard.donut.집계_응답;
+import com.arms.elasticsearch.models.dashboard.sankey.SankeyElasticSearchData;
 import com.arms.elasticsearch.models.지라이슈_검색_일반_요청;
 import com.arms.elasticsearch.models.지라이슈_검색_일자별_요청;
-import com.arms.elasticsearch.models.집계_응답;
+import com.arms.elasticsearch.services.dashboard.bar.BarChart;
+import com.arms.elasticsearch.services.dashboard.donut.DonutChart;
+import com.arms.elasticsearch.services.dashboard.sankey.SankeyChart;
 import com.arms.elasticsearch.services.지라이슈_대시보드_서비스;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
-
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +25,16 @@ import java.util.Map;
 @RequestMapping("/engine/jira/dashboard")
 @Slf4j
 public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
-
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private 지라이슈_대시보드_서비스 지라이슈_검색엔진;
+    @Autowired
+    private SankeyChart sankeyChart;
+    @Autowired
+    private DonutChart donutChart;
+    @Autowired
+    private BarChart barChart;
 
     @ResponseBody
     @RequestMapping(
@@ -38,7 +45,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
             @RequestParam Long pdServiceLink,
             @RequestParam List<Long> pdServiceVersionLinks
     ) throws IOException {
-        List<집계_응답> 요구사항이슈집계 = 지라이슈_검색엔진.이슈상태집계(pdServiceLink, pdServiceVersionLinks);
+        List<집계_응답> 요구사항이슈집계 = donutChart.이슈상태집계(pdServiceLink, pdServiceVersionLinks);
         return 요구사항이슈집계;
     }
 
@@ -47,12 +54,12 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
             value = {"/requirements-jira-issue-statuses"},
             method = {RequestMethod.GET}
     )
-    public Map<String, 요구사항_지라이슈상태_월별_집계> 요구사항이슈월별집계(
+    public Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항이슈월별집계(
             @RequestParam Long pdServiceLink,
             @RequestParam List<Long> pdServiceVersionLinks
     ) throws IOException {
-        Map<String, 요구사항_지라이슈상태_월별_집계> 요구사항이슈월별집계 = 지라이슈_검색엔진.요구사항_지라이슈상태_월별_집계(pdServiceLink, pdServiceVersionLinks);
-        return 요구사항이슈월별집계;
+        Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항이슈주별집계 = barChart.요구사항_지라이슈상태_주별_집계(pdServiceLink, pdServiceVersionLinks);
+        return 요구사항이슈주별집계;
     }
 
     @ResponseBody
@@ -72,7 +79,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
             method = {RequestMethod.GET}
     )
     public Map<String, Long> 제품서비스별_담당자_이름_통계(
-            @PathVariable("pdServiceId") Long 제품서비스_아이디 ) throws Exception {
+            @PathVariable("pdServiceId") Long 제품서비스_아이디) throws Exception {
         return 지라이슈_검색엔진.제품서비스별_담당자_이름_통계(0L, 제품서비스_아이디);
     }
 
@@ -85,7 +92,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
             @RequestParam Long pdServiceLink,
             @RequestParam List<Long> pdServiceVersionLinks
     ) throws IOException {
-        Map<String, List<SankeyElasticSearchData>> sankeyElasticSearchData = 지라이슈_검색엔진.제품_버전별_담당자_목록(pdServiceLink, pdServiceVersionLinks);
+        Map<String, List<SankeyElasticSearchData>> sankeyElasticSearchData = sankeyChart.제품_버전별_담당자_목록(pdServiceLink, pdServiceVersionLinks);
         return sankeyElasticSearchData;
     }
 
