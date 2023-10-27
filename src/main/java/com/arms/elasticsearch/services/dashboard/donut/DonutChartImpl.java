@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Service("지라이슈_대시보드_제품의 이슈 상태 현황")
+@Service("지라이슈_대시보드_제품의_이슈_상태_현황")
 @RequiredArgsConstructor
 public class DonutChartImpl implements DonutChart {
     private final ElasticSearchQueryHelper es;

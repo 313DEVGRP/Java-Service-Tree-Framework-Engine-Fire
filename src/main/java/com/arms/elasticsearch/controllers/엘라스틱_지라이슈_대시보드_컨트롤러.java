@@ -3,11 +3,13 @@ package com.arms.elasticsearch.controllers;
 import com.arms.elasticsearch.models.dashboard.bar.요구사항_지라이슈상태_주별_집계;
 import com.arms.elasticsearch.models.dashboard.donut.집계_응답;
 import com.arms.elasticsearch.models.dashboard.sankey.SankeyElasticSearchData;
+import com.arms.elasticsearch.models.dashboard.treemap.Worker;
 import com.arms.elasticsearch.models.지라이슈_검색_일반_요청;
 import com.arms.elasticsearch.models.지라이슈_검색_일자별_요청;
 import com.arms.elasticsearch.services.dashboard.bar.BarChart;
 import com.arms.elasticsearch.services.dashboard.donut.DonutChart;
 import com.arms.elasticsearch.services.dashboard.sankey.SankeyChart;
+import com.arms.elasticsearch.services.dashboard.treemap.TreeMapChart;
 import com.arms.elasticsearch.services.지라이슈_대시보드_서비스;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +37,8 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     private DonutChart donutChart;
     @Autowired
     private BarChart barChart;
+    @Autowired
+    private TreeMapChart treeMapChart;
 
     @ResponseBody
     @RequestMapping(
@@ -110,4 +114,18 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         검색결과_목록_메인 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(지라이슈_검색_일반_요청);
         return ResponseEntity.ok(집계결과_가져오기);
     }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/assignees-requirements-involvement"},
+            method = {RequestMethod.GET}
+    )
+    public List<Worker> abc(
+            @RequestParam Long pdServiceLink,
+            @RequestParam List<Long> pdServiceVersionLinks
+    ) throws IOException {
+        return treeMapChart.작업자_별_요구사항_별_관여도(pdServiceLink, pdServiceVersionLinks);
+    }
+
+
 }
