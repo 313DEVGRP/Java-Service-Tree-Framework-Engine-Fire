@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.arms.serverinfo.model.서버정보_데이터;
 import com.arms.serverinfo.service.서버정보_서비스;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -51,8 +52,10 @@ public class 온프레미스_지라이슈상태_전략 implements 지라이슈�
             return 반환할_지라이슈상태_데이터_목록;
 
         } catch (Exception e) {
-            로그.error("온프레미스 이슈 상태 목록 조회에 실패하였습니다" +e.getMessage());
-            throw new IllegalArgumentException(에러코드.이슈상태_조회_오류.getErrorMsg());
+            로그.error("온프레미스 이슈 상태 목록 조회에 실패하였습니다");
+            로그.error(e.getClass().getName() + " : "+ e.getMessage());
+
+            return Collections.emptyList();
         }
     }
 
@@ -88,8 +91,10 @@ public class 온프레미스_지라이슈상태_전략 implements 지라이슈�
             return 반환할_지라이슈상태_데이터_목록;
 
         } catch (Exception e) {
-            로그.error("온프레미스 이슈 상태 목록 조회에 실패하였습니다" +e.getMessage());
-            throw new IllegalArgumentException(에러코드.이슈상태_조회_오류.getErrorMsg());
+            로그.error("온프레미스 이슈 상태 목록 조회에 실패하였습니다");
+            로그.error(e.getClass().getName() + " : "+ e.getMessage());
+
+            return Collections.emptyList();
         }
     }
 
