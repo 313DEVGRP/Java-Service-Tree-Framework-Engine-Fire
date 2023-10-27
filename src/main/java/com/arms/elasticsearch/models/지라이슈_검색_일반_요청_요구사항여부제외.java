@@ -1,6 +1,7 @@
 package com.arms.elasticsearch.models;
 
-import com.arms.elasticsearch.util.쿼리_추상_팩토리;
+import com.arms.elasticsearch.util.query.서브_집계_요청;
+import com.arms.elasticsearch.util.query.쿼리_추상_팩토리;
 import lombok.Getter;
 import lombok.Setter;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -77,12 +78,5 @@ public class 지라이슈_검색_일반_요청_요구사항여부제외 implemen
 		return boolQuery;
 	}
 
-	public BoolQueryBuilder searchField(BoolQueryBuilder boolQuery){
-
-		if(!ObjectUtils.isEmpty(특정필드)){
-			boolQuery.must(QueryBuilders.termQuery(특정필드, 특정필드검색어));
-		}
-		return boolQuery;
-	}
 
 }
