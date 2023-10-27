@@ -120,7 +120,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
             value = {"/assignees-requirements-involvement"},
             method = {RequestMethod.GET}
     )
-    public List<Worker> abc(
+    public List<Worker> 작업자_별_요구사항_별_관여도(
             @RequestParam Long pdServiceLink,
             @RequestParam List<Long> pdServiceVersionLinks
     ) throws IOException {
