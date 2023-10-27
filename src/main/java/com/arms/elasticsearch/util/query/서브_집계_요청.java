@@ -1,4 +1,4 @@
-package com.arms.elasticsearch.models;
+package com.arms.elasticsearch.util.query;
 
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;

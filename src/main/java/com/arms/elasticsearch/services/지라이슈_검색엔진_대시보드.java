@@ -1,11 +1,10 @@
 package com.arms.elasticsearch.services;
 
-import com.arms.elasticsearch.models.지라이슈;
-import com.arms.elasticsearch.repositories.지라이슈_저장소;
-import com.arms.elasticsearch.util.검색결과_목록_메인;
-import com.arms.elasticsearch.util.쿼리_추상_팩토리;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -21,10 +20,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
+import com.arms.elasticsearch.models.지라이슈;
+import com.arms.elasticsearch.repositories.지라이슈_저장소;
+import com.arms.elasticsearch.util.query.쿼리_추상_팩토리;
+import com.arms.elasticsearch.util.검색결과_목록_메인;
+
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service("지라이슈_대시보드_서비스")

@@ -2,9 +2,7 @@ package com.arms.elasticsearch.services;
 
 import com.arms.elasticsearch.models.지라이슈;
 import com.arms.elasticsearch.models.지라이슈_검색요청;
-import com.arms.elasticsearch.util.쿼리_추상_팩토리;
 import com.arms.elasticsearch.util.검색결과_목록;
-import com.arms.elasticsearch.util.검색결과_목록_메인;
 import com.arms.elasticsearch.util.검색조건;
 
 import java.io.IOException;
