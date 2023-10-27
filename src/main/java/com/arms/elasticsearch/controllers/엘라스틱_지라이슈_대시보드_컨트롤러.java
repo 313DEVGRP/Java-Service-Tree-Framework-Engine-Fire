@@ -5,6 +5,7 @@ import com.arms.elasticsearch.models.dashboard.donut.집계_응답;
 import com.arms.elasticsearch.models.dashboard.sankey.SankeyElasticSearchData;
 import com.arms.elasticsearch.models.dashboard.treemap.Worker;
 import com.arms.elasticsearch.models.지라이슈_검색_일반_요청;
+import com.arms.elasticsearch.models.지라이슈_검색_일반_요청_요구사항여부제외;
 import com.arms.elasticsearch.models.지라이슈_검색_일자별_요청;
 import com.arms.elasticsearch.services.dashboard.bar.BarChart;
 import com.arms.elasticsearch.services.dashboard.donut.DonutChart;
@@ -127,5 +128,11 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         return treeMapChart.작업자_별_요구사항_별_관여도(pdServiceLink, pdServiceVersionLinks);
     }
 
-
+    @ResponseBody
+    @GetMapping("/exclusion-isreq-normal/{pdServiceId}")
+    public ResponseEntity<검색결과_목록_메인> 요구사항여부제외_일반_검색(@PathVariable Long pdServiceId, 지라이슈_검색_일반_요청_요구사항여부제외 지라이슈_검색_일반_요청_요구사항여부제외) throws IOException {
+        지라이슈_검색_일반_요청_요구사항여부제외.set서비스아이디(pdServiceId);
+        검색결과_목록_메인 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(지라이슈_검색_일반_요청_요구사항여부제외);
+        return ResponseEntity.ok(집계결과_가져오기);
+    }
 }
