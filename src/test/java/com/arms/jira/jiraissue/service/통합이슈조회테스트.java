@@ -3,6 +3,7 @@ package com.arms.jira.jiraissue.service;
 import com.arms.jira.jiraissue.model.*;
 import com.arms.jira.jiraissueresolution.model.지라이슈해결책_데이터;
 import com.arms.jira.jiraissuestatus.model.지라이슈상태_데이터;
+import com.arms.jira.jiraissuestatus.model.클라우드_지라이슈상태_데이터;
 import com.arms.jira.jiraissuetype.model.지라이슈유형_데이터;
 import com.arms.jira.jirapriority.model.지라이슈우선순위_데이터;
 import com.arms.jira.utils.지라유틸;
@@ -14,13 +15,17 @@ import com.atlassian.jira.rest.client.api.domain.Worklog;
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -487,4 +492,52 @@ class 통합이슈조회테스트 {
         return 연관된_지라이슈_목록;
     }
 
+    @Test
+    public void 클라우드_지라이슈상태_테스트() throws JsonProcessingException {
+
+        List<지라이슈상태_데이터> 결과 = 지라이슈상태테스트("10004");
+
+        if (결과.size() != 0) {
+            System.out.println(결과.toString());
+        }
+        else {
+            System.out.println(결과.size() + "ㅋㅋㅋ");
+        }
+
+        assertNotNull(결과);
+    }
+
+    public List<지라이슈상태_데이터> 지라이슈상태테스트(String 프로젝트_아이디) {
+        int 최대_검색수 = 50;
+        int startAt = 0;
+
+        WebClient chanhoWeb = WebClient.builder()
+                .baseUrl("https://testchkim.atlassian.net")
+                .defaultHeader("Authorization", "Basic " + getBase64Credentials("gkfn185@gmail.com", "ATATT3xFfGF0WHBw5R_YdXGY-QBpFTJl5S6am7hqo7yWx1P0kOUdarkWcDaWDH-aYuJNQFL7LjUAA8MzArZyaXQQDeOGdKVjLyiFcuIBDR_FdKSD1UCFm3cXnJD7rHPPsxYe73OIMO5nuoP-mJDMy35zYoQiQGaW3DdW4Z64UoT2PeieuDz0UFE=1E941C6B"))
+                .build();
+
+        String endpoint = "/rest/api/3/statuses/search?maxResults=" + 최대_검색수 + "&startAt=" + startAt + "&projectId=" + 프로젝트_아이디;
+
+        클라우드_지라이슈상태_데이터 지라이슈상태_조회_결과;
+
+        try {
+            지라이슈상태_조회_결과 = 지라유틸.get(chanhoWeb, endpoint, 클라우드_지라이슈상태_데이터.class).block();
+        }
+        catch (Exception e) {
+            if (e instanceof WebClientResponseException) {
+                WebClientResponseException wcException = (WebClientResponseException) e;
+                HttpStatus status = wcException.getStatusCode();
+                String body = wcException.getResponseBodyAsString();
+
+                로그.error(status + " : " + body);
+            }
+
+            로그.error("클라우드 이슈 상태 목록 조회에 실패하였습니다" + e.getMessage());
+
+            return Collections.emptyList();
+            // throw new IllegalArgumentException(에러코드.이슈상태_조회_오류.getErrorMsg());
+        }
+
+        return 지라이슈상태_조회_결과.getValues();
+    }
 }

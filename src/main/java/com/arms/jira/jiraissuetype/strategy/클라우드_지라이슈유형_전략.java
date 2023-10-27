@@ -9,9 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -38,9 +41,20 @@ public class 클라우드_지라이슈유형_전략 implements 지라이슈유�
             로그.info(반환할_이슈_유형_목록.toString());
 
             return 반환할_이슈_유형_목록;
+
         } catch (Exception e) {
-            로그.error("클라우드 지라 이슈 유형 목록 가져오기 가져오기에 실패하였습니다." + e.getMessage());
-            throw new IllegalArgumentException(에러코드.이슈유형_조회_오류.getErrorMsg());
+            로그.error("클라우드 지라 이슈 유형 목록 가져오기 가져오기에 실패하였습니다.");
+            로그.error(e.getClass().getName() + " : "+ e.getMessage());
+
+            if (e instanceof WebClientResponseException) {
+                WebClientResponseException wcException = (WebClientResponseException) e;
+                HttpStatus status = wcException.getStatusCode();
+                String body = wcException.getResponseBodyAsString();
+
+                로그.error(status + " : " + body);
+            }
+
+            return Collections.emptyList();
         }
     }
 
@@ -66,9 +80,20 @@ public class 클라우드_지라이슈유형_전략 implements 지라이슈유�
             로그.info(반환할_이슈_유형_목록.toString());
 
             return 반환할_이슈_유형_목록;
+
         } catch (Exception e) {
             로그.error("클라우드 지라 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록_가져오기에 실패하였습니다.");
-            throw new IllegalArgumentException(에러코드.이슈유형_조회_오류.getErrorMsg());
+            로그.error(e.getClass().getName() + " : "+ e.getMessage());
+
+            if (e instanceof WebClientResponseException) {
+                WebClientResponseException wcException = (WebClientResponseException) e;
+                HttpStatus status = wcException.getStatusCode();
+                String body = wcException.getResponseBodyAsString();
+
+                로그.error(status + " : " + body);
+            }
+
+            return Collections.emptyList();
         }
     }
 }

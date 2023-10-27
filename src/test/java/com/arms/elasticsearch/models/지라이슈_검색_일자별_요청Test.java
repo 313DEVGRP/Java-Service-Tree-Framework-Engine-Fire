@@ -14,7 +14,7 @@ class 지라이슈_검색_일자별_요청Test {
     @Test
     public void test(){
         지라이슈_검색_일자별_요청 x = new 지라이슈_검색_일자별_요청();
-        x.setSize(100);
+        x.set크기(100);
         x.set하위그룹필드들(List.of("a","b"));
         x.set시간그룹필드("updated");
         NativeSearchQuery 생성 = x.생성();
