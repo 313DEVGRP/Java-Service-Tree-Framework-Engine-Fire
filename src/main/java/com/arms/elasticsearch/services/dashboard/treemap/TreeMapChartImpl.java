@@ -62,7 +62,10 @@ public class TreeMapChartImpl implements TreeMapChart {
             }
         }
 
-        return new ArrayList<>(contributionMap.values());
+        return contributionMap.values().stream()
+                .sorted(Comparator.comparingInt(Worker::getTotalInvolvedCount).reversed())
+                .limit(5)
+                .collect(Collectors.toList());
     }
 
 }
