@@ -1,7 +1,6 @@
 package com.arms.elasticsearch.services;
 
 import com.arms.elasticsearch.models.지라이슈;
-import com.arms.elasticsearch.models.지라이슈_검색요청;
 import com.arms.elasticsearch.util.검색결과_목록;
 import com.arms.elasticsearch.util.검색조건;
 
@@ -51,5 +50,4 @@ public interface 지라이슈_서비스 {
 
     Map<String, Long> 제품서비스별_담당자_연관된_요구사항_통계(Long 지라서버_아이디, Long 제품서비스_아이디, String 이슈키, String 담당자_이메일) throws IOException;
 
-    List<지라이슈> 이슈_다중검색하기(List<지라이슈_검색요청> 다중검색목록) throws IOException;
 }
