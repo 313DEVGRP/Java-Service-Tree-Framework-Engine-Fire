@@ -10,6 +10,7 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -35,7 +36,11 @@ public class SankeyChartImpl implements SankeyChart {
                 .filter(QueryBuilders.existsQuery("assignee"));
 
         TermsAggregationBuilder versionsAgg = AggregationBuilders.terms("versions").field("pdServiceVersion");
-        TermsAggregationBuilder assigneesAgg = AggregationBuilders.terms("assignees").field("assignee.assignee_accountId.keyword");
+        TermsAggregationBuilder assigneesAgg = AggregationBuilders.terms("assignees")
+                .field("assignee.assignee_accountId.keyword")
+                .order(BucketOrder.count(false))
+                .size(10);
+
         assigneesAgg.subAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"));
         versionsAgg.subAggregation(assigneesAgg);
 
