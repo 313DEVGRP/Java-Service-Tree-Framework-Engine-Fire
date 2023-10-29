@@ -22,6 +22,7 @@ public class 검색_일반_요청 implements 쿼리_추상_팩토리 {
 	private final List<String> 하위그룹필드들;
 	private final String 메인그룹필드;
 	private final int 크기;
+	private final int 하위크기;
 	private final boolean 컨텐츠보기여부;
 	private final 조건_쿼리_컴포넌트 조건_쿼리_컴포넌트;
 
@@ -30,6 +31,7 @@ public class 검색_일반_요청 implements 쿼리_추상_팩토리 {
 		this.메인그룹필드 = 검색_기본_요청.get메인그룹필드();
 		this.크기 = 검색_기본_요청.get크기();
 		this.컨텐츠보기여부 = 검색_기본_요청.is컨텐츠보기여부();
+		this.하위크기 = 검색_기본_요청.get하위크기();
 		this.조건_쿼리_컴포넌트 = 조건_쿼리_컴포넌트;
 	}
 
@@ -66,7 +68,7 @@ public class 검색_일반_요청 implements 쿼리_추상_팩토리 {
 						if(!하위그룹필드들.isEmpty()){
 							termsAggregationBuilder
 								.subAggregation(
-										서브_집계_요청.createNestedAggregation(하위그룹필드들, 크기)
+										서브_집계_요청.createNestedAggregation(하위그룹필드들, 하위크기)
 								);
 						}
 					});
