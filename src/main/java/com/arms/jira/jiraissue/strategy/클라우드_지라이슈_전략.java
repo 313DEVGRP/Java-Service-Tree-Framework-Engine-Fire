@@ -6,12 +6,15 @@ import com.arms.jira.utils.지라유틸;
 import com.arms.serverinfo.model.서버정보_데이터;
 import com.arms.serverinfo.service.서버정보_서비스;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.*;
 
@@ -144,7 +147,6 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
 
         지라사용자_데이터 사용자 = 사용자_정보_조회(webClient);
         클라우드_필드_데이터.setReporter(사용자);
-        클라우드_필드_데이터.setAssignee(사용자);
 
         /* ***
         * 프로젝트 와 이슈 유형에 따라 이슈 생성 시 들어가는 fields의 내용을 확인하는 부분(현재 priority만 적용)
@@ -190,12 +192,23 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
         }
 
         입력_데이터.setFields(클라우드_필드_데이터);
-        로그.info(String.valueOf(입력_데이터));
+        ObjectMapper objectMapper = new ObjectMapper();
+        로그.info(objectMapper.writeValueAsString(입력_데이터));
 
         String endpoint = "/rest/api/3/issue";
+        지라이슈_데이터 반환할_지라이슈_데이터 = null;
+        try {
+            반환할_지라이슈_데이터 = 지라유틸.post(webClient, endpoint, 입력_데이터, 지라이슈_데이터.class).block();
+        } catch (Exception e) {
+            if (e instanceof WebClientResponseException) {
+                WebClientResponseException wcException = (WebClientResponseException) e;
+                HttpStatus status = wcException.getStatusCode();
+                String body = wcException.getResponseBodyAsString();
 
-        지라이슈_데이터 반환할_지라이슈_데이터 = 지라유틸.post(webClient, endpoint, 입력_데이터, 지라이슈_데이터.class)
-                .onErrorMap(e -> new IllegalArgumentException(에러코드.이슈생성_오류.getErrorMsg()+" "+e.getMessage())).block();
+                로그.error(status + " : " + body);
+            }
+        }
+
         if (반환할_지라이슈_데이터 == null) {
             로그.error("이슈 생성에 실패하였습니다.");
             return null;
