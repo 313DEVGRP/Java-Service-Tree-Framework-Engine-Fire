@@ -18,6 +18,7 @@ import com.arms.elasticsearch.util.query.bool.조건_쿼리_생성자;
 import com.arms.elasticsearch.util.query.bool.조건_쿼리_컴포넌트;
 import com.arms.elasticsearch.util.query.검색_일반_요청;
 import com.arms.elasticsearch.util.query.검색_일자별_요청;
+import com.arms.elasticsearch.util.query.검색_크기별_요청;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -165,6 +166,19 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
             .build();
 
         검색결과_목록_메인 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(지라이슈_일반_검색요청, 조건_쿼리_컴포넌트));
+        return ResponseEntity.ok(집계결과_가져오기);
+    }
+
+    @ResponseBody
+    @GetMapping("/isreq-normal/{pdServiceId}")
+    public ResponseEntity<검색결과_목록_메인> 요구사항_일반_검색(@PathVariable Long pdServiceId, 지라이슈_일반_검색요청 지라이슈_일반_검색요청) throws IOException {
+
+        조건_쿼리_컴포넌트 조건_쿼리_컴포넌트 = 서비스_조건.builder()
+                .조건_쿼리_컴포넌트(new 조건_쿼리_생성자())
+                .pdServiceId(pdServiceId)
+                .build();
+
+        검색결과_목록_메인 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(검색_크기별_요청.of(지라이슈_일반_검색요청, 조건_쿼리_컴포넌트));
         return ResponseEntity.ok(집계결과_가져오기);
     }
 }
