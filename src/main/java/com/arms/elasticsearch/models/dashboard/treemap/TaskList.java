@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Map;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -12,7 +14,5 @@ import lombok.Setter;
 public class TaskList {
     String id;
     String name;
-    int involvedCount;
-
-
+    Map<String, Integer> data;
 }

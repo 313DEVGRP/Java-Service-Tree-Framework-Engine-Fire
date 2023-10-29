@@ -47,25 +47,32 @@ public class TreeMapChartImpl implements TreeMapChart {
 
                 Worker worker = contributionMap.computeIfAbsent(
                         assigneeId,
-                        k -> new Worker(assigneeId, displayName)
+                        taskList -> new Worker(assigneeId, displayName, new HashMap<>() {{
+                            put("totalInvolvedCount", 0);
+                        }}, new ArrayList<>())
                 );
 
-                worker.getChildren().stream()
-                        .filter(taskList -> taskList.getId().equals(key))
+                TaskList taskList = worker.getChildren().stream()
+                        .filter(task -> task.getId().equals(key))
                         .findFirst()
-                        .ifPresentOrElse(
-                                existingTaskList -> existingTaskList.setInvolvedCount(existingTaskList.getInvolvedCount() + 1),
-                                () -> worker.getChildren().add(new TaskList(key, summary, 1))
-                        );
+                        .orElseGet(() -> {
+                            TaskList newTask = new TaskList(key, summary, new HashMap<>() {{
+                                put("involvedCount", 0);
+                            }});
+                            worker.getChildren().add(newTask);
+                            return newTask;
+                        });
 
-                worker.setTotalInvolvedCount(worker.getTotalInvolvedCount() + 1);
+                taskList.getData().put("involvedCount", taskList.getData().get("involvedCount") + 1);
+                worker.getData().put("totalInvolvedCount", worker.getData().get("totalInvolvedCount") + 1);
             }
         }
 
         return contributionMap.values().stream()
-                .sorted(Comparator.comparingInt(Worker::getTotalInvolvedCount).reversed())
+                .sorted((Comparator<Worker>) (w1, w2) -> w2.getData().get("totalInvolvedCount").compareTo(w1.getData().get("totalInvolvedCount")))
                 .limit(5)
                 .collect(Collectors.toList());
+
     }
 
 }
