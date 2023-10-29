@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class TaskList {
     String id;
-    String summary;
+    String name;
     int involvedCount;
 
 

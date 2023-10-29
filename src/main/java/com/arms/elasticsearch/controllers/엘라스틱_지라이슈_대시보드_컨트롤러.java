@@ -1,21 +1,5 @@
 package com.arms.elasticsearch.controllers;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.arms.elasticsearch.models.boolquery.서비스_조건;
 import com.arms.elasticsearch.models.boolquery.요구사항인지_여부_조건;
 import com.arms.elasticsearch.models.boolquery.진행사항_필터_조건;
@@ -35,8 +19,16 @@ import com.arms.elasticsearch.util.query.bool.조건_쿼리_컴포넌트;
 import com.arms.elasticsearch.util.query.검색_일반_요청;
 import com.arms.elasticsearch.util.query.검색_일자별_요청;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
-
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/engine/jira/dashboard")
@@ -153,7 +145,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
 
     @ResponseBody
     @RequestMapping(
-            value = {"/assignees-requirements-involvement"},
+            value = {"/assignees-requirements-involvements"},
             method = {RequestMethod.GET}
     )
     public List<Worker> 작업자_별_요구사항_별_관여도(
