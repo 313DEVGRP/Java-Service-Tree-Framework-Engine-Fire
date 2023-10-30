@@ -1,40 +1,37 @@
 package com.arms.elasticsearch.services;
 
-import com.arms.elasticsearch.helper.인덱스자료;
-import com.arms.elasticsearch.models.SankeyElasticSearchData;
-import com.arms.elasticsearch.models.요구사항_지라이슈상태_월별_집계;
-import com.arms.elasticsearch.models.집계_응답;
-import com.arms.elasticsearch.repositories.지라이슈_저장소;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
-import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.arms.elasticsearch.models.지라이슈;
+import com.arms.elasticsearch.repositories.지라이슈_저장소;
+import com.arms.elasticsearch.util.query.쿼리_추상_팩토리;
+import com.arms.elasticsearch.util.검색결과_목록_메인;
+
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service("지라이슈_대시보드_서비스")
 @AllArgsConstructor
 public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대시보드_서비스 {
-    public static final String STATUS_AGG_NAME = "statuses";
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     private 지라이슈_저장소 지라이슈저장소;
@@ -43,7 +40,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     public Map<String, Long> 제품서비스별_담당자_이름_통계(Long 지라서버_아이디, Long 제품서비스_아이디) throws IOException {
 
         BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
-        if ( 제품서비스_아이디 != null && 제품서비스_아이디 > 9L) {
+        if (제품서비스_아이디 != null && 제품서비스_아이디 > 9L) {
             MatchQueryBuilder 제품서비스_조회 = QueryBuilders.matchQuery("pdServiceId", 제품서비스_아이디);
             복합조회.must(제품서비스_조회);
         }
@@ -74,132 +71,14 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
             String 담당자_이메일 = 담당자.getKeyAsString();
             long 개수 = 담당자.getDocCount();
             log.info("담당자: " + 담당자_이메일 + ", Count: " + 개수);
-            담당자_총합+= 개수;
+            담당자_총합 += 개수;
             제품서비스별_하위이슈_담당자_집계.put(담당자_이메일, 개수);
         }
-        제품서비스별_하위이슈_담당자_집계.put("담당자 미지정",결과-담당자_총합);
+        제품서비스별_하위이슈_담당자_집계.put("담당자 미지정", 결과 - 담당자_총합);
 
         return 제품서비스별_하위이슈_담당자_집계;
     }
 
-    @Override
-    public List<집계_응답> 이슈상태집계(Long pdServiceLink, List<Long> pdServiceVersionLinks) throws IOException {
-        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
-                .filter(QueryBuilders.termQuery("pdServiceId", pdServiceLink));
-
-        if (pdServiceVersionLinks != null && !pdServiceVersionLinks.isEmpty()) {
-            boolQuery.filter(QueryBuilders.termsQuery("pdServiceVersion", pdServiceVersionLinks));
-        }
-
-        TermsAggregationBuilder issueStatusAgg = AggregationBuilders.terms(STATUS_AGG_NAME).field("status.status_name.keyword");
-
-        SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource().query(boolQuery).aggregation(issueStatusAgg);
-
-        SearchResponse searchResponse = 지라이슈저장소.search(getSearchRequest(sourceBuilder), RequestOptions.DEFAULT);
-
-        Terms status = searchResponse.getAggregations().get(STATUS_AGG_NAME);
-
-        return status.getBuckets().stream()
-                .map(bucket -> new 집계_응답(bucket.getKeyAsString(), bucket.getDocCount()))
-                .collect(Collectors.toList());
-    }
-
-
-    @Override
-    public Map<String, 요구사항_지라이슈상태_월별_집계> 요구사항_지라이슈상태_월별_집계(Long pdServiceLink, List<Long> pdServiceVersionLinks) throws IOException {
-        Instant now = Instant.now();
-        Instant oneYearAgo = now.minus(365, ChronoUnit.DAYS);
-
-        // 현재 시간("created field", UTC) 기준 최근 12개월 데이터만 집계
-        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
-                .filter(QueryBuilders.termQuery("pdServiceId", pdServiceLink))
-                .filter(QueryBuilders.rangeQuery("created")
-                        .from(oneYearAgo.toString()).to(now.toString())
-                );
-
-        if (pdServiceVersionLinks != null && !pdServiceVersionLinks.isEmpty()) {
-            boolQuery.filter(QueryBuilders.termsQuery("pdServiceVersion", pdServiceVersionLinks));
-        }
-
-        // DateHistogramAggregation 설정
-        DateHistogramAggregationBuilder monthlyAggregationBuilder = AggregationBuilders
-                .dateHistogram("aggregation_by_month")
-                .field("created")
-                .calendarInterval(DateHistogramInterval.MONTH);
-
-        // 요구사항과 지라 이슈 상태에 대한 집계
-        monthlyAggregationBuilder.subAggregation(AggregationBuilders.terms(STATUS_AGG_NAME).field("status.status_name.keyword"));
-        monthlyAggregationBuilder.subAggregation(AggregationBuilders.terms("requirements").field("isReq"));
-
-        // Query 및 Aggregation 반영
-        SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource().query(boolQuery).aggregation(monthlyAggregationBuilder);
-
-        // Elasticsearch 쿼리 실행
-        SearchResponse searchResponse = 지라이슈저장소.search(getSearchRequest(sourceBuilder), RequestOptions.DEFAULT);
-
-        // Aggregation 결과 처리
-        Histogram aggregationByMonth = searchResponse.getAggregations().get("aggregation_by_month");
-
-        // 월 별 요구사항, 지라 이슈 상태 집계
-        Map<String, 요구사항_지라이슈상태_월별_집계> monthlyIssueAndRequirementData = aggregationByMonth.getBuckets().stream()
-                .collect(Collectors.toMap(
-                        Histogram.Bucket::getKeyAsString,
-                        this::createMonthlyData
-                ));
-
-
-        // 월별 누적 처리
-        long totalIssues = 0;
-        long totalRequirements = 0;
-        for (요구사항_지라이슈상태_월별_집계 monthlyAggregation : monthlyIssueAndRequirementData.values()) {
-            totalIssues += monthlyAggregation.getTotalIssues();
-            totalRequirements += monthlyAggregation.getTotalRequirements();
-            monthlyAggregation.setTotalIssues(totalIssues);
-            monthlyAggregation.setTotalRequirements(totalRequirements);
-        }
-
-        // 날짜 형식 변환 2023-10-01T00:00:00.000Z -> 2023-10
-        return monthlyIssueAndRequirementData.entrySet().stream()
-                .collect(Collectors.toMap(
-                        entry -> transformDateKey(entry.getKey()),
-                        Map.Entry::getValue
-                ));
-    }
-
-    public 요구사항_지라이슈상태_월별_집계 createMonthlyData(Histogram.Bucket entry) {
-        요구사항_지라이슈상태_월별_집계 monthlyData = new 요구사항_지라이슈상태_월별_집계();
-        monthlyData.setTotalIssues(entry.getDocCount());
-
-        Map<String, Long> statuses = ((Terms) entry.getAggregations().get(STATUS_AGG_NAME)).getBuckets().stream()
-                .collect(Collectors.toMap(Terms.Bucket::getKeyAsString, Terms.Bucket::getDocCount));
-
-        monthlyData.setStatuses(statuses);
-
-        long totalReqCount = Optional.ofNullable((Terms) entry.getAggregations().get("requirements"))
-                .flatMap(reqs -> reqs.getBuckets().stream()
-                        .filter(bucket -> "true".equals(bucket.getKeyAsString()))
-                        .findFirst())
-                .map(Terms.Bucket::getDocCount)
-                .orElse(0L);
-
-        monthlyData.setTotalRequirements(totalReqCount);
-        return monthlyData;
-    }
-
-    public String transformDateKey(String month) {
-        Instant instant = Instant.parse(month);
-        return DateTimeFormatter
-                .ofPattern("yyyy-MM")
-                .withZone(ZoneId.of("UTC"))
-                .format(instant);
-    }
-
-    public static SearchRequest getSearchRequest(SearchSourceBuilder sourceBuilder) {
-        SearchRequest searchRequest = new SearchRequest();
-        searchRequest.indices(인덱스자료.지라이슈_인덱스명);
-        searchRequest.source(sourceBuilder);
-        return searchRequest;
-    }
 
     @Override
     public Map<String, Map<String, Map<String, Integer>>> 담당자_요구사항여부_상태별집계(Long pdServiceLink) throws IOException {
@@ -253,49 +132,15 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         return 담당자별_요구사항여부별_상태값_집계;
     }
 
+
     @Override
-    public Map<String, List<SankeyElasticSearchData>> 제품_버전별_담당자_목록(Long pdServiceLink, List<Long> pdServiceVersionLinks) throws IOException {
-        TermsAggregationBuilder versionsAgg = AggregationBuilders.terms("versions").field("pdServiceVersion");
-        TermsAggregationBuilder assigneesAgg = AggregationBuilders.terms("assignees").field("assignee.assignee_accountId.keyword");
-        assigneesAgg.subAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"));
-        versionsAgg.subAggregation(assigneesAgg);
+    public 검색결과_목록_메인 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) throws IOException {
 
+        SearchHits searchHits = 지라이슈저장소.search(
+                쿼리추상팩토리.생성(),
+                지라이슈.class
+        );
 
-        BoolQueryBuilder query = QueryBuilders.boolQuery()
-                .filter(QueryBuilders.termQuery("pdServiceId", pdServiceLink))
-                .filter(QueryBuilders.termQuery("isReq", false))
-                .filter(QueryBuilders.existsQuery("assignee"));
-
-        if (pdServiceVersionLinks != null && !pdServiceVersionLinks.isEmpty()) {
-            query.filter(QueryBuilders.termsQuery("pdServiceVersion", pdServiceVersionLinks));
-        }
-
-        SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource().query(query).aggregation(versionsAgg);
-
-        SearchResponse searchResponse = 지라이슈저장소.search(getSearchRequest(sourceBuilder), RequestOptions.DEFAULT);
-
-        Map<String, List<SankeyElasticSearchData>> versionAssigneesMap = new HashMap<>();
-        Terms versions = searchResponse.getAggregations().get("versions");
-
-        for (Terms.Bucket versionBucket : versions.getBuckets()) {
-            String version = versionBucket.getKeyAsString();
-
-            Terms assignees = versionBucket.getAggregations().get("assignees");
-
-            List<SankeyElasticSearchData> assigneeList = new ArrayList<>();
-
-            for (Terms.Bucket assigneeBucket : assignees.getBuckets()) {
-                String accountId = assigneeBucket.getKeyAsString();
-
-                Terms displayNames = assigneeBucket.getAggregations().get("displayNames");
-                String displayName = displayNames.getBuckets().get(0).getKeyAsString();
-
-                assigneeList.add(new SankeyElasticSearchData(accountId, displayName));
-            }
-
-            versionAssigneesMap.put(version, assigneeList);
-        }
-
-        return versionAssigneesMap;
+        return new 검색결과_목록_메인(searchHits);
     }
 }

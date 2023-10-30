@@ -4,12 +4,9 @@ import static java.util.stream.Collectors.*;
 
 import com.arms.elasticsearch.helper.인덱스자료;
 import com.arms.elasticsearch.models.지라이슈;
-import com.arms.elasticsearch.models.지라이슈_검색요청;
-import com.arms.elasticsearch.util.쿼리_추상_팩토리;
 import com.arms.elasticsearch.repositories.지라이슈_저장소;
 import com.arms.elasticsearch.util.검색결과;
 import com.arms.elasticsearch.util.검색결과_목록;
-import com.arms.elasticsearch.util.검색결과_목록_메인;
 import com.arms.elasticsearch.util.검색엔진_유틸;
 import com.arms.elasticsearch.util.검색조건;
 import com.arms.errors.codes.에러코드;
@@ -40,8 +37,6 @@ import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -130,14 +125,6 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         return 지라이슈저장소.internalSearch(request,지라이슈.class);
     }
 
-    @Override
-    public 검색결과_목록_메인 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) throws IOException {
-
-        return new 검색결과_목록_메인(지라이슈저장소.getBucket(
-            쿼리추상팩토리.생성(),
-            지라이슈.class
-        ));
-    }
 
     @Override
     public 검색결과_목록 특정필드의_값들을_그룹화하여_빈도수가져오기(String indexName, String groupByField) throws IOException {
@@ -814,8 +801,8 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         }
 
         if ( 이슈키 != null ) {
-            MatchQueryBuilder 요구사항_조회 = QueryBuilders.matchQuery("key.keyword", 이슈키);
-            MatchQueryBuilder 하위_요구사항_조회 = QueryBuilders.matchQuery("parentReqKey.keyword", 이슈키);
+            MatchQueryBuilder 요구사항_조회 = QueryBuilders.matchQuery("key", 이슈키);
+            MatchQueryBuilder 하위_요구사항_조회 = QueryBuilders.matchQuery("parentReqKey", 이슈키);
 
             복합조회.should(요구사항_조회);
             복합조회.should(하위_요구사항_조회);
@@ -868,46 +855,6 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         }
 
         return 제품서비스별_담당자_연관된_요구사항_통계;
-    }
-
-    @Override
-    public List<지라이슈> 이슈_다중검색하기(List<지라이슈_검색요청> 다중검색목록) throws IOException {
-
-        if (다중검색목록 == null || 다중검색목록.size() < 1) {
-            return null;
-        }
-
-        final SearchRequest request = 검색엔진_유틸.buildSearchRequest(
-                인덱스자료.지라이슈_인덱스명,
-                다중검색목록
-        );
-
-        SearchResponse 검색결과 = 지라이슈저장소.search(request, RequestOptions.DEFAULT);
-        long totalHits = 검색결과.getHits().getTotalHits().value;
-        로그.info(String.valueOf(totalHits));
-
-        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-
-        for (지라이슈_검색요청 검색요청 : 다중검색목록) {
-            if (검색요청.getType().equals("must")) {
-                boolQuery.must(QueryBuilders.matchQuery(검색요청.getField(), 검색요청.getFieldKeyword()));
-            }
-            else if (검색요청.getType().equals("should")) {
-                boolQuery.should(QueryBuilders.matchQuery(검색요청.getField(), 검색요청.getFieldKeyword()));
-            }
-            else if (검색요청.getType().equals("must not")) {
-                boolQuery.mustNot(QueryBuilders.matchQuery(검색요청.getField(), 검색요청.getFieldKeyword()));
-            }
-        }
-
-        NativeSearchQuery query = new NativeSearchQueryBuilder()
-                .withQuery(boolQuery)
-                .build();
-
-        long count = elasticsearchRestTemplate.count(query, 지라이슈.class);
-        로그.info(String.valueOf(count) + "입니다.");
-
-        return 지라이슈저장소.internalSearch(request,지라이슈.class);
     }
 
 }

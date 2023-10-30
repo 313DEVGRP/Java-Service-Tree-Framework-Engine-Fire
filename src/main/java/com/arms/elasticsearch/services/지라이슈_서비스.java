@@ -1,10 +1,7 @@
 package com.arms.elasticsearch.services;
 
 import com.arms.elasticsearch.models.지라이슈;
-import com.arms.elasticsearch.models.지라이슈_검색요청;
-import com.arms.elasticsearch.util.쿼리_추상_팩토리;
 import com.arms.elasticsearch.util.검색결과_목록;
-import com.arms.elasticsearch.util.검색결과_목록_메인;
 import com.arms.elasticsearch.util.검색조건;
 
 import java.io.IOException;
@@ -27,7 +24,6 @@ public interface 지라이슈_서비스 {
 
     public List<지라이슈> 이슈_검색하기(검색조건 검색조건);
 
-    검색결과_목록_메인 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) throws IOException;
 
 
 	public 검색결과_목록 특정필드의_값들을_그룹화하여_빈도수가져오기(String indexName, String groupByField) throws IOException;
@@ -54,5 +50,4 @@ public interface 지라이슈_서비스 {
 
     Map<String, Long> 제품서비스별_담당자_연관된_요구사항_통계(Long 지라서버_아이디, Long 제품서비스_아이디, String 이슈키, String 담당자_이메일) throws IOException;
 
-    List<지라이슈> 이슈_다중검색하기(List<지라이슈_검색요청> 다중검색목록) throws IOException;
 }

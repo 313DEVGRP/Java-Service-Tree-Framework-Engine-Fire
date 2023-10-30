@@ -1,6 +1,5 @@
 package com.arms.elasticsearch.util;
 
-import com.arms.elasticsearch.models.지라이슈_검색요청;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.index.query.*;
@@ -183,37 +182,4 @@ public final class 검색엔진_유틸 {
         return searchRequest;
     }
 
-    public static SearchRequest buildSearchRequest(final String indexName,
-                                                   final List<지라이슈_검색요청> 다중검색목록) {
-        try {
-            if (다중검색목록 == null) {
-                return null;
-            }
-
-            BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-
-            for (지라이슈_검색요청 검색요청 : 다중검색목록) {
-                if (검색요청.getType().equals("must")) {
-                    boolQuery.must(QueryBuilders.matchQuery(검색요청.getField(), 검색요청.getFieldKeyword()));
-                }
-                else if (검색요청.getType().equals("should")) {
-                    boolQuery.should(QueryBuilders.matchQuery(검색요청.getField(), 검색요청.getFieldKeyword()));
-                }
-                else if (검색요청.getType().equals("must not")) {
-                    boolQuery.mustNot(QueryBuilders.matchQuery(검색요청.getField(), 검색요청.getFieldKeyword()));
-                }
-            }
-
-            SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-            sourceBuilder.query(boolQuery);
-
-            final SearchRequest searchRequest = new SearchRequest(indexName);
-            searchRequest.source(sourceBuilder);
-
-            return searchRequest;
-        } catch (final Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 }

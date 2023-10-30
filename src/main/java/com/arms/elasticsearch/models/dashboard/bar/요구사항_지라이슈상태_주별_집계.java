@@ -1,4 +1,4 @@
-package com.arms.elasticsearch.models;
+package com.arms.elasticsearch.models.dashboard.bar;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,7 +11,7 @@ import java.util.Map;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class 요구사항_지라이슈상태_월별_집계 {
+public class 요구사항_지라이슈상태_주별_집계 {
     private long totalIssues;
     private Map<String, Long> statuses;
     private long totalRequirements;

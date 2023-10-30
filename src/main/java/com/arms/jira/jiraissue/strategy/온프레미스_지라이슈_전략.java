@@ -127,7 +127,6 @@ public class 온프레미스_지라이슈_전략 implements 지라이슈_전략 
         String 제목 = null;
         String 내용 = null;
         String 보고자 = null;
-        String 담당자 = null;
         Long 우선순위아이디 = null;
 
         if (필드_데이터.getProject() != null) {
@@ -150,10 +149,6 @@ public class 온프레미스_지라이슈_전략 implements 지라이슈_전략 
             보고자 = 필드_데이터.getReporter().getAccountId();
         }
 
-        if (필드_데이터.getAssignee() != null) {
-            담당자 = 필드_데이터.getAssignee().getAccountId();
-        }
-
         if (필드_데이터.getPriority() != null) {
             우선순위아이디 = Long.valueOf(필드_데이터.getPriority().getId());
         }
@@ -167,10 +162,6 @@ public class 온프레미스_지라이슈_전략 implements 지라이슈_전략 
 
         if (보고자 != null) {
             입력_생성.setReporterName(보고자);
-        }
-
-        if (담당자 != null) {
-            입력_생성.setAssigneeName(담당자);
         }
 
         if (우선순위아이디 != null) {

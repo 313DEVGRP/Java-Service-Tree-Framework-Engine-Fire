@@ -1,4 +1,4 @@
-package com.arms.elasticsearch.models;
+package com.arms.elasticsearch.models.dashboard.sankey;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

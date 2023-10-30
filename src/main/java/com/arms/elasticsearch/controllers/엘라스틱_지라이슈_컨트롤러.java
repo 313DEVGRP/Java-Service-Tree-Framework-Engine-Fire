@@ -1,24 +1,32 @@
 package com.arms.elasticsearch.controllers;
 
-import com.arms.elasticsearch.helper.인덱스자료;
-import com.arms.elasticsearch.models.*;
-import com.arms.elasticsearch.services.지라이슈_서비스;
-import com.arms.elasticsearch.util.검색결과_목록;
-import com.arms.elasticsearch.util.검색결과_목록_메인;
-import com.arms.elasticsearch.util.검색조건;
-import com.arms.jira.jiraissue.service.지라이슈_전략_호출;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.arms.elasticsearch.helper.인덱스자료;
+import com.arms.elasticsearch.models.지라이슈;
+import com.arms.elasticsearch.services.지라이슈_서비스;
+import com.arms.elasticsearch.util.검색결과_목록;
+import com.arms.elasticsearch.util.검색조건;
+import com.arms.jira.jiraissue.service.지라이슈_전략_호출;
+
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/engine/jira/{connectId}/issue")
@@ -68,27 +76,6 @@ public class 엘라스틱_지라이슈_컨트롤러 {
 
         return 지라이슈_검색엔진.특정필드_검색후_다른필드_그룹결과(인덱스자료.지라이슈_인덱스명, 특정필드, 특정필드검색어, 그룹할필드 );
     }
-
-    @ResponseBody
-    @PostMapping("/search/single-bucket")
-    public ResponseEntity<검색결과_목록_메인> 단일버킷(@RequestBody 지라이슈_검색_요청 지라이슈_검색_요청) throws IOException {
-        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(지라이슈_검색_요청));
-    }
-
-    @ResponseBody
-    @PostMapping("/search/sub-bucket")
-    public ResponseEntity<검색결과_목록_메인> 서브버킷(
-            @RequestBody 지라이슈_검색_서브버킷_요청 지라이슈_검색_서브버킷_요청) throws IOException {
-        검색결과_목록_메인 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(지라이슈_검색_서브버킷_요청);
-        return ResponseEntity.ok(집계결과_가져오기);
-    }
-
-    @ResponseBody
-    @PostMapping("/search/single-bucket/date")
-    public ResponseEntity<검색결과_목록_메인> 단일버킷_시계열(@RequestBody 지라이슈_검색_요청_시계열 지라이슈_검색_요청_시계열) throws IOException {
-        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(지라이슈_검색_요청_시계열));
-    }
-
 
     @ResponseBody
     @RequestMapping(
@@ -207,13 +194,4 @@ public class 엘라스틱_지라이슈_컨트롤러 {
         return 지라이슈_검색엔진.제품서비스별_담당자_연관된_요구사항_통계(지라서버_아이디, 제품서비스_아이디, 이슈키, 담당자_이메일);
     }
 
-    @ResponseBody
-    @RequestMapping(
-            value = {"/search/list"},
-            method = {RequestMethod.POST}
-    )
-    public List<지라이슈> 요구사항이슈_다중검색(@RequestBody final List<지라이슈_검색요청> 다중검색목록) throws IOException {
-
-        return 지라이슈_검색엔진.이슈_다중검색하기(다중검색목록);
-    }
 }
