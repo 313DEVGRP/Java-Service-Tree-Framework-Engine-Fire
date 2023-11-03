@@ -39,7 +39,7 @@ public class SankeyChartImpl implements SankeyChart {
         TermsAggregationBuilder assigneesAgg = AggregationBuilders.terms("assignees")
                 .field("assignee.assignee_accountId.keyword")
                 .order(BucketOrder.count(false))
-                .size(5);
+                .size(3);
 
         assigneesAgg.subAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"));
         versionsAgg.subAggregation(assigneesAgg);
