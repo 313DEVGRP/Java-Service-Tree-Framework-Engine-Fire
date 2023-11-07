@@ -114,17 +114,23 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
     public boolean isIndexExists(Class<?> clazz) {
         IndexOperations indexOperations = elasticsearchOperations.indexOps(clazz);
 
-        boolean 결과 = false;
-
         if (indexOperations.exists()) {
-            결과 = indexOperations.exists();
+            return true;
         }
-        else {
-            결과 = indexOperations.create();
+
+        boolean isCreated = indexOperations.create();
+        if (!isCreated) {
+            return false;
+        }
+
+        boolean isMappingSet = indexOperations.putMapping(indexOperations.createMapping());
+        indexOperations.refresh();
+
+        if (isMappingSet) {
             로그.info("Created index: " + clazz.getSimpleName().toLowerCase());
         }
 
-        return 결과;
+        return isMappingSet;
     }
 
 //    @Override
