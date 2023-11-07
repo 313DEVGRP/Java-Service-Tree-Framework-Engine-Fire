@@ -1,5 +1,6 @@
 package com.arms.serverinfo.service;
 
+import com.arms.elasticsearch.helper.인덱스생성_매핑;
 import com.arms.errors.codes.에러코드;
 import com.arms.serverinfo.model.서버정보_데이터;
 import com.arms.serverinfo.model.서버정보_엔티티;
@@ -37,7 +38,7 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
     private com.arms.util.external_communicate.백엔드통신기 백엔드통신기;
 
     @Autowired
-    private ElasticsearchOperations elasticsearchOperations;
+    private 인덱스생성_매핑 인덱스생성_매핑;
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
@@ -76,9 +77,9 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
     @Override
     public Iterable<서버정보_엔티티> 서버정보백업_스케줄러() {
 
-        boolean isIndex = isIndexExists(서버정보_엔티티.class);
+        boolean 인덱스확인 = 인덱스생성_매핑.인덱스확인_및_생성_매핑(서버정보_엔티티.class);
 
-        if (!isIndex) {
+        if (!인덱스확인) {
             throw new IllegalArgumentException(에러코드.서버인덱스_NULL_오류.getErrorMsg());
         }
 
@@ -109,28 +110,6 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
         }
 
         return 서버정보_저장소.saveAll(result);
-    }
-
-    public boolean isIndexExists(Class<?> clazz) {
-        IndexOperations indexOperations = elasticsearchOperations.indexOps(clazz);
-
-        if (indexOperations.exists()) {
-            return true;
-        }
-
-        boolean isCreated = indexOperations.create();
-        if (!isCreated) {
-            return false;
-        }
-
-        boolean isMappingSet = indexOperations.putMapping(indexOperations.createMapping());
-        indexOperations.refresh();
-
-        if (isMappingSet) {
-            로그.info("Created index: " + clazz.getSimpleName().toLowerCase());
-        }
-
-        return isMappingSet;
     }
 
 //    @Override

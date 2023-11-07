@@ -1,7 +1,6 @@
 package com.arms.elasticsearch.services;
 
-import static java.util.stream.Collectors.*;
-
+import com.arms.elasticsearch.helper.인덱스생성_매핑;
 import com.arms.elasticsearch.helper.인덱스자료;
 import com.arms.elasticsearch.models.지라이슈;
 import com.arms.elasticsearch.repositories.지라이슈_저장소;
@@ -15,7 +14,6 @@ import com.arms.jira.jiraissue.model.지라이슈필드_데이터;
 import com.arms.jira.jiraissue.model.지라프로젝트_데이터;
 import com.arms.jira.jiraissue.service.지라이슈_전략_호출;
 import com.arms.jira.jiraissuestatus.model.지라이슈상태_데이터;
-import com.arms.serverinfo.model.서버정보_엔티티;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchRequest;
@@ -33,10 +31,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
-import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
@@ -48,6 +43,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service("지라이슈_서비스")
@@ -61,6 +58,8 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     private ElasticsearchOperations 검색엔진_실행기;
 
     private 지라이슈_전략_호출 지라이슈_전략_호출;
+
+    private 인덱스생성_매핑 인덱스생성_매핑;
 
     @Override
     public 지라이슈 이슈_추가하기(지라이슈 지라이슈) {
@@ -211,34 +210,13 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         return 이슈_추가하기(저장할_지라이슈);
     }
 
-    public boolean isIndexExists(Class<?> clazz) {
-        IndexOperations indexOperations = 검색엔진_실행기.indexOps(clazz);
-
-        if (indexOperations.exists()) {
-            return true;
-        }
-
-        boolean isCreated = indexOperations.create();
-        if (!isCreated) {
-            return false;
-        }
-
-        boolean isMappingSet = indexOperations.putMapping(indexOperations.createMapping());
-        indexOperations.refresh();
-
-        if (isMappingSet) {
-            로그.info("Created index: " + clazz.getSimpleName().toLowerCase());
-        }
-
-        return isMappingSet;
-    }
-
     @Override
     public int 이슈_링크드이슈_서브테스크_벌크로_추가하기(Long 지라서버_아이디, String 이슈_키 , Long 제품서비스_아이디, Long 제품서비스_버전) throws Exception {
 
-        boolean isIndex = isIndexExists(지라이슈.class);
 
-        if (!isIndex) {
+        boolean 인덱스확인 = 인덱스생성_매핑.인덱스확인_및_생성_매핑(지라이슈.class);
+
+        if (!인덱스확인) {
             throw new IllegalArgumentException(에러코드.지라이슈_인덱스_NULL_오류.getErrorMsg());
         }
 
