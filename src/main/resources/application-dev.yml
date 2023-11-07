@@ -13,3 +13,7 @@ jira:
   maxResults: 50
   issue:
     fields: fields=project,issuetype,creator,reporter,assignee,labels,priority,status,resolution,resolutiondate,created,updated,worklogs,timespent,summary
+
+arms:
+  backend-core:
+    url: http://127.0.0.1:31313

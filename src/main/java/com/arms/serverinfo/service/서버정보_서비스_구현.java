@@ -11,9 +11,16 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.IndexOperations;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service("서버정보_서비스")
@@ -25,6 +32,13 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
 
     @Autowired
     private 서버정보_저장소 서버정보_저장소;
+
+    @Autowired
+    private com.arms.util.external_communicate.백엔드통신기 백엔드통신기;
+
+    @Autowired
+    private ElasticsearchOperations elasticsearchOperations;
+
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     @Override
@@ -54,6 +68,60 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
 
         if (결과 == null) {
             throw new IllegalArgumentException(에러코드.서버정보_생성_오류.getErrorMsg());
+        }
+
+        return 결과;
+    }
+
+    @Override
+    public Iterable<서버정보_엔티티> 서버정보백업_스케줄러() {
+
+        boolean isIndex = isIndexExists(서버정보_엔티티.class);
+
+        if (!isIndex) {
+            throw new IllegalArgumentException(에러코드.서버인덱스_NULL_오류.getErrorMsg());
+        }
+
+        ResponseEntity<?> 결과 = 백엔드통신기.지라서버정보_가져오기();
+
+        HashMap<String, Object> 서버정보맵 = (HashMap<String, Object>) 결과.getBody();
+
+        if ((boolean) 서버정보맵.get("success") != true) {
+            throw new IllegalArgumentException(에러코드.서버정보_조회_오류.getErrorMsg());
+        }
+
+        List<LinkedHashMap> 서버정보목록 = (List<LinkedHashMap>) 서버정보맵.get("response");
+
+        List<서버정보_엔티티> result = null;
+        if (서버정보목록 != null && !서버정보목록.isEmpty()) {
+            result = 서버정보목록.stream()
+                    .map(서버정보 -> {
+                        서버정보_엔티티 서버정보_엔티티 = new 서버정보_엔티티();
+                        서버정보_엔티티.setUri((String) 서버정보.get("c_jira_server_base_url"));
+                        서버정보_엔티티.setType((String) 서버정보.get("c_jira_server_type"));
+                        서버정보_엔티티.setUserId((String) 서버정보.get("c_jira_server_connect_id"));
+                        서버정보_엔티티.setPasswordOrToken((String) 서버정보.get("c_jira_server_connect_pw"));
+                        서버정보_엔티티.setConnectId(Long.parseLong((String) 서버정보.get("c_jira_server_etc")));
+
+                        return 서버정보_엔티티;
+                    })
+                    .collect(Collectors.toList());
+        }
+
+        return 서버정보_저장소.saveAll(result);
+    }
+
+    public boolean isIndexExists(Class<?> clazz) {
+        IndexOperations indexOperations = elasticsearchOperations.indexOps(clazz);
+
+        boolean 결과 = false;
+
+        if (indexOperations.exists()) {
+            결과 = indexOperations.exists();
+        }
+        else {
+            결과 = indexOperations.create();
+            로그.info("Created index: " + clazz.getSimpleName().toLowerCase());
         }
 
         return 결과;
