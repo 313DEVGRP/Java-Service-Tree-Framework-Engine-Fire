@@ -1,8 +1,8 @@
 package com.arms.serverinfo.controller;
 
-import com.arms.serverinfo.service.서버정보_서비스;
 import com.arms.serverinfo.model.서버정보_데이터;
 import com.arms.serverinfo.model.서버정보_엔티티;
+import com.arms.serverinfo.service.서버정보_서비스;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +31,18 @@ public class 서버정보_컨트롤러 {
         로그.info("서버정보 저장");
 
         return 서버정보_서비스.서버정보_저장_또는_수정(서버정보_데이터);
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/backup/scheduler"},
+            method = {RequestMethod.POST}
+    )
+    public Iterable<서버정보_엔티티> 서버정보백업_스케줄러(ModelMap model, HttpServletRequest request) throws Exception {
+
+        로그.info("서버정보백업 스케줄러");
+
+        return 서버정보_서비스.서버정보백업_스케줄러();
     }
 
     /*
