@@ -122,7 +122,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                 인덱스자료.지라이슈_인덱스명,
                 검색조건
         );
-        return 지라이슈저장소.internalSearch(request,지라이슈.class);
+        return 지라이슈저장소.internalSearch(request, 지라이슈.class);
     }
 
 

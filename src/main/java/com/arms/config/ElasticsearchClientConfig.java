@@ -3,6 +3,7 @@
  */
 package com.arms.config;
 
+import com.arms.elasticsearch.util.repository.공통저장소_구현체;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -11,8 +12,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.elasticsearch.client.ClientConfiguration;
 import org.springframework.data.elasticsearch.client.RestClients;
 import org.springframework.data.elasticsearch.config.AbstractElasticsearchConfiguration;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 
 /**
@@ -20,7 +19,7 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
  *
  */
 @Configuration
-@EnableElasticsearchRepositories(basePackages = {"com.arms.elasticsearch.repositories","com.arms.serverinfo.repositories"})
+@EnableElasticsearchRepositories(basePackages = {"com.arms.elasticsearch.repositories","com.arms.serverinfo.repositories"},repositoryBaseClass = 공통저장소_구현체.class)
 @ComponentScan(basePackages = { "com.arms.elasticsearch" ,"com.arms.serverinfo"})
 public class ElasticsearchClientConfig extends AbstractElasticsearchConfiguration {
 

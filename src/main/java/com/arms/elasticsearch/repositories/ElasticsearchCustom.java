@@ -29,6 +29,5 @@ public interface ElasticsearchCustom {
 
 	<T> T getById(String 이슈_아이디, Class<T> clazz);
 
-	<T> SearchHits search(Query query, Class<T> clazz) ;
 
 }

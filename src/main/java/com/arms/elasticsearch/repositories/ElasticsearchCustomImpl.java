@@ -47,9 +47,6 @@ public class ElasticsearchCustomImpl implements ElasticsearchCustom {
 
 	private final ObjectMapper objectMapper;
 
-	private ElasticsearchOperations elasticsearchOperations;
-
-
 	@Override
 	public <T>List<T> internalSearch(SearchRequest request ,Class<T> clazz) {
 		if (request == null) {
@@ -170,10 +167,6 @@ public class ElasticsearchCustomImpl implements ElasticsearchCustom {
 
 	}
 
-	@Override
-	public <T> SearchHits search(Query query, Class<T> clazz) {
-		return elasticsearchOperations.search(query,clazz);
-	}
 
 
 }

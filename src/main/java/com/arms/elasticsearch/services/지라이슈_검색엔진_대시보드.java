@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.arms.elasticsearch.models.지라이슈;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -20,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 
-import com.arms.elasticsearch.models.지라이슈;
 import com.arms.elasticsearch.repositories.지라이슈_저장소;
 import com.arms.elasticsearch.util.query.쿼리_추상_팩토리;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
@@ -136,9 +136,8 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     @Override
     public 검색결과_목록_메인 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) throws IOException {
 
-        SearchHits searchHits = 지라이슈저장소.search(
-                쿼리추상팩토리.생성(),
-                지라이슈.class
+        SearchHits searchHits = 지라이슈저장소.operationSearch(
+                쿼리추상팩토리.생성()
         );
 
         return new 검색결과_목록_메인(searchHits);
