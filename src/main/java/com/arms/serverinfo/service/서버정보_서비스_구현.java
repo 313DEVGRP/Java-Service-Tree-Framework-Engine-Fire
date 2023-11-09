@@ -1,5 +1,6 @@
 package com.arms.serverinfo.service;
 
+import com.arms.elasticsearch.helper.인덱스생성_매핑;
 import com.arms.errors.codes.에러코드;
 import com.arms.serverinfo.model.서버정보_데이터;
 import com.arms.serverinfo.model.서버정보_엔티티;
@@ -11,9 +12,16 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.IndexOperations;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service("서버정보_서비스")
@@ -25,6 +33,13 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
 
     @Autowired
     private 서버정보_저장소 서버정보_저장소;
+
+    @Autowired
+    private com.arms.util.external_communicate.백엔드통신기 백엔드통신기;
+
+    @Autowired
+    private 인덱스생성_매핑 인덱스생성_매핑;
+
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     @Override
@@ -57,6 +72,44 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
         }
 
         return 결과;
+    }
+
+    @Override
+    public Iterable<서버정보_엔티티> 서버정보백업_스케줄러() {
+
+        boolean 인덱스확인 = 인덱스생성_매핑.인덱스확인_및_생성_매핑(서버정보_엔티티.class);
+
+        if (!인덱스확인) {
+            throw new IllegalArgumentException(에러코드.서버인덱스_NULL_오류.getErrorMsg());
+        }
+
+        ResponseEntity<?> 결과 = 백엔드통신기.지라서버정보_가져오기();
+
+        HashMap<String, Object> 서버정보맵 = (HashMap<String, Object>) 결과.getBody();
+
+        if ((boolean) 서버정보맵.get("success") != true) {
+            throw new IllegalArgumentException(에러코드.서버정보_조회_오류.getErrorMsg());
+        }
+
+        List<LinkedHashMap> 서버정보목록 = (List<LinkedHashMap>) 서버정보맵.get("response");
+
+        List<서버정보_엔티티> result = null;
+        if (서버정보목록 != null && !서버정보목록.isEmpty()) {
+            result = 서버정보목록.stream()
+                    .map(서버정보 -> {
+                        서버정보_엔티티 서버정보_엔티티 = new 서버정보_엔티티();
+                        서버정보_엔티티.setUri((String) 서버정보.get("c_jira_server_base_url"));
+                        서버정보_엔티티.setType((String) 서버정보.get("c_jira_server_type"));
+                        서버정보_엔티티.setUserId((String) 서버정보.get("c_jira_server_connect_id"));
+                        서버정보_엔티티.setPasswordOrToken((String) 서버정보.get("c_jira_server_connect_pw"));
+                        서버정보_엔티티.setConnectId(Long.parseLong((String) 서버정보.get("c_jira_server_etc")));
+
+                        return 서버정보_엔티티;
+                    })
+                    .collect(Collectors.toList());
+        }
+
+        return 서버정보_저장소.saveAll(result);
     }
 
 //    @Override
