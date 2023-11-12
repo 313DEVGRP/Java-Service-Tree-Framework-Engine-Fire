@@ -1,28 +1,17 @@
 package com.arms.elasticsearch.repositories;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 
-import org.elasticsearch.action.search.SearchRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.arms.elasticsearch.helper.인덱스자료;
-import com.arms.elasticsearch.models.지라이슈;
-import com.arms.elasticsearch.util.검색엔진_유틸;
-import com.arms.elasticsearch.util.검색조건;
+import com.arms.api.engine.models.지라이슈;
+import com.arms.api.engine.repositories.지라이슈_저장소;
 
 @SpringBootTest
 @ActiveProfiles("dev")
@@ -39,7 +28,7 @@ class ElasticsearchCustomImplTest {
 		// testHelper(지라이슈.class);
 
 		try{
-			com.arms.elasticsearch.models.지라이슈 byId = 저장소.getById("7634806241763211551_SP_SP-756", 지라이슈.class);
+			com.arms.api.engine.models.지라이슈 byId = 저장소.getById("7634806241763211551_SP_SP-756", 지라이슈.class);
 			System.out.println(byId);
 
 			// testHelper(지라이슈);
