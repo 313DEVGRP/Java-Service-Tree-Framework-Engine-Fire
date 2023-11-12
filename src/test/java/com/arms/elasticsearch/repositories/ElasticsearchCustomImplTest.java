@@ -21,22 +21,22 @@ class ElasticsearchCustomImplTest {
 	@Autowired
 	지라이슈_저장소 저장소;
 
-	@Test
-	public void test() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-		지라이슈 지라이슈 = new 지라이슈();
-		// 지라이슈.setId("1000");
-		// testHelper(지라이슈.class);
-
-		try{
-			com.arms.api.engine.models.지라이슈 byId = 저장소.getById("7634806241763211551_SP_SP-756", 지라이슈.class);
-			System.out.println(byId);
-
-			// testHelper(지라이슈);
-		}catch (RuntimeException e){
-			System.out.println(e.getMessage());
-		}
-
-	}
+	// @Test
+	// public void test() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+	// 	지라이슈 지라이슈 = new 지라이슈();
+	// 	// 지라이슈.setId("1000");
+	// 	// testHelper(지라이슈.class);
+	//
+	// 	try{
+	// 		com.arms.api.engine.models.지라이슈 byId = 저장소.getById("7634806241763211551_SP_SP-756", 지라이슈.class);
+	// 		System.out.println(byId);
+	//
+	// 		// testHelper(지라이슈);
+	// 	}catch (RuntimeException e){
+	// 		System.out.println(e.getMessage());
+	// 	}
+	//
+	// }
 
 	public <T> void testHelper(Class<T> valueType) throws ClassNotFoundException {
 

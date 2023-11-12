@@ -1,7 +1,6 @@
 package com.arms.api.engine.services;
 
 import com.arms.elasticsearch.helper.인덱스생성_매핑;
-import com.arms.elasticsearch.helper.인덱스자료;
 import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.repositories.지라이슈_저장소;
 import com.arms.elasticsearch.util.검색결과;
@@ -31,10 +30,9 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -55,8 +53,6 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
     private 지라이슈_저장소 지라이슈저장소;
 
-    private ElasticsearchOperations 검색엔진_실행기;
-
     private 지라이슈_전략_호출 지라이슈_전략_호출;
 
     private 인덱스생성_매핑 인덱스생성_매핑;
@@ -75,7 +71,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                 .map(지라이슈 -> new IndexQueryBuilder().withId(String.valueOf(지라이슈.getId()))
                         .withObject(지라이슈).build())
                 .collect(toList());
-        검색엔진_실행기.bulkIndex(검색엔진_쿼리, IndexCoordinates.of(인덱스자료.지라이슈_인덱스명));
+        지라이슈저장소.bulkIndex(검색엔진_쿼리);
 
         return 검색엔진_쿼리.size();
     }
@@ -118,11 +114,9 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
     @Override
     public List<지라이슈> 이슈_검색하기(검색조건 검색조건) {
-        final SearchRequest request = 검색엔진_유틸.buildSearchRequest(
-                인덱스자료.지라이슈_인덱스명,
-                검색조건
-        );
-        return 지라이슈저장소.internalSearch(request, 지라이슈.class);
+        Query query
+            = 검색엔진_유틸.buildSearchQuery(검색조건).build();
+        return 지라이슈저장소.internalSearch(query);
     }
 
 
@@ -466,18 +460,14 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
         검색조건 검색조건 = new 검색조건();
         검색조건.setFields(검색_필드);
-        검색조건.setOrder(SortOrder.valueOf("ASC"));
+        검색조건.setOrder(SortOrder.ASC);
         검색조건.setSearchTerm(이슈_키);
         검색조건.setPage(페이지_번호);
         검색조건.setSize(페이지_사이즈);
 
-        final SearchRequest request = 검색엔진_유틸.buildSearchRequest(
-                인덱스자료.지라이슈_인덱스명,
-                검색조건,
-                서버_아이디
-        );
+        Query query = 검색엔진_유틸.buildSearchQuery(검색조건,서버_아이디).build();
 
-        return 지라이슈저장소.internalSearch(request,지라이슈.class);
+        return 지라이슈저장소.internalSearch(query);
     }
 
     @Override

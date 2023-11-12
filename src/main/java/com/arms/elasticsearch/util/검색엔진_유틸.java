@@ -3,67 +3,83 @@ package com.arms.elasticsearch.util;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.index.query.*;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.List;
-
+import java.util.Optional;
 
 @Slf4j
 public final class 검색엔진_유틸 {
 
-    public static SearchRequest buildSearchRequest(final String indexName,
-                                                   final 검색조건 dto) {
+    public static NativeSearchQueryBuilder buildSearchQuery(final 검색조건 dto) {
         try {
-            final int page = dto.getPage();
-            final int size = dto.getSize();
-            final int from = page <= 0 ? 0 : page * size;
+            NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+                .withQuery(getQueryBuilder(dto))
+                .withPageable(PageRequest.of(dto.getPage(), dto.getSize()));
+                if(dto.getSortBy()!=null){
+                    nativeSearchQueryBuilder.withSort(Sort.by(
+                        Direction.fromString(
+                            Optional.ofNullable(dto.getOrder()).orElseGet(() -> SortOrder.ASC).name())
+                        , dto.getSortBy()));
+                }
 
-            SearchSourceBuilder builder = new SearchSourceBuilder()
-                    .from(from)
-                    .size(size)
-                    .postFilter(getQueryBuilder(dto));
+                return nativeSearchQueryBuilder;
+        } catch (final Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-            if (dto.getSortBy() != null) {
-                builder = builder.sort(
-                        dto.getSortBy(),
-                        dto.getOrder() != null ? dto.getOrder() : SortOrder.ASC
-                );
+    /* ***
+     * 페이징 처리 데이터 조회 시 이슈 키 값으로 조회하면 같은 프로젝트명, 이슈 키 값이 있을 경우 문제가 있어 검색 조건 추가
+     *** */
+    public static NativeSearchQueryBuilder buildSearchQuery( final 검색조건 dto ,final Long serverId) {
+        try {
+            final QueryBuilder searchQuery = getQueryBuilder(dto);
+            final QueryBuilder serverQuery = getQueryBuilder("jira_server_id", serverId);
+
+            final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
+                .must(searchQuery)
+                .must(serverQuery);
+
+            NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+                .withQuery(boolQuery)
+                .withPageable(PageRequest.of(dto.getPage(), dto.getSize()));
+
+            if(dto.getSortBy()!=null){
+                nativeSearchQueryBuilder.withSort(Sort.by(
+                    Direction.fromString(
+                        Optional.ofNullable(dto.getOrder()).orElseGet(() -> SortOrder.ASC).name())
+                    , dto.getSortBy()));
             }
 
-            final SearchRequest request = new SearchRequest(indexName);
-            request.source(builder);
-
-            return request;
+            return nativeSearchQueryBuilder;
         } catch (final Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public static SearchRequest buildSearchRequest(final String indexName,
-                                                   final String field,
-                                                   final Date date) {
+    public static NativeSearchQueryBuilder buildSearchQuery(final String field,final Date date) {
         try {
-            final SearchSourceBuilder builder = new SearchSourceBuilder()
-                    .postFilter(getQueryBuilder(field, date));
 
-            final SearchRequest request = new SearchRequest(indexName);
-            request.source(builder);
+            return new NativeSearchQueryBuilder()
+                .withQuery(getQueryBuilder(field, date));
 
-            return request;
         } catch (final Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public static SearchRequest buildSearchRequest(final String indexName,
-                                                   final 검색조건 dto,
-                                                   final Date date) {
+    public static NativeSearchQueryBuilder buildSearchQuery(final 검색조건 dto, final Date date) {
         try {
             final QueryBuilder searchQuery = getQueryBuilder(dto);
             final QueryBuilder dateQuery = getQueryBuilder("created", date);
@@ -72,20 +88,16 @@ public final class 검색엔진_유틸 {
                     .mustNot(searchQuery)
                     .must(dateQuery);
 
-            SearchSourceBuilder builder = new SearchSourceBuilder()
-                    .postFilter(boolQuery);
-
-            if (dto.getSortBy() != null) {
-                builder = builder.sort(
-                        dto.getSortBy(),
-                        dto.getOrder() != null ? dto.getOrder() : SortOrder.ASC
-                );
+            NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+                .withQuery(boolQuery)
+                .withPageable(PageRequest.of(dto.getPage(), dto.getSize()));
+            if(dto.getSortBy()!=null){
+                nativeSearchQueryBuilder.withSort(Sort.by(
+                    Direction.fromString(
+                        Optional.ofNullable(dto.getOrder()).orElseGet(() -> SortOrder.ASC).name())
+                    , dto.getSortBy()));
             }
-
-            final SearchRequest request = new SearchRequest(indexName);
-            request.source(builder);
-
-            return request;
+            return nativeSearchQueryBuilder;
         } catch (final Exception e) {
             e.printStackTrace();
             return null;
@@ -124,62 +136,9 @@ public final class 검색엔진_유틸 {
         return QueryBuilders.rangeQuery(field).gte(date);
     }
 
-    /* ***
-     * 페이징 처리 데이터 조회 시 이슈 키 값으로 조회하면 같은 프로젝트명, 이슈 키 값이 있을 경우 문제가 있어 검색 조건 추가
-     *** */
-    public static SearchRequest buildSearchRequest(final String indexName,
-                                                   final 검색조건 dto,
-                                                   final Long serverId) {
-        try {
-            final int page = dto.getPage();
-            final int size = dto.getSize();
-            final int from = page <= 0 ? 0 : page * size;
-
-            final QueryBuilder searchQuery = getQueryBuilder(dto);
-            final QueryBuilder serverQuery = getQueryBuilder("jira_server_id", serverId);
-
-            final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
-                    .must(searchQuery)
-                    .must(serverQuery);
-
-            SearchSourceBuilder builder = new SearchSourceBuilder()
-                    .from(from)
-                    .size(size)
-                    .postFilter(boolQuery);
-
-            if (dto.getSortBy() != null) {
-                builder = builder.sort(
-                        dto.getSortBy(),
-                        dto.getOrder() != null ? dto.getOrder() : SortOrder.ASC
-                );
-            }
-
-            final SearchRequest request = new SearchRequest(indexName);
-            request.source(builder);
-
-            return request;
-        } catch (final Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
     private static QueryBuilder getQueryBuilder(final String field, final Long serverId) {
         return QueryBuilders.matchQuery(field, serverId);
-    }
-
-    public static SearchRequest getSearchRequest(String indexName, String groupByField) {
-        SearchRequest searchRequest = new SearchRequest(indexName);
-
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.query(QueryBuilders.matchAllQuery());
-        searchSourceBuilder.aggregation(
-            AggregationBuilders.terms("group_by")
-                .field(groupByField)
-                .size(100)  // Change the size as needed
-        );
-        searchRequest.source(searchSourceBuilder);
-        return searchRequest;
     }
 
 }
