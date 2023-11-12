@@ -16,7 +16,7 @@ import org.springframework.data.annotation.Id;
 @Setter
 @Document(indexName = 인덱스자료.지라이슈_인덱스명)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "_class")
-@JsonTypeName("com.arms.api.engine.models.지라이슈")
+@JsonTypeName("com.arms.elasticsearch.models.지라이슈")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class 지라이슈 {
 
