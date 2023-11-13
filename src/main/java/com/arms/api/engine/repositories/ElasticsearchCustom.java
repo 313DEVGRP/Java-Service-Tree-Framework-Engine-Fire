@@ -20,6 +20,7 @@ import com.arms.elasticsearch.util.검색조건;
 public interface ElasticsearchCustom {
 
 
+	@Deprecated
 	SearchResponse search(SearchRequest searchRequest, RequestOptions options) throws IOException;
 
 

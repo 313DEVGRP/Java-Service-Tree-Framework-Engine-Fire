@@ -3,10 +3,7 @@ package com.arms.api.engine.services;
 import com.arms.elasticsearch.helper.인덱스생성_매핑;
 import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.repositories.지라이슈_저장소;
-import com.arms.elasticsearch.util.검색결과;
-import com.arms.elasticsearch.util.검색결과_목록;
-import com.arms.elasticsearch.util.검색엔진_유틸;
-import com.arms.elasticsearch.util.검색조건;
+import com.arms.elasticsearch.util.*;
 import com.arms.errors.codes.에러코드;
 import com.arms.api.jira.jiraissue.model.지라이슈_데이터;
 import com.arms.api.jira.jiraissue.model.지라이슈필드_데이터;
@@ -30,8 +27,10 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 
@@ -119,57 +118,35 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         return 지라이슈저장소.internalSearch(query);
     }
 
-
     @Override
-    public 검색결과_목록 특정필드의_값들을_그룹화하여_빈도수가져오기(String indexName, String groupByField) throws IOException {
-        SearchRequest searchRequest = new SearchRequest(indexName);
+    public 검색결과_목록_메인 특정필드의_값들을_그룹화하여_빈도수가져오기(String indexName, String groupByField) throws IOException {
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
+        nativeSearchQueryBuilder
+            .withQuery(QueryBuilders.matchAllQuery())
+            .withAggregations(
+                AggregationBuilders.terms("group_by")
+                        .field(groupByField)
+                        .size(100)
+            );
 
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.query(QueryBuilders.matchAllQuery());
-        searchSourceBuilder.aggregation(
-            AggregationBuilders.terms("group_by")
-                .field(groupByField)
-                .size(100)  // Change the size as needed
-        );
-        searchRequest.source(searchSourceBuilder);
-
-        SearchResponse searchResponse = 지라이슈저장소.search(searchRequest, RequestOptions.DEFAULT);
-
-        Terms terms = searchResponse.getAggregations().get("group_by");
-
-        List<검색결과> buckets
-            = terms.getBuckets()
-                .stream()
-                .map(bucket -> new 검색결과(bucket.getKeyAsString(), bucket.getDocCount()))
-                .collect(toList());
-
-        return new 검색결과_목록(buckets).중복제거();
+        return new 검색결과_목록_메인(지라이슈저장소.operationSearch(nativeSearchQueryBuilder.build()));
     }
 
     @Override
-    public 검색결과_목록 특정필드_검색후_다른필드_그룹결과(String 인덱스이름, String 특정필드, String 특정필드검색어, String 그룹할필드) throws IOException {
-        SearchRequest searchRequest = new SearchRequest(인덱스이름);
+    public 검색결과_목록_메인 특정필드_검색후_다른필드_그룹결과(String 인덱스이름, String 특정필드, String 특정필드검색어, String 그룹할필드) throws IOException {
 
-        ExistsQueryBuilder existsQuery = QueryBuilders.existsQuery(특정필드);
-        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery().must(existsQuery).filter(QueryBuilders.termQuery(특정필드, 특정필드검색어));
-        searchRequest.source().query(boolQuery);
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
 
-        TermsAggregationBuilder termsAggregation = AggregationBuilders.terms("group_by_" + 특정필드)
-            .field(그룹할필드)
-            .size(1000); // Change the size as needed
-        searchRequest.source().aggregation(termsAggregation);
+        BoolQueryBuilder boolQuery
+                = QueryBuilders.boolQuery()
+                .must(QueryBuilders.existsQuery(특정필드))
+                .filter(QueryBuilders.termQuery(특정필드, 특정필드검색어));
 
-        SearchResponse searchResponse = 지라이슈저장소.search(searchRequest, RequestOptions.DEFAULT);
-
-        Terms terms = searchResponse.getAggregations().get("group_by_" + 특정필드);
-
-        List<검색결과> buckets
-            = terms.getBuckets()
-                .stream()
-                .map(bucket -> new 검색결과(bucket.getKeyAsString(), bucket.getDocCount()))
-                .collect(toList());
-
-        return new 검색결과_목록(buckets);
+        nativeSearchQueryBuilder.withQuery(boolQuery)
+                .withAggregations( AggregationBuilders.terms("group_by_" + 특정필드)
+                        .field(그룹할필드)
+                        .size(1000));
+        return new 검색결과_목록_메인(지라이슈저장소.operationSearch(nativeSearchQueryBuilder.build()));
     }
 
     @Override
