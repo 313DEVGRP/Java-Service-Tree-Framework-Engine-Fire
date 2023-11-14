@@ -47,6 +47,15 @@ public class 클라우드_지라이슈우선순위_전략 implements 지라이�
                 String endpoint = "/rest/api/3/priority/search?maxResults="+ 최대_검색수 + "&startAt=" + startAt;
                 클라우드_지라이슈우선순위_데이터 클라우드_지라이슈우선순위_데이터 = 지라유틸.get(webClient, endpoint, 클라우드_지라이슈우선순위_데이터.class).block();
 
+                if (클라우드_지라이슈우선순위_데이터 == null) {
+                    로그.error("클라우드 지라 이슈 우선순위 전체 목록이 Null 입니다.");
+                    throw new IllegalArgumentException(에러코드.이슈우선순위_조회_오류.getErrorMsg());
+                }
+                else if (클라우드_지라이슈우선순위_데이터.getValues() == null || 클라우드_지라이슈우선순위_데이터.getValues().size() == 0) {
+                    로그.error("클라우드 지라 이슈 우선순위 전체 목록이 없습니다.");
+                    throw new IllegalArgumentException(에러코드.이슈우선순위_조회_오류.getErrorMsg());
+                }
+
                 반환할_지라이슈우선순위_데이터_목록.addAll(클라우드_지라이슈우선순위_데이터.getValues());
 
                 if (클라우드_지라이슈우선순위_데이터.getTotal() == 반환할_지라이슈우선순위_데이터_목록.size()) {

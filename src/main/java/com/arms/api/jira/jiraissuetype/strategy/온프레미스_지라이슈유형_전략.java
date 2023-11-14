@@ -57,7 +57,16 @@ public class 온프레미스_지라이슈유형_전략 implements 지라이슈�
 
             return 반환할_이슈_유형_목록;
 
-        } catch (Exception e) {
+        }
+        catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // 스레드를 다시 interrupt
+
+            로그.error("온프레미스 지라 이슈 유형 목록 가져오기 가져오기에 실패하였습니다.");
+            로그.error(e.getClass().getName() + " : "+ e.getMessage());
+
+            return Collections.emptyList();
+        }
+        catch (Exception e) {
             로그.error("온프레미스 지라 이슈 유형 목록 가져오기 가져오기에 실패하였습니다.");
             로그.error(e.getClass().getName() + " : "+ e.getMessage());
 
@@ -100,7 +109,16 @@ public class 온프레미스_지라이슈유형_전략 implements 지라이슈�
 
             return 반환할_이슈_유형_목록;
 
-        } catch (Exception e) {
+        }
+        catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // 스레드를 다시 interrupt
+
+            로그.error("온프레미스 지라 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록_가져오기에 실패하였습니다.");
+            로그.error(e.getClass().getName() + " : "+ e.getMessage());
+
+            return Collections.emptyList();
+        }
+        catch (Exception e) {
             로그.error("온프레미스 지라 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록_가져오기에 실패하였습니다.");
             로그.error(e.getClass().getName() + " : "+ e.getMessage());
 

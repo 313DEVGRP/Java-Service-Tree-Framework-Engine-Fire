@@ -38,12 +38,19 @@ public class 클라우드_지라이슈유형_전략 implements 지라이슈유�
                                         = 지라유틸.get(webClient, endpoint,
                                         new ParameterizedTypeReference<List<지라이슈유형_데이터>>() {}).block();
 
-            로그.info(반환할_이슈_유형_목록.toString());
+            if (반환할_이슈_유형_목록 == null) {
+                로그.error("클라우드 지라 이슈 유형 목록이 Null입니다.");
+                return Collections.emptyList();
+            }
+            else if (반환할_이슈_유형_목록.size() == 0) {
+                로그.error("클라우드 지라 이슈 유형 목록이 없습니다.");
+                return Collections.emptyList();
+            }
 
             return 반환할_이슈_유형_목록;
 
         } catch (Exception e) {
-            로그.error("클라우드 지라 이슈 유형 목록 가져오기 가져오기에 실패하였습니다.");
+            로그.error("클라우드 지라 이슈 유형 목록 가져오기 실패하였습니다.");
             로그.error(e.getClass().getName() + " : "+ e.getMessage());
 
             if (e instanceof WebClientResponseException) {
@@ -77,7 +84,14 @@ public class 클라우드_지라이슈유형_전략 implements 지라이슈유�
                     = 지라유틸.get(webClient, endpoint,
                             new ParameterizedTypeReference<List<지라이슈유형_데이터>>() {}).block();
 
-            로그.info(반환할_이슈_유형_목록.toString());
+            if (반환할_이슈_유형_목록 == null) {
+                로그.error("클라우드 지라 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록이 Null입니다.");
+                return Collections.emptyList();
+            }
+            else if (반환할_이슈_유형_목록.size() == 0) {
+                로그.error("클라우드 지라 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록이 없습니다.");
+                return Collections.emptyList();
+            }
 
             return 반환할_이슈_유형_목록;
 
