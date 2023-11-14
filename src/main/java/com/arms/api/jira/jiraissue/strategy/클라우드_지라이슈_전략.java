@@ -58,7 +58,7 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
             List<지라이슈_데이터> 프로젝트_이슈_목록 = new ArrayList<>();
 
             while (!isLast) {
-                String endpoint = "/rest/api/3/engine?jql=project=" + 프로젝트_키_또는_아이디
+                String endpoint = "/rest/api/3/search?jql=project=" + 프로젝트_키_또는_아이디
                                 + "&startAt=" + 검색_시작_지점 + "&maxResults=" + 최대_검색수
                                 + "&" + 지라유틸.조회할_필드_목록_가져오기();
 
@@ -390,7 +390,7 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
 
         try {
             while (!isLast) {
-                String endpoint = "/rest/api/3/engine?jql=issue in linkedIssues(" + 이슈_키_또는_아이디 + ")&" + 지라유틸.조회할_필드_목록_가져오기()
+                String endpoint = "/rest/api/3/search?jql=issue in linkedIssues(" + 이슈_키_또는_아이디 + ")&" + 지라유틸.조회할_필드_목록_가져오기()
                         + "&startAt=" + 검색_시작_지점 + "&maxResults=" + 최대_검색수;
 
                 지라이슈조회_데이터 이슈링크_조회결과
@@ -429,7 +429,7 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
 
         try {
             while (!isLast) {
-                String endpoint = "/rest/api/3/engine?jql=parent=" + 이슈_키_또는_아이디 +
+                String endpoint = "/rest/api/3/search?jql=parent=" + 이슈_키_또는_아이디 +
                         "&" + 지라유틸.조회할_필드_목록_가져오기() +
                         "&startAt=" + 검색_시작_지점 + "&maxResults=" + 최대_검색수;
 
