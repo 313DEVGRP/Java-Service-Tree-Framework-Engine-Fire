@@ -31,7 +31,7 @@ public class SankeyChartImpl implements SankeyChart {
     private final ElasticSearchQueryHelper es;
 
     @Override
-    public Map<String, List<SankeyElasticSearchData>> 제품_버전별_담당자_목록(Long pdServiceLink, List<Long> pdServiceVersionLinks) throws IOException {
+    public Map<String, List<SankeyElasticSearchData>> 제품_버전별_담당자_목록(Long pdServiceLink, List<Long> pdServiceVersionLinks, int maxResults) throws IOException {
         BoolQueryBuilder boolQuery = es.boolQueryBuilder(pdServiceLink, pdServiceVersionLinks)
                 .filter(QueryBuilders.termQuery("isReq", false))
                 .filter(QueryBuilders.existsQuery("assignee"));
@@ -39,8 +39,11 @@ public class SankeyChartImpl implements SankeyChart {
         TermsAggregationBuilder versionsAgg = AggregationBuilders.terms("versions").field("pdServiceVersion");
         TermsAggregationBuilder assigneesAgg = AggregationBuilders.terms("assignees")
                 .field("assignee.assignee_accountId.keyword")
-                .order(BucketOrder.count(false))
-                .size(3);
+                .order(BucketOrder.count(false));
+
+        if(maxResults > 0) {
+            assigneesAgg.size(maxResults);
+        }
 
         assigneesAgg.subAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"));
         versionsAgg.subAggregation(assigneesAgg);

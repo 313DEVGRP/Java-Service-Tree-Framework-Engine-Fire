@@ -102,9 +102,10 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     )
     public Map<String, List<SankeyElasticSearchData>> 제품별_버전_및_작업자(
             @RequestParam Long pdServiceLink,
-            @RequestParam List<Long> pdServiceVersionLinks
+            @RequestParam List<Long> pdServiceVersionLinks,
+            @RequestParam int maxResults
     ) throws IOException {
-        Map<String, List<SankeyElasticSearchData>> sankeyElasticSearchData = sankeyChart.제품_버전별_담당자_목록(pdServiceLink, pdServiceVersionLinks);
+        Map<String, List<SankeyElasticSearchData>> sankeyElasticSearchData = sankeyChart.제품_버전별_담당자_목록(pdServiceLink, pdServiceVersionLinks, maxResults);
         return sankeyElasticSearchData;
     }
 
