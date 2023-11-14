@@ -21,7 +21,7 @@ public class TreeMapChartImpl implements TreeMapChart {
     private final 지라이슈_저장소 지라이슈저장소;
 
     @Override
-    public List<Worker> 작업자_별_요구사항_별_관여도(Long pdServiceLink, List<Long> pdServiceVersionLinks) {
+    public List<Worker> 작업자_별_요구사항_별_관여도(Long pdServiceLink, List<Long> pdServiceVersionLinks, int maxResults) {
         Map<String, Worker> contributionMap = new HashMap<>();
 
         List<지라이슈> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionIn(true, pdServiceLink, pdServiceVersionLinks);
@@ -70,9 +70,16 @@ public class TreeMapChartImpl implements TreeMapChart {
             }
         }
 
+
+        if (maxResults > 0) {
+            return contributionMap.values().stream()
+                    .sorted((w1, w2) -> w2.getData().get(FIELD_TOTAL_INVOLVED_COUNT).compareTo(w1.getData().get(FIELD_TOTAL_INVOLVED_COUNT)))
+                    .limit(maxResults)
+                    .collect(Collectors.toList());
+        }
+
         return contributionMap.values().stream()
                 .sorted((w1, w2) -> w2.getData().get(FIELD_TOTAL_INVOLVED_COUNT).compareTo(w1.getData().get(FIELD_TOTAL_INVOLVED_COUNT)))
-                .limit(5)
                 .collect(Collectors.toList());
 
     }

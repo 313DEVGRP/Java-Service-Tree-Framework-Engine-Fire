@@ -152,9 +152,10 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     )
     public List<Worker> 작업자_별_요구사항_별_관여도(
             @RequestParam Long pdServiceLink,
-            @RequestParam List<Long> pdServiceVersionLinks
+            @RequestParam List<Long> pdServiceVersionLinks,
+            @RequestParam int maxResults
     ) throws IOException {
-        return treeMapChart.작업자_별_요구사항_별_관여도(pdServiceLink, pdServiceVersionLinks);
+        return treeMapChart.작업자_별_요구사항_별_관여도(pdServiceLink, pdServiceVersionLinks, maxResults);
     }
 
     @ResponseBody
