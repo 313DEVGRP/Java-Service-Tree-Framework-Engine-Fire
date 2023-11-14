@@ -1,12 +1,18 @@
 package com.arms.jira.jiraissue.service;
 
-import com.arms.jira.jiraissue.model.*;
-import com.arms.jira.jiraissueresolution.model.지라이슈해결책_데이터;
-import com.arms.jira.jiraissuestatus.model.지라이슈상태_데이터;
-import com.arms.jira.jiraissuestatus.model.클라우드_지라이슈상태_데이터;
-import com.arms.jira.jiraissuetype.model.지라이슈유형_데이터;
-import com.arms.jira.jirapriority.model.지라이슈우선순위_데이터;
-import com.arms.jira.utils.지라유틸;
+import com.arms.api.jira.jiraissue.model.지라사용자_데이터;
+import com.arms.api.jira.jiraissue.model.지라이슈_데이터;
+import com.arms.api.jira.jiraissue.model.지라이슈워크로그_데이터;
+import com.arms.api.jira.jiraissue.model.지라이슈전체워크로그_데이터;
+import com.arms.api.jira.jiraissue.model.지라이슈조회_데이터;
+import com.arms.api.jira.jiraissue.model.지라이슈필드_데이터;
+import com.arms.api.jira.jiraissue.model.지라프로젝트_데이터;
+import com.arms.api.jira.jiraissueresolution.model.지라이슈해결책_데이터;
+import com.arms.api.jira.jiraissuestatus.model.지라이슈상태_데이터;
+import com.arms.api.jira.jiraissuestatus.model.클라우드_지라이슈상태_데이터;
+import com.arms.api.jira.jiraissuetype.model.지라이슈유형_데이터;
+import com.arms.api.jira.jirapriority.model.지라이슈우선순위_데이터;
+import com.arms.utils.지라유틸;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.api.domain.BasicUser;
 import com.atlassian.jira.rest.client.api.domain.Issue;
@@ -15,7 +21,7 @@ import com.atlassian.jira.rest.client.api.domain.Worklog;
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import feign.FeignException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -23,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
@@ -41,7 +46,7 @@ class 통합이슈조회테스트 {
     ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
-    지라이슈_전략_호출 지라이슈_전략_호출;
+    com.arms.api.jira.jiraissue.service.지라이슈_전략_호출 지라이슈_전략_호출;
 
     String fieldsParam = "project,issuetype,creator,reporter,assignee,labels,priority,status,resolution,resolutiondate,created,worklogs,timespent,fixVersions";
 
@@ -101,7 +106,7 @@ class 통합이슈조회테스트 {
 
     public 지라이슈_데이터 클라우드_이슈조회() throws JsonProcessingException {
 
-        //String endpoint = "/rest/api/3/search?jql=issue=" + c_issueKey + "&fields=" + fieldsParam;
+        //String endpoint = "/rest/api/3/engine?jql=issue=" + c_issueKey + "&fields=" + fieldsParam;
         String endpoint = "/rest/api/3/issue/" + c_issueKey + "?fields=" + fieldsParam;
         
         로그.info(endpoint);
@@ -158,7 +163,7 @@ class 통합이슈조회테스트 {
         List<지라이슈_데이터> 지라이슈_목록 = new ArrayList<>();
 
         while (!isLast) {
-            String endpoint = "/rest/api/3/search?jql=project=" + c_projectKey + "&fields=" + fieldsParam
+            String endpoint = "/rest/api/3/engine?jql=project=" + c_projectKey + "&fields=" + fieldsParam
                             + "&startAt=" + 검색_시작_지점 + "&maxResults=" + 검색_최대_개수;
 
             지라이슈조회_데이터 지라이슈조회_데이터 = 지라유틸.get(webClient, endpoint, 지라이슈조회_데이터.class).block();
@@ -516,7 +521,7 @@ class 통합이슈조회테스트 {
                 .defaultHeader("Authorization", "Basic " + getBase64Credentials("gkfn185@gmail.com", "ATATT3xFfGF0WHBw5R_YdXGY-QBpFTJl5S6am7hqo7yWx1P0kOUdarkWcDaWDH-aYuJNQFL7LjUAA8MzArZyaXQQDeOGdKVjLyiFcuIBDR_FdKSD1UCFm3cXnJD7rHPPsxYe73OIMO5nuoP-mJDMy35zYoQiQGaW3DdW4Z64UoT2PeieuDz0UFE=1E941C6B"))
                 .build();
 
-        String endpoint = "/rest/api/3/statuses/search?maxResults=" + 최대_검색수 + "&startAt=" + startAt + "&projectId=" + 프로젝트_아이디;
+        String endpoint = "/rest/api/3/statuses/engine?maxResults=" + 최대_검색수 + "&startAt=" + startAt + "&projectId=" + 프로젝트_아이디;
 
         클라우드_지라이슈상태_데이터 지라이슈상태_조회_결과;
 
