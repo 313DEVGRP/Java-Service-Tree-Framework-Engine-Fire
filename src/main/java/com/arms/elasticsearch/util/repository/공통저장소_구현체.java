@@ -2,6 +2,8 @@ package com.arms.elasticsearch.util.repository;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -27,6 +29,8 @@ import com.arms.elasticsearch.util.검색조건;
 @Slf4j
 public class 공통저장소_구현체<T,ID extends Serializable> extends SimpleElasticsearchRepository<T,ID> implements 공통저장소<T,ID> {
 
+    private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
+
     private final Class<T> entityClass;
     private final ElasticsearchOperations operations;
 
@@ -44,6 +48,12 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
     public List<IndexedObjectInformation> bulkIndex(List<IndexQuery> indexQueryList){
         Document document = AnnotationUtils.findAnnotation(entityClass, Document.class);
+
+        if (document == null) {
+            로그.error("bulkIndex Document null 오류");
+            throw new IllegalArgumentException("bulkIndex Document null 오류");
+        }
+
         return operations.bulkIndex(indexQueryList, IndexCoordinates.of(document.indexName()));
     }
 
@@ -54,7 +64,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         }
         try {
             return operations.search(query, entityClass).stream()
-                .map(a->a.getContent()).collect(Collectors.toList());
+                    .map(a->a.getContent()).collect(Collectors.toList());
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -66,8 +76,8 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
     public List<T>  getAllCreatedSince(final Date date, Class<T> clazz) {
 
         NativeSearchQueryBuilder query = 검색엔진_유틸.buildSearchQuery(
-            "created",
-            date
+                "created",
+                date
         );
         return this.internalSearch(query.build());
 
@@ -77,8 +87,8 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
     public List<T>  searchCreatedSince(final 검색조건 dto, final Date date, Class<T> clazz) {
 
         NativeSearchQueryBuilder query = 검색엔진_유틸.buildSearchQuery(
-            dto,
-            date
+                dto,
+                date
         );
         return this.internalSearch(query.build());
 
