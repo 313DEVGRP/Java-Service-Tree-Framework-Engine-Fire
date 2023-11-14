@@ -261,23 +261,16 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
             }
         }
         else {
-
             List<지라이슈_데이터> 이슈링크_또는_서브테스크_목록 = new ArrayList<지라이슈_데이터>();
 
             Optional.ofNullable(지라이슈_전략_호출.이슈링크_가져오기(지라서버_아이디, 이슈_키))
-                    .map(이슈링크_목록 -> {
-                        이슈링크_또는_서브테스크_목록.addAll(이슈링크_목록);
-                        return 이슈링크_목록;
-                    });
+                    .ifPresent(이슈링크_목록 -> 이슈링크_또는_서브테스크_목록.addAll(이슈링크_목록));
 
             Optional.ofNullable(지라이슈_전략_호출.서브테스크_가져오기(지라서버_아이디, 이슈_키))
-                    .map(서브테스크_목록 -> {
-                        이슈링크_또는_서브테스크_목록.addAll(서브테스크_목록);
-                        return 서브테스크_목록;
-                    });
+                    .ifPresent(서브테스크_목록 -> 이슈링크_또는_서브테스크_목록.addAll(서브테스크_목록));
 
             if (이슈링크_또는_서브테스크_목록 != null && 이슈링크_또는_서브테스크_목록.size() >= 1) {
-                이슈링크_또는_서브테스크_목록.stream().map(이슈링크또는서브테스크 -> {
+                List<지라이슈> 변환된_이슈_목록 = 이슈링크_또는_서브테스크_목록.stream().map(이슈링크또는서브테스크 -> {
                             지라이슈 변환된_이슈 = ELK_데이터로_변환(지라서버_아이디, 이슈링크또는서브테스크,
                                     false, 이슈_키, 제품서비스_아이디, 제품서비스_버전);
                             벌크_저장_목록.add(변환된_이슈);
@@ -850,5 +843,8 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         return 제품서비스별_담당자_연관된_요구사항_통계;
     }
 
+    @Override
+    public List<지라이슈> 제품서비스_버전목록으로_조회(Long pdServiceLink, List<Long> pdServiceVersionLinks) {
+        return 지라이슈저장소.findByPdServiceIdAndPdServiceVersionIn(pdServiceLink, pdServiceVersionLinks);
+    }
 }
-

@@ -50,6 +50,15 @@ public class 클라우드_지라이슈상태_전략 implements 지라이슈상�
                 String endpoint = "/rest/api/3/statuses/search?maxResults="+ 최대_검색수 + "&startAt=" + startAt;
                 클라우드_지라이슈상태_데이터 지라이슈상태_조회_결과 = 지라유틸.get(webClient, endpoint, 클라우드_지라이슈상태_데이터.class).block();
 
+                if (지라이슈상태_조회_결과 == null) {
+                    로그.error("클라우드 지라 이슈 상태 목록이 Null입니다.");
+                    return Collections.emptyList();
+                }
+                else if (지라이슈상태_조회_결과.getValues() == null || 지라이슈상태_조회_결과.getValues().size() == 0) {
+                    로그.error("클라우드 지라 이슈 상태 목록이 없습니다.");
+                    return Collections.emptyList();
+                }
+
                 반환할_지라이슈상태_데이터_목록.addAll(지라이슈상태_조회_결과.getValues());
 
                 for (지라이슈상태_데이터 이슈_상태 : 반환할_지라이슈상태_데이터_목록) {
@@ -106,6 +115,15 @@ public class 클라우드_지라이슈상태_전략 implements 지라이슈상�
             while(!checkLast) {
                 String endpoint = "/rest/api/3/statuses/search?maxResults="+ 최대_검색수 + "&startAt=" + startAt + "&projectId="+프로젝트_아이디;
                 클라우드_지라이슈상태_데이터 지라이슈상태_조회_결과 = 지라유틸.get(webClient, endpoint, 클라우드_지라이슈상태_데이터.class).block();
+
+                if (지라이슈상태_조회_결과 == null) {
+                    로그.error("클라우드 지라 이슈 상태 목록이 Null입니다.");
+                    return Collections.emptyList();
+                }
+                else if (지라이슈상태_조회_결과.getValues() == null || 지라이슈상태_조회_결과.getValues().size() == 0) {
+                    로그.error("클라우드 지라 이슈 상태 목록이 없습니다.");
+                    return Collections.emptyList();
+                }
 
                 반환할_지라이슈상태_데이터_목록.addAll(지라이슈상태_조회_결과.getValues());
 

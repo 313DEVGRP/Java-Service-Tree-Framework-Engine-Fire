@@ -1,33 +1,22 @@
 package com.arms.api.engine.controllers;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.services.지라이슈_서비스;
+import com.arms.api.jira.jiraissue.service.지라이슈_전략_호출;
+import com.arms.elasticsearch.helper.인덱스자료;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
+import com.arms.elasticsearch.util.검색조건;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.arms.elasticsearch.helper.인덱스자료;
-import com.arms.api.engine.models.지라이슈;
-import com.arms.elasticsearch.util.검색결과_목록;
-import com.arms.elasticsearch.util.검색조건;
-import com.arms.api.jira.jiraissue.service.지라이슈_전략_호출;
-
-import lombok.extern.slf4j.Slf4j;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/engine/jira/{connectId}/issue")
@@ -195,4 +184,13 @@ public class 엘라스틱_지라이슈_컨트롤러 {
         return 지라이슈_검색엔진.제품서비스별_담당자_연관된_요구사항_통계(지라서버_아이디, 제품서비스_아이디, 이슈키, 담당자_이메일);
     }
 
+    @ResponseBody
+    @GetMapping("/pdService/pdServiceVersions")
+    public List<지라이슈> 제품서비스_버전목록으로_조회(@RequestParam Long pdServiceLink,
+                                    @RequestParam List<Long> pdServiceVersionLinks) throws IOException {
+
+        로그.info("제품서비스_버전목록으로_조회");
+
+        return 지라이슈_검색엔진.제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
+    }
 }

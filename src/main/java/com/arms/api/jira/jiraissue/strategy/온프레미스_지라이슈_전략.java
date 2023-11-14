@@ -161,9 +161,6 @@ public class 온프레미스_지라이슈_전략 implements 지라이슈_전략 
 
         IssueInputBuilder 입력_생성 = new IssueInputBuilder(프로젝트키, 이슈유형아이디, 제목);
 
-        if (입력_생성 == null) {
-            throw new IllegalArgumentException(에러코드.이슈생성_오류.getErrorMsg());
-        }
         입력_생성.setDescription(내용);
 
         if (보고자 != null) {
@@ -540,8 +537,18 @@ public class 온프레미스_지라이슈_전략 implements 지라이슈_전략 
 
             return 반환할_이슈링크_목록;
         }
+        catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // 스레드를 다시 interrupt
+
+            로그.error("온프레미스에서 조회하려는 이슈 키의 연결된 이슈 정보 가져오기에 실패하였습니다. 조회 대상 정보 확인이 필요합니다.");
+            로그.error(e.getClass().getName() + " : "+ e.getMessage());
+
+            return null;
+        }
         catch (Exception e) {
             로그.error("온프레미스에서 조회하려는 이슈 키의 연결된 이슈 정보 가져오기에 실패하였습니다. 조회 대상 정보 확인이 필요합니다.");
+            로그.error(e.getClass().getName() + " : "+ e.getMessage());
+
             return null;
         }
     }
@@ -579,9 +586,19 @@ public class 온프레미스_지라이슈_전략 implements 지라이슈_전략 
 
             return 반환할_서브테스크_목록;
         }
+        catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // 스레드를 다시 interrupt
+
+            로그.error("온프레미스에서 조회하려는 이슈 키의 서브테스크 정보 가져오기에 실패하였습니다. 조회 대상 정보 확인이 필요합니다.");
+            로그.error(e.getClass().getName() + " : "+ e.getMessage());
+
+            return null;
+        }
         catch (Exception e) {
-                로그.error("온프레미스에서 조회하려는 이슈 키의 서브테스크 정보 가져오기에 실패하였습니다. 조회 대상 정보 확인이 필요합니다.");
-                return null;
+            로그.error("온프레미스에서 조회하려는 이슈 키의 서브테스크 정보 가져오기에 실패하였습니다. 조회 대상 정보 확인이 필요합니다.");
+            로그.error(e.getClass().getName() + " : "+ e.getMessage());
+
+            return null;
             }
         }
 }

@@ -44,6 +44,7 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
 
     @Override
     public 서버정보_엔티티 서버정보_저장_또는_수정(서버정보_데이터 서버정보_데이터) {
+
         if (서버정보_데이터 == null) {
             throw new IllegalArgumentException(에러코드.서버정보_오류.getErrorMsg());
         }
@@ -64,10 +65,14 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
         }
 
         서버정보_엔티티 서버정보_엔티티 = modelMapper.map(서버정보_데이터, 서버정보_엔티티.class);
-        서버정보_엔티티 결과 = 서버정보_저장소.save(서버정보_엔티티);
+        서버정보_엔티티 결과;
 
-        if (결과 == null) {
-            throw new IllegalArgumentException(에러코드.서버정보_생성_오류.getErrorMsg());
+        try {
+            결과 = 서버정보_저장소.save(서버정보_엔티티);
+        }
+        catch (Exception e) {
+            로그.error(e.getMessage());
+            throw new IllegalArgumentException(e.getMessage(), e);
         }
 
         return 결과;
@@ -86,7 +91,15 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
 
         HashMap<String, Object> 서버정보맵 = (HashMap<String, Object>) 결과.getBody();
 
-        if ((boolean) 서버정보맵.get("success") != true) {
+        Object 성공유무 = 서버정보맵.get("success");
+
+        if (성공유무 == null) {
+            throw new IllegalArgumentException(에러코드.서버정보_조회_오류.getErrorMsg());
+        }
+        else if ((boolean) 성공유무 != true) {
+            throw new IllegalArgumentException(에러코드.서버정보_조회_오류.getErrorMsg());
+        }
+        else if (서버정보맵.get("response") == null) {
             throw new IllegalArgumentException(에러코드.서버정보_조회_오류.getErrorMsg());
         }
 
@@ -168,5 +181,3 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
         return 서버정보_데이터;
     }
 }
-
-

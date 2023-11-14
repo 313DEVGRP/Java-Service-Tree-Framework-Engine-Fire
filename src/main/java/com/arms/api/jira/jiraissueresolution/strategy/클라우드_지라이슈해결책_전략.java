@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -44,12 +45,21 @@ public class 클라우드_지라이슈해결책_전략 implements 지라이슈�
 
             while(!checkLast) {
                 String endpoint = "/rest/api/3/resolution/search?maxResults="+ 최대_검색수 + "&startAt=" + startAt;
-                클라우드_지라이슈해결책_데이터 resolutions = 지라유틸.get(webClient, endpoint,
+                클라우드_지라이슈해결책_데이터 지라이슈해결책_조회_결과 = 지라유틸.get(webClient, endpoint,
                                                             클라우드_지라이슈해결책_데이터.class).block();
 
-                반환할_지라이슈해결책_데이터_목록.addAll(resolutions.getValues());
+                if (지라이슈해결책_조회_결과 == null) {
+                    로그.error("클라우드 지라 이슈 해결책 목록이 Null입니다.");
+                    throw new IllegalArgumentException(에러코드.이슈해결책_조회_오류.getErrorMsg());
+                }
+                else if (지라이슈해결책_조회_결과.getValues() == null || 지라이슈해결책_조회_결과.getValues().size() == 0) {
+                    로그.error("클라우드 지라 이슈 해결책 목록이 없습니다.");
+                    throw new IllegalArgumentException(에러코드.이슈해결책_조회_오류.getErrorMsg());
+                }
 
-                if (resolutions.getTotal() == 반환할_지라이슈해결책_데이터_목록.size()) {
+                반환할_지라이슈해결책_데이터_목록.addAll(지라이슈해결책_조회_결과.getValues());
+
+                if (지라이슈해결책_조회_결과.getTotal() == 반환할_지라이슈해결책_데이터_목록.size()) {
                     checkLast = true;
                 }
                 else {

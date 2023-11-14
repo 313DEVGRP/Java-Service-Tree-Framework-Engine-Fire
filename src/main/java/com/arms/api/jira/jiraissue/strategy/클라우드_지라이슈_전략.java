@@ -64,8 +64,16 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
                                 + "&startAt=" + 검색_시작_지점 + "&maxResults=" + 최대_검색수
                                 + "&" + 지라유틸.조회할_필드_목록_가져오기();
 
-                지라이슈조회_데이터 프로젝트_이슈_검색결과 = 지라유틸.get(webClient, endpoint, 지라이슈조회_데이터.class)
-                        .onErrorMap(e -> new IllegalArgumentException(에러코드.검색정보_오류.getErrorMsg())).block();
+                지라이슈조회_데이터 프로젝트_이슈_검색결과 = 지라유틸.get(webClient, endpoint, 지라이슈조회_데이터.class).block();
+
+                if (프로젝트_이슈_검색결과 == null) {
+                    로그.error("클라우드 지라 프로젝트에 이슈 목록이 Null입니다.");
+                    throw new IllegalArgumentException(에러코드.이슈_조회_오류.getErrorMsg());
+                }
+                else if (프로젝트_이슈_검색결과.getIssues() == null || 프로젝트_이슈_검색결과.getIssues().size() == 0) {
+                    로그.error("클라우드 지라 프로젝트에 이슈 목록이 없습니다.");
+                    throw new IllegalArgumentException(에러코드.이슈_조회_오류.getErrorMsg());
+                }
 
                 프로젝트_이슈_목록.addAll(프로젝트_이슈_검색결과.getIssues());
 
@@ -103,10 +111,14 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
             서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
             WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
 
-            지라이슈_데이터 지라이슈_데이터 = 지라유틸.get(webClient, endpoint, 지라이슈_데이터.class)
-                    .onErrorMap(e -> new IllegalArgumentException(에러코드.검색정보_오류.getErrorMsg())).block();
+            지라이슈_데이터 지라이슈_데이터 = 지라유틸.get(webClient, endpoint, 지라이슈_데이터.class).block();
 
-            지라이슈_데이터.getFields().setWorklogs(이슈_워크로그_조회(webClient, 이슈_키_또는_아이디));
+            if(지라이슈_데이터 != null && 지라이슈_데이터.getFields() != null) {
+                지라이슈_데이터.getFields().setWorklogs(이슈_워크로그_조회(webClient, 이슈_키_또는_아이디));
+            } else {
+                로그.error("이슈 정보 가져오기에 실패하였습니다. 조회 대상 정보 확인이 필요합니다.");
+                return null;
+            }
 
             로그.info(지라이슈_데이터.toString());
 
@@ -148,7 +160,6 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
             클라우드_필드_데이터.setSummary(필드_데이터.getSummary());
         }
 
-        System.out.println(필드_데이터.getDescription().toString());
         if (필드_데이터.getDescription() != null) {
             클라우드_필드_데이터.setDescription(내용_변환((String) 필드_데이터.getDescription()));
         }
@@ -178,21 +189,45 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
 
         String 이슈생성_필드확인_지점 = "/rest/api/3/issue/createmeta?expand=projects.issuetypes.fields&projectIds="+ 프로젝트_아이디 +"&issuetypeIds=" +이슈유형_아이디;
 
-
         Map<String, Object> 반환할_이슈생성_필드 = 지라유틸.get(webClient, 이슈생성_필드확인_지점, Map.class).block();
-        List<Map<String, Object>> 프로젝트_목록 = (List<Map<String, Object>>) 반환할_이슈생성_필드.get("projects");
+        List<Map<String, Object>> 프로젝트_목록 = null;
 
-        if (반환할_이슈생성_필드 == null || 프로젝트_목록.size() != 1) {
+        if(반환할_이슈생성_필드 != null && 반환할_이슈생성_필드.containsKey("projects") && 반환할_이슈생성_필드.get("projects") != null) {
+            프로젝트_목록 = (List<Map<String, Object>>) 반환할_이슈생성_필드.get("projects");
+        } else {
             throw new IllegalArgumentException("이슈 생성 필드 확인 중 프로젝트 목록에 문제가있습니다.");
         }
 
-        List<Map<String, Object>> 이슈유형 = (List<Map<String, Object>>) 프로젝트_목록.get(0).get("issuetypes");
+        if (프로젝트_목록.size() != 1) {
+            throw new IllegalArgumentException("이슈 생성 필드 확인 중 프로젝트 목록에 문제가있습니다.");
+        }
 
-        if (이슈유형 == null || 이슈유형.size() != 1) {
+        List<Map<String, Object>> 이슈유형 = null;
+
+        if(프로젝트_목록 != null && !프로젝트_목록.isEmpty() && 프로젝트_목록.get(0) != null) {
+            Map<String, Object> 프로젝트 = 프로젝트_목록.get(0);
+            if(프로젝트.containsKey("issuetypes") && 프로젝트.get("issuetypes") != null) {
+                이슈유형 = (List<Map<String, Object>>) 프로젝트.get("issuetypes");
+            } else {
+                throw new IllegalArgumentException("이슈 생성 필드 확인 중 이슈유형 목록에 문제가있습니다.");
+            }
+        } else {
             throw new IllegalArgumentException("이슈 생성 필드 확인 중 이슈유형 목록에 문제가있습니다.");
         }
 
-        Map<String, Object> 필드 = (Map<String, Object>) 이슈유형.get(0).get("fields");
+        Map<String, Object> 필드 = null;
+
+        if(이슈유형 != null && !이슈유형.isEmpty() && 이슈유형.get(0) != null) {
+            Map<String, Object> firstIssueType = 이슈유형.get(0);
+            if(firstIssueType.containsKey("fields") && firstIssueType.get("fields") != null) {
+                필드 = (Map<String, Object>) firstIssueType.get("fields");
+            } else {
+                throw new IllegalArgumentException("이슈 생성 필드 확인 중 fields 목록에 문제가있습니다.");
+            }
+        } else {
+            throw new IllegalArgumentException("이슈 생성 필드 확인 중 fields 목록에 문제가있습니다.");
+        }
+
         boolean 우선순위_유무 = 필드.containsKey("priority");
 
         if (우선순위_유무 && 필드_데이터.getPriority() != null) {
@@ -398,6 +433,15 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
                 지라이슈조회_데이터 이슈링크_조회결과
                         = 지라유틸.get(webClient, endpoint, 지라이슈조회_데이터.class).block();
 
+                if (이슈링크_조회결과 == null) {
+                    로그.error("클라우드 지라 연결된 이슈 목록이 Null입니다.");
+                    return null;
+                }
+                else if (이슈링크_조회결과.getIssues() == null || 이슈링크_조회결과.getIssues().size() == 0) {
+                    로그.error("클라우드 지라 연결된 이슈 목록이 없습니다.");
+                    return null;
+                }
+
                 이슈링크_목록.addAll(이슈링크_조회결과.getIssues());
 
                 if (이슈링크_조회결과.getTotal() == 이슈링크_목록.size()) {
@@ -406,8 +450,6 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
                     검색_시작_지점 += 최대_검색수;
                 }
             }
-
-            System.out.println(이슈링크_목록.toString());
 
             return 이슈링크_목록;
         }
@@ -438,6 +480,15 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
                 지라이슈조회_데이터 서브테스크_조회결과
                         = 지라유틸.get(webClient, endpoint, 지라이슈조회_데이터.class).block();
 
+                if (서브테스크_조회결과 == null) {
+                    로그.error("클라우드 지라 서브테스크 이슈 목록이 Null입니다.");
+                    return null;
+                }
+                else if (서브테스크_조회결과.getIssues() == null || 서브테스크_조회결과.getIssues().size() == 0) {
+                    로그.error("클라우드 지라 서브테스크 이슈 목록이 없습니다.");
+                    return null;
+                }
+
                 서브테스크_목록.addAll(서브테스크_조회결과.getIssues());
 
                 if (서브테스크_조회결과.getTotal() == 서브테스크_목록.size()) {
@@ -446,8 +497,6 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
                     검색_시작_지점 += 최대_검색수;
                 }
             }
-
-            System.out.println(서브테스크_목록.toString());
 
             return 서브테스크_목록;
         }
@@ -468,11 +517,20 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
         while (!isLast) {
             String endpoint = "/rest/api/3/issue/" + 이슈_키_또는_아이디 + "/worklog?startAt=" + 검색_시작_지점 + "&maxResults=" + 최대_검색수;
 
-            지라이슈전체워크로그_데이터 지라이슈전체워크로그_데이터 = 지라유틸.get(webClient, endpoint, 지라이슈전체워크로그_데이터.class).block();
+            지라이슈전체워크로그_데이터 지라이슈워크로그_조회_결과 = 지라유틸.get(webClient, endpoint, 지라이슈전체워크로그_데이터.class).block();
 
-            지라이슈워크로그_목록.addAll(지라이슈전체워크로그_데이터.getWorklogs());
+            if (지라이슈워크로그_조회_결과 == null) {
+                로그.error("클라우드 지라이슈 전체 워크로그 목록이 Null입니다.");
+                throw new IllegalArgumentException(에러코드.워크로그_조회_오류.getErrorMsg());
+            }
+            else if (지라이슈워크로그_조회_결과.getWorklogs() == null || 지라이슈워크로그_조회_결과.getWorklogs().size() == 0) {
+                로그.error("클라우드 지라이슈 전체 워크로그 목록이 없습니다.");
+                throw new IllegalArgumentException(에러코드.워크로그_조회_오류.getErrorMsg());
+            }
 
-            if (지라이슈전체워크로그_데이터.getTotal() == 지라이슈워크로그_목록.size()) {
+            지라이슈워크로그_목록.addAll(지라이슈워크로그_조회_결과.getWorklogs());
+
+            if (지라이슈워크로그_조회_결과.getTotal() == 지라이슈워크로그_목록.size()) {
                 isLast = true;
             } else {
                 검색_시작_지점 += 최대_검색수;
