@@ -163,7 +163,7 @@ class 통합이슈조회테스트 {
         List<지라이슈_데이터> 지라이슈_목록 = new ArrayList<>();
 
         while (!isLast) {
-            String endpoint = "/rest/api/3/engine?jql=project=" + c_projectKey + "&fields=" + fieldsParam
+            String endpoint = "/rest/api/3/search?jql=project=" + c_projectKey + "&fields=" + fieldsParam
                             + "&startAt=" + 검색_시작_지점 + "&maxResults=" + 검색_최대_개수;
 
             지라이슈조회_데이터 지라이슈조회_데이터 = 지라유틸.get(webClient, endpoint, 지라이슈조회_데이터.class).block();
@@ -521,7 +521,7 @@ class 통합이슈조회테스트 {
                 .defaultHeader("Authorization", "Basic " + getBase64Credentials("gkfn185@gmail.com", "ATATT3xFfGF0WHBw5R_YdXGY-QBpFTJl5S6am7hqo7yWx1P0kOUdarkWcDaWDH-aYuJNQFL7LjUAA8MzArZyaXQQDeOGdKVjLyiFcuIBDR_FdKSD1UCFm3cXnJD7rHPPsxYe73OIMO5nuoP-mJDMy35zYoQiQGaW3DdW4Z64UoT2PeieuDz0UFE=1E941C6B"))
                 .build();
 
-        String endpoint = "/rest/api/3/statuses/engine?maxResults=" + 최대_검색수 + "&startAt=" + startAt + "&projectId=" + 프로젝트_아이디;
+        String endpoint = "/rest/api/3/statuses/search?maxResults=" + 최대_검색수 + "&startAt=" + startAt + "&projectId=" + 프로젝트_아이디;
 
         클라우드_지라이슈상태_데이터 지라이슈상태_조회_결과;
 

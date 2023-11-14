@@ -20,6 +20,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import com.arms.api.serverinfo.repositories.서버정보_저장소;
+import com.arms.utils.external_communicate.백엔드통신기;
 
 @Slf4j
 @Service("서버정보_서비스")
@@ -30,10 +32,10 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
     private ModelMapper modelMapper;
 
     @Autowired
-    private com.arms.api.serverinfo.repositories.서버정보_저장소 서버정보_저장소;
+    private 서버정보_저장소 서버정보_저장소;
 
     @Autowired
-    private com.arms.utils.external_communicate.백엔드통신기 백엔드통신기;
+    private 백엔드통신기 백엔드통신기;
 
     @Autowired
     private 인덱스생성_매핑 인덱스생성_매핑;
@@ -42,7 +44,6 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
 
     @Override
     public 서버정보_엔티티 서버정보_저장_또는_수정(서버정보_데이터 서버정보_데이터) {
-
         if (서버정보_데이터 == null) {
             throw new IllegalArgumentException(에러코드.서버정보_오류.getErrorMsg());
         }

@@ -17,7 +17,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @Setter
 @Document(indexName = 인덱스자료.서버정보_인덱스명)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "_class")
-@JsonTypeName("서버정보_엔티티")
+@JsonTypeName("com.arms.api.serverinfo.model.서버정보_엔티티")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class 서버정보_엔티티 {
 

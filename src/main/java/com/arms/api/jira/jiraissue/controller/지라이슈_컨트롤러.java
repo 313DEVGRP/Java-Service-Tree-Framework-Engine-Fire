@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
+import com.arms.api.jira.jiraissue.service.*;
 
 @RestController
 @RequestMapping("/{connectId}/jira/issue")
@@ -20,7 +21,7 @@ public class 지라이슈_컨트롤러 {
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    com.arms.api.jira.jiraissue.service.지라이슈_전략_호출 지라이슈_전략_호출;
+    지라이슈_전략_호출 지라이슈_전략_호출;
 
     @ResponseBody
     @RequestMapping(

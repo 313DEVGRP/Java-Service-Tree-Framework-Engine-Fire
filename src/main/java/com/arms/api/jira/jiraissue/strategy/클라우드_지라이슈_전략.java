@@ -11,6 +11,8 @@ import com.arms.api.jira.jiraissue.model.지라이슈조회_데이터;
 import com.arms.api.jira.jiraissue.model.클라우드_지라이슈생성_데이터;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.errors.codes.에러코드;
+import com.arms.api.serverinfo.service.서버정보_서비스;
+import com.arms.utils.지라유틸;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
@@ -30,13 +32,13 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private com.arms.api.serverinfo.service.서버정보_서비스 서버정보_서비스;
+    private 서버정보_서비스 서버정보_서비스;
 
     @Autowired
     private ModelMapper modelMapper;
 
     @Autowired
-    private com.arms.utils.지라유틸 지라유틸;
+    private 지라유틸 지라유틸;
 
     @Override
     public List<지라이슈_데이터> 이슈_목록_가져오기(Long 연결_아이디, String 프로젝트_키_또는_아이디) {

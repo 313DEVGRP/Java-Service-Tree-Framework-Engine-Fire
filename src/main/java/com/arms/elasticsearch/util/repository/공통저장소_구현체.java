@@ -49,7 +49,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
     public List<T> internalSearch(Query query) {
         if (query == null) {
-            log.error("Failed to build engine request");
+            log.error("Failed to build search request");
             return Collections.emptyList();
         }
         try {

@@ -541,12 +541,12 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                 AggregationBuilders.terms("status_name_agg").field("status.status_name.keyword")
         );
 
-        // Create the engine request
+        // Create the search request
         SearchRequest searchRequest = new SearchRequest();
         searchRequest.indices("jiraissue"); // Replace with your actual index name
         searchRequest.source(sourceBuilder);
 
-        // Execute the engine request
+        // Execute the search request
         SearchResponse searchResponse = 지라이슈저장소.search(searchRequest, RequestOptions.DEFAULT);
 
         // Extract the Terms aggregation results

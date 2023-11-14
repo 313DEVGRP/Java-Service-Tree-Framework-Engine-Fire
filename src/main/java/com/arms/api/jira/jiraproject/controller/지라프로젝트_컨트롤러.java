@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import com.arms.api.jira.jiraproject.service.지라프로젝트_전략_호출;
+
 
 @RestController
 @RequestMapping("/{connectId}/jira/project")
@@ -18,7 +20,7 @@ public class 지라프로젝트_컨트롤러 {
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    com.arms.api.jira.jiraproject.service.지라프로젝트_전략_호출 지라프로젝트_전략_호출;
+    지라프로젝트_전략_호출 지라프로젝트_전략_호출;
 
     @ResponseBody
     @RequestMapping(

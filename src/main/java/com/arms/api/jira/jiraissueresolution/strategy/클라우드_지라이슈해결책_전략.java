@@ -5,6 +5,7 @@ import com.arms.api.jira.jiraissueresolution.model.클라우드_지라이슈해�
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.errors.codes.에러코드;
 import com.arms.api.serverinfo.service.서버정보_서비스;
+import com.arms.utils.지라유틸;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,7 @@ public class 클라우드_지라이슈해결책_전략 implements 지라이슈�
     private 서버정보_서비스 서버정보_서비스;
 
     @Autowired
-    private com.arms.utils.지라유틸 지라유틸;
+    private 지라유틸 지라유틸;
 
     @Override
     public List<지라이슈해결책_데이터> 이슈해결책_목록_가져오기(Long 연결_아이디) {
@@ -42,7 +43,7 @@ public class 클라우드_지라이슈해결책_전략 implements 지라이슈�
             List<지라이슈해결책_데이터> 반환할_지라이슈해결책_데이터_목록 = new ArrayList<지라이슈해결책_데이터>();
 
             while(!checkLast) {
-                String endpoint = "/rest/api/3/resolution/engine?maxResults="+ 최대_검색수 + "&startAt=" + startAt;
+                String endpoint = "/rest/api/3/resolution/search?maxResults="+ 최대_검색수 + "&startAt=" + startAt;
                 클라우드_지라이슈해결책_데이터 resolutions = 지라유틸.get(webClient, endpoint,
                                                             클라우드_지라이슈해결책_데이터.class).block();
 

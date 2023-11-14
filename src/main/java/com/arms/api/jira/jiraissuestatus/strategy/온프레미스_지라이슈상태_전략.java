@@ -3,6 +3,7 @@ package com.arms.api.jira.jiraissuestatus.strategy;
 import com.arms.utils.지라유틸;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.errors.codes.에러코드;
+import com.arms.api.serverinfo.service.서버정보_서비스;
 
 import com.arms.api.jira.jiraissuestatus.model.지라이슈상태_데이터;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
@@ -23,7 +24,7 @@ public class 온프레미스_지라이슈상태_전략 implements 지라이슈�
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private com.arms.api.serverinfo.service.서버정보_서비스 서버정보_서비스;
+    private 서버정보_서비스 서버정보_서비스;
 
     @Override
     public List<지라이슈상태_데이터> 이슈상태_목록_가져오기(Long 연결_아이디) throws Exception {

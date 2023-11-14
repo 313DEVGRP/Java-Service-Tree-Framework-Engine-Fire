@@ -69,7 +69,7 @@ public class 클라우드_지라프로젝트_전략 implements 지라프로젝�
             List<지라프로젝트_데이터> 반환할_프로젝트_데이터_목록 = new ArrayList<>();
 
             while(!isLast) {
-                String endpoint = "/rest/api/3/project/engine?maxResults="+ 최대_검색수 + "&startAt=" + startAt;
+                String endpoint = "/rest/api/3/project/search?maxResults="+ 최대_검색수 + "&startAt=" + startAt;
                 클라우드_지라프로젝트_전체_데이터 클라우드_지라프로젝트_전체_데이터
                                     = 지라유틸.get(webClient, endpoint, 클라우드_지라프로젝트_전체_데이터.class).block();
 

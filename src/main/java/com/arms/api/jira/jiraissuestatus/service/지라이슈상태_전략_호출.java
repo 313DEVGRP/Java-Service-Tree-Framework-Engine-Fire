@@ -23,13 +23,13 @@ public class 지라이슈상태_전략_호출 {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
-    com.arms.api.jira.jiraissuestatus.strategy.지라이슈상태_전략_등록_및_실행 지라이슈상태_전략_등록_및_실행;
+    지라이슈상태_전략_등록_및_실행 지라이슈상태_전략_등록_및_실행;
 
-    com.arms.api.jira.jiraissuestatus.strategy.클라우드_지라이슈상태_전략 클라우드_지라이슈상태_전략;
+    클라우드_지라이슈상태_전략 클라우드_지라이슈상태_전략;
 
-    com.arms.api.jira.jiraissuestatus.strategy.온프레미스_지라이슈상태_전략 온프레미스_지라이슈상태_전략;
+    온프레미스_지라이슈상태_전략 온프레미스_지라이슈상태_전략;
 
-    com.arms.api.serverinfo.service.서버정보_서비스 서버정보_서비스;
+    서버정보_서비스 서버정보_서비스;
 
     @Autowired
     public 지라이슈상태_전략_호출(지라이슈상태_전략_등록_및_실행 지라이슈상태_전략_등록_및_실행,

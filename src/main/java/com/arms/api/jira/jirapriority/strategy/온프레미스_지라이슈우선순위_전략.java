@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import com.arms.api.serverinfo.service.서버정보_서비스;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,7 @@ public class 온프레미스_지라이슈우선순위_전략 implements 지라�
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private com.arms.api.serverinfo.service.서버정보_서비스 서버정보_서비스;
+    private 서버정보_서비스 서버정보_서비스;
 
     @Override
     public List<지라이슈우선순위_데이터> 우선순위_목록_가져오기(Long 연결_아이디) throws Exception {
