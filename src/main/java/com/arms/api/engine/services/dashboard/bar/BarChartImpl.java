@@ -9,6 +9,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
@@ -31,6 +32,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BarChartImpl implements BarChart {
 
+    private static final String FIELD_CREATED = "created";
+
     private final 지라이슈_저장소 지라이슈저장소;
     private final ElasticSearchQueryHelper es;
 
@@ -38,11 +41,11 @@ public class BarChartImpl implements BarChart {
     public 요구사항_지라이슈상태_주별_집계 누적데이터조회(Long pdServiceLink, List<Long> pdServiceVersionLinks, LocalDate monthAgo) throws IOException {
         // 총 이슈 개수를 구하기 위한 쿼리
         BoolQueryBuilder boolQueryForTotalIssues = es.boolQueryBuilder(pdServiceLink, pdServiceVersionLinks)
-                .filter(QueryBuilders.rangeQuery("created").lt(monthAgo));
+                .filter(QueryBuilders.rangeQuery(FIELD_CREATED).lt(monthAgo));
 
         // 총 요구사항 개수를 구하기 위한 쿼리
         BoolQueryBuilder boolQueryForTotalRequirements = es.boolQueryBuilder(pdServiceLink, pdServiceVersionLinks)
-                .filter(QueryBuilders.rangeQuery("created").lt(monthAgo))
+                .filter(QueryBuilders.rangeQuery(FIELD_CREATED).lt(monthAgo))
                 .filter(QueryBuilders.termQuery("isReq", true));
 
         // 이슈 상태에 대한 집계 쿼리
@@ -51,21 +54,32 @@ public class BarChartImpl implements BarChart {
         // 총 이슈 개수 검색
         SearchSourceBuilder sourceBuilderForTotalIssues = new SearchSourceBuilder().query(boolQueryForTotalIssues).aggregation(totalAggregationBuilder);
         SearchResponse searchResponseForTotalIssues = 지라이슈저장소.search(es.getSearchRequest(sourceBuilderForTotalIssues), RequestOptions.DEFAULT);
-        long totalIssuesCount = searchResponseForTotalIssues.getHits().getTotalHits().value;
+        Long totalIssuesCount = Optional.ofNullable(searchResponseForTotalIssues)
+                .map(SearchResponse::getHits)
+                .map(SearchHits::getTotalHits)
+                .map(totalHits -> totalHits.value)
+                .orElse(0L);
 
         // 총 요구사항 개수 검색
         SearchSourceBuilder sourceBuilderForTotalRequirements = new SearchSourceBuilder().query(boolQueryForTotalRequirements);
         SearchResponse searchResponseForTotalRequirements = 지라이슈저장소.search(es.getSearchRequest(sourceBuilderForTotalRequirements), RequestOptions.DEFAULT);
-        long totalRequirementsCount = searchResponseForTotalRequirements.getHits().getTotalHits().value;
+        Long totalRequirementsCount = Optional.ofNullable(searchResponseForTotalRequirements)
+                .map(SearchResponse::getHits)
+                .map(SearchHits::getTotalHits)
+                .map(totalHits -> totalHits.value)
+                .orElse(0L);
 
         // 이슈 상태 집계 결과 가져오기
-        Terms totalStatus = searchResponseForTotalIssues.getAggregations().get("total_status");
         Map<String, Long> statusMap = new HashMap<>();
-        for (Terms.Bucket entry : totalStatus.getBuckets()) {
-            String key = entry.getKeyAsString();
-            long value = entry.getDocCount();
-            statusMap.put(key, value);
-        }
+        Optional.ofNullable(searchResponseForTotalIssues)
+                .map(response -> response.getAggregations().get("total_status"))
+                .ifPresent(totalStatus -> {
+                    for (Terms.Bucket entry : ((Terms) totalStatus).getBuckets()) {
+                        String key = entry.getKeyAsString();
+                        long value = entry.getDocCount();
+                        statusMap.put(key, value);
+                    }
+                });
 
         return new 요구사항_지라이슈상태_주별_집계(totalIssuesCount, statusMap, totalRequirementsCount);
     }
@@ -83,11 +97,11 @@ public class BarChartImpl implements BarChart {
 
         // 2. 검색 범위 내의 데이터를 가져온다. 현재 검색 범위는 차트 UI를 고려하여, 4~5주 정도로 적용
         BoolQueryBuilder boolQuery = es.boolQueryBuilder(pdServiceLink, pdServiceVersionLinks)
-                .filter(QueryBuilders.rangeQuery("created").from(monthAgo).to(now));
+                .filter(QueryBuilders.rangeQuery(FIELD_CREATED).from(monthAgo).to(now));
 
         DateHistogramAggregationBuilder weeklyAggregationBuilder = AggregationBuilders
                 .dateHistogram("aggregation_by_week")
-                .field("created")
+                .field(FIELD_CREATED)
                 .calendarInterval(DateHistogramInterval.WEEK)
                 .subAggregation(AggregationBuilders.terms("statuses").field("status.status_name.keyword"))
                 .subAggregation(AggregationBuilders.terms("requirements").field("isReq"));

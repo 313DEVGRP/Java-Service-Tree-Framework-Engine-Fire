@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TreeMapChartImpl implements TreeMapChart {
 
+    public static final String FIELD_INVOLVED_COUNT = "involvedCount";
+    public static final String FIELD_TOTAL_INVOLVED_COUNT = "totalInvolvedCount";
     private final 지라이슈_저장소 지라이슈저장소;
 
     @Override
@@ -45,31 +47,31 @@ public class TreeMapChartImpl implements TreeMapChart {
                 String assigneeId = subtask.getAssignee().getAccountId();
                 String displayName = subtask.getAssignee().getDisplayName();
 
-                Worker worker = contributionMap.computeIfAbsent(
-                        assigneeId,
-                        taskList -> new Worker(assigneeId, displayName, new HashMap<>() {{
-                            put("totalInvolvedCount", 0);
-                        }}, new ArrayList<>())
-                );
+                Worker worker = contributionMap.computeIfAbsent(assigneeId, id -> {
+                    Map<String, Integer> dataMap = new HashMap<>();
+                    dataMap.put(FIELD_TOTAL_INVOLVED_COUNT, 0);
+                    return new Worker(assigneeId, displayName, dataMap, new ArrayList<>());
+                });
+
 
                 TaskList taskList = worker.getChildren().stream()
                         .filter(task -> task.getId().equals(key))
                         .findFirst()
                         .orElseGet(() -> {
-                            TaskList newTask = new TaskList(key, summary, new HashMap<>() {{
-                                put("involvedCount", 0);
-                            }});
+                            Map<String, Integer> dataList = new HashMap<>();
+                            dataList.put(FIELD_INVOLVED_COUNT, 0);
+                            TaskList newTask = new TaskList(key, summary, dataList);
                             worker.getChildren().add(newTask);
                             return newTask;
                         });
 
-                taskList.getData().put("involvedCount", taskList.getData().get("involvedCount") + 1);
-                worker.getData().put("totalInvolvedCount", worker.getData().get("totalInvolvedCount") + 1);
+                taskList.getData().put(FIELD_INVOLVED_COUNT, taskList.getData().get(FIELD_INVOLVED_COUNT) + 1);
+                worker.getData().put(FIELD_TOTAL_INVOLVED_COUNT, worker.getData().get(FIELD_TOTAL_INVOLVED_COUNT) + 1);
             }
         }
 
         return contributionMap.values().stream()
-                .sorted((Comparator<Worker>) (w1, w2) -> w2.getData().get("totalInvolvedCount").compareTo(w1.getData().get("totalInvolvedCount")))
+                .sorted((w1, w2) -> w2.getData().get(FIELD_TOTAL_INVOLVED_COUNT).compareTo(w1.getData().get(FIELD_TOTAL_INVOLVED_COUNT)))
                 .limit(5)
                 .collect(Collectors.toList());
 

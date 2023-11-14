@@ -20,6 +20,7 @@ import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
@@ -27,7 +28,6 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
@@ -600,7 +600,11 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         검색요청.source(검색조건);
 
         SearchResponse 검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
-        long 결과 = 검색결과.getHits().getTotalHits().value;
+        long 결과 = Optional.ofNullable(검색결과)
+                .map(SearchResponse::getHits)
+                .map(SearchHits::getTotalHits)
+                .map(totalHits -> totalHits.value)
+                .orElse(0L);
         로그.info("검색결과 개수: " + 결과);
 
         Terms 담당자별_집계 = 검색결과.getAggregations().get("담당자별_집계");
@@ -649,7 +653,11 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
         SearchResponse 검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
 
-        long 결과 = 검색결과.getHits().getTotalHits().value;
+        long 결과 = Optional.ofNullable(검색결과)
+                .map(SearchResponse::getHits)
+                .map(SearchHits::getTotalHits)
+                .map(totalHits -> totalHits.value)
+                .orElse(0L);
         로그.info("검색결과 개수: " + 결과);
 
         Map<String, Long> 업데이트날짜차이_결과 = new HashMap<>();
@@ -734,7 +742,11 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         검색요청.source(검색조건);
 
         검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
-        long 할당된_요구사항_개수 = 검색결과.getHits().getTotalHits().value;
+        long 할당된_요구사항_개수 = Optional.ofNullable(검색결과)
+                .map(SearchResponse::getHits)
+                .map(org.elasticsearch.search.SearchHits::getTotalHits)
+                .map(totalHits -> totalHits.value)
+                .orElse(0L);
 
         로그.info("요구사항 개수: " + 요구사항_개수);
         로그.info("할당된 요구사항 개수: " + 할당된_요구사항_개수);
@@ -790,7 +802,11 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         검색요청.source(검색조건);
 
         검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
-        long 연관된_요구사항_개수 = 검색결과.getHits().getTotalHits().value;
+        long 연관된_요구사항_개수 = Optional.ofNullable(검색결과)
+                .map(SearchResponse::getHits)
+                .map(org.elasticsearch.search.SearchHits::getTotalHits)
+                .map(totalHits -> totalHits.value)
+                .orElse(0L);
 
         if ( 담당자_이메일 != null ) {
             MatchQueryBuilder 담당자_조회 = QueryBuilders.matchQuery("assignee.assignee_emailAddress.keyword", 담당자_이메일);
@@ -809,8 +825,11 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         검색요청.source(검색조건);
 
         검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
-        long 할당된_요구사항_개수 = 검색결과.getHits().getTotalHits().value;
-
+        long 할당된_요구사항_개수 = Optional.ofNullable(검색결과)
+                .map(SearchResponse::getHits)
+                .map(org.elasticsearch.search.SearchHits::getTotalHits)
+                .map(totalHits -> totalHits.value)
+                .orElse(0L);
         로그.info("연관된 요구사항 개수: " + 연관된_요구사항_개수);
         로그.info("할당된 요구사항 개수: " + 할당된_요구사항_개수);
 
