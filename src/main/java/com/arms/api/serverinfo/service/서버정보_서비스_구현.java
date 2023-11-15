@@ -89,7 +89,18 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
 
         ResponseEntity<?> 결과 = 백엔드통신기.지라서버정보_가져오기();
 
-        HashMap<String, Object> 서버정보맵 = (HashMap<String, Object>) 결과.getBody();
+        Object body = 결과.getBody();
+        HashMap<String, Object> 서버정보맵 = null;
+
+        if (body instanceof HashMap) {
+            서버정보맵 = (HashMap<String, Object>) body;
+
+            if (서버정보맵 == null) {
+                throw new IllegalArgumentException(에러코드.서버정보_조회_오류.getErrorMsg());
+            }
+        } else {
+            throw new IllegalArgumentException("서버 응답이 올바르지 않습니다.");
+        }
 
         Object 성공유무 = 서버정보맵.get("success");
 
