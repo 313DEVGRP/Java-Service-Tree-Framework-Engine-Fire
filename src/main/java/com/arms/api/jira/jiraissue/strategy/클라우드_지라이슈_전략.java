@@ -520,12 +520,10 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
             지라이슈전체워크로그_데이터 지라이슈워크로그_조회_결과 = 지라유틸.get(webClient, endpoint, 지라이슈전체워크로그_데이터.class).block();
 
             if (지라이슈워크로그_조회_결과 == null) {
-                로그.error("클라우드 지라이슈 전체 워크로그 목록이 Null입니다.");
-                throw new IllegalArgumentException(에러코드.워크로그_조회_오류.getErrorMsg());
+                return Collections.emptyList();
             }
             else if (지라이슈워크로그_조회_결과.getWorklogs() == null || 지라이슈워크로그_조회_결과.getWorklogs().size() == 0) {
-                로그.error("클라우드 지라이슈 전체 워크로그 목록이 없습니다.");
-                throw new IllegalArgumentException(에러코드.워크로그_조회_오류.getErrorMsg());
+                return Collections.emptyList();
             }
 
             지라이슈워크로그_목록.addAll(지라이슈워크로그_조회_결과.getWorklogs());
