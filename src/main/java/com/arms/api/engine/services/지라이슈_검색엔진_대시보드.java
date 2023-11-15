@@ -61,10 +61,10 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         // 요구사항 vs 연결된이슈&서브테스크 구분안하고 한번에
         SearchResponse 검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
-        if(ObjectUtils.isEmpty(검색결과)) {
+        if(검색결과 == null) {
             return new HashMap<>();
         }
-        long 결과 = Optional.ofNullable(검색결과)
+        Long 결과 = Optional.ofNullable(검색결과)
                 .map(SearchResponse::getHits)
                 .map(org.elasticsearch.search.SearchHits::getTotalHits)
                 .map(totalHits -> totalHits.value)
