@@ -457,9 +457,6 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         searchRequest.source(sourceBuilder);
 
         SearchResponse 검색결과 = 지라이슈저장소.search(searchRequest, RequestOptions.DEFAULT);
-        if(검색결과 == null) {
-            return new HashMap<>();
-        }
         Terms 상태별집계_결과 = 검색결과.getAggregations().get("이슈_상태별_집계");
 
         Map<String, Integer> 전체상태값_집계 = new HashMap<>();
@@ -600,9 +597,6 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         검색요청.source(검색조건);
 
         SearchResponse 검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
-        if(검색결과 == null) {
-            return new HashMap<>();
-        }
         long 결과 = Optional.ofNullable(검색결과)
                 .map(SearchResponse::getHits)
                 .map(SearchHits::getTotalHits)
@@ -655,9 +649,6 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         검색요청.source(검색조건);
 
         SearchResponse 검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
-        if(검색결과 == null) {
-            return new HashMap<>();
-        }
         long 결과 = Optional.ofNullable(검색결과)
                 .map(SearchResponse::getHits)
                 .map(SearchHits::getTotalHits)
@@ -751,9 +742,6 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         검색요청.source(검색조건);
 
         검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
-        if(검색결과 == null) {
-            return new HashMap<>();
-        }
         long 할당된_요구사항_개수 = Optional.ofNullable(검색결과)
                 .map(SearchResponse::getHits)
                 .map(org.elasticsearch.search.SearchHits::getTotalHits)
@@ -837,9 +825,6 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         검색요청.source(검색조건);
 
         검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
-        if(검색결과 == null) {
-            return new HashMap<>();
-        }
         long 할당된_요구사항_개수 = Optional.ofNullable(검색결과)
                 .map(SearchResponse::getHits)
                 .map(org.elasticsearch.search.SearchHits::getTotalHits)
