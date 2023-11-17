@@ -6,6 +6,7 @@ import com.arms.api.engine.models.boolquery.요구사항인지_여부_조건;
 import com.arms.api.engine.models.boolquery.진행사항_필터_조건;
 import com.arms.api.engine.models.dashboard.bar.요구사항_지라이슈상태_주별_집계;
 import com.arms.api.engine.models.dashboard.donut.집계_응답;
+import com.arms.api.engine.models.dashboard.resource.AssigneeData;
 import com.arms.api.engine.models.dashboard.sankey.SankeyElasticSearchData;
 import com.arms.api.engine.models.dashboard.treemap.Worker;
 import com.arms.api.engine.models.지라이슈_일반_검색요청;
@@ -15,7 +16,6 @@ import com.arms.api.engine.services.dashboard.donut.DonutChart;
 import com.arms.api.engine.services.dashboard.sankey.SankeyChart;
 import com.arms.api.engine.services.dashboard.treemap.TreeMapChart;
 import com.arms.api.engine.services.지라이슈_대시보드_서비스;
-import com.arms.elasticsearch.util.base.검색_기본_요청;
 import com.arms.elasticsearch.util.query.bool.조건_쿼리_생성자;
 import com.arms.elasticsearch.util.query.bool.조건_쿼리_컴포넌트;
 import com.arms.elasticsearch.util.query.검색_일반_요청;
@@ -202,5 +202,17 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
 
         검색결과_목록_메인 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(검색_크기별_요청.of(지라이슈_일반_검색요청, 조건_쿼리_컴포넌트));
         return ResponseEntity.ok(집계결과_가져오기);
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/resources/tasks"},
+            method = {RequestMethod.GET}
+    )
+    public List<AssigneeData> 리소스_담당자_데이터_리스트(
+            @RequestParam Long pdServiceLink,
+            @RequestParam List<Long> pdServiceVersionLinks
+    ) throws IOException {
+        return 지라이슈_검색엔진.리소스_담당자_데이터_리스트(pdServiceLink, pdServiceVersionLinks);
     }
 }
