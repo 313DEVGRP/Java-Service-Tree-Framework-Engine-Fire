@@ -1,5 +1,6 @@
 package com.arms.api.engine.controllers;
 
+import com.arms.api.engine.models.boolquery.서비스_버전_조건;
 import com.arms.api.engine.models.boolquery.서비스_조건;
 import com.arms.api.engine.models.boolquery.요구사항인지_여부_조건;
 import com.arms.api.engine.models.boolquery.진행사항_필터_조건;
@@ -14,6 +15,7 @@ import com.arms.api.engine.services.dashboard.donut.DonutChart;
 import com.arms.api.engine.services.dashboard.sankey.SankeyChart;
 import com.arms.api.engine.services.dashboard.treemap.TreeMapChart;
 import com.arms.api.engine.services.지라이슈_대시보드_서비스;
+import com.arms.elasticsearch.util.base.검색_기본_요청;
 import com.arms.elasticsearch.util.query.bool.조건_쿼리_생성자;
 import com.arms.elasticsearch.util.query.bool.조건_쿼리_컴포넌트;
 import com.arms.elasticsearch.util.query.검색_일반_요청;
@@ -142,6 +144,24 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
             )
             .isReq(지라이슈_일반_검색요청.getIsReq())
             .build();
+        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(지라이슈_일반_검색요청, 조건_쿼리_컴포넌트)));
+    }
+
+    @ResponseBody
+    @GetMapping("/normal-version/{pdServiceId}")
+    public ResponseEntity<검색결과_목록_메인> 일반_버전필터_검색(@PathVariable Long pdServiceId,
+                                                 @RequestParam List<Long> pdServiceVersionLinks,
+                                                 지라이슈_일반_검색요청 지라이슈_일반_검색요청) throws IOException {
+        조건_쿼리_컴포넌트 조건_쿼리_컴포넌트 = 요구사항인지_여부_조건.builder()
+                .isReq(지라이슈_일반_검색요청.getIsReq())
+                .조건_쿼리_컴포넌트(
+                    서비스_버전_조건.builder()
+                        .조건_쿼리_컴포넌트(new 조건_쿼리_생성자())
+                        .pdServiceId(pdServiceId)
+                        .pdServiceVersion(pdServiceVersionLinks)
+                        .build()
+                ).build();
+
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(지라이슈_일반_검색요청, 조건_쿼리_컴포넌트)));
     }
 
