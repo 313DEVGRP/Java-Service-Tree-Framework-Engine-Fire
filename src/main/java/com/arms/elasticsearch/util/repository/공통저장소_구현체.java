@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.arms.elasticsearch.util.검색결과_목록_메인;
 import com.arms.elasticsearch.util.검색엔진_유틸;
 import com.arms.elasticsearch.util.검색조건;
 
@@ -41,8 +42,8 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
     }
 
     @Override
-    public SearchHits aggregationSearch(Query query) {
-        return operations.search(query,entityClass);
+    public 검색결과_목록_메인 aggregationSearch(Query query) {
+        return new 검색결과_목록_메인(operations.search(query,entityClass));
     }
 
     public List<IndexedObjectInformation> bulkIndex(List<IndexQuery> indexQueryList){

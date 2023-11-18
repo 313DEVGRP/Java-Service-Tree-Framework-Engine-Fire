@@ -11,12 +11,13 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+import com.arms.elasticsearch.util.검색결과_목록_메인;
 import com.arms.elasticsearch.util.검색조건;
 
 @NoRepositoryBean
 public interface 공통저장소<T,ID extends Serializable> extends ElasticsearchRepository<T,ID> {
 
-    SearchHits aggregationSearch(Query query) ;
+	검색결과_목록_메인 aggregationSearch(Query query) ;
 
     List<IndexedObjectInformation> bulkIndex(List<IndexQuery> indexQueryList);
 

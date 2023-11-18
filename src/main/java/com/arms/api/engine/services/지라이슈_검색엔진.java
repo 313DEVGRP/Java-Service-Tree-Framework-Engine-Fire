@@ -127,7 +127,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                         .size(100)
             );
 
-        return new 검색결과_목록_메인(지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build()));
+        return 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
     }
 
     @Override
@@ -144,7 +144,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                 .withAggregations( AggregationBuilders.terms("group_by_" + 특정필드)
                         .field(그룹할필드)
                         .size(1000));
-        return new 검색결과_목록_메인(지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build()));
+        return 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
     }
 
     @Override
@@ -446,10 +446,9 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                 .withQuery(사용자별_조회)
                 .withAggregations(AggregationBuilders.terms("이슈_상태별_집계").field("status.status_name.keyword"));
 
-        org.springframework.data.elasticsearch.core.SearchHits searchHits
-                = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
+       ;
 
-        검색결과_목록_메인 검색결과_목록_메인 = new 검색결과_목록_메인(searchHits);
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
         List<검색결과> 이슈_상태별_집계 = 검색결과_목록_메인.get검색결과().get("이슈_상태별_집계");
 
         Map<String, Integer> 전체상태값_집계 = new HashMap<>();
@@ -480,11 +479,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
                 .withQuery(사용자별_조회)
                 .withAggregations(프로젝트별_집계);
-
-        org.springframework.data.elasticsearch.core.SearchHits searchHits
-                = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
-
-        검색결과_목록_메인 검색결과_목록_메인 = new 검색결과_목록_메인(searchHits);
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
         List<검색결과> 프로젝트키별_집계 = 검색결과_목록_메인.get검색결과().get("프로젝트키별_집계");
         Map<String, Map<String, Integer>> 프로젝트별상태값_집계= new HashMap<>();
 
@@ -526,9 +521,8 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         );
 
         // Execute the search
-        org.springframework.data.elasticsearch.core.SearchHits searchHits = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
         // Extract the Terms aggregation results
-        검색결과_목록_메인 검색결과_목록_메인 = new 검색결과_목록_메인(searchHits);
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
         List<검색결과> 상태값통계 = 검색결과_목록_메인.get검색결과().get("status_name_agg");
 
         // Iterate through the aggregation buckets
@@ -561,9 +555,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
             .withMaxResults(0)
             .withAggregations( AggregationBuilders.terms("담당자별_집계").field("assignee.assignee_emailAddress.keyword"));
 
-        org.springframework.data.elasticsearch.core.SearchHits searchHits
-                = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
-        검색결과_목록_메인 검색결과_목록_메인 = new 검색결과_목록_메인(searchHits);
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
         long 결과 = 검색결과_목록_메인.get전체합계();
         로그.info("검색결과 개수: " + 결과);
 
@@ -656,8 +648,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         nativeSearchQueryBuilder.withQuery(복합조회)
                 .withMaxResults(10000);
 
-        org.springframework.data.elasticsearch.core.SearchHits searchHits = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
-        검색결과_목록_메인 검색결과_목록_메인 = new 검색결과_목록_메인(searchHits);
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
         long 요구사항_개수 = 검색결과_목록_메인.get전체합계();
 
         if ( 담당자_이메일 != null ) {
@@ -671,7 +662,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                 .withAggregations(AggregationBuilders.terms("상태값_집계").field("status.status_name.keyword"))
                 .withMaxResults(10000);
 
-        com.arms.elasticsearch.util.검색결과_목록_메인 검색결과_목록_메인_집계 = new 검색결과_목록_메인(지라이슈저장소.aggregationSearch(aggregationQuery.build()));
+        검색결과_목록_메인 검색결과_목록_메인_집계 = 지라이슈저장소.aggregationSearch(aggregationQuery.build());
         long 할당된_요구사항_개수 = 검색결과_목록_메인_집계.get전체합계();
 
         로그.info("요구사항 개수: " + 요구사항_개수);
@@ -723,8 +714,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                 .withMaxResults(10000);
 
         long 연관된_요구사항_개수
-                = new 검색결과_목록_메인(지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build()))
-                .get전체합계();
+                = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build()).get전체합계();
 
         if ( 담당자_이메일 != null ) {
             MatchQueryBuilder 담당자_조회 = QueryBuilders.matchQuery("assignee.assignee_emailAddress.keyword", 담당자_이메일);
@@ -738,7 +728,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                 .withAggregations(AggregationBuilders.terms("상태값_집계").field("status.status_name.keyword"))
                 .withMaxResults(10000);
 
-        검색결과_목록_메인 검색결과_목록_메인_집계 = new 검색결과_목록_메인(지라이슈저장소.aggregationSearch(aggregationQuery.build()));
+        검색결과_목록_메인 검색결과_목록_메인_집계 = 지라이슈저장소.aggregationSearch(aggregationQuery.build());
         long 할당된_요구사항_개수 = 검색결과_목록_메인_집계.get전체합계();
 
         로그.info("연관된 요구사항 개수: " + 연관된_요구사항_개수);

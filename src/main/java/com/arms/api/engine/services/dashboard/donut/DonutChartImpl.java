@@ -38,7 +38,7 @@ public class DonutChartImpl implements DonutChart {
                 .withQuery(boolQuery)
                 .withAggregations(issueStatusAgg);
 
-        검색결과_목록_메인 검색결과_목록_메인 = new 검색결과_목록_메인(지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build()));
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
 
         List<검색결과> statuses = 검색결과_목록_메인.get검색결과().get("statuses");
 

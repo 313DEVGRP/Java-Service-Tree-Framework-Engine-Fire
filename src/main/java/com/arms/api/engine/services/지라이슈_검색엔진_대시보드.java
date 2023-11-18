@@ -55,7 +55,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
             ).withMaxResults(0);
 
         // 요구사항 vs 연결된이슈&서브테스크 구분안하고 한번에
-        검색결과_목록_메인 검색결과_목록_메인 = new 검색결과_목록_메인(지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build()));
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
         Long 결과 = 검색결과_목록_메인.get전체합계();
         로그.info("검색결과 개수: " + 결과);
 
@@ -93,7 +93,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 .withAggregations(담당자별_집계)
                 .withMaxResults(0);
 
-        검색결과_목록_메인 검색결과_목록_메인 = new 검색결과_목록_메인(지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build()));
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
 
         Map<String, Map<String, Map<String, Integer>>> 담당자별_요구사항여부별_상태값_집계
                 = 검색결과_목록_메인.get검색결과().get("담당자별_집계")
@@ -131,11 +131,9 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     @Override
     public 검색결과_목록_메인 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) throws IOException {
 
-        SearchHits searchHits = 지라이슈저장소.aggregationSearch(
-                쿼리추상팩토리.생성()
+        return 지라이슈저장소.aggregationSearch(
+            쿼리추상팩토리.생성()
         );
-
-        return new 검색결과_목록_메인(searchHits);
     }
 
     @Override
@@ -158,9 +156,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         NativeSearchQueryBuilder nativeSearchQueryBuilder
                 = new NativeSearchQueryBuilder().withQuery(boolQuery).withAggregations(assigneesAgg);
-
-        SearchHits searchHits = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
-        검색결과_목록_메인 검색결과_목록_메인 = new 검색결과_목록_메인(searchHits);
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
         List<검색결과> assignee = 검색결과_목록_메인.그룹결과("assignee");
 
         return assignee

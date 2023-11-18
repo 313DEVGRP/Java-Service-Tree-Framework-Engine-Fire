@@ -59,7 +59,7 @@ public class BarChartImpl implements BarChart {
                 = new NativeSearchQueryBuilder().withQuery(boolQueryForTotalIssues).withAggregations(totalAggregationBuilder);
 
         검색결과_목록_메인 searchResponseForTotalIssues
-                = new 검색결과_목록_메인(지라이슈저장소.aggregationSearch(nativeSearchQueryBuilderForTotalIssues.build()));
+                = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilderForTotalIssues.build());
 
         Long totalIssuesCount
                 = searchResponseForTotalIssues.get전체합계();
@@ -69,7 +69,7 @@ public class BarChartImpl implements BarChart {
                 = new NativeSearchQueryBuilder().withQuery(boolQueryForTotalRequirements);
 
         검색결과_목록_메인 검색결과_목록_메인
-                = new 검색결과_목록_메인(지라이슈저장소.aggregationSearch(nativeSearchQueryBuilderForTotalRequirements.build()));
+                = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilderForTotalRequirements.build());
 
         Long totalRequirementsCount = 검색결과_목록_메인.get전체합계();
 
@@ -113,7 +113,7 @@ public class BarChartImpl implements BarChart {
         NativeSearchQueryBuilder nativeSearchQueryBuilder
                 = new NativeSearchQueryBuilder().withQuery(boolQuery).withAggregations(weeklyAggregationBuilder);
 
-        검색결과_목록_메인 검색결과_목록_메인 = new 검색결과_목록_메인(지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build()));
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
 
         List<검색결과> aggregationByWeek = 검색결과_목록_메인.get검색결과().get("aggregation_by_week");
 

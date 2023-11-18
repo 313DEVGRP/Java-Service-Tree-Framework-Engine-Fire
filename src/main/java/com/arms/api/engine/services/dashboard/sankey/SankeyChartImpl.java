@@ -58,7 +58,7 @@ public class SankeyChartImpl implements SankeyChart {
 
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource().query(boolQuery).aggregation(versionsAgg);
 
-        검색결과_목록_메인 검색결과_목록_메인 = new 검색결과_목록_메인(지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build()));
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
 
         Map<String, List<SankeyElasticSearchData>> versionAssigneesMap = new HashMap<>();
 
