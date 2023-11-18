@@ -2,11 +2,13 @@ package com.arms.api.engine.services;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.ObjectUtils;
+import com.arms.api.engine.models.dashboard.resource.AssigneeData;
+import com.arms.api.engine.services.dashboard.common.ElasticSearchQueryHelper;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -14,6 +16,8 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.filter.ParsedFilter;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -34,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대시보드_서비스 {
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
-
+    private final ElasticSearchQueryHelper es;
     private 지라이슈_저장소 지라이슈저장소;
 
     @Override
@@ -146,5 +150,77 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         );
 
         return new 검색결과_목록_메인(searchHits);
+    }
+
+    @Override
+    public List<AssigneeData> 리소스_담당자_데이터_리스트(Long pdServiceLink, List<Long> pdServiceVersionLinks) throws IOException {
+        BoolQueryBuilder boolQuery = es.boolQueryBuilder(pdServiceLink, pdServiceVersionLinks)
+                .filter(QueryBuilders.existsQuery("assignee"));
+
+        FilterAggregationBuilder reqAgg = AggregationBuilders
+                .filter("requirements", QueryBuilders.termQuery("isReq", true));
+        FilterAggregationBuilder issueAgg = AggregationBuilders
+                .filter("issues", QueryBuilders.termQuery("isReq", false));
+        TermsAggregationBuilder assigneesAgg = AggregationBuilders.terms("assignee").field("assignee.assignee_accountId.keyword")
+                .subAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"))
+                .subAggregation(reqAgg)
+                .subAggregation(issueAgg)
+                .subAggregation(AggregationBuilders.terms("issueTypes").field("issuetype.issuetype_name.keyword"))
+                .subAggregation(AggregationBuilders.terms("priorities").field("priority.priority_name.keyword"))
+                .subAggregation(AggregationBuilders.terms("statuses").field("status.status_name.keyword"))
+                .subAggregation(AggregationBuilders.terms("resolutions").field("resolution.resolution_name.keyword"));
+
+        SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource().query(boolQuery).aggregation(assigneesAgg);
+
+        SearchResponse searchResponse = 지라이슈저장소.search(es.getSearchRequest(sourceBuilder), RequestOptions.DEFAULT);
+        Terms terms = searchResponse.getAggregations().get("assignee");
+        return terms.getBuckets().stream()
+                .map(this::mapToAssigneeData)
+                .sorted((a1, a2) -> Long.compare(a2.getIssues(), a1.getIssues()))
+                .collect(Collectors.toList());
+    }
+
+    private Map<String, Object> createAssigneeData(Terms.Bucket bucket) {
+        Map<String, Object> assigneeData = new HashMap<>();
+        assigneeData.put("requirements", getDocCount(bucket, "requirements"));
+        assigneeData.put("issues", getDocCount(bucket, "issues"));
+        assigneeData.put("displayName", getFirstTermKey(bucket, "displayNames"));
+        assigneeData.put("issueTypes", getTermCounts(bucket, "issueTypes"));
+        assigneeData.put("priorities", getTermCounts(bucket, "priorities"));
+        assigneeData.put("statuses", getTermCounts(bucket, "statuses"));
+        assigneeData.put("resolutions", getTermCounts(bucket, "resolutions"));
+        return Map.of(bucket.getKeyAsString(), assigneeData);
+    }
+
+    private long getDocCount(Terms.Bucket bucket, String aggName) {
+        ParsedFilter filter = bucket.getAggregations().get(aggName);
+        return filter.getDocCount();
+    }
+
+    private String getFirstTermKey(Terms.Bucket bucket, String aggName) {
+        Terms terms = bucket.getAggregations().get(aggName);
+        return terms.getBuckets().isEmpty() ? "" : terms.getBuckets().get(0).getKeyAsString();
+    }
+
+    private Map<String, Long> getTermCounts(Terms.Bucket bucket, String aggName) {
+        Terms terms = bucket.getAggregations().get(aggName);
+        return terms.getBuckets().stream()
+                .collect(Collectors.toMap(
+                        Terms.Bucket::getKeyAsString,
+                        Terms.Bucket::getDocCount
+                ));
+    }
+
+
+    private AssigneeData mapToAssigneeData(Terms.Bucket bucket) {
+        AssigneeData assigneeData = new AssigneeData();
+        assigneeData.setRequirements(getDocCount(bucket, "requirements"));
+        assigneeData.setIssues(getDocCount(bucket, "issues"));
+        assigneeData.setDisplayName(getFirstTermKey(bucket, "displayNames"));
+        assigneeData.setIssueTypes(getTermCounts(bucket, "issueTypes"));
+        assigneeData.setPriorities(getTermCounts(bucket, "priorities"));
+        assigneeData.setStatuses(getTermCounts(bucket, "statuses"));
+        assigneeData.setResolutions(getTermCounts(bucket, "resolutions"));
+        return assigneeData;
     }
 }

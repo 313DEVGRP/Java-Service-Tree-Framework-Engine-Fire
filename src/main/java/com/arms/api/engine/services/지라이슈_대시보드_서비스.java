@@ -1,8 +1,10 @@
 package com.arms.api.engine.services;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
+import com.arms.api.engine.models.dashboard.resource.AssigneeData;
 import com.arms.elasticsearch.util.query.쿼리_추상_팩토리;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
 
@@ -14,4 +16,6 @@ public interface 지라이슈_대시보드_서비스 {
     public Map<String, Long> 제품서비스별_담당자_이름_통계(Long 지라서버_아이디, Long 제품서비스_아이디) throws IOException;
 
     검색결과_목록_메인 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) throws IOException;
+
+    List<AssigneeData> 리소스_담당자_데이터_리스트(Long pdServiceLink, List<Long> pdServiceVersionLinks) throws IOException;
 }
