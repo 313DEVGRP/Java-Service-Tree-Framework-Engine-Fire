@@ -4,6 +4,8 @@ import com.arms.api.engine.services.dashboard.common.ElasticSearchQueryHelper;
 import com.arms.api.engine.models.dashboard.sankey.SankeyElasticSearchData;
 import com.arms.api.engine.repositories.지라이슈_저장소;
 
+import com.arms.elasticsearch.util.검색결과;
+import com.arms.elasticsearch.util.검색결과_목록_메인;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchResponse;
@@ -15,6 +17,8 @@ import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -48,27 +52,34 @@ public class SankeyChartImpl implements SankeyChart {
         assigneesAgg.subAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"));
         versionsAgg.subAggregation(assigneesAgg);
 
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
+        nativeSearchQueryBuilder.withQuery(boolQuery)
+                .withAggregations(versionsAgg);
+
         SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource().query(boolQuery).aggregation(versionsAgg);
 
-        SearchResponse searchResponse = 지라이슈저장소.search(es.getSearchRequest(sourceBuilder), RequestOptions.DEFAULT);
+        검색결과_목록_메인 검색결과_목록_메인 = new 검색결과_목록_메인(지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build()));
 
         Map<String, List<SankeyElasticSearchData>> versionAssigneesMap = new HashMap<>();
-        Terms versions = searchResponse.getAggregations().get("versions");
 
-        for (Terms.Bucket versionBucket : versions.getBuckets()) {
-            String version = versionBucket.getKeyAsString();
 
-            Terms assignees = versionBucket.getAggregations().get("assignees");
+        List<검색결과> versions = 검색결과_목록_메인.get검색결과().get("versions");
+
+        for (검색결과 버전 : versions) {
+            String version = 버전.get필드명();
+
+            List<com.arms.elasticsearch.util.검색결과> assignees = 버전.get하위검색결과().get("assignees");
 
             List<SankeyElasticSearchData> assigneeList = new ArrayList<>();
 
-            for (Terms.Bucket assigneeBucket : assignees.getBuckets()) {
-                String accountId = assigneeBucket.getKeyAsString();
+            for (검색결과 담당자 : assignees) {
+                String accountId = 담당자.get필드명();
 
-                Terms displayNames = assigneeBucket.getAggregations().get("displayNames");
-                String displayName = displayNames.getBuckets().get(0).getKeyAsString();
-
-                assigneeList.add(new SankeyElasticSearchData(accountId, displayName));
+                List<검색결과> displayNames = 담당자.get하위검색결과().get("displayNames");
+                assigneeList.add(new SankeyElasticSearchData(accountId
+                        , displayNames.stream()
+                        .findFirst()
+                        .map(displayName->displayName.get필드명()).orElseGet(()->"N/A")));
             }
 
             versionAssigneesMap.put(version, assigneeList);

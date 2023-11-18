@@ -16,11 +16,11 @@ import com.arms.elasticsearch.util.검색조건;
 @NoRepositoryBean
 public interface 공통저장소<T,ID extends Serializable> extends ElasticsearchRepository<T,ID> {
 
-    SearchHits operationSearch(Query query) ;
+    SearchHits aggregationSearch(Query query) ;
 
     List<IndexedObjectInformation> bulkIndex(List<IndexQuery> indexQueryList);
 
-    List<T> internalSearch(Query query);
+    List<T> normalSearch(Query query);
 
 	List<T>  getAllCreatedSince(Date date, Class<T> clazz);
 

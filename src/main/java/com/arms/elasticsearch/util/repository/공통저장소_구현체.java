@@ -22,7 +22,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.arms.api.engine.models.지라이슈;
 import com.arms.elasticsearch.util.검색엔진_유틸;
 import com.arms.elasticsearch.util.검색조건;
 
@@ -42,7 +41,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
     }
 
     @Override
-    public SearchHits operationSearch(Query query) {
+    public SearchHits aggregationSearch(Query query) {
         return operations.search(query,entityClass);
     }
 
@@ -57,7 +56,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         return operations.bulkIndex(indexQueryList, IndexCoordinates.of(document.indexName()));
     }
 
-    public List<T> internalSearch(Query query) {
+    public List<T> normalSearch(Query query) {
         if (query == null) {
             log.error("Failed to build search request");
             return Collections.emptyList();
@@ -79,7 +78,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
                 "created",
                 date
         );
-        return this.internalSearch(query.build());
+        return this.normalSearch(query.build());
 
     }
 
@@ -90,7 +89,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
                 dto,
                 date
         );
-        return this.internalSearch(query.build());
+        return this.normalSearch(query.build());
 
     }
 

@@ -16,10 +16,8 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
@@ -115,7 +113,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     public List<지라이슈> 이슈_검색하기(검색조건 검색조건) {
         Query query
             = 검색엔진_유틸.buildSearchQuery(검색조건).build();
-        return 지라이슈저장소.internalSearch(query);
+        return 지라이슈저장소.normalSearch(query);
     }
 
     @Override
@@ -129,7 +127,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                         .size(100)
             );
 
-        return new 검색결과_목록_메인(지라이슈저장소.operationSearch(nativeSearchQueryBuilder.build()));
+        return new 검색결과_목록_메인(지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build()));
     }
 
     @Override
@@ -146,7 +144,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                 .withAggregations( AggregationBuilders.terms("group_by_" + 특정필드)
                         .field(그룹할필드)
                         .size(1000));
-        return new 검색결과_목록_메인(지라이슈저장소.operationSearch(nativeSearchQueryBuilder.build()));
+        return new 검색결과_목록_메인(지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build()));
     }
 
     @Override
@@ -437,34 +435,32 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
         Query query = 검색엔진_유틸.buildSearchQuery(검색조건,서버_아이디).build();
 
-        return 지라이슈저장소.internalSearch(query);
+        return 지라이슈저장소.normalSearch(query);
     }
 
     @Override
     public Map<String,Integer>  요구사항_릴레이션이슈_상태값_전체통계(Long 지라서버_아이디) throws IOException {
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+
         MatchQueryBuilder 사용자별_조회 = QueryBuilders.matchQuery("jira_server_id", 지라서버_아이디);
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+                .withQuery(사용자별_조회)
+                .withAggregations(AggregationBuilders.terms("이슈_상태별_집계").field("status.status_name.keyword"));
 
-        sourceBuilder.query(사용자별_조회);
+        org.springframework.data.elasticsearch.core.SearchHits searchHits
+                = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
 
-        sourceBuilder.aggregation(
-                AggregationBuilders.terms("이슈_상태별_집계").field("status.status_name.keyword")
-        );
-
-        SearchRequest searchRequest = new SearchRequest();
-        searchRequest.indices("jiraissue"); // Replace with your actual index name
-        searchRequest.source(sourceBuilder);
-
-        SearchResponse 검색결과 = 지라이슈저장소.search(searchRequest, RequestOptions.DEFAULT);
-        Terms 상태별집계_결과 = 검색결과.getAggregations().get("이슈_상태별_집계");
+        검색결과_목록_메인 검색결과_목록_메인 = new 검색결과_목록_메인(searchHits);
+        List<검색결과> 이슈_상태별_집계 = 검색결과_목록_메인.get검색결과().get("이슈_상태별_집계");
 
         Map<String, Integer> 전체상태값_집계 = new HashMap<>();
-        if (상태별집계_결과.getBuckets().isEmpty()) {
+
+        if (이슈_상태별_집계.isEmpty()) {
             전체상태값_집계.put("조회된 상태: ",0 );
         }
-        for (Terms.Bucket 상태 : 상태별집계_결과.getBuckets()) {
-            String statusName = 상태.getKeyAsString();
-            long docCount = 상태.getDocCount();
+
+        for (검색결과 상태 : 이슈_상태별_집계) {
+            String statusName = 상태.get필드명();
+            long docCount = 상태.get개수();
             전체상태값_집계.put(statusName, (int) docCount);
         }
         return 전체상태값_집계;
@@ -473,40 +469,36 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     @Override
     public Map<String, Map<String, Integer>> 요구사항_릴레이션이슈_상태값_프로젝트별통계(Long 지라서버_아이디) throws IOException {
 
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-
         MatchQueryBuilder 사용자별_조회 = QueryBuilders.matchQuery("jira_server_id", 지라서버_아이디);
 
-        sourceBuilder.query(사용자별_조회);
+        TermsAggregationBuilder 프로젝트별_집계
+                = AggregationBuilders.terms("프로젝트키별_집계").field("project.project_key.keyword")
+                    .subAggregation(
+                            AggregationBuilders.terms("생태별_집계").field("status.status_name.keyword")
+                    );
 
-        TermsAggregationBuilder 상태별_집계 = AggregationBuilders.terms("생태별_집계").field("status.status_name.keyword");
-        TermsAggregationBuilder 프로젝트별_집계 = AggregationBuilders.terms("프로젝트키별_집계").field("project.project_key.keyword")
-                .subAggregation(상태별_집계);
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+                .withQuery(사용자별_조회)
+                .withAggregations(프로젝트별_집계);
 
-        sourceBuilder.aggregation(프로젝트별_집계);
+        org.springframework.data.elasticsearch.core.SearchHits searchHits
+                = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
 
-        SearchRequest searchRequest = new SearchRequest();
-        searchRequest.indices("jiraissue");
-        searchRequest.source(sourceBuilder);
-
-        SearchResponse searchResponse = 지라이슈저장소.search(searchRequest, RequestOptions.DEFAULT);
-        Terms 종합집계_결과 = searchResponse.getAggregations().get("프로젝트키별_집계");
+        검색결과_목록_메인 검색결과_목록_메인 = new 검색결과_목록_메인(searchHits);
+        List<검색결과> 프로젝트키별_집계 = 검색결과_목록_메인.get검색결과().get("프로젝트키별_집계");
         Map<String, Map<String, Integer>> 프로젝트별상태값_집계= new HashMap<>();
 
-        for (Terms.Bucket 프로젝트 : 종합집계_결과.getBuckets()) {
-            String 프로젝트이름= 프로젝트.getKeyAsString();
+        for (검색결과 프로젝트 : 프로젝트키별_집계) {
+            String 프로젝트이름 = 프로젝트.get필드명();
             Map<String,Integer> 상태값_프로젝트별통계= new HashMap<>();
             프로젝트별상태값_집계.put(프로젝트이름 , 상태값_프로젝트별통계 );
 
-            Terms 상태_조회결과=  프로젝트.getAggregations().get("생태별_집계");
+            List<검색결과> 생태별_집계 = 프로젝트.get하위검색결과().get("생태별_집계");
 
-            for (Terms.Bucket 상태 : 상태_조회결과.getBuckets()) {
-
-                String 상태이름  = 상태.getKeyAsString();
-                int docCount  =(int)상태.getDocCount();
-
+            for (검색결과 상태 : 생태별_집계) {
+                String 상태이름  = 상태.get필드명();
+                int docCount  =(int)상태.get개수();
                 상태값_프로젝트별통계.put(상태이름 , docCount );
-
             }
 
         }
@@ -515,39 +507,36 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
     @Override
     public Map<String, Long> 제품서비스_버전별_상태값_통계(Long 제품서비스_아이디, Long 버전_아이디) throws IOException {
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-        sourceBuilder.query(QueryBuilders.matchAllQuery()); // You can add your own query here if needed
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
+
+        nativeSearchQueryBuilder.withQuery(QueryBuilders.matchAllQuery());
 
         if ( 제품서비스_아이디 != null && 제품서비스_아이디 > 9L) {
             MatchQueryBuilder 제품서비스_조회 = QueryBuilders.matchQuery("pdServiceId", 제품서비스_아이디);
-            sourceBuilder.query(제품서비스_조회);
+            nativeSearchQueryBuilder.withQuery(제품서비스_조회);
         }
 
         if ( 버전_아이디 != null && 버전_아이디 > 9L) {
             MatchQueryBuilder 제품서비스_버전_조회 = QueryBuilders.matchQuery("pdServiceVersion", 버전_아이디);
-            sourceBuilder.query(제품서비스_버전_조회);
+            nativeSearchQueryBuilder.withQuery(제품서비스_버전_조회);
         }
 
-        sourceBuilder.aggregation(
+        nativeSearchQueryBuilder.withAggregations(
                 AggregationBuilders.terms("status_name_agg").field("status.status_name.keyword")
         );
 
-        // Create the search request
-        SearchRequest searchRequest = new SearchRequest();
-        searchRequest.indices("jiraissue"); // Replace with your actual index name
-        searchRequest.source(sourceBuilder);
-
-        // Execute the search request
-        SearchResponse searchResponse = 지라이슈저장소.search(searchRequest, RequestOptions.DEFAULT);
+        // Execute the search
+        org.springframework.data.elasticsearch.core.SearchHits searchHits = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
         // Extract the Terms aggregation results
-        Terms statusNameAggregation = searchResponse.getAggregations().get("status_name_agg");
+        검색결과_목록_메인 검색결과_목록_메인 = new 검색결과_목록_메인(searchHits);
+        List<검색결과> 상태값통계 = 검색결과_목록_메인.get검색결과().get("status_name_agg");
 
         // Iterate through the aggregation buckets
 
         Map<String, Long> 제품서비스_버전별_집계 = new HashMap<>();
-        for (Terms.Bucket bucket : statusNameAggregation.getBuckets()) {
-            String statusName = bucket.getKeyAsString();
-            long docCount = bucket.getDocCount();
+        for (검색결과 상태값 : 상태값통계) {
+            String statusName = 상태값.get필드명();
+            long docCount = 상태값.get개수();
             log.info("Status Name: " + statusName + ", Count: " + docCount);
 
             제품서비스_버전별_집계.put(statusName, docCount);
@@ -560,50 +549,31 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     @Override
     public Map<String, Long> 제품서비스별_담당자_통계(Long 지라서버_아이디, Long 제품서비스_아이디) throws IOException {
 
-        SearchSourceBuilder 검색조건 = new SearchSourceBuilder();
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
         BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
-
-//        if ( 지라서버_아이디 != null ) {
-//            MatchQueryBuilder 지라서버_조회 = QueryBuilders.matchQuery("jira_server_id", 지라서버_아이디);
-//            복합조회.must(지라서버_조회);
-//        }
 
         if ( 제품서비스_아이디 != null && 제품서비스_아이디 > 9L) {
             MatchQueryBuilder 제품서비스_조회 = QueryBuilders.matchQuery("pdServiceId", 제품서비스_아이디);
             복합조회.must(제품서비스_조회);
         }
 
-//        if ( 이슈_키 != null ) {
-//            MatchQueryBuilder 하위이슈_조회 = QueryBuilders.matchQuery("parentReqKey.keyword", 이슈_키);
-//            복합조회.must(하위이슈_조회);
-//        }
+        nativeSearchQueryBuilder.withQuery(복합조회)
+            .withMaxResults(0)
+            .withAggregations( AggregationBuilders.terms("담당자별_집계").field("assignee.assignee_emailAddress.keyword"));
 
-        검색조건.query(복합조회);
-        검색조건.size(0); // 모든 검색 결과를 가져오기 위함
-
-        검색조건.aggregation(
-                AggregationBuilders.terms("담당자별_집계").field("assignee.assignee_emailAddress.keyword")
-        );
-
-        SearchRequest 검색요청 = new SearchRequest();
-        검색요청.indices("jiraissue");
-        검색요청.source(검색조건);
-
-        SearchResponse 검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
-        long 결과 = Optional.ofNullable(검색결과)
-                .map(SearchResponse::getHits)
-                .map(SearchHits::getTotalHits)
-                .map(totalHits -> totalHits.value)
-                .orElse(0L);
+        org.springframework.data.elasticsearch.core.SearchHits searchHits
+                = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
+        검색결과_목록_메인 검색결과_목록_메인 = new 검색결과_목록_메인(searchHits);
+        long 결과 = 검색결과_목록_메인.get전체합계();
         로그.info("검색결과 개수: " + 결과);
 
-        Terms 담당자별_집계 = 검색결과.getAggregations().get("담당자별_집계");
+        List<검색결과> 담당자별_집계 = 검색결과_목록_메인.get검색결과().get("담당자별_집계");
 
         long 담당자_총합 = 0;
         Map<String, Long> 제품서비스별_하위이슈_담당자_집계 = new HashMap<>();
-        for (Terms.Bucket 담당자 : 담당자별_집계.getBuckets()) {
-            String 담당자_이메일 = 담당자.getKeyAsString();
-            long 개수 = 담당자.getDocCount();
+        for (검색결과 담당자 : 담당자별_집계) {
+            String 담당자_이메일 = 담당자.get필드명();
+            long 개수 = 담당자.get개수();
             log.info("담당자: " + 담당자_이메일 + ", Count: " + 개수);
             담당자_총합+= 개수;
             제품서비스별_하위이슈_담당자_집계.put(담당자_이메일, 개수);
@@ -616,46 +586,28 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     @Override
     public Map<String, Long> 제품서비스별_소요일_통계(Long 지라서버_아이디, Long 제품서비스_아이디) throws IOException {
 
-        SearchSourceBuilder 검색조건 = new SearchSourceBuilder();
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
         BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
-
-//        if ( 지라서버_아이디 != null ) {
-//            MatchQueryBuilder 지라서버_조회 = QueryBuilders.matchQuery("jira_server_id", 지라서버_아이디);
-//            복합조회.must(지라서버_조회);
-//        }
 
         if ( 제품서비스_아이디 != null && 제품서비스_아이디 > 9L) {
             MatchQueryBuilder 제품서비스_조회 = QueryBuilders.matchQuery("pdServiceId", 제품서비스_아이디);
             복합조회.must(제품서비스_조회);
         }
 
-//        if ( 이슈_키 != null ) {
-//            MatchQueryBuilder 하위이슈_조회 = QueryBuilders.matchQuery("parentReqKey.keyword", 이슈_키);
-//            복합조회.must(하위이슈_조회);
-//        }
+        nativeSearchQueryBuilder.withQuery(복합조회)
+            .withMaxResults(10000);
 
-        검색조건.query(복합조회);
-        검색조건.size(10000); // 모든 검색 결과를 가져오기 위함
+        List<지라이슈> 지라이슈들 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build());
 
-        SearchRequest 검색요청 = new SearchRequest();
-        검색요청.indices("jiraissue");
-        검색요청.source(검색조건);
-
-        SearchResponse 검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
-        long 결과 = Optional.ofNullable(검색결과)
-                .map(SearchResponse::getHits)
-                .map(SearchHits::getTotalHits)
-                .map(totalHits -> totalHits.value)
-                .orElse(0L);
+        long 결과 = 지라이슈들.size();
         로그.info("검색결과 개수: " + 결과);
 
         Map<String, Long> 업데이트날짜차이_결과 = new HashMap<>();
 
-        for (SearchHit hit : 검색결과.getHits()) {
-            Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+        for (지라이슈 지라이슈 : 지라이슈들) {
 
-            String 생성일 = (String) sourceAsMap.get("created");
-            String 수정일 = (String) sourceAsMap.get("updated");
+            String 생성일 = 지라이슈.getCreated();
+            String 수정일 = 지라이슈.getUpdated();
 
             if (생성일 == null || 수정일 == null || 생성일.isEmpty()|| 수정일.isEmpty()) {
                 continue;
@@ -693,66 +645,48 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
     @Override
     public Map<String, Long> 제품서비스별_담당자_요구사항_통계(Long 지라서버_아이디, Long 제품서비스_아이디, String 담당자_이메일) throws IOException {
-
-        SearchSourceBuilder 검색조건 = new SearchSourceBuilder();
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
         BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
-        SearchRequest 검색요청 = new SearchRequest();
-        SearchResponse 검색결과;
 
         if ( 제품서비스_아이디 != null && 제품서비스_아이디 > 9L) {
             MatchQueryBuilder 제품서비스_조회 = QueryBuilders.matchQuery("pdServiceId", 제품서비스_아이디);
             복합조회.must(제품서비스_조회);
         }
 
-        검색조건.query(복합조회);
-        검색조건.size(10000); // 모든 검색 결과를 가져오기 위함
+        nativeSearchQueryBuilder.withQuery(복합조회)
+                .withMaxResults(10000);
 
-        검색요청.indices("jiraissue");
-        검색요청.source(검색조건);
-
-        검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
-        long 요구사항_개수 = Optional.ofNullable(검색결과)
-                .map(SearchResponse::getHits)
-                .map(SearchHits::getTotalHits)
-                .map(totalHits -> totalHits.value)
-                .orElse(0L);
-
+        org.springframework.data.elasticsearch.core.SearchHits searchHits = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
+        검색결과_목록_메인 검색결과_목록_메인 = new 검색결과_목록_메인(searchHits);
+        long 요구사항_개수 = 검색결과_목록_메인.get전체합계();
 
         if ( 담당자_이메일 != null ) {
             MatchQueryBuilder 담당자_조회 = QueryBuilders.matchQuery("assignee.assignee_emailAddress.keyword", 담당자_이메일);
             복합조회.must(담당자_조회);
         }
 
-        검색조건.query(복합조회);
-        검색조건.size(10000); // 모든 검색 결과를 가져오기 위함
+        NativeSearchQueryBuilder aggregationQuery = new NativeSearchQueryBuilder();
 
-        // 상태값 집계
-        검색조건.aggregation(
-                AggregationBuilders.terms("상태값_집계").field("status.status_name.keyword")
-        );
+        aggregationQuery.withQuery(복합조회)
+                .withAggregations(AggregationBuilders.terms("상태값_집계").field("status.status_name.keyword"))
+                .withMaxResults(10000);
 
-        검색요청.indices("jiraissue");
-        검색요청.source(검색조건);
-
-        검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
-        long 할당된_요구사항_개수 = Optional.ofNullable(검색결과)
-                .map(SearchResponse::getHits)
-                .map(org.elasticsearch.search.SearchHits::getTotalHits)
-                .map(totalHits -> totalHits.value)
-                .orElse(0L);
+        com.arms.elasticsearch.util.검색결과_목록_메인 검색결과_목록_메인_집계 = new 검색결과_목록_메인(지라이슈저장소.aggregationSearch(aggregationQuery.build()));
+        long 할당된_요구사항_개수 = 검색결과_목록_메인_집계.get전체합계();
 
         로그.info("요구사항 개수: " + 요구사항_개수);
         로그.info("할당된 요구사항 개수: " + 할당된_요구사항_개수);
 
-        Terms 상태값_집계 = 검색결과.getAggregations().get("상태값_집계");
+        List<검색결과> 상태값_집계 = 검색결과_목록_메인_집계.get검색결과().get("상태값_집계");
 
         Map<String, Long> 제품서비스별_담당자_요구사항_통계 = new HashMap<>();
         제품서비스별_담당자_요구사항_통계.put("allReq", 요구사항_개수);
         제품서비스별_담당자_요구사항_통계.put("myReq", 할당된_요구사항_개수);
 
-        for (Terms.Bucket 상태값 : 상태값_집계.getBuckets()) {
-            String 상태 = 상태값.getKeyAsString();
-            long 개수 = 상태값.getDocCount();
+        for (검색결과 상태값 : 상태값_집계) {
+
+            String 상태 = 상태값.get필드명();
+            long 개수 = 상태값.get개수();
             log.info("상태값: " + 상태 + ", Count: " + 개수);
 
             제품서비스별_담당자_요구사항_통계.put(상태, 개수);
@@ -764,10 +698,8 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     @Override
     public Map<String, Long> 제품서비스별_담당자_연관된_요구사항_통계(Long 지라서버_아이디, Long 제품서비스_아이디, String 이슈키, String 담당자_이메일) throws IOException {
 
-        SearchSourceBuilder 검색조건 = new SearchSourceBuilder();
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
         BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
-        SearchRequest 검색요청 = new SearchRequest();
-        SearchResponse 검색결과;
 
         if ( 지라서버_아이디 != null ) {
             MatchQueryBuilder 지라서버_조회 = QueryBuilders.matchQuery("jira_server_id", 지라서버_아이디);
@@ -782,59 +714,45 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         if ( 이슈키 != null ) {
             MatchQueryBuilder 요구사항_조회 = QueryBuilders.matchQuery("key", 이슈키);
             MatchQueryBuilder 하위_요구사항_조회 = QueryBuilders.matchQuery("parentReqKey", 이슈키);
-
             복합조회.should(요구사항_조회);
             복합조회.should(하위_요구사항_조회);
             복합조회.minimumShouldMatch(1);
         }
 
-        검색조건.query(복합조회);
-        검색조건.size(10000); // 모든 검색 결과를 가져오기 위함
+        nativeSearchQueryBuilder.withQuery(복합조회)
+                .withMaxResults(10000);
 
-        검색요청.indices("jiraissue");
-        검색요청.source(검색조건);
-
-        검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
-        long 연관된_요구사항_개수 = Optional.ofNullable(검색결과)
-                .map(SearchResponse::getHits)
-                .map(org.elasticsearch.search.SearchHits::getTotalHits)
-                .map(totalHits -> totalHits.value)
-                .orElse(0L);
+        long 연관된_요구사항_개수
+                = new 검색결과_목록_메인(지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build()))
+                .get전체합계();
 
         if ( 담당자_이메일 != null ) {
             MatchQueryBuilder 담당자_조회 = QueryBuilders.matchQuery("assignee.assignee_emailAddress.keyword", 담당자_이메일);
             복합조회.must(담당자_조회);
         }
 
-        검색조건.query(복합조회);
-        검색조건.size(10000); // 모든 검색 결과를 가져오기 위함
 
-        // 상태값 집계
-        검색조건.aggregation(
-                AggregationBuilders.terms("상태값_집계").field("status.status_name.keyword")
-        );
+        NativeSearchQueryBuilder aggregationQuery = new NativeSearchQueryBuilder();
 
-        검색요청.indices("jiraissue");
-        검색요청.source(검색조건);
+        aggregationQuery.withQuery(복합조회)
+                .withAggregations(AggregationBuilders.terms("상태값_집계").field("status.status_name.keyword"))
+                .withMaxResults(10000);
 
-        검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
-        long 할당된_요구사항_개수 = Optional.ofNullable(검색결과)
-                .map(SearchResponse::getHits)
-                .map(org.elasticsearch.search.SearchHits::getTotalHits)
-                .map(totalHits -> totalHits.value)
-                .orElse(0L);
+        검색결과_목록_메인 검색결과_목록_메인_집계 = new 검색결과_목록_메인(지라이슈저장소.aggregationSearch(aggregationQuery.build()));
+        long 할당된_요구사항_개수 = 검색결과_목록_메인_집계.get전체합계();
+
         로그.info("연관된 요구사항 개수: " + 연관된_요구사항_개수);
         로그.info("할당된 요구사항 개수: " + 할당된_요구사항_개수);
 
-        Terms 상태값_집계 = 검색결과.getAggregations().get("상태값_집계");
+        List<검색결과> 상태값_집계 = 검색결과_목록_메인_집계.get검색결과().get("상태값_집계");
 
         Map<String, Long> 제품서비스별_담당자_연관된_요구사항_통계 = new HashMap<>();
         제품서비스별_담당자_연관된_요구사항_통계.put("allReq", 연관된_요구사항_개수);
         제품서비스별_담당자_연관된_요구사항_통계.put("myReq", 할당된_요구사항_개수);
 
-        for (Terms.Bucket 상태값 : 상태값_집계.getBuckets()) {
-            String 상태 = 상태값.getKeyAsString();
-            long 개수 = 상태값.getDocCount();
+        for (검색결과 상태값 : 상태값_집계) {
+            String 상태 = 상태값.get필드명();
+            long 개수 = 상태값.get개수();
             log.info("상태값: " + 상태 + ", Count: " + 개수);
 
             제품서비스별_담당자_연관된_요구사항_통계.put(상태, 개수);
