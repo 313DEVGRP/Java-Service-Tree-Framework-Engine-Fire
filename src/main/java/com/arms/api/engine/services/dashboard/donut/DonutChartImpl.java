@@ -3,6 +3,8 @@ package com.arms.api.engine.services.dashboard.donut;
 import com.arms.api.engine.models.dashboard.donut.집계_응답;
 import com.arms.api.engine.repositories.지라이슈_저장소;
 import com.arms.api.engine.services.dashboard.common.ElasticSearchQueryHelper;
+import com.arms.elasticsearch.util.검색결과;
+import com.arms.elasticsearch.util.검색결과_목록_메인;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchResponse;
@@ -12,6 +14,8 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -30,14 +34,16 @@ public class DonutChartImpl implements DonutChart {
 
         TermsAggregationBuilder issueStatusAgg = AggregationBuilders.terms("statuses").field("status.status_name.keyword");
 
-        SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource().query(boolQuery).aggregation(issueStatusAgg);
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+                .withQuery(boolQuery)
+                .withAggregations(issueStatusAgg);
 
-        SearchResponse searchResponse = 지라이슈저장소.search(es.getSearchRequest(sourceBuilder), RequestOptions.DEFAULT);
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
 
-        Terms status = searchResponse.getAggregations().get("statuses");
+        List<검색결과> statuses = 검색결과_목록_메인.get검색결과().get("statuses");
 
-        return status.getBuckets().stream()
-                .map(bucket -> new 집계_응답(bucket.getKeyAsString(), bucket.getDocCount()))
+        return statuses.stream()
+                .map(bucket -> new 집계_응답(bucket.get필드명(), bucket.get개수()))
                 .collect(Collectors.toList());
     }
 

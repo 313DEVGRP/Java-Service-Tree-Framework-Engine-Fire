@@ -4,14 +4,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.arms.api.engine.models.dashboard.resource.AssigneeData;
 import com.arms.api.engine.services.dashboard.common.ElasticSearchQueryHelper;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
+import com.arms.elasticsearch.util.검색결과;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -20,10 +17,10 @@ import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuil
 import org.elasticsearch.search.aggregations.bucket.filter.ParsedFilter;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
 import com.arms.api.engine.repositories.지라이슈_저장소;
@@ -50,35 +47,25 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
             복합조회.must(제품서비스_조회);
         }
 
-        SearchSourceBuilder 검색조건 = new SearchSourceBuilder();
-
-        검색조건.query(복합조회);
-        검색조건.size(0); // 모든 검색 결과를 가져오기 위함
-
-        검색조건.aggregation(
-                AggregationBuilders.terms("담당자별_집계").field("assignee.assignee_displayName.keyword")
-        );
-
-        SearchRequest 검색요청 = new SearchRequest();
-        검색요청.indices("jiraissue"); //인덱스 공간에서 해당 인덱스 설정
-        검색요청.source(검색조건);
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+            .withQuery(복합조회)
+            .withAggregations(
+                AggregationBuilders
+                    .terms("담당자별_집계").field("assignee.assignee_displayName.keyword")
+            ).withMaxResults(0);
 
         // 요구사항 vs 연결된이슈&서브테스크 구분안하고 한번에
-        SearchResponse 검색결과 = 지라이슈저장소.search(검색요청, RequestOptions.DEFAULT);
-        Long 결과 = Optional.ofNullable(검색결과)
-                .map(SearchResponse::getHits)
-                .map(org.elasticsearch.search.SearchHits::getTotalHits)
-                .map(totalHits -> totalHits.value)
-                .orElse(0L);
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
+        Long 결과 = 검색결과_목록_메인.get전체합계();
         로그.info("검색결과 개수: " + 결과);
 
-        Terms 담당자별_집계 = 검색결과.getAggregations().get("담당자별_집계");
+        List<검색결과> 담당자별_집계 = 검색결과_목록_메인.get검색결과().get("담당자별_집계");
 
         long 담당자_총합 = 0;
         Map<String, Long> 제품서비스별_하위이슈_담당자_집계 = new HashMap<>();
-        for (Terms.Bucket 담당자 : 담당자별_집계.getBuckets()) {
-            String 담당자_이메일 = 담당자.getKeyAsString();
-            long 개수 = 담당자.getDocCount();
+        for (검색결과 담당자 : 담당자별_집계) {
+            String 담당자_이메일 = 담당자.get필드명();
+            long 개수 = 담당자.get개수();
             log.info("담당자: " + 담당자_이메일 + ", Count: " + 개수);
             담당자_총합 += 개수;
             제품서비스별_하위이슈_담당자_집계.put(담당자_이메일, 개수);
@@ -92,50 +79,49 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     @Override
     public Map<String, Map<String, Map<String, Integer>>> 담당자_요구사항여부_상태별집계(Long pdServiceLink) throws IOException {
 
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+
         MatchQueryBuilder 제품아이디별_조회 = QueryBuilders.matchQuery("pdServiceId", pdServiceLink);
 
-        sourceBuilder.query(제품아이디별_조회);
+        TermsAggregationBuilder 담당자별_집계
+                = AggregationBuilders.terms("담당자별_집계")
+                    .field("assignee.assignee_emailAddress.keyword")
+                    .subAggregation(AggregationBuilders.terms("요구사항_여부별_집계").field("isReq")
+                    .subAggregation(AggregationBuilders.terms("상태별_집계").field("status.status_name.keyword")));
 
-        TermsAggregationBuilder 상태별_집계 = AggregationBuilders.terms("상태별_집계").field("status.status_name.keyword");
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+                .withQuery(제품아이디별_조회)
+                .withAggregations(담당자별_집계)
+                .withMaxResults(0);
 
-        TermsAggregationBuilder 요구사항_여부별_집계 = AggregationBuilders.terms("요구사항_여부별_집계").field("isReq")
-                .subAggregation(상태별_집계);
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
 
-        TermsAggregationBuilder 담당자별_집계 = AggregationBuilders.terms("담당자별_집계").field("assignee.assignee_emailAddress.keyword")
-                .subAggregation(요구사항_여부별_집계);
-
-        sourceBuilder.aggregation(담당자별_집계);
-
-        SearchRequest searchRequest = new SearchRequest();
-        searchRequest.indices("jiraissue");
-        searchRequest.source(sourceBuilder);
-
-        SearchResponse searchResponse = 지라이슈저장소.search(searchRequest, RequestOptions.DEFAULT);
-
-        Terms 종합집계결과 = searchResponse.getAggregations().get("담당자별_집계");
-
-        Map<String, Map<String, Map<String, Integer>>> 담당자별_요구사항여부별_상태값_집계 = 종합집계결과.getBuckets().stream().collect(Collectors.toMap(
-                Terms.Bucket::getKeyAsString,
-                담당자 -> {
-                    Terms 요구사항_여부별집계 = 담당자.getAggregations().get("요구사항_여부별_집계");
-                    return 요구사항_여부별집계.getBuckets().stream().collect(Collectors.toMap(
-                            bucket -> {
-                                String 여부 = bucket.getKeyAsString();
-                                if (여부.equals("true")) {
-                                    return "requirement";
-                                } else {
-                                    return "relation_issue";
-                                }
-                            },
-                            bucket -> {
-                                Terms 상태별집계 = bucket.getAggregations().get("상태별_집계");
-                                return 상태별집계.getBuckets().stream()
-                                        .collect(Collectors.toMap(Terms.Bucket::getKeyAsString,
-                                                상태 -> (int) 상태.getDocCount()));
-                            }
-                    ));
-                }
+        Map<String, Map<String, Map<String, Integer>>> 담당자별_요구사항여부별_상태값_집계
+                = 검색결과_목록_메인.get검색결과().get("담당자별_집계")
+                    .stream()
+                    .collect(
+                        Collectors.toMap(
+                        검색결과::get필드명,
+                        담당자 -> {
+                            List<검색결과> 요구사항_여부별_집계 = 담당자.get하위검색결과().get("요구사항_여부별_집계");
+                            return 요구사항_여부별_집계.stream()
+                                    .collect(Collectors.toMap(
+                                    검색결과 -> {
+                                        String 여부 = 검색결과.get필드명();
+                                        if (여부.equals("true")) {
+                                            return "requirement";
+                                        } else {
+                                            return "relation_issue";
+                                        }
+                                    },
+                                    검색결과 -> {
+                                        List<검색결과> 상태별_집계 = 검색결과.get하위검색결과().get("상태별_집계");
+                                        return 상태별_집계.stream()
+                                            .collect(Collectors.toMap(
+                                                    a->a.get필드명(),
+                                                    a->(int)a.get개수()));
+                                    }
+                            ));
+                        }
         ));
 
         return 담당자별_요구사항여부별_상태값_집계;
@@ -145,11 +131,9 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     @Override
     public 검색결과_목록_메인 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) throws IOException {
 
-        SearchHits searchHits = 지라이슈저장소.operationSearch(
-                쿼리추상팩토리.생성()
+        return 지라이슈저장소.aggregationSearch(
+            쿼리추상팩토리.생성()
         );
-
-        return new 검색결과_목록_메인(searchHits);
     }
 
     @Override
@@ -170,57 +154,59 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 .subAggregation(AggregationBuilders.terms("statuses").field("status.status_name.keyword"))
                 .subAggregation(AggregationBuilders.terms("resolutions").field("resolution.resolution_name.keyword"));
 
-        SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource().query(boolQuery).aggregation(assigneesAgg);
+        NativeSearchQueryBuilder nativeSearchQueryBuilder
+                = new NativeSearchQueryBuilder().withQuery(boolQuery).withAggregations(assigneesAgg);
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
+        List<검색결과> assignee = 검색결과_목록_메인.그룹결과("assignee");
 
-        SearchResponse searchResponse = 지라이슈저장소.search(es.getSearchRequest(sourceBuilder), RequestOptions.DEFAULT);
-        Terms terms = searchResponse.getAggregations().get("assignee");
-        return terms.getBuckets().stream()
+        return assignee
+                .stream()
                 .map(this::mapToAssigneeData)
                 .sorted((a1, a2) -> Long.compare(a2.getIssues(), a1.getIssues()))
                 .collect(Collectors.toList());
     }
+// 일단주석 sevoon0909
+//    private Map<String, Object> createAssigneeData(Terms.Bucket bucket) {
+//        Map<String, Object> assigneeData = new HashMap<>();
+//        assigneeData.put("requirements", getDocCount(bucket, "requirements"));
+//        assigneeData.put("issues", getDocCount(bucket, "issues"));
+//        assigneeData.put("displayName", getFirstTermKey(bucket, "displayNames"));
+//        assigneeData.put("issueTypes", getTermCounts(bucket, "issueTypes"));
+//        assigneeData.put("priorities", getTermCounts(bucket, "priorities"));
+//        assigneeData.put("statuses", getTermCounts(bucket, "statuses"));
+//        assigneeData.put("resolutions", getTermCounts(bucket, "resolutions"));
+//        return Map.of(bucket.getKeyAsString(), assigneeData);
+//    }
+//
+//    private long getDocCount(Terms.Bucket bucket, String aggName) {
+//        ParsedFilter filter = bucket.getAggregations().get(aggName);
+//        return filter.getDocCount();
+//    }
+//
+//    private String getFirstTermKey(Terms.Bucket bucket, String aggName) {
+//        Terms terms = bucket.getAggregations().get(aggName);
+//        return terms.getBuckets().isEmpty() ? "" : terms.getBuckets().get(0).getKeyAsString();
+//    }
+//
+//    private Map<String, Long> getTermCounts(Terms.Bucket bucket, String aggName) {
+//        Terms terms = bucket.getAggregations().get(aggName);
+//        return terms.getBuckets().stream()
+//                .collect(Collectors.toMap(
+//                        Terms.Bucket::getKeyAsString,
+//                        Terms.Bucket::getDocCount
+//                ));
+//    }
 
-    private Map<String, Object> createAssigneeData(Terms.Bucket bucket) {
-        Map<String, Object> assigneeData = new HashMap<>();
-        assigneeData.put("requirements", getDocCount(bucket, "requirements"));
-        assigneeData.put("issues", getDocCount(bucket, "issues"));
-        assigneeData.put("displayName", getFirstTermKey(bucket, "displayNames"));
-        assigneeData.put("issueTypes", getTermCounts(bucket, "issueTypes"));
-        assigneeData.put("priorities", getTermCounts(bucket, "priorities"));
-        assigneeData.put("statuses", getTermCounts(bucket, "statuses"));
-        assigneeData.put("resolutions", getTermCounts(bucket, "resolutions"));
-        return Map.of(bucket.getKeyAsString(), assigneeData);
-    }
+    private AssigneeData mapToAssigneeData(검색결과 검색결과) {
 
-    private long getDocCount(Terms.Bucket bucket, String aggName) {
-        ParsedFilter filter = bucket.getAggregations().get(aggName);
-        return filter.getDocCount();
-    }
-
-    private String getFirstTermKey(Terms.Bucket bucket, String aggName) {
-        Terms terms = bucket.getAggregations().get(aggName);
-        return terms.getBuckets().isEmpty() ? "" : terms.getBuckets().get(0).getKeyAsString();
-    }
-
-    private Map<String, Long> getTermCounts(Terms.Bucket bucket, String aggName) {
-        Terms terms = bucket.getAggregations().get(aggName);
-        return terms.getBuckets().stream()
-                .collect(Collectors.toMap(
-                        Terms.Bucket::getKeyAsString,
-                        Terms.Bucket::getDocCount
-                ));
-    }
-
-
-    private AssigneeData mapToAssigneeData(Terms.Bucket bucket) {
         AssigneeData assigneeData = new AssigneeData();
-        assigneeData.setRequirements(getDocCount(bucket, "requirements"));
-        assigneeData.setIssues(getDocCount(bucket, "issues"));
-        assigneeData.setDisplayName(getFirstTermKey(bucket, "displayNames"));
-        assigneeData.setIssueTypes(getTermCounts(bucket, "issueTypes"));
-        assigneeData.setPriorities(getTermCounts(bucket, "priorities"));
-        assigneeData.setStatuses(getTermCounts(bucket, "statuses"));
-        assigneeData.setResolutions(getTermCounts(bucket, "resolutions"));
+        assigneeData.setRequirements(검색결과.필터필드개수("requirements"));
+        assigneeData.setIssues(검색결과.필터필드개수("issues"));
+        assigneeData.setDisplayName(검색결과.필터필드명( "displayNames"));
+        assigneeData.setIssueTypes(검색결과.검색결과_맵처리("issueTypes"));
+        assigneeData.setPriorities(검색결과.검색결과_맵처리( "priorities"));
+        assigneeData.setStatuses(검색결과.검색결과_맵처리( "statuses"));
+        assigneeData.setResolutions(검색결과.검색결과_맵처리( "resolutions"));
         return assigneeData;
     }
 }

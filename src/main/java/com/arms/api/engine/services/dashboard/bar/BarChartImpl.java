@@ -3,13 +3,14 @@ package com.arms.api.engine.services.dashboard.bar;
 import com.arms.api.engine.models.dashboard.bar.요구사항_지라이슈상태_주별_집계;
 import com.arms.api.engine.repositories.지라이슈_저장소;
 import com.arms.api.engine.services.dashboard.common.ElasticSearchQueryHelper;
+import com.arms.elasticsearch.util.검색결과_목록_메인;
+import com.arms.elasticsearch.util.검색결과;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
@@ -17,6 +18,8 @@ import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -52,31 +55,32 @@ public class BarChartImpl implements BarChart {
         TermsAggregationBuilder totalAggregationBuilder = AggregationBuilders.terms("total_status").field("status.status_name.keyword");
 
         // 총 이슈 개수 검색
-        SearchSourceBuilder sourceBuilderForTotalIssues = new SearchSourceBuilder().query(boolQueryForTotalIssues).aggregation(totalAggregationBuilder);
-        SearchResponse searchResponseForTotalIssues = 지라이슈저장소.search(es.getSearchRequest(sourceBuilderForTotalIssues), RequestOptions.DEFAULT);
-        Long totalIssuesCount = Optional.ofNullable(searchResponseForTotalIssues)
-                .map(SearchResponse::getHits)
-                .map(SearchHits::getTotalHits)
-                .map(totalHits -> totalHits.value)
-                .orElse(0L);
+        NativeSearchQueryBuilder nativeSearchQueryBuilderForTotalIssues
+                = new NativeSearchQueryBuilder().withQuery(boolQueryForTotalIssues).withAggregations(totalAggregationBuilder);
+
+        검색결과_목록_메인 searchResponseForTotalIssues
+                = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilderForTotalIssues.build());
+
+        Long totalIssuesCount
+                = searchResponseForTotalIssues.get전체합계();
 
         // 총 요구사항 개수 검색
-        SearchSourceBuilder sourceBuilderForTotalRequirements = new SearchSourceBuilder().query(boolQueryForTotalRequirements);
-        SearchResponse searchResponseForTotalRequirements = 지라이슈저장소.search(es.getSearchRequest(sourceBuilderForTotalRequirements), RequestOptions.DEFAULT);
-        Long totalRequirementsCount = Optional.ofNullable(searchResponseForTotalRequirements)
-                .map(SearchResponse::getHits)
-                .map(SearchHits::getTotalHits)
-                .map(totalHits -> totalHits.value)
-                .orElse(0L);
+        NativeSearchQueryBuilder nativeSearchQueryBuilderForTotalRequirements
+                = new NativeSearchQueryBuilder().withQuery(boolQueryForTotalRequirements);
+
+        검색결과_목록_메인 검색결과_목록_메인
+                = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilderForTotalRequirements.build());
+
+        Long totalRequirementsCount = 검색결과_목록_메인.get전체합계();
 
         // 이슈 상태 집계 결과 가져오기
         Map<String, Long> statusMap = new HashMap<>();
         Optional.ofNullable(searchResponseForTotalIssues)
-                .map(response -> response.getAggregations().get("total_status"))
+                .map(response ->  response.get검색결과().get("total_status"))
                 .ifPresent(totalStatus -> {
-                    for (Terms.Bucket entry : ((Terms) totalStatus).getBuckets()) {
-                        String key = entry.getKeyAsString();
-                        long value = entry.getDocCount();
+                    for (검색결과 검색결과 : totalStatus) {
+                        String key = 검색결과.get필드명();
+                        long value = 검색결과.get개수();
                         statusMap.put(key, value);
                     }
                 });
@@ -106,16 +110,18 @@ public class BarChartImpl implements BarChart {
                 .subAggregation(AggregationBuilders.terms("statuses").field("status.status_name.keyword"))
                 .subAggregation(AggregationBuilders.terms("requirements").field("isReq"));
 
-        SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource().query(boolQuery).aggregation(weeklyAggregationBuilder);
-        SearchResponse searchResponse = 지라이슈저장소.search(es.getSearchRequest(sourceBuilder), RequestOptions.DEFAULT);
+        NativeSearchQueryBuilder nativeSearchQueryBuilder
+                = new NativeSearchQueryBuilder().withQuery(boolQuery).withAggregations(weeklyAggregationBuilder);
 
-        Histogram aggregationByMonth = searchResponse.getAggregations().get("aggregation_by_week");
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
+
+        List<검색결과> aggregationByWeek = 검색결과_목록_메인.get검색결과().get("aggregation_by_week");
 
 
-        Map<String, 요구사항_지라이슈상태_주별_집계> 검색결과 = aggregationByMonth.getBuckets().stream()
-                .sorted(Comparator.comparing(bucket -> OffsetDateTime.parse(bucket.getKeyAsString()).toLocalDate()))
+        Map<String, 요구사항_지라이슈상태_주별_집계> 검색결과 = aggregationByWeek.stream()
+                .sorted(Comparator.comparing(bucket -> OffsetDateTime.parse(bucket.get필드명()).toLocalDate()))
                 .collect(Collectors.toMap(
-                        entry -> transformDate(entry.getKeyAsString()),
+                        entry ->  transformDate(entry.get필드명()),
                         this::주별데이터생성,
                         (existingValue, newValue) -> existingValue,
                         LinkedHashMap::new
@@ -139,19 +145,19 @@ public class BarChartImpl implements BarChart {
         return 검색결과;
     }
 
-    private 요구사항_지라이슈상태_주별_집계 주별데이터생성(Histogram.Bucket entry) {
+    private 요구사항_지라이슈상태_주별_집계 주별데이터생성(검색결과 검색_결과) {
 
-        Map<String, Long> statuses = ((Terms) entry.getAggregations().get("statuses")).getBuckets().stream()
-                .collect(Collectors.toMap(Terms.Bucket::getKeyAsString, Terms.Bucket::getDocCount));
+        Map<String, Long> statuses = (검색_결과.get하위검색결과().get("statuses")).stream()
+                .collect(Collectors.toMap(검색결과::get필드명, 검색결과::get개수));
 
-        long totalReqCount = Optional.ofNullable((Terms) entry.getAggregations().get("requirements"))
-                .flatMap(reqs -> reqs.getBuckets().stream()
-                        .filter(bucket -> "true".equals(bucket.getKeyAsString()))
+        long totalReqCount = Optional.ofNullable(검색_결과.get하위검색결과().get("requirements"))
+                .flatMap(reqs -> reqs.stream()
+                        .filter(bucket -> "true".equals(bucket.get필드명()))
                         .findFirst())
-                .map(Terms.Bucket::getDocCount)
+                .map(검색결과::get개수)
                 .orElse(0L);
 
-        return new 요구사항_지라이슈상태_주별_집계(entry.getDocCount(), statuses, totalReqCount);
+        return new 요구사항_지라이슈상태_주별_집계(검색_결과.get개수(), statuses, totalReqCount);
     }
 
     private String transformDate(String date) {
