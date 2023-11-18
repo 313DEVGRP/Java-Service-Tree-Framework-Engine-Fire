@@ -1,14 +1,12 @@
 package com.arms.api.engine.controllers;
 
-import com.arms.api.engine.models.boolquery.서비스_버전_조건;
-import com.arms.api.engine.models.boolquery.서비스_조건;
-import com.arms.api.engine.models.boolquery.요구사항인지_여부_조건;
-import com.arms.api.engine.models.boolquery.진행사항_필터_조건;
+import com.arms.api.engine.models.boolquery.*;
 import com.arms.api.engine.models.dashboard.bar.요구사항_지라이슈상태_주별_집계;
 import com.arms.api.engine.models.dashboard.donut.집계_응답;
 import com.arms.api.engine.models.dashboard.resource.AssigneeData;
 import com.arms.api.engine.models.dashboard.sankey.SankeyElasticSearchData;
 import com.arms.api.engine.models.dashboard.treemap.Worker;
+import com.arms.api.engine.models.지라이슈_단순_검색요청;
 import com.arms.api.engine.models.지라이슈_일반_검색요청;
 import com.arms.api.engine.models.지라이슈_일자별_검색요청;
 import com.arms.api.engine.services.dashboard.bar.BarChart;
@@ -16,6 +14,7 @@ import com.arms.api.engine.services.dashboard.donut.DonutChart;
 import com.arms.api.engine.services.dashboard.sankey.SankeyChart;
 import com.arms.api.engine.services.dashboard.treemap.TreeMapChart;
 import com.arms.api.engine.services.지라이슈_대시보드_서비스;
+import com.arms.elasticsearch.util.base.검색_기본_요청;
 import com.arms.elasticsearch.util.query.bool.조건_쿼리_생성자;
 import com.arms.elasticsearch.util.query.bool.조건_쿼리_컴포넌트;
 import com.arms.elasticsearch.util.query.검색_일반_요청;
@@ -163,6 +162,25 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
                 ).build();
 
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(지라이슈_일반_검색요청, 조건_쿼리_컴포넌트)));
+    }
+
+    @ResponseBody
+    @GetMapping("/normal-version-only/{pdServiceId}")
+    public ResponseEntity<검색결과_목록_메인> 일반_버전필터_작업자별_검색(@PathVariable Long pdServiceId,
+                                                 @RequestParam List<Long> pdServiceVersionLinks,
+                                                    지라이슈_단순_검색요청 지라이슈_단순_검색_요청) throws IOException {
+        조건_쿼리_컴포넌트 조건_쿼리_컴포넌트 =
+                            진행사항_필터_조건.builder()
+                            .조건_쿼리_컴포넌트(진행사항_포함_조건.builder()
+                                    .조건_쿼리_컴포넌트(new 조건_쿼리_생성자())
+                                    .포함필드("pdServiceId")
+                                    .포함필드검색어(pdServiceId)
+                                    .build())
+                            .필터필드("pdServiceVersion")
+                            .필터필드검색어(pdServiceVersionLinks)
+                            .build();
+
+        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(지라이슈_단순_검색_요청, 조건_쿼리_컴포넌트)));
     }
 
     @ResponseBody
