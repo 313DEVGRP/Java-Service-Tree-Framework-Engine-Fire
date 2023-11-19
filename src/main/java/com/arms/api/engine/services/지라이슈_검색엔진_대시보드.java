@@ -6,25 +6,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.arms.api.engine.models.dashboard.resource.AssigneeData;
-import com.arms.api.engine.services.dashboard.common.ElasticSearchQueryHelper;
-import com.arms.elasticsearch.util.검색결과;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.filter.ParsedFilter;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
+import com.arms.api.engine.models.dashboard.resource.AssigneeData;
 import com.arms.api.engine.repositories.지라이슈_저장소;
+import com.arms.api.engine.services.dashboard.common.ElasticSearchQueryHelper;
 import com.arms.elasticsearch.util.query.쿼리_추상_팩토리;
+import com.arms.elasticsearch.util.검색결과;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
 
 import lombok.AllArgsConstructor;
@@ -165,37 +162,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 .sorted((a1, a2) -> Long.compare(a2.getIssues(), a1.getIssues()))
                 .collect(Collectors.toList());
     }
-// 일단주석 sevoon0909
-//    private Map<String, Object> createAssigneeData(Terms.Bucket bucket) {
-//        Map<String, Object> assigneeData = new HashMap<>();
-//        assigneeData.put("requirements", getDocCount(bucket, "requirements"));
-//        assigneeData.put("issues", getDocCount(bucket, "issues"));
-//        assigneeData.put("displayName", getFirstTermKey(bucket, "displayNames"));
-//        assigneeData.put("issueTypes", getTermCounts(bucket, "issueTypes"));
-//        assigneeData.put("priorities", getTermCounts(bucket, "priorities"));
-//        assigneeData.put("statuses", getTermCounts(bucket, "statuses"));
-//        assigneeData.put("resolutions", getTermCounts(bucket, "resolutions"));
-//        return Map.of(bucket.getKeyAsString(), assigneeData);
-//    }
-//
-//    private long getDocCount(Terms.Bucket bucket, String aggName) {
-//        ParsedFilter filter = bucket.getAggregations().get(aggName);
-//        return filter.getDocCount();
-//    }
-//
-//    private String getFirstTermKey(Terms.Bucket bucket, String aggName) {
-//        Terms terms = bucket.getAggregations().get(aggName);
-//        return terms.getBuckets().isEmpty() ? "" : terms.getBuckets().get(0).getKeyAsString();
-//    }
-//
-//    private Map<String, Long> getTermCounts(Terms.Bucket bucket, String aggName) {
-//        Terms terms = bucket.getAggregations().get(aggName);
-//        return terms.getBuckets().stream()
-//                .collect(Collectors.toMap(
-//                        Terms.Bucket::getKeyAsString,
-//                        Terms.Bucket::getDocCount
-//                ));
-//    }
+
 
     private AssigneeData mapToAssigneeData(검색결과 검색결과) {
 
