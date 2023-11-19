@@ -43,6 +43,8 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
     @Override
     public 검색결과_목록_메인 aggregationSearch(Query query) {
+        SearchHits<T> search = operations.search(query, entityClass);
+        System.out.println(search);
         return new 검색결과_목록_메인(operations.search(query,entityClass));
     }
 

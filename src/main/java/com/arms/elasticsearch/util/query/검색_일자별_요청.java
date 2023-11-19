@@ -3,18 +3,16 @@ package com.arms.elasticsearch.util.query;
 import lombok.Getter;
 import lombok.Setter;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
-import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.Optional;
 
 import com.arms.elasticsearch.util.base.검색_기본_요청;
-import com.arms.elasticsearch.util.query.bool.조건_쿼리_컴포넌트;
+import com.arms.elasticsearch.util.query.bool.EsQuery;
 
 @Setter
 @Getter
@@ -25,23 +23,23 @@ public class 검색_일자별_요청 implements 쿼리_추상_팩토리 {
 	private final int 크기;
 	private final boolean 컨텐츠보기여부;
 
-	private final 조건_쿼리_컴포넌트 조건_쿼리_컴포넌트;
+	private final EsQuery esQuery;
 
-	private 검색_일자별_요청(검색_기본_요청 검색_기본_요청, 조건_쿼리_컴포넌트 조건_쿼리_컴포넌트){
+	private 검색_일자별_요청(검색_기본_요청 검색_기본_요청, EsQuery esQuery){
 		this.하위그룹필드들 = 검색_기본_요청.get하위그룹필드들();
 		this.메인그룹필드 = 검색_기본_요청.get메인그룹필드();
 		this.크기 = 검색_기본_요청.get크기();
 		this.컨텐츠보기여부 = 검색_기본_요청.is컨텐츠보기여부();
-		this.조건_쿼리_컴포넌트 = 조건_쿼리_컴포넌트;
+		this.esQuery = esQuery;
 	}
 
-	public static 쿼리_추상_팩토리 of(검색_기본_요청 검색_기본_요청, 조건_쿼리_컴포넌트 조건_쿼리_컴포넌트){
-		return new 검색_일자별_요청(검색_기본_요청, 조건_쿼리_컴포넌트);
+	public static 쿼리_추상_팩토리 of(검색_기본_요청 검색_기본_요청, EsQuery esQuery){
+		return new 검색_일자별_요청(검색_기본_요청, esQuery);
 	}
 
 	@Override
 	public NativeSearchQuery 생성() {
-		BoolQueryBuilder boolQuery = 조건_쿼리_컴포넌트.getBoolQuery();
+		BoolQueryBuilder boolQuery = esQuery.boolQuery();
 		서브_집계_요청 서브_집계_요청 = new 서브_집계_요청(하위그룹필드들, 크기);
 
 		NativeSearchQueryBuilder nativeSearchQueryBuilder
