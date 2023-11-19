@@ -1,7 +1,6 @@
 package com.arms.elasticsearch.util.query;
 
 import com.arms.elasticsearch.util.base.검색_기본_요청;
-import com.arms.elasticsearch.util.query.bool.EsQuery;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -3,7 +3,9 @@ package com.arms.elasticsearch.util.query.bool;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 
-public abstract class Must implements EsQuery{
+import com.arms.elasticsearch.util.query.EsQuery;
+
+public abstract class Must implements EsBoolQuery {
 	public abstract TermQueryBuilder termQueryBuilder();
 
 	@Override

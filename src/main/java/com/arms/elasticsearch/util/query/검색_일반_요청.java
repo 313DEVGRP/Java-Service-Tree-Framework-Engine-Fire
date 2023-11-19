@@ -6,11 +6,11 @@ import java.util.Optional;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 
 import com.arms.elasticsearch.util.base.검색_기본_요청;
-import com.arms.elasticsearch.util.query.bool.EsQuery;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -43,6 +43,7 @@ public class 검색_일반_요청 implements 쿼리_추상_팩토리 {
 	public NativeSearchQuery 생성() {
 
 		BoolQueryBuilder boolQuery = esQuery.boolQuery();
+		Sort sort = esQuery.sortQuery();
 		서브_집계_요청 서브_집계_요청 = new 서브_집계_요청(하위그룹필드들, 크기);
 
 		NativeSearchQueryBuilder nativeSearchQueryBuilder
@@ -53,6 +54,10 @@ public class 검색_일반_요청 implements 쿼리_추상_팩토리 {
 			.ifPresent(query->{
 				nativeSearchQueryBuilder.withQuery(boolQuery);
 			});
+
+		if(sort!=null){
+			nativeSearchQueryBuilder.withSort(sort);
+		}
 
 		Optional.ofNullable(메인그룹필드)
 			.ifPresent(그룹_필드 -> {

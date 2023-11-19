@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.arms.elasticsearch.util.base.검색_기본_요청;
-import com.arms.elasticsearch.util.query.bool.EsQuery;
 
 @Setter
 @Getter

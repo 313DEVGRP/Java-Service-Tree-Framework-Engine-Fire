@@ -1,10 +1,11 @@
 package com.arms.elasticsearch.util.query.bool;
 
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 
-public abstract class Filter implements EsQuery {
+import com.arms.elasticsearch.util.query.EsQuery;
+
+public abstract class Filter implements EsBoolQuery {
 
 	public abstract TermsQueryBuilder termsQueryBuilder();
 
