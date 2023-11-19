@@ -1,6 +1,21 @@
 package com.arms.api.engine.controllers;
 
-import com.arms.api.engine.models.boolquery.*;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.arms.api.engine.models.dashboard.bar.요구사항_지라이슈상태_주별_집계;
 import com.arms.api.engine.models.dashboard.donut.집계_응답;
 import com.arms.api.engine.models.dashboard.resource.AssigneeData;
@@ -14,23 +29,16 @@ import com.arms.api.engine.services.dashboard.donut.DonutChart;
 import com.arms.api.engine.services.dashboard.sankey.SankeyChart;
 import com.arms.api.engine.services.dashboard.treemap.TreeMapChart;
 import com.arms.api.engine.services.지라이슈_대시보드_서비스;
-import com.arms.elasticsearch.util.base.검색_기본_요청;
-import com.arms.elasticsearch.util.query.bool.조건_쿼리_생성자;
-import com.arms.elasticsearch.util.query.bool.조건_쿼리_컴포넌트;
+import com.arms.elasticsearch.util.query.bool.BoolQuery;
+import com.arms.elasticsearch.util.query.bool.EsQuery;
+import com.arms.elasticsearch.util.query.bool.TermQueryMust;
+import com.arms.elasticsearch.util.query.bool.TermsQueryFilter;
 import com.arms.elasticsearch.util.query.검색_일반_요청;
 import com.arms.elasticsearch.util.query.검색_일자별_요청;
 import com.arms.elasticsearch.util.query.검색_크기별_요청;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/engine/jira/dashboard")
@@ -113,37 +121,25 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     @ResponseBody
     @GetMapping("/date/{pdServiceId}")
     public ResponseEntity<검색결과_목록_메인> 일자별_검색(@PathVariable Long pdServiceId, 지라이슈_일자별_검색요청 지라이슈_일자별_검색요청) throws IOException {
-        조건_쿼리_컴포넌트 조건_쿼리_컴포넌트 =
-            요구사항인지_여부_조건.builder()
-                .조건_쿼리_컴포넌트(
-                    진행사항_필터_조건.builder()
-                        .조건_쿼리_컴포넌트(서비스_조건.builder()
-                            .조건_쿼리_컴포넌트(new 조건_쿼리_생성자())
-                            .pdServiceId(pdServiceId)
-                            .build())
-                        .필터필드검색어(지라이슈_일자별_검색요청.get필터필드검색어())
-                        .필터필드(지라이슈_일자별_검색요청.get필터필드())
-                        .build()
-                )
-            .isReq(지라이슈_일자별_검색요청.getIsReq())
-            .build();
-        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일자별_요청.of(지라이슈_일자별_검색요청, 조건_쿼리_컴포넌트)));
+
+        EsQuery esQuery
+            =  new BoolQuery()
+                .add(new TermsQueryFilter(지라이슈_일자별_검색요청.get필터필드(),지라이슈_일자별_검색요청.get필터필드검색어()))
+                .add(new TermQueryMust("pdServiceId",pdServiceId));
+
+        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일자별_요청.of(지라이슈_일자별_검색요청, esQuery)));
     }
 
     @ResponseBody
     @GetMapping("/normal/{pdServiceId}")
     public ResponseEntity<검색결과_목록_메인> 일반_검색(@PathVariable Long pdServiceId, 지라이슈_일반_검색요청 지라이슈_일반_검색요청) throws IOException {
 
-        조건_쿼리_컴포넌트 조건_쿼리_컴포넌트 = 요구사항인지_여부_조건.builder()
-            .조건_쿼리_컴포넌트(
-                서비스_조건.builder()
-                    .조건_쿼리_컴포넌트(new 조건_쿼리_생성자())
-                    .pdServiceId(pdServiceId)
-                    .build()
-            )
-            .isReq(지라이슈_일반_검색요청.getIsReq())
-            .build();
-        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(지라이슈_일반_검색요청, 조건_쿼리_컴포넌트)));
+        EsQuery esQuery
+            =  new BoolQuery()
+                .add(new TermQueryMust("pdServiceId",pdServiceId))
+                .add(new TermQueryMust("isReq",지라이슈_일반_검색요청.getIsReq()));
+
+        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(지라이슈_일반_검색요청, esQuery)));
     }
 
     @ResponseBody
@@ -151,17 +147,13 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     public ResponseEntity<검색결과_목록_메인> 일반_버전필터_검색(@PathVariable Long pdServiceId,
                                                  @RequestParam List<Long> pdServiceVersionLinks,
                                                  지라이슈_일반_검색요청 지라이슈_일반_검색요청) throws IOException {
-        조건_쿼리_컴포넌트 조건_쿼리_컴포넌트 = 요구사항인지_여부_조건.builder()
-                .isReq(지라이슈_일반_검색요청.getIsReq())
-                .조건_쿼리_컴포넌트(
-                    서비스_버전_조건.builder()
-                        .조건_쿼리_컴포넌트(new 조건_쿼리_생성자())
-                        .pdServiceId(pdServiceId)
-                        .pdServiceVersion(pdServiceVersionLinks)
-                        .build()
-                ).build();
+        EsQuery esQuery
+            =  new BoolQuery()
+                .add(new TermQueryMust("pdServiceId",pdServiceId))
+                .add(new TermsQueryFilter("pdServiceVersion",pdServiceVersionLinks))
+                .add(new TermQueryMust("isReq",지라이슈_일반_검색요청.getIsReq()));
 
-        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(지라이슈_일반_검색요청, 조건_쿼리_컴포넌트)));
+        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(지라이슈_일반_검색요청, esQuery)));
     }
 
     @ResponseBody
@@ -169,18 +161,12 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     public ResponseEntity<검색결과_목록_메인> 일반_버전필터_작업자별_검색(@PathVariable Long pdServiceId,
                                                  @RequestParam List<Long> pdServiceVersionLinks,
                                                     지라이슈_단순_검색요청 지라이슈_단순_검색_요청) throws IOException {
-        조건_쿼리_컴포넌트 조건_쿼리_컴포넌트 =
-                            진행사항_필터_조건.builder()
-                            .조건_쿼리_컴포넌트(진행사항_포함_조건.builder()
-                                    .조건_쿼리_컴포넌트(new 조건_쿼리_생성자())
-                                    .포함필드("pdServiceId")
-                                    .포함필드검색어(pdServiceId)
-                                    .build())
-                            .필터필드("pdServiceVersion")
-                            .필터필드검색어(pdServiceVersionLinks)
-                            .build();
+        EsQuery esQuery
+            =  new BoolQuery()
+                .add(new TermQueryMust("pdServiceId",pdServiceId))
+                .add(new TermsQueryFilter("pdServiceVersion",pdServiceVersionLinks));
 
-        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(지라이슈_단순_검색_요청, 조건_쿼리_컴포넌트)));
+        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(지라이슈_단순_검색_요청, esQuery)));
     }
 
     @ResponseBody
@@ -200,12 +186,11 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     @GetMapping("/exclusion-isreq-normal/{pdServiceId}")
     public ResponseEntity<검색결과_목록_메인> 요구사항여부제외_일반_검색(@PathVariable Long pdServiceId, 지라이슈_일반_검색요청 지라이슈_일반_검색요청) throws IOException {
 
-        조건_쿼리_컴포넌트 조건_쿼리_컴포넌트 = 서비스_조건.builder()
-            .조건_쿼리_컴포넌트(new 조건_쿼리_생성자())
-            .pdServiceId(pdServiceId)
-            .build();
+        EsQuery esQuery
+            =  new BoolQuery()
+                .add(new TermQueryMust("pdServiceId",pdServiceId));
 
-        검색결과_목록_메인 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(지라이슈_일반_검색요청, 조건_쿼리_컴포넌트));
+        검색결과_목록_메인 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(지라이슈_일반_검색요청, esQuery));
         return ResponseEntity.ok(집계결과_가져오기);
     }
 
@@ -213,12 +198,11 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     @GetMapping("/isreq-normal/{pdServiceId}")
     public ResponseEntity<검색결과_목록_메인> 요구사항_일반_검색(@PathVariable Long pdServiceId, 지라이슈_일반_검색요청 지라이슈_일반_검색요청) throws IOException {
 
-        조건_쿼리_컴포넌트 조건_쿼리_컴포넌트 = 서비스_조건.builder()
-                .조건_쿼리_컴포넌트(new 조건_쿼리_생성자())
-                .pdServiceId(pdServiceId)
-                .build();
+        EsQuery esQuery
+            =  new BoolQuery()
+                .add(new TermQueryMust("pdServiceId",pdServiceId));
 
-        검색결과_목록_메인 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(검색_크기별_요청.of(지라이슈_일반_검색요청, 조건_쿼리_컴포넌트));
+        검색결과_목록_메인 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(검색_크기별_요청.of(지라이슈_일반_검색요청, esQuery));
         return ResponseEntity.ok(집계결과_가져오기);
     }
 
