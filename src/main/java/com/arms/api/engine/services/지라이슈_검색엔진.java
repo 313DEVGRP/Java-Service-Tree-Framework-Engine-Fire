@@ -648,8 +648,11 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         nativeSearchQueryBuilder.withQuery(복합조회)
                 .withMaxResults(10000);
 
-        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
-        long 요구사항_개수 = 검색결과_목록_메인.get전체합계();
+//        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build());
+//        long 요구사항_개수 = 검색결과_목록_메인.get전체합계();
+        long 요구사항_개수 = Optional.ofNullable(지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build()))
+                .map(지라이슈 -> 지라이슈.size())
+                .orElse(0);
 
         if ( 담당자_이메일 != null ) {
             MatchQueryBuilder 담당자_조회 = QueryBuilders.matchQuery("assignee.assignee_emailAddress.keyword", 담당자_이메일);
@@ -713,8 +716,13 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         nativeSearchQueryBuilder.withQuery(복합조회)
                 .withMaxResults(10000);
 
-        long 연관된_요구사항_개수
-                = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build()).get전체합계();
+        // aggregation 부분이 없어서 null 오류 발생
+        /*long 연관된_요구사항_개수
+                = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build()).get전체합계();*/
+
+        long 연관된_요구사항_개수 = Optional.ofNullable(지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build()))
+                .map(지라이슈 -> 지라이슈.size())
+                .orElse(0);
 
         if ( 담당자_이메일 != null ) {
             MatchQueryBuilder 담당자_조회 = QueryBuilders.matchQuery("assignee.assignee_emailAddress.keyword", 담당자_이메일);

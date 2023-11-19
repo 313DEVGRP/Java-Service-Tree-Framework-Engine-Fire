@@ -68,10 +68,13 @@ public class BarChartImpl implements BarChart {
         NativeSearchQueryBuilder nativeSearchQueryBuilderForTotalRequirements
                 = new NativeSearchQueryBuilder().withQuery(boolQueryForTotalRequirements);
 
-        검색결과_목록_메인 검색결과_목록_메인
-                = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilderForTotalRequirements.build());
+//        검색결과_목록_메인 검색결과_목록_메인
+//                = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilderForTotalRequirements.build());
+//        Long totalRequirementsCount = 검색결과_목록_메인.get전체합계();
 
-        Long totalRequirementsCount = 검색결과_목록_메인.get전체합계();
+        Long totalRequirementsCount = Long.valueOf(Optional.ofNullable(지라이슈저장소.normalSearch(nativeSearchQueryBuilderForTotalRequirements.build()))
+                .map(지라이슈 -> 지라이슈.size())
+                .orElse(0));
 
         // 이슈 상태 집계 결과 가져오기
         Map<String, Long> statusMap = new HashMap<>();
