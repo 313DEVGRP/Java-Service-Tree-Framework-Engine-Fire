@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import com.arms.api.engine.models.지라이슈_제품_및_제품버전_검색요청;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,6 @@ import com.arms.api.engine.models.지라이슈_단순_검색요청;
 import com.arms.api.engine.models.지라이슈_일반_검색요청;
 import com.arms.api.engine.models.지라이슈_일자별_검색요청;
 import com.arms.api.engine.services.dashboard.bar.BarChart;
-import com.arms.api.engine.services.dashboard.donut.DonutChart;
 import com.arms.api.engine.services.dashboard.sankey.SankeyChart;
 import com.arms.api.engine.services.dashboard.treemap.TreeMapChart;
 import com.arms.api.engine.services.지라이슈_대시보드_서비스;
@@ -51,8 +51,6 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     @Autowired
     private SankeyChart sankeyChart;
     @Autowired
-    private DonutChart donutChart;
-    @Autowired
     private BarChart barChart;
     @Autowired
     private TreeMapChart treeMapChart;
@@ -62,12 +60,11 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
             value = {"/jira-issue-statuses"},
             method = {RequestMethod.GET}
     )
-    public List<집계_응답> 요구사항이슈집계(
-            @RequestParam Long pdServiceLink,
-            @RequestParam List<Long> pdServiceVersionLinks
-    ) throws IOException {
-        List<집계_응답> 요구사항이슈집계 = donutChart.이슈상태집계(pdServiceLink, pdServiceVersionLinks);
-        return 요구사항이슈집계;
+    public ResponseEntity<검색결과_목록_메인> 요구사항이슈집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws IOException {
+        EsQuery esQuery = new BoolQuery()
+                .add(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink()))
+                .add(new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks()));
+        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(지라이슈_제품_및_제품버전_검색요청, esQuery)));
     }
 
     @ResponseBody
