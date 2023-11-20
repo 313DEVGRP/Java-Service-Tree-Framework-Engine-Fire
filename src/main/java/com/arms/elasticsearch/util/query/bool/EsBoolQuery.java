@@ -4,8 +4,8 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 
 import com.arms.elasticsearch.util.query.EsQuery;
 
-public interface EsBoolQuery extends EsQuery {
+public abstract class EsBoolQuery extends EsQuery {
 
-	EsQuery boolQueryBuilder(BoolQueryBuilder boolQueryBuilder);
+	public abstract EsQuery boolQueryBuilder(BoolQueryBuilder boolQueryBuilder);
 
 }

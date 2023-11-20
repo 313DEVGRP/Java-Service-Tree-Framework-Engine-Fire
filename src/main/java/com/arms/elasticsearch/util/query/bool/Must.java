@@ -5,7 +5,7 @@ import org.elasticsearch.index.query.TermQueryBuilder;
 
 import com.arms.elasticsearch.util.query.EsQuery;
 
-public abstract class Must implements EsBoolQuery {
+public abstract class Must extends EsBoolQuery {
 	public abstract TermQueryBuilder termQueryBuilder();
 
 	@Override

@@ -5,7 +5,7 @@ import org.springframework.data.domain.Sort.Direction;
 
 import com.arms.elasticsearch.util.query.EsQuery;
 
-public class SortBy implements EsQuery {
+public class SortBy extends EsQuery {
 
 	private Sort sort;
 

@@ -5,7 +5,7 @@ import org.elasticsearch.index.query.TermsQueryBuilder;
 
 import com.arms.elasticsearch.util.query.EsQuery;
 
-public abstract class Filter implements EsBoolQuery {
+public abstract class Filter extends EsBoolQuery {
 
 	public abstract TermsQueryBuilder termsQueryBuilder();
 

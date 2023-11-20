@@ -43,10 +43,9 @@ public class 검색_일반_요청 implements 쿼리_추상_팩토리 {
 
 	@Override
 	public NativeSearchQuery 생성() {
-		BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<BoolQueryBuilder>(){});
+		BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
+		Sort sort = esQuery.getQuery(new ParameterizedTypeReference<>(){});
 
-		System.out.println(esQuery);
-		Sort sort = esQuery.getQuery(new ParameterizedTypeReference<Sort>(){});
 		서브_집계_요청 서브_집계_요청 = new 서브_집계_요청(하위그룹필드들, 크기);
 
 		NativeSearchQueryBuilder nativeSearchQueryBuilder

@@ -1,24 +1,26 @@
 package com.arms.elasticsearch.util.query;
 
-import org.elasticsearch.index.query.BoolQueryBuilder;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.domain.Sort;
 
-public interface EsQuery {
+public abstract class EsQuery {
 
+	private ConcurrentHashMap<Type, Object> map = new ConcurrentHashMap<>();
 
-//
-//	default BoolQueryBuilder boolQuery() {
-//		throw new RuntimeException();
-//	};
-//
-//	default Sort sortQuery() {
-//		throw new RuntimeException();
-//	};
+	public  <T> T getQuery(ParameterizedTypeReference<T> typeReference) {
+		Type type = typeReference.getType();
+		if (type instanceof ParameterizedType) {
+			return ((Class<T>) ((ParameterizedType) type).getRawType()).cast(map.get(typeReference.getType()));
+		} else {
+			return ((Class<T>) type).cast(map.get(typeReference.getType()));
+		}
+	}
 
-	default <T> T getQuery(ParameterizedTypeReference<T> typeReference){
-		throw new RuntimeException();
-	};
-
+	public <T> void put(ParameterizedTypeReference<T> parameterizedTypeReference, T t){
+		map.put(parameterizedTypeReference.getType(), t);
+	}
 
 }
