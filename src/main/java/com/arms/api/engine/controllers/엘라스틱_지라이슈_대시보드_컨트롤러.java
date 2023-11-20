@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.arms.api.engine.models.dashboard.bar.요구사항_지라이슈상태_주별_집계;
-import com.arms.api.engine.models.dashboard.resource.AssigneeData;
 import com.arms.api.engine.models.dashboard.sankey.SankeyElasticSearchData;
 import com.arms.api.engine.models.dashboard.treemap.Worker;
 import com.arms.api.engine.models.지라이슈_단순_검색요청;
@@ -201,15 +200,4 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         return ResponseEntity.ok(집계결과_가져오기);
     }
 
-    @ResponseBody
-    @RequestMapping(
-            value = {"/resources/tasks"},
-            method = {RequestMethod.GET}
-    )
-    public List<AssigneeData> 리소스_담당자_데이터_리스트(
-            @RequestParam Long pdServiceLink,
-            @RequestParam List<Long> pdServiceVersionLinks
-    ) throws IOException {
-        return 지라이슈_검색엔진.리소스_담당자_데이터_리스트(pdServiceLink, pdServiceVersionLinks);
-    }
 }
