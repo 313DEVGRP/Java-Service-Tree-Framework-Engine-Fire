@@ -1,46 +1,44 @@
 package com.arms.elasticsearch.util.query;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.springframework.data.domain.Sort;
-
 import com.arms.elasticsearch.util.query.bool.EsBoolQuery;
 import com.arms.elasticsearch.util.query.sort.SortBy;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Sort;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class EsQueryBuilder implements EsQuery {
 
-	private BoolQueryBuilder boolQueryBuilder;
-	private Sort sort ;
-	private List<EsBoolQuery> esQueryList = new ArrayList<>();
+	private List<EsBoolQuery> esQueryList;
+	private final Map<ParameterizedTypeReference<?>,Object> map = new ConcurrentHashMap<>();
 
-	public EsQueryBuilder(){
-		this.boolQueryBuilder = QueryBuilders.boolQuery();
-	}
-
-	@Override
-	public BoolQueryBuilder boolQuery(){
+	public void boolQuery(){
+		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
 		for (EsBoolQuery esQuery : esQueryList) {
 			esQuery.boolQueryBuilder(boolQueryBuilder);
 		}
-		return this.boolQueryBuilder;
 	}
 
-	public EsQueryBuilder bool(EsBoolQuery esBoolQuery){
-		this.esQueryList.add(esBoolQuery);
+	public EsQueryBuilder bool(EsBoolQuery ... esBoolQuery){
+		this.esQueryList = Arrays.asList(esBoolQuery);
+		map.put(new ParameterizedTypeReference<BoolQueryBuilder>(){},this.esQueryList);
+		return this;
+	}
+
+	public EsQueryBuilder sort(SortBy sortBy){
+		map.put(new ParameterizedTypeReference<SortBy>(){},sortBy.sortQuery());
 		return this;
 	}
 
 	@Override
-	public Sort sortQuery() {
-		return this.sort;
-	};
-
-	public EsQueryBuilder sort(SortBy sortBy){
-		this.sort = sortBy.sortQuery();
-		return this;
+	public <T> T getQuery(ParameterizedTypeReference<T> typeReference) {
+		return ((Class<T>)typeReference.getClass()).cast(map.get(typeReference));
 	}
 
 

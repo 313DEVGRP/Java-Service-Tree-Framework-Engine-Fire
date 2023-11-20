@@ -13,7 +13,6 @@ public class SortBy implements EsQuery {
 		this.sort = Sort.by(Direction.fromString(sortOrder),field);
 	};
 
-	@Override
 	public Sort sortQuery() {
 		return this.sort;
 	};

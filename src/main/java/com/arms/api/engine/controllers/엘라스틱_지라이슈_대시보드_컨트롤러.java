@@ -125,8 +125,9 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
 
         EsQuery esQuery
             = new EsQueryBuilder()
-                .bool(new TermsQueryFilter(지라이슈_일자별_검색요청.get필터필드(),지라이슈_일자별_검색요청.get필터필드검색어()))
-                .bool(new TermQueryMust("pdServiceId",pdServiceId));
+                .bool(
+                      new TermsQueryFilter(지라이슈_일자별_검색요청.get필터필드(),지라이슈_일자별_검색요청.get필터필드검색어()),
+                      new TermQueryMust("pdServiceId",pdServiceId));
 
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일자별_요청.of(지라이슈_일자별_검색요청, esQuery)));
     }
@@ -137,8 +138,10 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
 
         EsQuery esQuery
             = new EsQueryBuilder()
-                .bool(new TermQueryMust("pdServiceId",pdServiceId))
-                .bool(new TermQueryMust("isReq",지라이슈_일반_검색요청.getIsReq()))
+                .bool(
+                         new TermQueryMust("pdServiceId",pdServiceId)
+                        ,new TermQueryMust("isReq",지라이슈_일반_검색요청.getIsReq())
+                )
                 .sort(new SortBy("pdServiceId","asc"));
 
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(지라이슈_일반_검색요청, esQuery)));
@@ -151,9 +154,11 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
                                                  지라이슈_일반_검색요청 지라이슈_일반_검색요청) throws IOException {
         EsQuery esQuery
             = new EsQueryBuilder()
-                .bool(new TermQueryMust("pdServiceId",pdServiceId))
-                .bool(new TermQueryMust("isReq",지라이슈_일반_검색요청.getIsReq()))
-                .bool(new TermsQueryFilter("pdServiceVersion",pdServiceVersionLinks));
+                .bool(
+                        new TermQueryMust("pdServiceId",pdServiceId)
+                        ,new TermQueryMust("isReq",지라이슈_일반_검색요청.getIsReq())
+                        ,new TermsQueryFilter("pdServiceVersion",pdServiceVersionLinks)
+                );
 
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(지라이슈_일반_검색요청, esQuery)));
     }
@@ -165,8 +170,10 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
                                                     지라이슈_단순_검색요청 지라이슈_단순_검색_요청) throws IOException {
         EsQuery esQuery
             = new EsQueryBuilder()
-                .bool(new TermQueryMust("pdServiceId",pdServiceId))
-                .bool(new TermsQueryFilter("pdServiceVersion",pdServiceVersionLinks));
+                .bool(
+                        new TermQueryMust("pdServiceId",pdServiceId)
+                        ,new TermsQueryFilter("pdServiceVersion",pdServiceVersionLinks)
+                );
 
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(지라이슈_단순_검색_요청, esQuery)));
     }

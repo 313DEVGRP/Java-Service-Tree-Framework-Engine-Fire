@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 
@@ -39,7 +40,7 @@ public class 검색_크기별_요청 implements 쿼리_추상_팩토리 {
 	@Override
 	public NativeSearchQuery 생성() {
 
-		BoolQueryBuilder boolQuery = esQuery.boolQuery();
+		BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<BoolQueryBuilder>(){});
 		서브_집계_요청 서브_집계_요청 = new 서브_집계_요청(하위그룹필드들, 크기);
 
 		NativeSearchQueryBuilder nativeSearchQueryBuilder
