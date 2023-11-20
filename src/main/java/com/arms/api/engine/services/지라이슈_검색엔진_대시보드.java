@@ -36,7 +36,6 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
-import com.arms.api.engine.models.dashboard.resource.AssigneeData;
 import com.arms.api.engine.repositories.지라이슈_저장소;
 import com.arms.elasticsearch.util.검색결과;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
@@ -150,53 +149,6 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         );
     }
 
-    @Override
-    public List<AssigneeData> 리소스_담당자_데이터_리스트(Long pdServiceLink, List<Long> pdServiceVersionLinks) throws IOException {
-        EsQueryBuilder esQuery = new EsQueryBuilder()
-                .bool(new TermQueryMust("pdServiceId", pdServiceLink),
-                        new TermsQueryFilter("pdServiceVersion", pdServiceVersionLinks),
-                        new ExistsQueryFilter("assignee")
-                );
-        BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
-
-        FilterAggregationBuilder reqAgg = AggregationBuilders
-                .filter("requirements", QueryBuilders.termQuery("isReq", true));
-        FilterAggregationBuilder issueAgg = AggregationBuilders
-                .filter("issues", QueryBuilders.termQuery("isReq", false));
-        TermsAggregationBuilder assigneesAgg = AggregationBuilders.terms("assignee").field("assignee.assignee_accountId.keyword")
-                .subAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"))
-                .subAggregation(reqAgg)
-                .subAggregation(issueAgg)
-                .subAggregation(AggregationBuilders.terms("issueTypes").field("issuetype.issuetype_name.keyword"))
-                .subAggregation(AggregationBuilders.terms("priorities").field("priority.priority_name.keyword"))
-                .subAggregation(AggregationBuilders.terms("statuses").field("status.status_name.keyword"))
-                .subAggregation(AggregationBuilders.terms("resolutions").field("resolution.resolution_name.keyword"));
-
-        NativeSearchQueryBuilder nativeSearchQueryBuilder
-                = new NativeSearchQueryBuilder().withQuery(boolQuery).withAggregations(assigneesAgg);
-        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
-        List<검색결과> assignee = 검색결과_목록_메인.그룹결과("assignee");
-
-        return assignee
-                .stream()
-                .map(this::mapToAssigneeData)
-                .sorted((a1, a2) -> Long.compare(a2.getIssues(), a1.getIssues()))
-                .collect(Collectors.toList());
-    }
-
-
-    private AssigneeData mapToAssigneeData(검색결과 검색결과) {
-
-        AssigneeData assigneeData = new AssigneeData();
-        assigneeData.setRequirements(검색결과.필터필드개수("requirements"));
-        assigneeData.setIssues(검색결과.필터필드개수("issues"));
-        assigneeData.setDisplayName(검색결과.필터필드명( "displayNames"));
-        assigneeData.setIssueTypes(검색결과.검색결과_맵처리("issueTypes"));
-        assigneeData.setPriorities(검색결과.검색결과_맵처리( "priorities"));
-        assigneeData.setStatuses(검색결과.검색결과_맵처리( "statuses"));
-        assigneeData.setResolutions(검색결과.검색결과_맵처리( "resolutions"));
-        return assigneeData;
-    }
 
     @Override
     public Map<String, List<SankeyElasticSearchData>> 제품_버전별_담당자_목록(Long pdServiceLink, List<Long> pdServiceVersionLinks, int maxResults) throws IOException {
