@@ -18,16 +18,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.arms.api.engine.models.dashboard.bar.요구사항_지라이슈상태_주별_집계;
-import com.arms.api.engine.models.dashboard.donut.집계_응답;
 import com.arms.api.engine.models.dashboard.resource.AssigneeData;
 import com.arms.api.engine.models.dashboard.sankey.SankeyElasticSearchData;
 import com.arms.api.engine.models.dashboard.treemap.Worker;
 import com.arms.api.engine.models.지라이슈_단순_검색요청;
 import com.arms.api.engine.models.지라이슈_일반_검색요청;
 import com.arms.api.engine.models.지라이슈_일자별_검색요청;
-import com.arms.api.engine.services.dashboard.bar.BarChart;
-import com.arms.api.engine.services.dashboard.sankey.SankeyChart;
-import com.arms.api.engine.services.dashboard.treemap.TreeMapChart;
 import com.arms.api.engine.services.지라이슈_대시보드_서비스;
 import com.arms.elasticsearch.util.query.EsQueryBuilder;
 import com.arms.elasticsearch.util.query.EsQuery;
@@ -49,12 +45,6 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
 
     @Autowired
     private 지라이슈_대시보드_서비스 지라이슈_검색엔진;
-    @Autowired
-    private SankeyChart sankeyChart;
-    @Autowired
-    private BarChart barChart;
-    @Autowired
-    private TreeMapChart treeMapChart;
 
     @ResponseBody
     @RequestMapping(
@@ -77,7 +67,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
             @RequestParam Long pdServiceLink,
             @RequestParam List<Long> pdServiceVersionLinks
     ) throws IOException {
-        Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항이슈주별집계 = barChart.요구사항_지라이슈상태_주별_집계(pdServiceLink, pdServiceVersionLinks);
+        Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항이슈주별집계 = 지라이슈_검색엔진.요구사항_지라이슈상태_주별_집계(pdServiceLink, pdServiceVersionLinks);
         return 요구사항이슈주별집계;
     }
 
@@ -112,7 +102,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
             @RequestParam List<Long> pdServiceVersionLinks,
             @RequestParam int maxResults
     ) throws IOException {
-        Map<String, List<SankeyElasticSearchData>> sankeyElasticSearchData = sankeyChart.제품_버전별_담당자_목록(pdServiceLink, pdServiceVersionLinks, maxResults);
+        Map<String, List<SankeyElasticSearchData>> sankeyElasticSearchData = 지라이슈_검색엔진.제품_버전별_담당자_목록(pdServiceLink, pdServiceVersionLinks, maxResults);
         return sankeyElasticSearchData;
     }
 
@@ -184,7 +174,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
             @RequestParam List<Long> pdServiceVersionLinks,
             @RequestParam int maxResults
     ) throws IOException {
-        return treeMapChart.작업자_별_요구사항_별_관여도(pdServiceLink, pdServiceVersionLinks, maxResults);
+        return 지라이슈_검색엔진.작업자_별_요구사항_별_관여도(pdServiceLink, pdServiceVersionLinks, maxResults);
     }
 
     @ResponseBody
