@@ -141,8 +141,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
                 .bool(
                          new TermQueryMust("pdServiceId",pdServiceId)
                         ,new TermQueryMust("isReq",지라이슈_일반_검색요청.getIsReq())
-                )
-                .sort(new SortBy("pdServiceId","asc"));
+                );
 
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(지라이슈_일반_검색요청, esQuery)));
     }
