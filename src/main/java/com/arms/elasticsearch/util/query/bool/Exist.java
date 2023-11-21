@@ -1,18 +1,17 @@
 package com.arms.elasticsearch.util.query.bool;
 
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.TermQueryBuilder;
-
 import com.arms.elasticsearch.util.query.EsQuery;
+import org.elasticsearch.index.query.ExistsQueryBuilder;
 
-public abstract class Must extends EsBoolQuery {
-	public abstract TermQueryBuilder termQueryBuilder();
+
+public abstract class Exist extends EsBoolQuery {
+	public abstract ExistsQueryBuilder existsQueryBuilder();
 
 	@Override
 	public EsQuery boolQueryBuilder(BoolQueryBuilder boolQueryBuilder){
-
-		if(termQueryBuilder()!=null){
-			boolQueryBuilder.must(termQueryBuilder());
+		if(existsQueryBuilder()!=null){
+			boolQueryBuilder.filter(existsQueryBuilder());
 		}
 		return this;
 	}
