@@ -9,10 +9,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.arms.api.engine.models.dashboard.bar.요구사항_지라이슈상태_주별_집계;
-import com.arms.api.engine.models.dashboard.sankey.SankeyElasticSearchData;
 import com.arms.api.engine.models.dashboard.treemap.TaskList;
 import com.arms.api.engine.models.dashboard.treemap.Worker;
 import com.arms.api.engine.models.지라이슈;
+import com.arms.api.engine.models.지라이슈_제품_및_제품버전_검색요청;
+import com.arms.elasticsearch.util.aggregation.CustomAbstractAggregationBuilder;
+import com.arms.elasticsearch.util.aggregation.CustomTermsAggregationBuilder;
 import com.arms.elasticsearch.util.query.*;
 import com.arms.elasticsearch.util.query.bool.ExistsQueryFilter;
 import com.arms.elasticsearch.util.query.bool.RangeQueryFilter;
@@ -20,15 +22,12 @@ import com.arms.elasticsearch.util.query.bool.TermQueryMust;
 import com.arms.elasticsearch.util.query.bool.TermsQueryFilter;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.BucketOrder;
-import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -151,57 +150,35 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
 
     @Override
-    public Map<String, List<SankeyElasticSearchData>> 제품_버전별_담당자_목록(Long pdServiceLink, List<Long> pdServiceVersionLinks, int maxResults) throws IOException {
+    public List<검색결과> 제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청)  {
         EsQueryBuilder esQuery = new EsQueryBuilder()
-                .bool(new TermQueryMust("pdServiceId", pdServiceLink),
-                        new TermsQueryFilter("pdServiceVersion", pdServiceVersionLinks),
+                .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink()),
+                        new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks()),
                         new ExistsQueryFilter("assignee")
                 );
+
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
 
-        TermsAggregationBuilder versionsAgg = AggregationBuilders.terms("versions").field("pdServiceVersion");
-        TermsAggregationBuilder assigneesAgg = AggregationBuilders.terms("assignees")
-                .field("assignee.assignee_accountId.keyword")
-                .order(BucketOrder.count(false));
+        CustomAbstractAggregationBuilder versionsAgg = new CustomTermsAggregationBuilder("versions")
+                .field("pdServiceVersion")
+                .addSubAggregation(
+                        new CustomTermsAggregationBuilder("assignees")
+                                .field("assignee.assignee_accountId.keyword")
+                                .order(BucketOrder.count(false))
+                                .size(지라이슈_제품_및_제품버전_검색요청.get크기())
+                                .addSubAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"))
+                                .build()
+                );
 
-        if(maxResults > 0) {
-            assigneesAgg.size(maxResults);
-        }
+        NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
+                .withQuery(boolQuery)
+                .withAggregations(versionsAgg.build())
+                .build();
 
-        assigneesAgg.subAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"));
-        versionsAgg.subAggregation(assigneesAgg);
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(searchQuery);
 
-        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
-        nativeSearchQueryBuilder.withQuery(boolQuery)
-                .withAggregations(versionsAgg);
+        return 검색결과_목록_메인.get검색결과().get("versions");
 
-        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
-
-        Map<String, List<SankeyElasticSearchData>> versionAssigneesMap = new HashMap<>();
-
-        List<검색결과> versions = 검색결과_목록_메인.get검색결과().get("versions");
-
-        for (검색결과 버전 : versions) {
-            String version = 버전.get필드명();
-
-            List<com.arms.elasticsearch.util.검색결과> assignees = 버전.get하위검색결과().get("assignees");
-
-            List<SankeyElasticSearchData> assigneeList = new ArrayList<>();
-
-            for (검색결과 담당자 : assignees) {
-                String accountId = 담당자.get필드명();
-
-                List<검색결과> displayNames = 담당자.get하위검색결과().get("displayNames");
-                assigneeList.add(new SankeyElasticSearchData(accountId
-                        , displayNames.stream()
-                        .findFirst()
-                        .map(displayName->displayName.get필드명()).orElseGet(()->"N/A")));
-            }
-
-            versionAssigneesMap.put(version, assigneeList);
-        }
-
-        return versionAssigneesMap;
     }
 
 
