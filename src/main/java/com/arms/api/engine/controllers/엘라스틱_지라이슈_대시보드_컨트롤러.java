@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.arms.api.engine.models.지라이슈_제품_및_제품버전_검색요청;
+import com.arms.elasticsearch.util.검색결과;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,13 +97,10 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
             value = {"/version-assignees"},
             method = {RequestMethod.GET}
     )
-    public Map<String, List<SankeyElasticSearchData>> 제품별_버전_및_작업자(
-            @RequestParam Long pdServiceLink,
-            @RequestParam List<Long> pdServiceVersionLinks,
-            @RequestParam int maxResults
+    public List<검색결과> 제품별_버전_및_작업자(
+            지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
     ) throws IOException {
-        Map<String, List<SankeyElasticSearchData>> sankeyElasticSearchData = 지라이슈_검색엔진.제품_버전별_담당자_목록(pdServiceLink, pdServiceVersionLinks, maxResults);
-        return sankeyElasticSearchData;
+        return 지라이슈_검색엔진.제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_검색요청);
     }
 
     @ResponseBody
