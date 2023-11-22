@@ -1,25 +1,20 @@
 package com.arms.api.engine.controllers;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import com.arms.api.engine.models.지라이슈_제품_및_제품버전_검색요청;
 import com.arms.elasticsearch.util.검색결과;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.arms.api.engine.models.dashboard.bar.요구사항_지라이슈상태_주별_집계;
-import com.arms.api.engine.models.dashboard.sankey.SankeyElasticSearchData;
 import com.arms.api.engine.models.dashboard.treemap.Worker;
 import com.arms.api.engine.models.지라이슈_단순_검색요청;
 import com.arms.api.engine.models.지라이슈_일반_검색요청;
@@ -29,7 +24,6 @@ import com.arms.elasticsearch.util.query.EsQueryBuilder;
 import com.arms.elasticsearch.util.query.EsQuery;
 import com.arms.elasticsearch.util.query.bool.TermQueryMust;
 import com.arms.elasticsearch.util.query.bool.TermsQueryFilter;
-import com.arms.elasticsearch.util.query.sort.SortBy;
 import com.arms.elasticsearch.util.query.검색_일반_요청;
 import com.arms.elasticsearch.util.query.검색_일자별_요청;
 import com.arms.elasticsearch.util.query.검색_크기별_요청;
@@ -41,17 +35,13 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/engine/jira/dashboard")
 @Slf4j
 public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
-    private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private 지라이슈_대시보드_서비스 지라이슈_검색엔진;
 
     @ResponseBody
-    @RequestMapping(
-            value = {"/jira-issue-statuses"},
-            method = {RequestMethod.GET}
-    )
-    public ResponseEntity<검색결과_목록_메인> 요구사항이슈집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws IOException {
+    @GetMapping("/jira-issue-statuses")
+    public ResponseEntity<검색결과_목록_메인> 요구사항이슈집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(  new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink()),
                         new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks()));
@@ -59,53 +49,39 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     }
 
     @ResponseBody
-    @RequestMapping(
-            value = {"/requirements-jira-issue-statuses"},
-            method = {RequestMethod.GET}
-    )
-    public Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항이슈월별집계(
-            @RequestParam Long pdServiceLink,
-            @RequestParam List<Long> pdServiceVersionLinks
-    ) throws IOException {
-        Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항이슈주별집계 = 지라이슈_검색엔진.요구사항_지라이슈상태_주별_집계(pdServiceLink, pdServiceVersionLinks);
-        return 요구사항이슈주별집계;
+    @GetMapping("/requirements-jira-issue-statuses")
+    public ResponseEntity<Map<String, 요구사항_지라이슈상태_주별_집계>> 요구사항이슈월별집계(
+            지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
+    ) {
+        return ResponseEntity.ok(지라이슈_검색엔진.요구사항_지라이슈상태_주별_집계(지라이슈_제품_및_제품버전_검색요청));
     }
 
     @ResponseBody
-    @RequestMapping(
-            value = {"/assignee-jira-issue-statuses"},
-            method = {RequestMethod.GET}
-    )
+    @GetMapping("/assignee-jira-issue-statuses")
     public Map<String, Map<String, Map<String, Integer>>> 담당자_요구사항여부_상태별집계(
-            @RequestParam Long pdServiceLink) throws IOException {
+            @RequestParam Long pdServiceLink) {
         Map<String, Map<String, Map<String, Integer>>> 담당자_요구사항여부_상태별_집계결과 = 지라이슈_검색엔진.담당자_요구사항여부_상태별집계(pdServiceLink);
         return 담당자_요구사항여부_상태별_집계결과;
     }
 
     @ResponseBody
-    @RequestMapping(
-            value = {"/issue-assignee/{pdServiceId}"},
-            method = {RequestMethod.GET}
-    )
+    @GetMapping("/issue-assignee/{pdServiceId}")
     public Map<String, Long> 제품서비스별_담당자_이름_통계(
-            @PathVariable("pdServiceId") Long 제품서비스_아이디) throws Exception {
+            @PathVariable("pdServiceId") Long 제품서비스_아이디) {
         return 지라이슈_검색엔진.제품서비스별_담당자_이름_통계(0L, 제품서비스_아이디);
     }
 
     @ResponseBody
-    @RequestMapping(
-            value = {"/version-assignees"},
-            method = {RequestMethod.GET}
-    )
-    public List<검색결과> 제품별_버전_및_작업자(
+    @GetMapping("/version-assignees")
+    public ResponseEntity<List<검색결과>> 제품별_버전_및_작업자(
             지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
-    ) throws IOException {
-        return 지라이슈_검색엔진.제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_검색요청);
+    ) {
+        return ResponseEntity.ok(지라이슈_검색엔진.제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_검색요청));
     }
 
     @ResponseBody
     @GetMapping("/date/{pdServiceId}")
-    public ResponseEntity<검색결과_목록_메인> 일자별_검색(@PathVariable Long pdServiceId, 지라이슈_일자별_검색요청 지라이슈_일자별_검색요청) throws IOException {
+    public ResponseEntity<검색결과_목록_메인> 일자별_검색(@PathVariable Long pdServiceId, 지라이슈_일자별_검색요청 지라이슈_일자별_검색요청) {
 
         EsQuery esQuery
             = new EsQueryBuilder()
@@ -118,7 +94,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
 
     @ResponseBody
     @GetMapping("/normal/{pdServiceId}")
-    public ResponseEntity<검색결과_목록_메인> 일반_검색(@PathVariable Long pdServiceId, 지라이슈_일반_검색요청 지라이슈_일반_검색요청) throws IOException {
+    public ResponseEntity<검색결과_목록_메인> 일반_검색(@PathVariable Long pdServiceId, 지라이슈_일반_검색요청 지라이슈_일반_검색요청) {
 
         EsQuery esQuery
             = new EsQueryBuilder()
@@ -134,7 +110,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     @GetMapping("/normal-version/{pdServiceId}")
     public ResponseEntity<검색결과_목록_메인> 일반_버전필터_검색(@PathVariable Long pdServiceId,
                                                  @RequestParam List<Long> pdServiceVersionLinks,
-                                                 지라이슈_일반_검색요청 지라이슈_일반_검색요청) throws IOException {
+                                                 지라이슈_일반_검색요청 지라이슈_일반_검색요청) {
         EsQuery esQuery
             = new EsQueryBuilder()
                 .bool(
@@ -150,7 +126,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     @GetMapping("/normal-version-only/{pdServiceId}")
     public ResponseEntity<검색결과_목록_메인> 일반_버전필터_작업자별_검색(@PathVariable Long pdServiceId,
                                                  @RequestParam List<Long> pdServiceVersionLinks,
-                                                    지라이슈_단순_검색요청 지라이슈_단순_검색_요청) throws IOException {
+                                                    지라이슈_단순_검색요청 지라이슈_단순_검색_요청) {
         EsQuery esQuery
             = new EsQueryBuilder()
                 .bool(
@@ -162,21 +138,16 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     }
 
     @ResponseBody
-    @RequestMapping(
-            value = {"/assignees-requirements-involvements"},
-            method = {RequestMethod.GET}
-    )
-    public List<Worker> 작업자_별_요구사항_별_관여도(
-            @RequestParam Long pdServiceLink,
-            @RequestParam List<Long> pdServiceVersionLinks,
-            @RequestParam int maxResults
-    ) throws IOException {
-        return 지라이슈_검색엔진.작업자_별_요구사항_별_관여도(pdServiceLink, pdServiceVersionLinks, maxResults);
+    @GetMapping("/assignees-requirements-involvements")
+    public ResponseEntity<List<Worker>> 작업자_별_요구사항_별_관여도(
+            지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
+    ) {
+        return ResponseEntity.ok(지라이슈_검색엔진.작업자_별_요구사항_별_관여도(지라이슈_제품_및_제품버전_검색요청));
     }
 
     @ResponseBody
     @GetMapping("/exclusion-isreq-normal/{pdServiceId}")
-    public ResponseEntity<검색결과_목록_메인> 요구사항여부제외_일반_검색(@PathVariable Long pdServiceId, 지라이슈_일반_검색요청 지라이슈_일반_검색요청) throws IOException {
+    public ResponseEntity<검색결과_목록_메인> 요구사항여부제외_일반_검색(@PathVariable Long pdServiceId, 지라이슈_일반_검색요청 지라이슈_일반_검색요청) {
 
         EsQuery esQuery
             = new EsQueryBuilder()
@@ -188,7 +159,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
 
     @ResponseBody
     @GetMapping("/isreq-normal/{pdServiceId}")
-    public ResponseEntity<검색결과_목록_메인> 요구사항_일반_검색(@PathVariable Long pdServiceId, 지라이슈_일반_검색요청 지라이슈_일반_검색요청) throws IOException {
+    public ResponseEntity<검색결과_목록_메인> 요구사항_일반_검색(@PathVariable Long pdServiceId, 지라이슈_일반_검색요청 지라이슈_일반_검색요청) {
 
         EsQuery esQuery
             = new EsQueryBuilder()
