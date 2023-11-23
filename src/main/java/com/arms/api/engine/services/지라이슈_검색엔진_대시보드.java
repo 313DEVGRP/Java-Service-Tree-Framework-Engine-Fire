@@ -9,10 +9,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.arms.api.engine.models.dashboard.bar.요구사항_지라이슈상태_주별_집계;
-import com.arms.api.engine.models.dashboard.sankey.SankeyElasticSearchData;
 import com.arms.api.engine.models.dashboard.treemap.TaskList;
 import com.arms.api.engine.models.dashboard.treemap.Worker;
 import com.arms.api.engine.models.지라이슈;
+import com.arms.api.engine.models.지라이슈_제품_및_제품버전_검색요청;
+import com.arms.elasticsearch.util.aggregation.CustomAbstractAggregationBuilder;
+import com.arms.elasticsearch.util.aggregation.CustomDateHistogramAggregationBuilder;
+import com.arms.elasticsearch.util.aggregation.CustomTermsAggregationBuilder;
 import com.arms.elasticsearch.util.query.*;
 import com.arms.elasticsearch.util.query.bool.ExistsQueryFilter;
 import com.arms.elasticsearch.util.query.bool.RangeQueryFilter;
@@ -20,15 +23,12 @@ import com.arms.elasticsearch.util.query.bool.TermQueryMust;
 import com.arms.elasticsearch.util.query.bool.TermsQueryFilter;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.BucketOrder;
-import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -52,7 +52,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     private 지라이슈_저장소 지라이슈저장소;
 
     @Override
-    public Map<String, Long> 제품서비스별_담당자_이름_통계(Long 지라서버_아이디, Long 제품서비스_아이디) throws IOException {
+    public Map<String, Long> 제품서비스별_담당자_이름_통계(Long 지라서버_아이디, Long 제품서비스_아이디) {
 
         BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
         if (제품서비스_아이디 != null && 제품서비스_아이디 > 9L) {
@@ -90,7 +90,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
 
     @Override
-    public Map<String, Map<String, Map<String, Integer>>> 담당자_요구사항여부_상태별집계(Long pdServiceLink) throws IOException {
+    public Map<String, Map<String, Map<String, Integer>>> 담당자_요구사항여부_상태별집계(Long pdServiceLink) {
 
 
         MatchQueryBuilder 제품아이디별_조회 = QueryBuilders.matchQuery("pdServiceId", pdServiceLink);
@@ -142,7 +142,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
 
     @Override
-    public 검색결과_목록_메인 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) throws IOException {
+    public 검색결과_목록_메인 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) {
 
         return 지라이슈저장소.aggregationSearch(
             쿼리추상팩토리.생성()
@@ -151,65 +151,43 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
 
     @Override
-    public Map<String, List<SankeyElasticSearchData>> 제품_버전별_담당자_목록(Long pdServiceLink, List<Long> pdServiceVersionLinks, int maxResults) throws IOException {
-        EsQueryBuilder esQuery = new EsQueryBuilder()
-                .bool(new TermQueryMust("pdServiceId", pdServiceLink),
-                        new TermsQueryFilter("pdServiceVersion", pdServiceVersionLinks),
+    public List<검색결과> 제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청)  {
+        EsQuery esQuery = new EsQueryBuilder()
+                .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink()),
+                        new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks()),
                         new ExistsQueryFilter("assignee")
                 );
+
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
 
-        TermsAggregationBuilder versionsAgg = AggregationBuilders.terms("versions").field("pdServiceVersion");
-        TermsAggregationBuilder assigneesAgg = AggregationBuilders.terms("assignees")
-                .field("assignee.assignee_accountId.keyword")
-                .order(BucketOrder.count(false));
+        CustomAbstractAggregationBuilder versionsAgg = new CustomTermsAggregationBuilder("versions")
+                .field("pdServiceVersion")
+                .addSubAggregation(
+                        new CustomTermsAggregationBuilder("assignees")
+                                .field("assignee.assignee_accountId.keyword")
+                                .order(BucketOrder.count(false))
+                                .size(지라이슈_제품_및_제품버전_검색요청.get크기())
+                                .addSubAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"))
+                                .build()
+                );
 
-        if(maxResults > 0) {
-            assigneesAgg.size(maxResults);
-        }
+        NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
+                .withQuery(boolQuery)
+                .withAggregations(versionsAgg.build())
+                .build();
 
-        assigneesAgg.subAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"));
-        versionsAgg.subAggregation(assigneesAgg);
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(searchQuery);
 
-        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
-        nativeSearchQueryBuilder.withQuery(boolQuery)
-                .withAggregations(versionsAgg);
+        return 검색결과_목록_메인.get검색결과().get("versions");
 
-        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
-
-        Map<String, List<SankeyElasticSearchData>> versionAssigneesMap = new HashMap<>();
-
-        List<검색결과> versions = 검색결과_목록_메인.get검색결과().get("versions");
-
-        for (검색결과 버전 : versions) {
-            String version = 버전.get필드명();
-
-            List<com.arms.elasticsearch.util.검색결과> assignees = 버전.get하위검색결과().get("assignees");
-
-            List<SankeyElasticSearchData> assigneeList = new ArrayList<>();
-
-            for (검색결과 담당자 : assignees) {
-                String accountId = 담당자.get필드명();
-
-                List<검색결과> displayNames = 담당자.get하위검색결과().get("displayNames");
-                assigneeList.add(new SankeyElasticSearchData(accountId
-                        , displayNames.stream()
-                        .findFirst()
-                        .map(displayName->displayName.get필드명()).orElseGet(()->"N/A")));
-            }
-
-            versionAssigneesMap.put(version, assigneeList);
-        }
-
-        return versionAssigneesMap;
     }
 
 
     @Override
-    public List<Worker> 작업자_별_요구사항_별_관여도(Long pdServiceLink, List<Long> pdServiceVersionLinks, int maxResults) {
+    public List<Worker> 작업자_별_요구사항_별_관여도(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
         Map<String, Worker> contributionMap = new HashMap<>();
 
-        List<지라이슈> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionIn(true, pdServiceLink, pdServiceVersionLinks);
+        List<지라이슈> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionIn(true, 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink(), 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks());
 
         // 요구사항의 키를 모두 추출
         List<String> allReqKeys = requirementIssues.stream().map(지라이슈::getKey).collect(Collectors.toList());
@@ -222,13 +200,11 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 .filter(subtask -> subtask.getAssignee() != null)
                 .collect(Collectors.groupingBy(지라이슈::getParentReqKey));
 
-        for (지라이슈 reqIssue : requirementIssues) {
+        requirementIssues.stream().forEach(reqIssue -> {
             String key = reqIssue.getKey();
             String summary = reqIssue.getSummary();
 
-            List<지라이슈> subTasks = subTasksByParent.getOrDefault(key, Collections.emptyList());
-
-            for (지라이슈 subtask : subTasks) {
+            Optional.ofNullable(subTasksByParent.get(key)).orElse(Collections.emptyList()).stream().forEach(subtask -> {
                 String assigneeId = subtask.getAssignee().getAccountId();
                 String displayName = subtask.getAssignee().getDisplayName();
 
@@ -237,7 +213,6 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                     dataMap.put("totalInvolvedCount", 0);
                     return new Worker(assigneeId, displayName, dataMap, new ArrayList<>());
                 });
-
 
                 TaskList taskList = worker.getChildren().stream()
                         .filter(task -> task.getId().equals(key))
@@ -252,51 +227,48 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
                 taskList.getData().put("involvedCount", taskList.getData().get("involvedCount") + 1);
                 worker.getData().put("totalInvolvedCount", worker.getData().get("totalInvolvedCount") + 1);
-            }
-        }
-
-
-        if (maxResults > 0) {
-            return contributionMap.values().stream()
-                    .sorted((w1, w2) -> w2.getData().get("totalInvolvedCount").compareTo(w1.getData().get("totalInvolvedCount")))
-                    .limit(maxResults)
-                    .collect(Collectors.toList());
-        }
+            });
+        });
 
         return contributionMap.values().stream()
                 .sorted((w1, w2) -> w2.getData().get("totalInvolvedCount").compareTo(w1.getData().get("totalInvolvedCount")))
+                .limit(지라이슈_제품_및_제품버전_검색요청.get크기() > 0 ? 지라이슈_제품_및_제품버전_검색요청.get크기() : Long.MAX_VALUE)
                 .collect(Collectors.toList());
 
     }
 
+
     @Override
-    public Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항_지라이슈상태_주별_집계(Long pdServiceLink, List<Long> pdServiceVersionLinks) throws IOException {
+    public Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항_지라이슈상태_주별_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
         LocalDate now = LocalDate.now(ZoneId.of("UTC"));
         LocalDate monthAgo = now.minusWeeks(4);
 
         // 1. 검색 범위에 포함되지 않은 누적 데이터를 가져온다. 기간이 길어지면 길어질수록 무의미한, 반복적인 연산이기 때문에 캐싱 고려
-        요구사항_지라이슈상태_주별_집계 HistoricalData = 누적데이터조회(pdServiceLink, pdServiceVersionLinks, monthAgo);
+        요구사항_지라이슈상태_주별_집계 HistoricalData = 누적데이터조회(
+                지라이슈_제품_및_제품버전_검색요청.getPdServiceLink(),
+                지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks(),
+                monthAgo
+        );
         Map<String, Long> totalStatuses = new HashMap<>(HistoricalData.getStatuses());
         long totalIssues = HistoricalData.getTotalIssues();
         long totalRequirements = HistoricalData.getTotalRequirements();
 
         // 2. 검색 범위 내의 데이터를 가져온다. 현재 검색 범위는 차트 UI를 고려하여, 4~5주 정도로 적용
-        EsQueryBuilder esQuery = new EsQueryBuilder()
-                .bool(new TermQueryMust("pdServiceId", pdServiceLink),
-                        new TermsQueryFilter("pdServiceVersion", pdServiceVersionLinks),
+        EsQuery esQuery = new EsQueryBuilder()
+                .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink()),
+                        new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks()),
                         new RangeQueryFilter("created", monthAgo, now, "fromto")
                 );
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
 
-        DateHistogramAggregationBuilder weeklyAggregationBuilder = AggregationBuilders
-                .dateHistogram("aggregation_by_week")
+        CustomAbstractAggregationBuilder weeklyAggregationBuilder = new CustomDateHistogramAggregationBuilder("aggregation_by_week")
                 .field("created")
                 .calendarInterval(DateHistogramInterval.WEEK)
-                .subAggregation(AggregationBuilders.terms("statuses").field("status.status_name.keyword"))
-                .subAggregation(AggregationBuilders.terms("requirements").field("isReq"));
+                .addSubAggregation(new CustomTermsAggregationBuilder("statuses").field("status.status_name.keyword").build())
+                .addSubAggregation(new CustomTermsAggregationBuilder("requirements").field("isReq").build());
 
         NativeSearchQueryBuilder nativeSearchQueryBuilder
-                = new NativeSearchQueryBuilder().withQuery(boolQuery).withAggregations(weeklyAggregationBuilder);
+                = new NativeSearchQueryBuilder().withQuery(boolQuery).withAggregations(weeklyAggregationBuilder.build());
 
         검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
 
@@ -306,7 +278,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         Map<String, 요구사항_지라이슈상태_주별_집계> 검색결과 = aggregationByWeek.stream()
                 .sorted(Comparator.comparing(bucket -> OffsetDateTime.parse(bucket.get필드명()).toLocalDate()))
                 .collect(Collectors.toMap(
-                        entry ->  transformDate(entry.get필드명()),
+                        entry -> transformDate(entry.get필드명()),
                         this::주별데이터생성,
                         (existingValue, newValue) -> existingValue,
                         LinkedHashMap::new
@@ -330,9 +302,9 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         return 검색결과;
     }
 
-    public 요구사항_지라이슈상태_주별_집계 누적데이터조회(Long pdServiceLink, List<Long> pdServiceVersionLinks, LocalDate monthAgo) throws IOException {
+    public 요구사항_지라이슈상태_주별_집계 누적데이터조회(Long pdServiceLink, List<Long> pdServiceVersionLinks, LocalDate monthAgo) {
         // 총 이슈 개수를 구하기 위한 쿼리
-        EsQueryBuilder issueEsQuery = new EsQueryBuilder()
+        EsQuery issueEsQuery = new EsQueryBuilder()
                 .bool(new TermQueryMust("pdServiceId", pdServiceLink),
                         new TermsQueryFilter("pdServiceVersion", pdServiceVersionLinks),
                         new RangeQueryFilter("created", null, monthAgo, "lt")
@@ -340,13 +312,12 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         BoolQueryBuilder boolQueryForTotalIssues = issueEsQuery.getQuery(new ParameterizedTypeReference<>() {});
 
         // 총 요구사항 개수를 구하기 위한 쿼리
-        EsQueryBuilder reqEsQuery = new EsQueryBuilder()
+        EsQuery reqEsQuery = new EsQueryBuilder()
                 .bool(new TermQueryMust("pdServiceId", pdServiceLink),
                         new TermQueryMust("isReq", true),
                         new RangeQueryFilter("created", null, monthAgo, "lt")
                 );
         BoolQueryBuilder boolQueryForTotalRequirements = reqEsQuery.getQuery(new ParameterizedTypeReference<>() {});
-
 
         // 이슈 상태에 대한 집계 쿼리
         TermsAggregationBuilder totalAggregationBuilder = AggregationBuilders.terms("total_status").field("status.status_name.keyword");
@@ -365,10 +336,6 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         NativeSearchQueryBuilder nativeSearchQueryBuilderForTotalRequirements
                 = new NativeSearchQueryBuilder().withQuery(boolQueryForTotalRequirements);
 
-//        검색결과_목록_메인 검색결과_목록_메인
-//                = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilderForTotalRequirements.build());
-//        Long totalRequirementsCount = 검색결과_목록_메인.get전체합계();
-
         Long totalRequirementsCount = Long.valueOf(Optional.ofNullable(지라이슈저장소.normalSearch(nativeSearchQueryBuilderForTotalRequirements.build()))
                 .map(지라이슈 -> 지라이슈.size())
                 .orElse(0));
@@ -376,7 +343,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         // 이슈 상태 집계 결과 가져오기
         Map<String, Long> statusMap = new HashMap<>();
         Optional.ofNullable(searchResponseForTotalIssues)
-                .map(response ->  response.get검색결과().get("total_status"))
+                .map(response -> response.get검색결과().get("total_status"))
                 .ifPresent(totalStatus -> {
                     for (검색결과 검색결과 : totalStatus) {
                         String key = 검색결과.get필드명();
@@ -387,6 +354,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         return new 요구사항_지라이슈상태_주별_집계(totalIssuesCount, statusMap, totalRequirementsCount);
     }
+
     private 요구사항_지라이슈상태_주별_집계 주별데이터생성(검색결과 검색_결과) {
 
         Map<String, Long> statuses = (검색_결과.get하위검색결과().get("statuses")).stream()
