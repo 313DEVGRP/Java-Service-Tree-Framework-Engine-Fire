@@ -138,6 +138,22 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     }
 
     @ResponseBody
+    @GetMapping("/normal-versionAndMail-filter/{pdServiceId}")
+    public ResponseEntity<검색결과_목록_메인> 일반_버전_및_작업자_필터_검색(@PathVariable Long pdServiceId,
+                                                      @RequestParam List<Long> pdServiceVersionLinks,
+                                                      @RequestParam List<String> mailAddressList,
+                                                      지라이슈_단순_검색요청 지라이슈_단순_검색_요청) {
+        EsQuery esQuery
+                = new EsQueryBuilder()
+                .bool(  new TermsQueryFilter("assignee.assignee_emailAddress.keyword", mailAddressList),
+                        new TermsQueryFilter("pdServiceVersion",pdServiceVersionLinks),
+                        new TermQueryMust("pdServiceId",pdServiceId)
+                );
+
+        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(지라이슈_단순_검색_요청, esQuery)));
+    }
+
+    @ResponseBody
     @GetMapping("/assignees-requirements-involvements")
     public ResponseEntity<List<Worker>> 작업자_별_요구사항_별_관여도(
             지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
