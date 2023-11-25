@@ -3,7 +3,7 @@ package com.arms.api.engine.controllers;
 import java.util.List;
 import java.util.Map;
 
-import com.arms.api.engine.models.지라이슈_제품_및_제품버전_검색요청;
+import com.arms.api.engine.models.*;
 import com.arms.elasticsearch.util.query.*;
 import com.arms.elasticsearch.util.검색결과;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.arms.api.engine.models.dashboard.bar.요구사항_지라이슈상태_주별_집계;
 import com.arms.api.engine.models.dashboard.treemap.Worker;
-import com.arms.api.engine.models.지라이슈_단순_검색요청;
-import com.arms.api.engine.models.지라이슈_일반_검색요청;
-import com.arms.api.engine.models.지라이슈_일자별_검색요청;
 import com.arms.api.engine.services.지라이슈_대시보드_서비스;
 import com.arms.elasticsearch.util.query.bool.TermQueryMust;
 import com.arms.elasticsearch.util.query.bool.TermsQueryFilter;
@@ -47,27 +44,41 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     @ResponseBody
     @GetMapping("/aggregation/nested")
     public ResponseEntity<검색결과_목록_메인> nestedAggregation(
-            지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
+            지라이슈_제품_및_제품버전_검색요청 검색요청
     ) {
-        EsQuery esQuery = new EsQueryBuilder()
+        EsQueryBuilder esQuery = new EsQueryBuilder()
                 .bool(
-                        new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink()),
-                        new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks())
+                        new TermQueryMust("pdServiceId", 검색요청.getPdServiceLink()),
+                        new TermsQueryFilter("pdServiceVersion", 검색요청.getPdServiceVersionLinks())
                 );
-        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(지라이슈_제품_및_제품버전_검색요청, esQuery)));
+
+        if (검색요청.getIsReqType() == IsReqType.REQUIREMENT) {
+            esQuery.bool(new TermQueryMust("isReq", true));
+        } else if (검색요청.getIsReqType() == IsReqType.ISSUE) {
+            esQuery.bool(new TermQueryMust("isReq", false));
+        }
+
+        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(검색요청, esQuery)));
     }
 
     @ResponseBody
     @GetMapping("/aggregation/flat")
     public ResponseEntity<검색결과_목록_메인> flatAggregation(
-            지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
+            지라이슈_제품_및_제품버전_검색요청 검색요청
     ) {
-        EsQuery esQuery = new EsQueryBuilder()
+        EsQueryBuilder esQuery = new EsQueryBuilder()
                 .bool(
-                        new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink()),
-                        new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks())
+                        new TermQueryMust("pdServiceId", 검색요청.getPdServiceLink()),
+                        new TermsQueryFilter("pdServiceVersion", 검색요청.getPdServiceVersionLinks())
                 );
-        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청_서브집계.of(지라이슈_제품_및_제품버전_검색요청, esQuery)));
+
+        if (검색요청.getIsReqType() == IsReqType.REQUIREMENT) {
+            esQuery.bool(new TermQueryMust("isReq", true));
+        } else if (검색요청.getIsReqType() == IsReqType.ISSUE) {
+            esQuery.bool(new TermQueryMust("isReq", false));
+        }
+
+        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청_서브집계.of(검색요청, esQuery)));
     }
 
     @ResponseBody

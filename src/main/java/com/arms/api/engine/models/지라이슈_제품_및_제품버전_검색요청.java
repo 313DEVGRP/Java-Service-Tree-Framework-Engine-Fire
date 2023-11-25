@@ -9,6 +9,8 @@ import java.util.List;
 @Getter
 @Setter
 public class 지라이슈_제품_및_제품버전_검색요청 extends 검색_기본_요청 {
-	private Long pdServiceLink;
-	private List<Long> pdServiceVersionLinks;
+    private Long pdServiceLink;
+    private List<Long> pdServiceVersionLinks;
+    private IsReqType isReqType;
+
 }
