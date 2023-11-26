@@ -2,9 +2,12 @@ package com.arms.api.engine.controllers;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import com.arms.api.engine.models.*;
 import com.arms.elasticsearch.util.query.*;
+import com.arms.elasticsearch.util.query.bool.EsBoolQuery;
 import com.arms.elasticsearch.util.검색결과;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -46,17 +49,14 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     public ResponseEntity<검색결과_목록_메인> nestedAggregation(
             지라이슈_제품_및_제품버전_검색요청 검색요청
     ) {
-        EsQueryBuilder esQuery = new EsQueryBuilder()
-                .bool(
-                        new TermQueryMust("pdServiceId", 검색요청.getPdServiceLink()),
-                        new TermsQueryFilter("pdServiceVersion", 검색요청.getPdServiceVersionLinks())
-                );
+        EsBoolQuery[] esBoolQueries = Stream.of(
+                new TermQueryMust("pdServiceId", 검색요청.getPdServiceLink()),
+                new TermsQueryFilter("pdServiceVersion", 검색요청.getPdServiceVersionLinks()),
+                검색요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
+                검색요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null
+        ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
 
-        if (검색요청.getIsReqType() == IsReqType.REQUIREMENT) {
-            esQuery.bool(new TermQueryMust("isReq", true));
-        } else if (검색요청.getIsReqType() == IsReqType.ISSUE) {
-            esQuery.bool(new TermQueryMust("isReq", false));
-        }
+        EsQueryBuilder esQuery = new EsQueryBuilder().bool(esBoolQueries);
 
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(검색요청, esQuery)));
     }
@@ -66,17 +66,14 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     public ResponseEntity<검색결과_목록_메인> flatAggregation(
             지라이슈_제품_및_제품버전_검색요청 검색요청
     ) {
-        EsQueryBuilder esQuery = new EsQueryBuilder()
-                .bool(
-                        new TermQueryMust("pdServiceId", 검색요청.getPdServiceLink()),
-                        new TermsQueryFilter("pdServiceVersion", 검색요청.getPdServiceVersionLinks())
-                );
+        EsBoolQuery[] esBoolQueries = Stream.of(
+                new TermQueryMust("pdServiceId", 검색요청.getPdServiceLink()),
+                new TermsQueryFilter("pdServiceVersion", 검색요청.getPdServiceVersionLinks()),
+                검색요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
+                검색요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null
+        ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
 
-        if (검색요청.getIsReqType() == IsReqType.REQUIREMENT) {
-            esQuery.bool(new TermQueryMust("isReq", true));
-        } else if (검색요청.getIsReqType() == IsReqType.ISSUE) {
-            esQuery.bool(new TermQueryMust("isReq", false));
-        }
+        EsQueryBuilder esQuery = new EsQueryBuilder().bool(esBoolQueries);
 
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청_서브집계.of(검색요청, esQuery)));
     }
