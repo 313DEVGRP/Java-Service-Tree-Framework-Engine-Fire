@@ -84,6 +84,28 @@ public class 엘라스틱_지라이슈_컨트롤러 {
 
     @ResponseBody
     @RequestMapping(
+    value = {"/index/backup"},
+    method = {RequestMethod.POST}
+    )
+    public boolean 지라이슈_인덱스백업() {
+        로그.info("지라이슈_인덱스백업 컨트롤러");
+
+        return 지라이슈_검색엔진.지라이슈_인덱스백업();
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/index"},
+            method = {RequestMethod.DELETE}
+    )
+    public boolean 지라이슈_인덱스삭제() {
+        로그.info("지라이슈_인덱스삭제 컨트롤러");
+
+        return 지라이슈_검색엔진.지라이슈_인덱스삭제();
+    }
+
+    @ResponseBody
+    @RequestMapping(
             value = {"/loadToES/bulk/{issueKey}"},
             method = {RequestMethod.GET}
     )
