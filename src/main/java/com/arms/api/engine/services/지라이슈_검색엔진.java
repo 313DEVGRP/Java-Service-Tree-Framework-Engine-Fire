@@ -1,8 +1,9 @@
 package com.arms.api.engine.services;
 
-import com.arms.elasticsearch.helper.인덱스생성_매핑;
+import com.arms.elasticsearch.helper.인덱스_유틸;
 import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.repositories.지라이슈_저장소;
+import com.arms.elasticsearch.helper.인덱스자료;
 import com.arms.elasticsearch.util.*;
 import com.arms.errors.codes.에러코드;
 import com.arms.api.jira.jiraissue.model.지라이슈_데이터;
@@ -12,17 +13,11 @@ import com.arms.api.jira.jiraissue.service.지라이슈_전략_호출;
 import com.arms.api.jira.jiraissuestatus.model.지라이슈상태_데이터;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +28,7 @@ import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -52,7 +48,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
     private 지라이슈_전략_호출 지라이슈_전략_호출;
 
-    private 인덱스생성_매핑 인덱스생성_매핑;
+    private 인덱스_유틸 인덱스_유틸;
 
     @Override
     public 지라이슈 이슈_추가하기(지라이슈 지라이슈) {
@@ -180,12 +176,41 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     }
 
     @Override
+    public boolean 지라이슈_인덱스백업() {
+        String 현재_지라이슈인덱스 = 인덱스자료.지라이슈_인덱스명;
+        String currentDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        String 백업_지라이슈인덱스 = 현재_지라이슈인덱스 + "-" + currentDate;
+
+        boolean 인덱스백업 = 인덱스_유틸.리인덱스(현재_지라이슈인덱스, 백업_지라이슈인덱스);
+        if (!인덱스백업) {
+            로그.error("Failed to reindex!");
+            return false;
+        }
+
+        return 인덱스백업;
+    }
+
+    @Override
+    public boolean 지라이슈_인덱스삭제() {
+        String 현재_지라이슈인덱스 = 인덱스자료.지라이슈_인덱스명;
+
+        boolean 삭제성공 = 인덱스_유틸.인덱스삭제(현재_지라이슈인덱스);
+        if (삭제성공) {
+            로그.info("Index deleted successfully!");
+        } else {
+            로그.error("Failed to delete index!");
+        }
+
+        return 삭제성공;
+    }
+
+    @Override
     public int 이슈_링크드이슈_서브테스크_벌크로_추가하기(Long 지라서버_아이디, String 이슈_키 , Long 제품서비스_아이디, Long 제품서비스_버전) throws Exception {
 
-
-        boolean 인덱스확인 = 인덱스생성_매핑.인덱스확인_및_생성_매핑(지라이슈.class);
+        boolean 인덱스확인 = 인덱스_유틸.인덱스확인_및_생성_매핑(지라이슈.class);
 
         if (!인덱스확인) {
+            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 인덱스 확인 Error " + 에러코드.지라이슈_인덱스_NULL_오류.getErrorMsg());
             throw new IllegalArgumentException(에러코드.지라이슈_인덱스_NULL_오류.getErrorMsg());
         }
 
