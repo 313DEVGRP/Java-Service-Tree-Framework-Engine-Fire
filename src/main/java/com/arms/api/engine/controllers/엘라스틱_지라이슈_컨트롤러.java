@@ -1,5 +1,6 @@
 package com.arms.api.engine.controllers;
 
+import com.arms.api.engine.models.analysis.time.히트맵데이터;
 import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.services.지라이슈_서비스;
 import com.arms.api.jira.jiraissue.service.지라이슈_전략_호출;
@@ -214,5 +215,14 @@ public class 엘라스틱_지라이슈_컨트롤러 {
         로그.info("제품서비스_버전목록으로_조회");
 
         return 지라이슈_검색엔진.제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
+    }
+
+    @ResponseBody
+    @GetMapping("/pdService/pdServiceVersions/heatmap")
+    public 히트맵데이터 히트맵_제품서비스_버전목록으로_조회(@RequestParam Long pdServiceLink,
+                                      @RequestParam List<Long> pdServiceVersionLinks) {
+        로그.info("히트맵_제품서비스_버전목록으로_조회");
+
+        return 지라이슈_검색엔진.히트맵_제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
     }
 }

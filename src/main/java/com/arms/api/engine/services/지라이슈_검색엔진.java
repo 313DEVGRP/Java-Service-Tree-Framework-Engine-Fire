@@ -1,39 +1,59 @@
 package com.arms.api.engine.services;
 
-import com.arms.elasticsearch.helper.인덱스_유틸;
+import com.arms.api.engine.models.analysis.time.히트맵데이터;
+import com.arms.api.engine.models.analysis.time.히트맵날짜데이터;
 import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.repositories.지라이슈_저장소;
-import com.arms.elasticsearch.helper.인덱스자료;
-import com.arms.elasticsearch.util.*;
-import com.arms.errors.codes.에러코드;
 import com.arms.api.jira.jiraissue.model.지라이슈_데이터;
 import com.arms.api.jira.jiraissue.model.지라이슈필드_데이터;
 import com.arms.api.jira.jiraissue.model.지라프로젝트_데이터;
 import com.arms.api.jira.jiraissue.service.지라이슈_전략_호출;
 import com.arms.api.jira.jiraissuestatus.model.지라이슈상태_데이터;
+import com.arms.elasticsearch.helper.인덱스_유틸;
+import com.arms.elasticsearch.helper.인덱스자료;
+import com.arms.elasticsearch.util.검색결과;
+import com.arms.elasticsearch.util.검색결과_목록_메인;
+import com.arms.elasticsearch.util.검색엔진_유틸;
+import com.arms.elasticsearch.util.검색조건;
+import com.arms.errors.codes.에러코드;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.*;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.IndexOperations;
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -49,6 +69,13 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     private 지라이슈_전략_호출 지라이슈_전략_호출;
 
     private 인덱스_유틸 인덱스_유틸;
+
+    private ObjectMapper objectMapper;
+
+    private ElasticsearchOperations 엘라스틱서치_작업;
+
+    @Autowired
+    private RestHighLevelClient client;
 
     @Override
     public 지라이슈 이슈_추가하기(지라이슈 지라이슈) {
@@ -787,5 +814,133 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     @Override
     public List<지라이슈> 제품서비스_버전목록으로_조회(Long pdServiceLink, List<Long> pdServiceVersionLinks) {
         return 지라이슈저장소.findByPdServiceIdAndPdServiceVersionIn(pdServiceLink, pdServiceVersionLinks);
+    }
+
+    @Override
+    public 히트맵데이터 히트맵_제품서비스_버전목록으로_조회(Long pdServiceLink, List<Long> pdServiceVersionLinks) {
+
+        BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
+
+        TermQueryBuilder 제품서비스_조회 = QueryBuilders.termQuery("pdServiceId", pdServiceLink);
+        복합조회.must(제품서비스_조회);
+
+        TermsQueryBuilder 제품서비스버전_조회 = QueryBuilders.termsQuery("pdServiceVersion", pdServiceVersionLinks);
+        복합조회.filter(제품서비스버전_조회);
+
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+        sourceBuilder.query(복합조회);
+        sourceBuilder.size(10000);
+        List<지라이슈> 전체결과 = new ArrayList<>();
+        boolean 인덱스존재시까지  = true;
+
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String 지라인덱스 = 인덱스자료.지라이슈_인덱스명;
+
+        while(인덱스존재시까지) {
+            LocalDate 오늘일경우 = LocalDate.now();
+            String 호출할_지라인덱스 = 오늘일경우.format(formatter).equals(today.format(formatter))
+                                            ? 지라인덱스 : 지라인덱스 + "-" + today.format(formatter);
+
+            IndexOperations 인덱스작업 = 엘라스틱서치_작업.indexOps(IndexCoordinates.of(호출할_지라인덱스));
+            if (!인덱스_유틸.인덱스확인(인덱스작업)) {
+                인덱스존재시까지 = false;
+                break;
+            }
+
+            today = today.minusDays(1);
+
+
+            SearchRequest searchRequest = new SearchRequest(호출할_지라인덱스); // 인덱스 이름을 동적으로 설정할 수 있습니다.
+            searchRequest.source(sourceBuilder);
+
+            try {
+                SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+                SearchHit[] searchHits = searchResponse.getHits().getHits();
+
+                List<지라이슈> 결과 = Optional.ofNullable(searchHits) // null 검사
+                        .map(Arrays::stream)
+                        .orElseGet(Stream::empty) // null인 경우 빈 스트림 반환
+                        .map(SearchHit::getSourceAsString) // getSourceAsString 메서드를 사용하여 JSON 문자열을 가져옴
+                        .filter(json -> json != null && !json.isEmpty()) // null이 아니고, 내용이 있는 경우만 처리
+                        .map(json -> {
+                            try {
+                                return objectMapper.readValue(json, 지라이슈.class); // JSON 문자열을 원하는 클래스로 변환
+                            } catch (JsonProcessingException e) {
+                                로그.error("지라이슈 파싱 오류 : " + e.getMessage());
+                                return null;
+                            }
+                        })
+                        .collect(Collectors.toList());
+                전체결과.addAll(결과);
+
+            } catch (IOException e) {
+                로그.error("백업인덱스_제품서비스_버전목록으로_조회 오류 : " + e.getMessage());
+                throw new RuntimeException(e);
+            }
+        }
+
+        히트맵데이터 히트맵데이터 = new 히트맵데이터();
+        Set<String> requirementColors = new HashSet<>();
+        Set<String> relationIssueColors = new HashSet<>();
+
+        전체결과.stream().forEach(지라이슈 -> {
+            if (지라이슈.getIsReq()) {
+                히트맵데이터_파싱(히트맵데이터.getRequirement(), 지라이슈, requirementColors);
+            } else {
+                히트맵데이터_파싱(히트맵데이터.getRelationIssue(), 지라이슈, relationIssueColors);
+            }
+        });
+
+        히트맵데이터.setRequirementColors(assignColors(requirementColors));
+        히트맵데이터.setRelationIssueColors(assignColors(relationIssueColors));
+
+        return 히트맵데이터;
+    }
+
+    private void 히트맵데이터_파싱(Map<String, 히트맵날짜데이터> returnObject, 지라이슈 item, Set<String> returnColors) {
+        if (item.getUpdated() == null || item.getUpdated().isEmpty()) {
+            로그.info(item.getKey());
+            return;
+        }
+
+        String 표시날짜 = formatDate(parseDateTime(item.getUpdated()));
+
+        if (!returnObject.containsKey(표시날짜)) {
+            returnObject.put(표시날짜, new 히트맵날짜데이터());
+        }
+
+        returnObject.get(표시날짜).getItems().add(item.getSummary());
+        returnColors.add(item.getSummary());
+    }
+
+    private static String formatDate(LocalDateTime date) {
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        return format.format(date);
+    }
+
+    private Map<String, String> assignColors(Set<String> colorsArray) {
+        Map<String, String> colorsObj = new HashMap<>();
+        colorsObj.put("default", "#eeeeee");
+
+        colorsArray.forEach(item -> {
+            if (!"default".equals(item)) {
+                colorsObj.put(item, getRandomColor());
+            }
+        });
+
+        return colorsObj;
+    }
+
+    private String getRandomColor() {
+        Random random = new Random();
+
+        float r = random.nextFloat();
+        float g = random.nextFloat();
+        float b = random.nextFloat();
+
+        Color randomColor = new Color(r, g, b);
+
+        return "#" + Integer.toHexString(randomColor.getRGB()).substring(2);
     }
 }
