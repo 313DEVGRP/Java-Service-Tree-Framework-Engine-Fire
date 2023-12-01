@@ -39,10 +39,10 @@ public class 인덱스_유틸 {
     }
 
     public boolean 인덱스확인_및_생성_매핑(Class<?> clazz) {
-
         IndexOperations 인덱스작업 = 엘라스틱서치_작업.indexOps(clazz);
+        boolean 인덱스확인 = 인덱스확인(인덱스작업);
 
-        if (인덱스작업.exists()) {
+        if (인덱스확인) {
             return true;
         }
 
@@ -61,6 +61,13 @@ public class 인덱스_유틸 {
         로그.info("Created index: " + clazz.getSimpleName().toLowerCase());
 
         return 매핑확인;
+    }
+
+    public boolean 인덱스확인(IndexOperations 인덱스작업) {
+
+        boolean 확인결과 = 인덱스작업.exists();
+
+        return 확인결과;
     }
 
     public boolean 리인덱스(String 현재_지라이슈인덱스, String 백업_지라이슈인덱스) {

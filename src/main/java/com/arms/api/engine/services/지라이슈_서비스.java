@@ -1,7 +1,7 @@
 package com.arms.api.engine.services;
 
+import com.arms.api.engine.models.analysis.time.히트맵데이터;
 import com.arms.api.engine.models.지라이슈;
-import com.arms.elasticsearch.util.검색결과_목록;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
 import com.arms.elasticsearch.util.검색조건;
 
@@ -54,4 +54,6 @@ import java.util.Map;
     Map<String, Long> 제품서비스별_담당자_연관된_요구사항_통계(Long 지라서버_아이디, Long 제품서비스_아이디, String 이슈키, String 담당자_이메일) throws IOException;
 
     List<지라이슈> 제품서비스_버전목록으로_조회(Long pdServiceLink, List<Long> pdServiceVersionLinks);
-}
+
+    히트맵데이터 히트맵_제품서비스_버전목록으로_조회(Long pdServiceLink, List<Long> pdServiceVersionLinks);
+ }
