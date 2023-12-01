@@ -44,6 +44,8 @@ import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -933,7 +935,14 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     }
 
     private String getRandomColor() {
-        Random random = new Random();
+        SecureRandom random = null;
+
+        try {
+            random = SecureRandom.getInstanceStrong();
+        } catch (NoSuchAlgorithmException e) {
+            로그.error("랜덤컬러 데이터 생성중 오류 : " + e.getMessage());
+            throw new RuntimeException(e);
+        }
 
         float r = random.nextFloat();
         float g = random.nextFloat();
