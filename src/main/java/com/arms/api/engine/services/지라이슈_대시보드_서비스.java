@@ -3,6 +3,7 @@ package com.arms.api.engine.services;
 import java.util.List;
 import java.util.Map;
 
+import com.arms.api.engine.models.dashboard.bar.요구사항_지라이슈상태_일별_집계;
 import com.arms.api.engine.models.dashboard.bar.요구사항_지라이슈상태_주별_집계;
 import com.arms.api.engine.models.dashboard.treemap.Worker;
 import com.arms.api.engine.models.지라이슈_제품_및_제품버전_검색요청;
@@ -24,4 +25,6 @@ public interface 지라이슈_대시보드_서비스 {
     List<Worker> 작업자_별_요구사항_별_관여도(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청);
 
     Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항_지라이슈상태_주별_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청);
+
+    Map<String, 요구사항_지라이슈상태_일별_집계> 요구사항_지라이슈상태_일별_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, String 버전_시작일);
 }

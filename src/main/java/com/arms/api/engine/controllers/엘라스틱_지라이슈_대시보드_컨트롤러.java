@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import com.arms.api.engine.models.*;
+import com.arms.api.engine.models.dashboard.bar.요구사항_지라이슈상태_일별_집계;
 import com.arms.elasticsearch.util.query.*;
 import com.arms.elasticsearch.util.query.bool.EsBoolQuery;
 import com.arms.elasticsearch.util.검색결과;
@@ -206,4 +207,13 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         return ResponseEntity.ok(집계결과_가져오기);
     }
 
+
+    @ResponseBody
+    @GetMapping("/daily-requirements-jira-issue-statuses")
+    public ResponseEntity<Map<String, 요구사항_지라이슈상태_일별_집계>> 요구사항이슈_일별_집계(
+            지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
+            String startDate
+    ) {
+        return ResponseEntity.ok(지라이슈_검색엔진.요구사항_지라이슈상태_일별_집계(지라이슈_제품_및_제품버전_검색요청, startDate));
+    }
 }
