@@ -1,6 +1,5 @@
 package com.arms.api.engine.services;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -8,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.arms.api.engine.models.dashboard.bar.요구사항_지라이슈상태_일별_집계;
 import com.arms.api.engine.models.dashboard.bar.요구사항_지라이슈상태_주별_집계;
 import com.arms.api.engine.models.dashboard.treemap.TaskList;
 import com.arms.api.engine.models.dashboard.treemap.Worker;
@@ -26,7 +26,6 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.BucketOrder;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.slf4j.Logger;
@@ -375,5 +374,65 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         return DateTimeFormatter
                 .ofPattern("yyyy-MM-dd")
                 .format(offsetDateTime);
+    }
+
+    @Override
+    public Map<String, 요구사항_지라이슈상태_일별_집계> 요구사항_지라이슈상태_일별_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, String startDate) {
+
+        LocalDate now = LocalDate.now(ZoneId.of("UTC"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate 버전_시작일 = LocalDate.parse(startDate, formatter);
+
+        //System.out.println("startDate: " + startDate);
+        System.out.println("버전 시작일: " + 버전_시작일);
+        //System.out.println("now: " + now);
+
+        EsQuery esQuery = new EsQueryBuilder()
+                .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink()),
+                        new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks()),
+                        new RangeQueryFilter("updated", 버전_시작일, now, "fromto")
+                );
+        BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
+
+        CustomAbstractAggregationBuilder dailyAggregationBuilder = new CustomDateHistogramAggregationBuilder("aggregation_by_day")
+                .field("updated")
+                .calendarInterval(DateHistogramInterval.DAY)
+                .addSubAggregation(new CustomTermsAggregationBuilder("statuses").field("status.status_name.keyword").build());
+
+        NativeSearchQueryBuilder nativeSearchQueryBuilder
+                = new NativeSearchQueryBuilder().withQuery(boolQuery).withAggregations(dailyAggregationBuilder.build());
+
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
+
+        List<검색결과> aggregationByDay = 검색결과_목록_메인.get검색결과().get("aggregation_by_day");
+
+
+        Map<String, 요구사항_지라이슈상태_일별_집계> 검색결과 = aggregationByDay.stream()
+                .sorted(Comparator.comparing(bucket -> OffsetDateTime.parse(bucket.get필드명()).toLocalDate()))
+                .collect(Collectors.toMap(
+                        entry -> transformDate(entry.get필드명()),
+                        this::일별데이터생성,
+                        (existingValue, newValue) -> existingValue,
+                        LinkedHashMap::new
+                ));
+
+        // 확인용 로그
+        /*for (Map.Entry<String, 요구사항_지라이슈상태_일별_집계> entry : 검색결과.entrySet()) {
+            String date = entry.getKey();
+            요구사항_지라이슈상태_일별_집계 data = entry.getValue();
+
+            System.out.println("Date: " + date);
+            System.out.println("Data: " + data.getStatuses());
+        }*/
+
+        return 검색결과;
+    }
+
+    private 요구사항_지라이슈상태_일별_집계 일별데이터생성(검색결과 검색_결과) {
+
+        Map<String, Long> statuses = (검색_결과.get하위검색결과().get("statuses")).stream()
+                .collect(Collectors.toMap(검색결과::get필드명, 검색결과::get개수));
+
+        return new 요구사항_지라이슈상태_일별_집계(statuses);
     }
 }
