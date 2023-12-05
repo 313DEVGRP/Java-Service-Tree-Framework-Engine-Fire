@@ -7,10 +7,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.arms.api.engine.models.dashboard.bar.요구사항_지라이슈상태_일별_집계;
-import com.arms.api.engine.models.dashboard.bar.요구사항_지라이슈상태_주별_집계;
-import com.arms.api.engine.models.dashboard.treemap.TaskList;
-import com.arms.api.engine.models.dashboard.treemap.Worker;
+import com.arms.api.engine.dtos.트리맵_담당자_요구사항_기여도;
+import com.arms.api.engine.dtos.요구사항_지라이슈상태_일별_집계;
+import com.arms.api.engine.dtos.요구사항_지라이슈상태_주별_집계;
 import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.models.지라이슈_제품_및_제품버전_검색요청;
 import com.arms.elasticsearch.util.aggregation.CustomAbstractAggregationBuilder;
@@ -183,57 +182,60 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
 
     @Override
-    public List<Worker> 작업자_별_요구사항_별_관여도(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
-        Map<String, Worker> contributionMap = new HashMap<>();
-
+    public List<트리맵_담당자_요구사항_기여도> 작업자_별_요구사항_별_관여도(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
         List<지라이슈> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionIn(true, 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink(), 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks());
 
-        // 요구사항의 키를 모두 추출
         List<String> allReqKeys = requirementIssues.stream().map(지라이슈::getKey).collect(Collectors.toList());
 
-        // 모든 하위 태스크를 한 번에 로드
         List<지라이슈> allSubTasks = 지라이슈저장소.findByParentReqKeyIn(allReqKeys);
 
-        // 하위 태스크를 부모 키로 그룹화
         Map<String, List<지라이슈>> subTasksByParent = allSubTasks.stream()
                 .filter(subtask -> subtask.getAssignee() != null)
                 .collect(Collectors.groupingBy(지라이슈::getParentReqKey));
 
-        requirementIssues.stream().forEach(reqIssue -> {
-            String key = reqIssue.getKey();
-            String summary = reqIssue.getSummary();
+        Map<String, 트리맵_담당자_요구사항_기여도> response = new HashMap<>();
 
-            Optional.ofNullable(subTasksByParent.get(key)).orElse(Collections.emptyList()).stream().forEach(subtask -> {
-                String assigneeId = subtask.getAssignee().getAccountId();
-                String displayName = subtask.getAssignee().getDisplayName();
+        requirementIssues.forEach(issue -> {
+            String issueKey = issue.getKey();
+            String issueSummary = issue.getSummary();
 
-                Worker worker = contributionMap.computeIfAbsent(assigneeId, id -> {
-                    Map<String, Integer> dataMap = new HashMap<>();
-                    dataMap.put("totalInvolvedCount", 0);
-                    return new Worker(assigneeId, displayName, dataMap, new ArrayList<>());
-                });
+            subTasksByParent.getOrDefault(issueKey, Collections.emptyList()).stream()
+                    .collect(Collectors.groupingBy(subTask -> subTask.getAssignee().getAccountId() + "_" + subTask.getAssignee().getDisplayName(), Collectors.counting()))
+                    .forEach((key, value) -> {
+                        String[] assigneeInfo = key.split("_");
+                        String assigneeId = assigneeInfo[0];
+                        String assigneeDisplayName = assigneeInfo[1];
 
-                TaskList taskList = worker.getChildren().stream()
-                        .filter(task -> task.getId().equals(key))
-                        .findFirst()
-                        .orElseGet(() -> {
-                            Map<String, Integer> dataList = new HashMap<>();
-                            dataList.put("involvedCount", 0);
-                            TaskList newTask = new TaskList(key, summary, dataList);
-                            worker.getChildren().add(newTask);
-                            return newTask;
-                        });
+                        트리맵_담당자_요구사항_기여도 트리맵담당자요구사항기여도 = response.computeIfAbsent(assigneeId, k -> createAssigneeContribution(assigneeDisplayName));
 
-                taskList.getData().put("involvedCount", taskList.getData().get("involvedCount") + 1);
-                worker.getData().put("totalInvolvedCount", worker.getData().get("totalInvolvedCount") + 1);
-            });
+                        트리맵담당자요구사항기여도.setValue(트리맵담당자요구사항기여도.getValue() + value);
+
+                        Map<String, Object> issueMap = createIssueMap(issueSummary, assigneeDisplayName, value);
+
+                        트리맵담당자요구사항기여도.getChildren().add(issueMap);
+                    });
         });
 
-        return contributionMap.values().stream()
-                .sorted((w1, w2) -> w2.getData().get("totalInvolvedCount").compareTo(w1.getData().get("totalInvolvedCount")))
-                .limit(지라이슈_제품_및_제품버전_검색요청.get크기() > 0 ? 지라이슈_제품_및_제품버전_검색요청.get크기() : Long.MAX_VALUE)
+        return response.values().stream()
+                .sorted(Comparator.comparingLong(트리맵_담당자_요구사항_기여도::getValue).reversed())
                 .collect(Collectors.toList());
+    }
 
+    private 트리맵_담당자_요구사항_기여도 createAssigneeContribution(String assigneeDisplayName) {
+        트리맵_담당자_요구사항_기여도 트리맵담당자요구사항기여도 = new 트리맵_담당자_요구사항_기여도();
+        트리맵담당자요구사항기여도.setName(assigneeDisplayName);
+        트리맵담당자요구사항기여도.setPath(assigneeDisplayName);
+        트리맵담당자요구사항기여도.setValue(0L);
+        트리맵담당자요구사항기여도.setChildren(new ArrayList<>());
+        return 트리맵담당자요구사항기여도;
+    }
+
+    private Map<String, Object> createIssueMap(String issueSummary, String assigneeDisplayName, Long value) {
+        Map<String, Object> issueMap = new HashMap<>();
+        issueMap.put("name", issueSummary);
+        issueMap.put("path", assigneeDisplayName + "/" + issueSummary);
+        issueMap.put("value", value);
+        return issueMap;
     }
 
 

@@ -1,4 +1,4 @@
-package com.arms.api.engine.models.dashboard.bar;
+package com.arms.api.engine.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,6 +11,8 @@ import java.util.Map;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class 요구사항_지라이슈상태_일별_집계 {
+public class 요구사항_지라이슈상태_주별_집계 {
+    private long totalIssues;
     private Map<String, Long> statuses;
+    private long totalRequirements;
 }
