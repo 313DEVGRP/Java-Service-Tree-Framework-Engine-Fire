@@ -1,7 +1,7 @@
 package com.arms.api.engine.services;
 
-import com.arms.api.engine.models.analysis.time.히트맵데이터;
-import com.arms.api.engine.models.analysis.time.히트맵날짜데이터;
+import com.arms.api.engine.dtos.히트맵날짜데이터;
+import com.arms.api.engine.dtos.히트맵데이터;
 import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.repositories.지라이슈_저장소;
 import com.arms.api.jira.jiraissue.model.지라이슈_데이터;
@@ -27,7 +27,6 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
@@ -51,9 +50,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -493,68 +491,6 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     }
 
     @Override
-    public Map<String,Integer>  요구사항_릴레이션이슈_상태값_전체통계(Long 지라서버_아이디) throws IOException {
-
-        MatchQueryBuilder 사용자별_조회 = QueryBuilders.matchQuery("jira_server_id", 지라서버_아이디);
-        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
-                .withQuery(사용자별_조회)
-                .withAggregations(AggregationBuilders.terms("이슈_상태별_집계").field("status.status_name.keyword"));
-
-       ;
-
-        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
-        List<검색결과> 이슈_상태별_집계 = 검색결과_목록_메인.get검색결과().get("이슈_상태별_집계");
-
-        Map<String, Integer> 전체상태값_집계 = new HashMap<>();
-
-        if (이슈_상태별_집계.isEmpty()) {
-            전체상태값_집계.put("조회된 상태: ",0 );
-        }
-
-        for (검색결과 상태 : 이슈_상태별_집계) {
-            String statusName = 상태.get필드명();
-            long docCount = 상태.get개수();
-            전체상태값_집계.put(statusName, (int) docCount);
-        }
-        return 전체상태값_집계;
-    }
-
-    @Override
-    public Map<String, Map<String, Integer>> 요구사항_릴레이션이슈_상태값_프로젝트별통계(Long 지라서버_아이디) throws IOException {
-
-        MatchQueryBuilder 사용자별_조회 = QueryBuilders.matchQuery("jira_server_id", 지라서버_아이디);
-
-        TermsAggregationBuilder 프로젝트별_집계
-                = AggregationBuilders.terms("프로젝트키별_집계").field("project.project_key.keyword")
-                    .subAggregation(
-                            AggregationBuilders.terms("생태별_집계").field("status.status_name.keyword")
-                    );
-
-        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
-                .withQuery(사용자별_조회)
-                .withAggregations(프로젝트별_집계);
-        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
-        List<검색결과> 프로젝트키별_집계 = 검색결과_목록_메인.get검색결과().get("프로젝트키별_집계");
-        Map<String, Map<String, Integer>> 프로젝트별상태값_집계= new HashMap<>();
-
-        for (검색결과 프로젝트 : 프로젝트키별_집계) {
-            String 프로젝트이름 = 프로젝트.get필드명();
-            Map<String,Integer> 상태값_프로젝트별통계= new HashMap<>();
-            프로젝트별상태값_집계.put(프로젝트이름 , 상태값_프로젝트별통계 );
-
-            List<검색결과> 생태별_집계 = 프로젝트.get하위검색결과().get("생태별_집계");
-
-            for (검색결과 상태 : 생태별_집계) {
-                String 상태이름  = 상태.get필드명();
-                int docCount  =(int)상태.get개수();
-                상태값_프로젝트별통계.put(상태이름 , docCount );
-            }
-
-        }
-        return 프로젝트별상태값_집계;
-    }
-
-    @Override
     public Map<String, Long> 제품서비스_버전별_상태값_통계(Long 제품서비스_아이디, Long 버전_아이디) throws IOException {
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
 
@@ -592,88 +528,6 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
         return 제품서비스_버전별_집계;
 
-    }
-
-    @Override
-    public Map<String, Long> 제품서비스별_담당자_통계(Long 지라서버_아이디, Long 제품서비스_아이디) throws IOException {
-
-        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
-        BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
-
-        if ( 제품서비스_아이디 != null && 제품서비스_아이디 > 9L) {
-            MatchQueryBuilder 제품서비스_조회 = QueryBuilders.matchQuery("pdServiceId", 제품서비스_아이디);
-            복합조회.must(제품서비스_조회);
-        }
-
-        nativeSearchQueryBuilder.withQuery(복합조회)
-            .withMaxResults(0)
-            .withAggregations( AggregationBuilders.terms("담당자별_집계").field("assignee.assignee_emailAddress.keyword"));
-
-        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
-        long 결과 = 검색결과_목록_메인.get전체합계();
-        로그.info("검색결과 개수: " + 결과);
-
-        List<검색결과> 담당자별_집계 = 검색결과_목록_메인.get검색결과().get("담당자별_집계");
-
-        long 담당자_총합 = 0;
-        Map<String, Long> 제품서비스별_하위이슈_담당자_집계 = new HashMap<>();
-        for (검색결과 담당자 : 담당자별_집계) {
-            String 담당자_이메일 = 담당자.get필드명();
-            long 개수 = 담당자.get개수();
-            log.info("담당자: " + 담당자_이메일 + ", Count: " + 개수);
-            담당자_총합+= 개수;
-            제품서비스별_하위이슈_담당자_집계.put(담당자_이메일, 개수);
-        }
-        제품서비스별_하위이슈_담당자_집계.put("담당자 미지정",결과-담당자_총합);
-
-        return 제품서비스별_하위이슈_담당자_집계;
-    }
-
-    @Override
-    public Map<String, Long> 제품서비스별_소요일_통계(Long 지라서버_아이디, Long 제품서비스_아이디) throws IOException {
-
-        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
-        BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
-
-        if ( 제품서비스_아이디 != null && 제품서비스_아이디 > 9L) {
-            MatchQueryBuilder 제품서비스_조회 = QueryBuilders.matchQuery("pdServiceId", 제품서비스_아이디);
-            복합조회.must(제품서비스_조회);
-        }
-
-        nativeSearchQueryBuilder.withQuery(복합조회)
-            .withMaxResults(10000);
-
-        List<지라이슈> 지라이슈들 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build());
-
-        long 결과 = 지라이슈들.size();
-        로그.info("검색결과 개수: " + 결과);
-
-        Map<String, Long> 업데이트날짜차이_결과 = new HashMap<>();
-
-        for (지라이슈 지라이슈 : 지라이슈들) {
-
-            String 생성일 = 지라이슈.getCreated();
-            String 수정일 = 지라이슈.getUpdated();
-
-            if (생성일 == null || 수정일 == null || 생성일.isEmpty()|| 수정일.isEmpty()) {
-                continue;
-            }
-
-            LocalDateTime 생성일_날짜포맷 = parseDateTime(생성일);
-            LocalDateTime 수정일_날짜포맷 = parseDateTime(수정일);
-
-            long 날짜차이 = ChronoUnit.DAYS.between(생성일_날짜포맷, 수정일_날짜포맷);
-
-            String key = 날짜차이 + "일";
-
-            if (업데이트날짜차이_결과.containsKey(key)) {
-                업데이트날짜차이_결과.put(key, 업데이트날짜차이_결과.get(key) + 1);
-            } else {
-                업데이트날짜차이_결과.put(key, 1L);
-            }
-        }
-
-        return 업데이트날짜차이_결과;
     }
 
     private static LocalDateTime parseDateTime(String dateTimeStr) {
@@ -952,4 +806,156 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
         return "#" + Integer.toHexString(randomColor.getRGB()).substring(2);
     }
+
+/* 사용하지 않는 Endpoint정리
+    @Override
+    public Map<String,Integer>  요구사항_릴레이션이슈_상태값_전체통계(Long 지라서버_아이디) throws IOException {
+
+        MatchQueryBuilder 사용자별_조회 = QueryBuilders.matchQuery("jira_server_id", 지라서버_아이디);
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+                .withQuery(사용자별_조회)
+                .withAggregations(AggregationBuilders.terms("이슈_상태별_집계").field("status.status_name.keyword"));
+
+       ;
+
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
+        List<검색결과> 이슈_상태별_집계 = 검색결과_목록_메인.get검색결과().get("이슈_상태별_집계");
+
+        Map<String, Integer> 전체상태값_집계 = new HashMap<>();
+
+        if (이슈_상태별_집계.isEmpty()) {
+            전체상태값_집계.put("조회된 상태: ",0 );
+        }
+
+        for (검색결과 상태 : 이슈_상태별_집계) {
+            String statusName = 상태.get필드명();
+            long docCount = 상태.get개수();
+            전체상태값_집계.put(statusName, (int) docCount);
+        }
+        return 전체상태값_집계;
+    }*/
+
+/*  사용하지 않는 Endpoint정리
+   @Override
+    public Map<String, Map<String, Integer>> 요구사항_릴레이션이슈_상태값_프로젝트별통계(Long 지라서버_아이디) throws IOException {
+
+        MatchQueryBuilder 사용자별_조회 = QueryBuilders.matchQuery("jira_server_id", 지라서버_아이디);
+
+        TermsAggregationBuilder 프로젝트별_집계
+                = AggregationBuilders.terms("프로젝트키별_집계").field("project.project_key.keyword")
+                    .subAggregation(
+                            AggregationBuilders.terms("생태별_집계").field("status.status_name.keyword")
+                    );
+
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+                .withQuery(사용자별_조회)
+                .withAggregations(프로젝트별_집계);
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
+        List<검색결과> 프로젝트키별_집계 = 검색결과_목록_메인.get검색결과().get("프로젝트키별_집계");
+        Map<String, Map<String, Integer>> 프로젝트별상태값_집계= new HashMap<>();
+
+        for (검색결과 프로젝트 : 프로젝트키별_집계) {
+            String 프로젝트이름 = 프로젝트.get필드명();
+            Map<String,Integer> 상태값_프로젝트별통계= new HashMap<>();
+            프로젝트별상태값_집계.put(프로젝트이름 , 상태값_프로젝트별통계 );
+
+            List<검색결과> 생태별_집계 = 프로젝트.get하위검색결과().get("생태별_집계");
+
+            for (검색결과 상태 : 생태별_집계) {
+                String 상태이름  = 상태.get필드명();
+                int docCount  =(int)상태.get개수();
+                상태값_프로젝트별통계.put(상태이름 , docCount );
+            }
+
+        }
+        return 프로젝트별상태값_집계;
+    }
+*/
+
+
+/* 사용하지 않는 Endpoint정리
+    @Override
+    public Map<String, Long> 제품서비스별_담당자_통계(Long 지라서버_아이디, Long 제품서비스_아이디) throws IOException {
+
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
+        BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
+
+        if ( 제품서비스_아이디 != null && 제품서비스_아이디 > 9L) {
+            MatchQueryBuilder 제품서비스_조회 = QueryBuilders.matchQuery("pdServiceId", 제품서비스_아이디);
+            복합조회.must(제품서비스_조회);
+        }
+
+        nativeSearchQueryBuilder.withQuery(복합조회)
+            .withMaxResults(0)
+            .withAggregations( AggregationBuilders.terms("담당자별_집계").field("assignee.assignee_emailAddress.keyword"));
+
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
+        long 결과 = 검색결과_목록_메인.get전체합계();
+        로그.info("검색결과 개수: " + 결과);
+
+        List<검색결과> 담당자별_집계 = 검색결과_목록_메인.get검색결과().get("담당자별_집계");
+
+        long 담당자_총합 = 0;
+        Map<String, Long> 제품서비스별_하위이슈_담당자_집계 = new HashMap<>();
+        for (검색결과 담당자 : 담당자별_집계) {
+            String 담당자_이메일 = 담당자.get필드명();
+            long 개수 = 담당자.get개수();
+            log.info("담당자: " + 담당자_이메일 + ", Count: " + 개수);
+            담당자_총합+= 개수;
+            제품서비스별_하위이슈_담당자_집계.put(담당자_이메일, 개수);
+        }
+        제품서비스별_하위이슈_담당자_집계.put("담당자 미지정",결과-담당자_총합);
+
+        return 제품서비스별_하위이슈_담당자_집계;
+    }
+*/
+
+/* 사용하지 않는 Endpoint정리
+    @Override
+    public Map<String, Long> 제품서비스별_소요일_통계(Long 지라서버_아이디, Long 제품서비스_아이디) throws IOException {
+
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
+        BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
+
+        if ( 제품서비스_아이디 != null && 제품서비스_아이디 > 9L) {
+            MatchQueryBuilder 제품서비스_조회 = QueryBuilders.matchQuery("pdServiceId", 제품서비스_아이디);
+            복합조회.must(제품서비스_조회);
+        }
+
+        nativeSearchQueryBuilder.withQuery(복합조회)
+            .withMaxResults(10000);
+
+        List<지라이슈> 지라이슈들 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build());
+
+        long 결과 = 지라이슈들.size();
+        로그.info("검색결과 개수: " + 결과);
+
+        Map<String, Long> 업데이트날짜차이_결과 = new HashMap<>();
+
+        for (지라이슈 지라이슈 : 지라이슈들) {
+
+            String 생성일 = 지라이슈.getCreated();
+            String 수정일 = 지라이슈.getUpdated();
+
+            if (생성일 == null || 수정일 == null || 생성일.isEmpty()|| 수정일.isEmpty()) {
+                continue;
+            }
+
+            LocalDateTime 생성일_날짜포맷 = parseDateTime(생성일);
+            LocalDateTime 수정일_날짜포맷 = parseDateTime(수정일);
+
+            long 날짜차이 = ChronoUnit.DAYS.between(생성일_날짜포맷, 수정일_날짜포맷);
+
+            String key = 날짜차이 + "일";
+
+            if (업데이트날짜차이_결과.containsKey(key)) {
+                업데이트날짜차이_결과.put(key, 업데이트날짜차이_결과.get(key) + 1);
+            } else {
+                업데이트날짜차이_결과.put(key, 1L);
+            }
+        }
+
+        return 업데이트날짜차이_결과;
+    }
+*/
 }

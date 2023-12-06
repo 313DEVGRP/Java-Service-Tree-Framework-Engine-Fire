@@ -1,6 +1,6 @@
 package com.arms.api.engine.services;
 
-import com.arms.api.engine.models.analysis.time.히트맵데이터;
+import com.arms.api.engine.dtos.히트맵데이터;
 import com.arms.api.engine.models.지라이슈;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
 import com.arms.elasticsearch.util.검색조건;
@@ -39,15 +39,9 @@ import java.util.Map;
 
      List<지라이슈> 요구사항_링크드이슈_서브테스크_검색하기(Long 서버_아이디, String 이슈_키, int 페이지_번호, int 페이지_사이즈);
 
-     Map<String,Integer> 요구사항_릴레이션이슈_상태값_전체통계(Long 지라서버_아이디) throws IOException;
-
-     Map<String, Map<String, Integer>> 요구사항_릴레이션이슈_상태값_프로젝트별통계(Long 지라서버_아이디) throws IOException;
-
      Map<String, Long> 제품서비스_버전별_상태값_통계(Long 제품서비스_아이디, Long 버전_아이디) throws IOException;
 
-     Map<String, Long> 제품서비스별_담당자_통계(Long 지라서버_아이디, Long 제품서비스_아이디) throws IOException;
 
-     Map<String, Long> 제품서비스별_소요일_통계(Long 서버_아이디, Long 제품서비스_아이디) throws IOException;
 
     Map<String, Long> 제품서비스별_담당자_요구사항_통계(Long 지라서버_아이디, Long 제품서비스_아이디, String 담당자_이메일) throws IOException;
 
@@ -56,4 +50,12 @@ import java.util.Map;
     List<지라이슈> 제품서비스_버전목록으로_조회(Long pdServiceLink, List<Long> pdServiceVersionLinks);
 
     히트맵데이터 히트맵_제품서비스_버전목록으로_조회(Long pdServiceLink, List<Long> pdServiceVersionLinks);
+
+//     Map<String,Integer> 요구사항_릴레이션이슈_상태값_전체통계(Long 지라서버_아이디) throws IOException;
+
+//     Map<String, Map<String, Integer>> 요구사항_릴레이션이슈_상태값_프로젝트별통계(Long 지라서버_아이디) throws IOException;
+
+//     Map<String, Long> 제품서비스별_담당자_통계(Long 지라서버_아이디, Long 제품서비스_아이디) throws IOException;
+
+//     Map<String, Long> 제품서비스별_소요일_통계(Long 서버_아이디, Long 제품서비스_아이디) throws IOException;
  }

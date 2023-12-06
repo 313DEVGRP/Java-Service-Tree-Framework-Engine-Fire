@@ -1,6 +1,6 @@
 package com.arms.api.engine.controllers;
 
-import com.arms.api.engine.models.analysis.time.히트맵데이터;
+import com.arms.api.engine.dtos.히트맵데이터;
 import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.services.지라이슈_서비스;
 import com.arms.api.jira.jiraissue.service.지라이슈_전략_호출;
@@ -134,6 +134,7 @@ public class 엘라스틱_지라이슈_컨트롤러 {
         return 지라이슈_검색엔진.요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디, 이슈_키, 페이지_번호, 페이지_사이즈);
     }
 
+    /* 통합으로 변경가능 API */
     @ResponseBody
     @GetMapping("/getProgress/{pdServiceId}/{pdServiceVersion}")
     public Map<String, Long> 제품서비스_버전별_상태값_통계(@PathVariable("connectId") Long 지라서버_아이디,
@@ -141,47 +142,6 @@ public class 엘라스틱_지라이슈_컨트롤러 {
                                        @PathVariable("pdServiceVersion") Long 제품서비스_버전_아이디) throws IOException {
 
         return 지라이슈_검색엔진.제품서비스_버전별_상태값_통계(제품서비스_아이디,제품서비스_버전_아이디);
-    }
-
-    /*
-    * 상태값 전체 통계
-    * */
-    @ResponseBody
-    @GetMapping("/search/req/status")
-    public Map<String,Integer> 상태값_조회(@PathVariable("connectId") Long 지라서버_아이디) throws IOException {
-        로그.info("전체 상태값 통계");
-        return 지라이슈_검색엔진.요구사항_릴레이션이슈_상태값_전체통계(지라서버_아이디);
-    }
-
-    /*
-     * 프로젝트별 상태값 전체 통계
-     * */
-    @ResponseBody
-    @GetMapping("/search/req/status/project")
-    public Map<String, Map<String, Integer>>프로젝트별_상태값_조회(@PathVariable("connectId") Long 지라서버_아이디) throws IOException {
-        로그.info("프로젝트별 상태값 통계");
-        return 지라이슈_검색엔진.요구사항_릴레이션이슈_상태값_프로젝트별통계(지라서버_아이디);
-    }
-
-    /*
-    *  하위 이슈
-    * */
-    @ResponseBody
-    @GetMapping("/getAssignee/{pdServiceId}")
-    public Map<String, Long> 제품서비스별_담당자_통계(@PathVariable("connectId") Long 지라서버_아이디,
-                                                @PathVariable("pdServiceId") Long 제품서비스_아이디) throws IOException {
-
-        return 지라이슈_검색엔진.제품서비스별_담당자_통계(지라서버_아이디, 제품서비스_아이디);
-    }
-
-    @ResponseBody
-    @GetMapping("/getDateDiff/{pdServiceId}")
-    public Map<String, Long> 제품서비스별_소요일_통계(@PathVariable("connectId") Long 지라서버_아이디,
-                                                @PathVariable("pdServiceId") Long 제품서비스_아이디)
-                                                 throws IOException {
-        로그.info("요구사항_제품별_소요일_빈도수_통계");
-
-        return 지라이슈_검색엔진.제품서비스별_소요일_통계(지라서버_아이디, 제품서비스_아이디);
     }
 
     @ResponseBody
@@ -225,4 +185,54 @@ public class 엘라스틱_지라이슈_컨트롤러 {
 
         return 지라이슈_검색엔진.히트맵_제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
     }
+
+
+    /*
+     * 상태값 전체 통계
+     * */
+/*  사용하지 않는 Endpoint정리
+    @ResponseBody
+    @GetMapping("/search/req/status")
+    public Map<String,Integer> 상태값_조회(@PathVariable("connectId") Long 지라서버_아이디) throws IOException {
+        로그.info("전체 상태값 통계");
+        return 지라이슈_검색엔진.요구사항_릴레이션이슈_상태값_전체통계(지라서버_아이디);
+    }
+*/
+
+    /*
+     * 프로젝트별 상태값 전체 통계
+     * */
+/*  사용하지 않는 Endpoint정리
+    @ResponseBody
+    @GetMapping("/search/req/status/project")
+    public Map<String, Map<String, Integer>>프로젝트별_상태값_조회(@PathVariable("connectId") Long 지라서버_아이디) throws IOException {
+        로그.info("프로젝트별 상태값 통계");
+        return 지라이슈_검색엔진.요구사항_릴레이션이슈_상태값_프로젝트별통계(지라서버_아이디);
+    }
+*/
+
+    /*
+     *  하위 이슈
+     * */
+/*  사용하지 않는 Endpoint정리
+    @ResponseBody
+    @GetMapping("/getAssignee/{pdServiceId}")
+    public Map<String, Long> 제품서비스별_담당자_통계(@PathVariable("connectId") Long 지라서버_아이디,
+                                                @PathVariable("pdServiceId") Long 제품서비스_아이디) throws IOException {
+
+        return 지라이슈_검색엔진.제품서비스별_담당자_통계(지라서버_아이디, 제품서비스_아이디);
+    }
+*/
+
+/* 사용하지 않는 Endpoint정리
+    @ResponseBody
+    @GetMapping("/getDateDiff/{pdServiceId}")
+    public Map<String, Long> 제품서비스별_소요일_통계(@PathVariable("connectId") Long 지라서버_아이디,
+                                                @PathVariable("pdServiceId") Long 제품서비스_아이디)
+                                                 throws IOException {
+        로그.info("요구사항_제품별_소요일_빈도수_통계");
+
+        return 지라이슈_검색엔진.제품서비스별_소요일_통계(지라서버_아이디, 제품서비스_아이디);
+    }
+*/
 }

@@ -72,7 +72,7 @@ public class 인덱스Test {
     public boolean 인덱스백업(Class<?> clazz) {
         String 현재_지라이슈인덱스 = 인덱스자료.지라이슈_인덱스명;
         String currentDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        String 백업_지라이슈인덱스 = 현재_지라이슈인덱스 + "-2023-11-29";
+        String 백업_지라이슈인덱스 = 현재_지라이슈인덱스 + "-2023-12-01";
 
         if (!인덱스_존재_확인(백업_지라이슈인덱스)) {
             if (!인덱스_존재_확인(현재_지라이슈인덱스)) {
@@ -131,7 +131,7 @@ public class 인덱스Test {
             long elapsedTime = endTime - startTime;
             System.out.println("Reindex 작업에 걸린 시간: " + elapsedTime + "밀리초");
 
-            결과 = 인덱스삭제();
+            // 결과 = 인덱스삭제();
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -170,7 +170,7 @@ public class 인덱스Test {
     boolean 인덱스백업삭제RequestTest() {
         String 현재_지라이슈인덱스 = 인덱스자료.지라이슈_인덱스명;
         String currentDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        String 백업_지라이슈인덱스 = 현재_지라이슈인덱스 + "-2023-11-29";
+        String 백업_지라이슈인덱스 = 현재_지라이슈인덱스 + "-2023-12-01";
 
         ReindexRequest reindexRequest = new ReindexRequest();
         reindexRequest.setSourceIndices(현재_지라이슈인덱스);
@@ -180,21 +180,14 @@ public class 인덱스Test {
             BulkByScrollResponse reindexResponse = client.reindex(reindexRequest, RequestOptions.DEFAULT);
             if (reindexResponse.getBulkFailures().size() == 0) {
                 // Reindex 작업 성공 시, DeleteRequest 생성
-                DeleteIndexRequest deleteRequest = new DeleteIndexRequest(현재_지라이슈인덱스+"-2023-11-29");
+                // DeleteIndexRequest deleteRequest = new DeleteIndexRequest(현재_지라이슈인덱스+"-2023-11-29");
 
                 // Delete 실행
-                client.indices().delete(deleteRequest, RequestOptions.DEFAULT);
-                System.out.println("Index deleted successfully!");
+                // client.indices().delete(deleteRequest, RequestOptions.DEFAULT);
+                // System.out.println("Index deleted successfully!");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } finally {
-            // 클라이언트 종료
-            try {
-                client.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
         }
 
         return true;
