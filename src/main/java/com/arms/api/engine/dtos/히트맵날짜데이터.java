@@ -1,4 +1,4 @@
-package com.arms.api.engine.models.analysis.time;
+package com.arms.api.engine.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
