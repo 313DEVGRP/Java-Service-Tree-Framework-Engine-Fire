@@ -381,16 +381,36 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     }
 
     @Override
-    public Map<String, 요구사항_지라이슈상태_일별_집계> 요구사항_지라이슈상태_일별_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, String startDate) {
+    public Map<String, 요구사항_지라이슈상태_주별_집계> 일자별_지라이슈_생성개수_및_상태_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, String startDate) {
 
-        LocalDate now = LocalDate.now(ZoneId.of("UTC"));
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate 버전_시작일 = LocalDate.parse(startDate, formatter);
+        Map<String, 요구사항_지라이슈상태_주별_집계> 생성개수_집계결과 = 일자별_이슈_생성개수_집계(지라이슈_제품_및_제품버전_검색요청, startDate);
+
+        Map<String, 요구사항_지라이슈상태_주별_집계> 상태_집계결과 = 요구사항_지라이슈상태_일별_집계(지라이슈_제품_및_제품버전_검색요청, startDate);
+
+        상태_집계결과.forEach((date, 일별_상태) -> {
+            // 생성개수_집계결과에서 해당 날짜를 찾고, 없다면 새 인스턴스를 생성
+            if (일별_상태.getStatuses() != null) {
+                요구사항_지라이슈상태_주별_집계 생성개수_집계 = 생성개수_집계결과.computeIfAbsent(date, k -> new 요구사항_지라이슈상태_주별_집계());
+
+                // 주별_집계의 statuses에 일별_상태를 추가
+                if (생성개수_집계.getStatuses() == null) {
+                    생성개수_집계.setStatuses(new HashMap<>());
+                }
+
+                생성개수_집계.getStatuses().putAll(일별_상태.getStatuses());
+            }
+        });
+
+        return 생성개수_집계결과;
+    }
+
+    @Override
+    public Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항_지라이슈상태_일별_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, String startDate) {
 
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink()),
-                        new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks()),
-                        new RangeQueryFilter("updated", 버전_시작일, now, "fromto")
+                        new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks())
+//                        , new RangeQueryFilter("updated", 버전_시작일, now, "fromto")
                 );
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
 
@@ -407,7 +427,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         List<검색결과> aggregationByDay = 검색결과_목록_메인.get검색결과().get("aggregation_by_day");
 
 
-        Map<String, 요구사항_지라이슈상태_일별_집계> 검색결과 = aggregationByDay.stream()
+        Map<String, 요구사항_지라이슈상태_주별_집계> 검색결과 = aggregationByDay.stream()
                 .sorted(Comparator.comparing(bucket -> OffsetDateTime.parse(bucket.get필드명()).toLocalDate()))
                 .collect(Collectors.toMap(
                         entry -> transformDate(entry.get필드명()),
@@ -416,45 +436,29 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                         LinkedHashMap::new
                 ));
 
-        // 확인용 로그
-        /*for (Map.Entry<String, 요구사항_지라이슈상태_일별_집계> entry : 검색결과.entrySet()) {
-            String date = entry.getKey();
-            요구사항_지라이슈상태_일별_집계 data = entry.getValue();
-
-            System.out.println("Date: " + date);
-            System.out.println("Data: " + data.getStatuses());
-        }*/
-
         return 검색결과;
     }
 
-    private 요구사항_지라이슈상태_일별_집계 일별데이터생성(검색결과 검색_결과) {
+    private 요구사항_지라이슈상태_주별_집계 일별데이터생성(검색결과 검색_결과) {
 
         Map<String, Long> statuses = (검색_결과.get하위검색결과().get("statuses")).stream()
                 .collect(Collectors.toMap(검색결과::get필드명, 검색결과::get개수));
 
-        return new 요구사항_지라이슈상태_일별_집계(statuses);
+        return new 요구사항_지라이슈상태_주별_집계(0, statuses, 0);
     }
 
-    public Map<String, 요구사항_지라이슈상태_주별_집계> 지라이슈_생성개수_및_상태일별_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, String startDate) {
-
-        LocalDate now = LocalDate.now(ZoneId.of("UTC"));
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-        LocalDate 버전_시작일 = LocalDate.parse(startDate, formatter);
+    public Map<String, 요구사항_지라이슈상태_주별_집계> 일자별_이슈_생성개수_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, String startDate) {
 
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink()),
-                        new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks()),
-                        new RangeQueryFilter("updated", 버전_시작일, now, "fromto")
+                        new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks())
                 );
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
 
         CustomAbstractAggregationBuilder dailyAggregationBuilder = new CustomDateHistogramAggregationBuilder("aggregation_by_day")
-                .field("updated")
+                .field("created")
                 .calendarInterval(DateHistogramInterval.DAY)
-                .addSubAggregation(new CustomTermsAggregationBuilder("요구사항여부").field("isReq")
-                        .addSubAggregation(new CustomTermsAggregationBuilder("상태목록").field("status.status_name.keyword").build()).build());
+                .addSubAggregation(new CustomTermsAggregationBuilder("요구사항여부").field("isReq").build());
 
         NativeSearchQueryBuilder nativeSearchQueryBuilder
                 = new NativeSearchQueryBuilder().withQuery(boolQuery).withAggregations(dailyAggregationBuilder.build());
@@ -463,13 +467,6 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         List<검색결과> aggregationByDay = 검색결과_목록_메인.get검색결과().get("aggregation_by_day");
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        String 결과 = "";
-        try {
-            결과 = objectMapper.writeValueAsString(aggregationByDay);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
 
         Map<String, 요구사항_지라이슈상태_주별_집계> 검색결과 = aggregationByDay.stream()
                 .sorted(Comparator.comparing(bucket -> OffsetDateTime.parse(bucket.get필드명()).toLocalDate()))
@@ -495,10 +492,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
             totalIssue = isReqTerms.getOrDefault("false", 0L);
         }
 
-        Map<String, Long> statuses = 결과.get하위검색결과().get("요구사항여부").stream()
-                .flatMap(term -> term.get하위검색결과().get("상태목록").stream())
-                .collect(Collectors.toMap(검색결과::get필드명, 검색결과::get개수, Long::sum, LinkedHashMap::new));
-
-        return new 요구사항_지라이슈상태_주별_집계(totalIssue, statuses, totalRequirement);
+        return new 요구사항_지라이슈상태_주별_집계(totalIssue, null, totalRequirement);
     }
+
 }
