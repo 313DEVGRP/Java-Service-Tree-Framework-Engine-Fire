@@ -1,17 +1,20 @@
 package com.arms.api.engine.services;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.arms.api.engine.dtos.트리맵_담당자_요구사항_기여도;
 import com.arms.api.engine.dtos.요구사항_지라이슈상태_일별_집계;
 import com.arms.api.engine.dtos.요구사항_지라이슈상태_주별_집계;
 import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.models.지라이슈_제품_및_제품버전_검색요청;
+import com.arms.elasticsearch.helper.인덱스자료;
 import com.arms.elasticsearch.util.aggregation.CustomAbstractAggregationBuilder;
 import com.arms.elasticsearch.util.aggregation.CustomDateHistogramAggregationBuilder;
 import com.arms.elasticsearch.util.aggregation.CustomTermsAggregationBuilder;
@@ -22,16 +25,24 @@ import com.arms.elasticsearch.util.query.bool.TermQueryMust;
 import com.arms.elasticsearch.util.query.bool.TermsQueryFilter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.*;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.IndexOperations;
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
@@ -50,6 +61,15 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     private 지라이슈_저장소 지라이슈저장소;
+
+    private com.arms.elasticsearch.helper.인덱스_유틸 인덱스_유틸;
+
+    private ObjectMapper objectMapper;
+
+    private ElasticsearchOperations 엘라스틱서치_작업;
+
+    @Autowired
+    private RestHighLevelClient client;
 
     @Override
     public Map<String, Long> 제품서비스별_담당자_이름_통계(Long 지라서버_아이디, Long 제품서비스_아이디) {
@@ -495,4 +515,80 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         return new 요구사항_지라이슈상태_주별_집계(totalIssue, null, totalRequirement);
     }
 
+    public List<지라이슈> 제품서비스_버전목록으로_주간이슈조회(Long pdServiceLink, List<Long> pdServiceVersionLinks, Integer baseWeek){
+        BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
+
+        if (baseWeek < 1) {
+            baseWeek = 1; // 최초 데이터는 오늘 기준 1주일 까지 범위 조회하기 위해 baseWeek를 1처리
+        }
+
+        String from = "now-"+baseWeek+"w/d";
+
+        String to   = "now-"+(baseWeek-1)+"w/d";
+
+        RangeQueryBuilder 오늘기준_주간조회 = QueryBuilders.rangeQuery("created").gte(from).lte(to );
+        복합조회.must(오늘기준_주간조회); // 최신이슈 기준으로
+
+        TermQueryBuilder 제품서비스_조회 = QueryBuilders.termQuery("pdServiceId", pdServiceLink);
+        복합조회.filter(제품서비스_조회);
+
+        TermsQueryBuilder 제품서비스버전_조회 = QueryBuilders.termsQuery("pdServiceVersion", pdServiceVersionLinks);
+        복합조회.must(제품서비스버전_조회); // 최신버전으로
+
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+        sourceBuilder.query(복합조회);
+        sourceBuilder.size(10000);
+
+
+        List<지라이슈> 전체결과 = new ArrayList<>();
+        boolean 인덱스존재시까지  = true;
+
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String 지라인덱스 = 인덱스자료.지라이슈_인덱스명;
+
+        while(인덱스존재시까지) {
+            LocalDate 오늘일경우 = LocalDate.now();
+            String 호출할_지라인덱스 = 오늘일경우.format(formatter).equals(today.format(formatter))
+                    ? 지라인덱스 : 지라인덱스 + "-" + today.format(formatter);
+
+            IndexOperations 인덱스작업 = 엘라스틱서치_작업.indexOps(IndexCoordinates.of(호출할_지라인덱스));
+            if (!인덱스_유틸.인덱스확인(인덱스작업)) {
+                인덱스존재시까지 = false;
+                break;
+            }
+
+            today = today.minusDays(1);
+
+            SearchRequest searchRequest = new SearchRequest(호출할_지라인덱스); //
+            searchRequest.source(sourceBuilder);
+
+            try {
+                SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+                SearchHit[] searchHits = searchResponse.getHits().getHits();
+
+                List<지라이슈> 결과 = Optional.ofNullable(searchHits) // null 검사
+                        .map(Arrays::stream)
+                        .orElseGet(Stream::empty) // null인 경우 빈 스트림 반환
+                        .map(SearchHit::getSourceAsString) // getSourceAsString 메서드를 사용하여 JSON 문자열을 가져옴
+                        .filter(json -> json != null && !json.isEmpty()) // null이 아니고, 내용이 있는 경우만 처리
+                        .map(json -> {
+                            try {
+                                return objectMapper.readValue(json, 지라이슈.class); // JSON 문자열을 원하는 클래스로 변환
+                            } catch (JsonProcessingException e) {
+                                로그.error("지라이슈 파싱 오류 : " + e.getMessage());
+                                return null;
+                            }
+                        })
+                        .collect(Collectors.toList());
+                전체결과.addAll(결과);
+
+            } catch (IOException e) {
+                로그.error("백업인덱스_제품서비스_버전목록으로_조회 오류 : " + e.getMessage());
+                throw new RuntimeException(e);
+            }
+        }
+        return 전체결과;
+
+    }
 }
