@@ -6,6 +6,7 @@ import java.util.Map;
 import com.arms.api.engine.dtos.트리맵_담당자_요구사항_기여도;
 import com.arms.api.engine.dtos.요구사항_지라이슈상태_일별_집계;
 import com.arms.api.engine.dtos.요구사항_지라이슈상태_주별_집계;
+import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.models.지라이슈_제품_및_제품버전_검색요청;
 import com.arms.elasticsearch.util.query.쿼리_추상_팩토리;
 import com.arms.elasticsearch.util.검색결과;
@@ -29,4 +30,6 @@ public interface 지라이슈_대시보드_서비스 {
     Map<String, 요구사항_지라이슈상태_주별_집계> 일자별_지라이슈_생성개수_및_상태_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, String 버전_시작일);
 
     Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항_지라이슈상태_일별_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, String 버전_시작일);
+
+    List<지라이슈> 제품서비스_버전목록으로_주간이슈조회(Long pdServiceLink, List<Long>  pdServiceVersionLinks, Integer baseWeek);
 }
