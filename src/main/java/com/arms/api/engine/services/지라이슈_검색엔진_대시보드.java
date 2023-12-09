@@ -515,79 +515,60 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         return new 요구사항_지라이슈상태_주별_집계(totalIssue, null, totalRequirement);
     }
 
-    public List<지라이슈> 제품서비스_버전목록으로_주간이슈조회(Long pdServiceLink, List<Long> pdServiceVersionLinks, Integer baseWeek){
-        BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
+    public List<지라이슈> 제품서비스_버전목록으로_주간이슈조회(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, Integer baseWeek){
 
         if (baseWeek < 1) {
-            baseWeek = 1; // 최초 데이터는 오늘 기준 1주일 까지 범위 조회하기 위해 baseWeek를 1처리
+            baseWeek = 1;
         }
 
         String from = "now-"+baseWeek+"w/d";
 
         String to   = "now-"+(baseWeek-1)+"w/d";
 
-        RangeQueryBuilder 오늘기준_주간조회 = QueryBuilders.rangeQuery("created").gte(from).lte(to );
-        복합조회.must(오늘기준_주간조회); // 최신이슈 기준으로
+        EsQuery esQuery = new EsQueryBuilder()
+                .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink()),
+                        new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks()),
+                        new RangeQueryFilter("created", from, to, "fromto")
+                );
 
-        TermQueryBuilder 제품서비스_조회 = QueryBuilders.termQuery("pdServiceId", pdServiceLink);
-        복합조회.filter(제품서비스_조회);
-
-        TermsQueryBuilder 제품서비스버전_조회 = QueryBuilders.termsQuery("pdServiceVersion", pdServiceVersionLinks);
-        복합조회.must(제품서비스버전_조회); // 최신버전으로
+        BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
 
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-        sourceBuilder.query(복합조회);
+        sourceBuilder.query(boolQuery);
         sourceBuilder.size(10000);
 
-
         List<지라이슈> 전체결과 = new ArrayList<>();
-        boolean 인덱스존재시까지  = true;
-
-        LocalDate today = LocalDate.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String 지라인덱스 = 인덱스자료.지라이슈_인덱스명;
 
-        while(인덱스존재시까지) {
-            LocalDate 오늘일경우 = LocalDate.now();
-            String 호출할_지라인덱스 = 오늘일경우.format(formatter).equals(today.format(formatter))
-                    ? 지라인덱스 : 지라인덱스 + "-" + today.format(formatter);
+        SearchRequest searchRequest = new SearchRequest(지라인덱스);
+        searchRequest.source(sourceBuilder);
 
-            IndexOperations 인덱스작업 = 엘라스틱서치_작업.indexOps(IndexCoordinates.of(호출할_지라인덱스));
-            if (!인덱스_유틸.인덱스확인(인덱스작업)) {
-                인덱스존재시까지 = false;
-                break;
-            }
+        try {
+            SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+            SearchHit[] searchHits = searchResponse.getHits().getHits();
 
-            today = today.minusDays(1);
+            List<지라이슈> 결과 = Optional.ofNullable(searchHits) // null 검사
+                    .map(Arrays::stream)
+                    .orElseGet(Stream::empty) // null인 경우 빈 스트림 반환
+                    .map(SearchHit::getSourceAsString) // getSourceAsString 메서드를 사용하여 JSON 문자열을 가져옴
+                    .filter(json -> json != null && !json.isEmpty()) // null이 아니고, 내용이 있는 경우만 처리
+                    .map(json -> {
+                        try {
+                            return objectMapper.readValue(json, 지라이슈.class); // JSON 문자열을 원하는 클래스로 변환
+                        } catch (JsonProcessingException e) {
+                            로그.error("지라이슈 파싱 오류 : " + e.getMessage());
+                            return null;
+                        }
+                    })
+                    .collect(Collectors.toList());
+            전체결과.addAll(결과);
 
-            SearchRequest searchRequest = new SearchRequest(호출할_지라인덱스); //
-            searchRequest.source(sourceBuilder);
-
-            try {
-                SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-                SearchHit[] searchHits = searchResponse.getHits().getHits();
-
-                List<지라이슈> 결과 = Optional.ofNullable(searchHits) // null 검사
-                        .map(Arrays::stream)
-                        .orElseGet(Stream::empty) // null인 경우 빈 스트림 반환
-                        .map(SearchHit::getSourceAsString) // getSourceAsString 메서드를 사용하여 JSON 문자열을 가져옴
-                        .filter(json -> json != null && !json.isEmpty()) // null이 아니고, 내용이 있는 경우만 처리
-                        .map(json -> {
-                            try {
-                                return objectMapper.readValue(json, 지라이슈.class); // JSON 문자열을 원하는 클래스로 변환
-                            } catch (JsonProcessingException e) {
-                                로그.error("지라이슈 파싱 오류 : " + e.getMessage());
-                                return null;
-                            }
-                        })
-                        .collect(Collectors.toList());
-                전체결과.addAll(결과);
-
-            } catch (IOException e) {
-                로그.error("백업인덱스_제품서비스_버전목록으로_조회 오류 : " + e.getMessage());
-                throw new RuntimeException(e);
-            }
+        } catch (IOException e) {
+            로그.error("제품서비스_버전목록으로_조회 오류 : " + e.getMessage());
+            throw new RuntimeException(e);
         }
+
+
         return 전체결과;
 
     }
