@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.arms.api.engine.dtos.트리맵_담당자_요구사항_기여도;
-import com.arms.api.engine.dtos.요구사항_지라이슈상태_일별_집계;
+import com.arms.api.engine.dtos.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.api.engine.dtos.요구사항_지라이슈상태_주별_집계;
 import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.models.지라이슈_제품_및_제품버전_검색요청;
@@ -30,6 +30,8 @@ public interface 지라이슈_대시보드_서비스 {
     Map<String, 요구사항_지라이슈상태_주별_집계> 일자별_지라이슈_생성개수_및_상태_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, String 버전_시작일);
 
     Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항_지라이슈상태_일별_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, String 버전_시작일);
+
+    Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> 일자별_이슈_생성개수_및_상태현황_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, String startDate);
 
     List<지라이슈> 제품서비스_버전목록으로_주간_업데이트된_이슈조회(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, Integer baseWeek);
 }

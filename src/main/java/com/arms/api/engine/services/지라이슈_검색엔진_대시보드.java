@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.arms.api.engine.dtos.트리맵_담당자_요구사항_기여도;
-import com.arms.api.engine.dtos.요구사항_지라이슈상태_일별_집계;
+import com.arms.api.engine.dtos.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.api.engine.dtos.요구사항_지라이슈상태_주별_집계;
 import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.models.지라이슈_제품_및_제품버전_검색요청;
@@ -41,8 +41,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.IndexOperations;
-import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
@@ -513,6 +511,64 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         }
 
         return new 요구사항_지라이슈상태_주별_집계(totalIssue, null, totalRequirement);
+    }
+
+    @Override
+    public Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> 일자별_이슈_생성개수_및_상태현황_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, String startDate) {
+
+        EsQuery esQuery = new EsQueryBuilder()
+                .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink()),
+                        new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks())
+                );
+        BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
+
+        CustomAbstractAggregationBuilder dailyAggregationBuilder = new CustomDateHistogramAggregationBuilder("aggregation_by_day")
+                .field("created")
+                .calendarInterval(DateHistogramInterval.DAY)
+                .addSubAggregation(new CustomTermsAggregationBuilder("요구사항여부").field("isReq")
+                        .addSubAggregation(new CustomTermsAggregationBuilder("상태목록").field("status.status_name.keyword").build()).build());
+
+        NativeSearchQueryBuilder nativeSearchQueryBuilder
+                = new NativeSearchQueryBuilder().withQuery(boolQuery).withAggregations(dailyAggregationBuilder.build());
+
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
+
+        List<검색결과> aggregationByDay = 검색결과_목록_메인.get검색결과().get("aggregation_by_day");
+
+        Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> 검색결과 = aggregationByDay.stream()
+                .sorted(Comparator.comparing(bucket -> OffsetDateTime.parse(bucket.get필드명()).toLocalDate()))
+                .collect(Collectors.toMap(
+                        entry -> transformDate(entry.get필드명()),
+                        this::일별_생성개수_및_상태_데이터생성,
+                        (existingValue, newValue) -> existingValue,
+                        LinkedHashMap::new
+                ));
+
+        return 검색결과;
+    }
+
+    private 일자별_요구사항_연결된이슈_생성개수_및_상태데이터 일별_생성개수_및_상태_데이터생성(검색결과 결과) {
+        Map<String, Long> 요구사항여부결과 = new HashMap<>();
+        Map<String, Map<String, Long>> 상태목록결과 = new HashMap<>();
+
+        결과.get하위검색결과().get("요구사항여부").forEach(term -> {
+            String 필드명 = term.get필드명();
+            Long 개수 = term.get개수();
+
+            요구사항여부결과.put(필드명, 개수);
+
+            Map<String, Long> status = term.get하위검색결과().get("상태목록").stream()
+                    .collect(Collectors.toMap(검색결과::get필드명, 검색결과::get개수, Long::sum));
+            상태목록결과.put(필드명, status);
+        });
+
+        long 요구사항_개수 = 요구사항여부결과.getOrDefault("true", 0L);
+        long 연결된이슈_개수 = 요구사항여부결과.getOrDefault("false", 0L);
+
+        Map<String, Long> 요구사항_상태목록 = 상태목록결과.getOrDefault("true", null);
+        Map<String, Long> 연결된이슈_상태목록 = 상태목록결과.getOrDefault("false", null);
+
+        return new 일자별_요구사항_연결된이슈_생성개수_및_상태데이터(요구사항_개수 , 요구사항_상태목록, 연결된이슈_개수, 연결된이슈_상태목록);
     }
 
     public List<지라이슈> 제품서비스_버전목록으로_주간_업데이트된_이슈조회(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, Integer baseWeek){

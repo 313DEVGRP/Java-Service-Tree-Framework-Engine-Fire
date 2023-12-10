@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 
 import com.arms.api.engine.dtos.트리맵_담당자_요구사항_기여도;
 import com.arms.api.engine.models.*;
-import com.arms.api.engine.dtos.요구사항_지라이슈상태_일별_집계;
+import com.arms.api.engine.dtos.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.elasticsearch.util.query.*;
 import com.arms.elasticsearch.util.query.bool.EsBoolQuery;
 import com.arms.elasticsearch.util.검색결과;
@@ -209,10 +209,10 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
 
     @ResponseBody
     @GetMapping("/daily-requirements-count/jira-issue-statuses")
-    public ResponseEntity<Map<String, 요구사항_지라이슈상태_주별_집계>> 일자별_지라이슈_생성개수_및_상태_집계(
+    public ResponseEntity<Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터>> 일자별_지라이슈_생성개수_및_상태_집계(
             지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
             String startDate) {
-        return ResponseEntity.ok(지라이슈_검색엔진.일자별_지라이슈_생성개수_및_상태_집계(지라이슈_제품_및_제품버전_검색요청, startDate));
+        return ResponseEntity.ok(지라이슈_검색엔진.일자별_이슈_생성개수_및_상태현황_집계(지라이슈_제품_및_제품버전_검색요청, startDate));
     }
 
     @ResponseBody
