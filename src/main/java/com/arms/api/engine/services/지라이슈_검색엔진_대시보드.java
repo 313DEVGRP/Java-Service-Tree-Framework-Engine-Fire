@@ -515,7 +515,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         return new 요구사항_지라이슈상태_주별_집계(totalIssue, null, totalRequirement);
     }
 
-    public List<지라이슈> 제품서비스_버전목록으로_주간이슈조회(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, Integer baseWeek){
+    public List<지라이슈> 제품서비스_버전목록으로_주간_업데이트된_이슈조회(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, Integer baseWeek){
 
         if (baseWeek < 1) {
             baseWeek = 1;
@@ -528,7 +528,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink()),
                         new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks()),
-                        new RangeQueryFilter("created", from, to, "fromto")
+                        new RangeQueryFilter("updated", from, to, "fromto")
                 );
 
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
