@@ -766,7 +766,10 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
             returnObject.put(표시날짜, new 히트맵날짜데이터());
         }
 
-        returnObject.get(표시날짜).getItems().add(item.getSummary());
+        히트맵날짜데이터 히트맵날짜데이터 = returnObject.get(표시날짜);
+        히트맵날짜데이터.getContents().add(item.getSummary());
+        히트맵날짜데이터.setCount(returnObject.get(표시날짜).getContents().size());
+        히트맵날짜데이터.setItems(Collections.singleton(히트맵날짜데이터.getCount() + "개 업데이트"));
         returnColors.add(item.getSummary());
     }
 
