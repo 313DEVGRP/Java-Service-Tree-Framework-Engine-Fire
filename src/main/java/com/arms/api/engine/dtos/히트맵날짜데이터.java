@@ -14,5 +14,6 @@ import java.util.Set;
 @AllArgsConstructor
 public class 히트맵날짜데이터 {
     private Set<String> items = new HashSet<>();
-
+    private Set<String> contents = new HashSet<>();
+    private int count = 0;
 }
