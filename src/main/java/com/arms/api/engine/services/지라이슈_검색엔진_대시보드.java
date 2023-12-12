@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import com.arms.api.engine.dtos.트리맵_담당자_요구사항_기여도;
 import com.arms.api.engine.dtos.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.api.engine.dtos.요구사항_지라이슈상태_주별_집계;
+import com.arms.api.engine.models.IsReqType;
 import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.models.지라이슈_일자별_제품_및_제품버전_검색요청;
 import com.arms.api.engine.models.지라이슈_제품_및_제품버전_검색요청;
@@ -37,6 +38,7 @@ import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -399,19 +401,25 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 .format(offsetDateTime);
     }
 
-    public List<지라이슈> 제품서비스_버전목록으로_주간_업데이트된_이슈조회(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, Integer baseWeek) {
-
+    public List<지라이슈> 제품서비스_버전목록으로_주간_업데이트된_이슈조회(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, Integer baseWeek, String sortField) {
         if (baseWeek < 1) {
             baseWeek = 1;
         }
 
         String from = "now-" + baseWeek + "w/d";
-
         String to = "now-" + (baseWeek - 1) + "w/d";
+
+        Boolean isReq = Optional.ofNullable(지라이슈_제품_및_제품버전_검색요청.getIsReqType())
+                .map(IsReqType::name)
+                .map(name -> name.equals(IsReqType.ISSUE.name()) ? Boolean.TRUE
+                        : name.equals(IsReqType.REQUIREMENT.name()) ? Boolean.FALSE
+                        : null)
+                .orElse(null);
 
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink()),
                         new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks()),
+                        new TermQueryMust("isReq", isReq),
                         new RangeQueryFilter("updated", from, to, "fromto")
                 );
 
@@ -419,6 +427,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
         sourceBuilder.query(boolQuery);
+        sourceBuilder.sort(sortField, SortOrder.ASC);
         sourceBuilder.size(10000);
 
         List<지라이슈> 전체결과 = new ArrayList<>();

@@ -210,9 +210,10 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     @ResponseBody
     @GetMapping("/weekly-updated-issue-search")
     public List<지라이슈> 제품서비스_버전목록으로_주간_업데이트된_이슈조회(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
-                                          @RequestParam Integer baseWeek){
+                                                 @RequestParam Integer baseWeek,
+                                                 @RequestParam String sortField){
 
-        return 지라이슈_검색엔진.제품서비스_버전목록으로_주간_업데이트된_이슈조회(지라이슈_제품_및_제품버전_검색요청,baseWeek);
+        return 지라이슈_검색엔진.제품서비스_버전목록으로_주간_업데이트된_이슈조회(지라이슈_제품_및_제품버전_검색요청, baseWeek, sortField);
     }
 
     @ResponseBody
