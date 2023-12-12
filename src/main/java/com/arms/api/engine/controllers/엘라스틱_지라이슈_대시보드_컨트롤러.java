@@ -208,6 +208,26 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     }
 
     @ResponseBody
+    @GetMapping("/weekly-updated-issue-search")
+    public List<지라이슈> 제품서비스_버전목록으로_주간_업데이트된_이슈조회(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
+                                          @RequestParam Integer baseWeek){
+
+        return 지라이슈_검색엔진.제품서비스_버전목록으로_주간_업데이트된_이슈조회(지라이슈_제품_및_제품버전_검색요청,baseWeek);
+    }
+
+    @ResponseBody
+    @GetMapping("/standard-daily/jira-issue")
+    public ResponseEntity<Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터>>
+                    기준일자별_제품_및_제품버전목록_요구사항_및_연결된이슈_집계(
+                            지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청){
+
+        return ResponseEntity.ok(지라이슈_검색엔진.지라이슈_기준일자별_제품_및_제품버전_집계검색(지라이슈_일자별_제품_및_제품버전_검색요청));
+    }
+
+    /* *****
+    * 삭제 예정
+    ***** */
+    @ResponseBody
     @GetMapping("/daily-requirements-count/jira-issue-statuses")
     public ResponseEntity<Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터>> 일자별_지라이슈_생성개수_및_상태_집계(
             지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
@@ -215,6 +235,9 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         return ResponseEntity.ok(지라이슈_검색엔진.일자별_이슈_생성개수_및_상태현황_집계(지라이슈_제품_및_제품버전_검색요청, startDate));
     }
 
+    /* *****
+     * 삭제 예정
+     ***** */
     @ResponseBody
     @GetMapping("/daily-requirements-jira-issue-statuses")
     public ResponseEntity<Map<String, 요구사항_지라이슈상태_주별_집계>> 요구사항이슈_일별_집계(
@@ -223,11 +246,4 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         return ResponseEntity.ok(지라이슈_검색엔진.요구사항_지라이슈상태_일별_집계(지라이슈_제품_및_제품버전_검색요청, startDate));
     }
 
-    @ResponseBody
-    @GetMapping("/weekly-updated-issue-search")
-    public List<지라이슈> 제품서비스_버전목록으로_주간_업데이트된_이슈조회(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
-                                          @RequestParam Integer baseWeek){
-
-        return 지라이슈_검색엔진.제품서비스_버전목록으로_주간_업데이트된_이슈조회(지라이슈_제품_및_제품버전_검색요청,baseWeek);
-    }
 }
