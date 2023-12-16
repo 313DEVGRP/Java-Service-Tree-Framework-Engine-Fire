@@ -469,11 +469,11 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     @Override
     public Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> 지라이슈_기준일자별_제품_및_제품버전_집계검색(지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청) {
 
-         int 날짜크기 = 지라이슈_일자별_제품_및_제품버전_검색요청.get날짜크기();
-         int 날짜페이지 = 지라이슈_일자별_제품_및_제품버전_검색요청.get날짜페이지();
+         String 시작일 = 지라이슈_일자별_제품_및_제품버전_검색요청.get시작일();
+         String 종료일 = 지라이슈_일자별_제품_및_제품버전_검색요청.get종료일();
 
-         String from = "now-" + (날짜페이지 * 날짜크기) + "d";
-         String to = "now-" + ((날짜페이지 - 1) * 날짜크기) + "d";
+         String from = 시작일;
+         String to = 종료일;
 
          EsQuery esQuery = new EsQueryBuilder()
                  .bool(new TermQueryMust("pdServiceId", 지라이슈_일자별_제품_및_제품버전_검색요청.getPdServiceLink()),
