@@ -3,13 +3,14 @@ package com.arms.api.engine.controllers;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.arms.api.engine.dtos.트리맵_담당자_요구사항_기여도;
 import com.arms.api.engine.models.*;
 import com.arms.api.engine.dtos.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.elasticsearch.util.query.*;
-import com.arms.elasticsearch.util.query.bool.EsBoolQuery;
+import com.arms.elasticsearch.util.query.bool.*;
 import com.arms.elasticsearch.util.검색결과;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.arms.api.engine.dtos.요구사항_지라이슈상태_주별_집계;
 import com.arms.api.engine.services.지라이슈_대시보드_서비스;
-import com.arms.elasticsearch.util.query.bool.TermQueryMust;
-import com.arms.elasticsearch.util.query.bool.TermsQueryFilter;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
 
 import lombok.extern.slf4j.Slf4j;
@@ -225,4 +224,27 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         return ResponseEntity.ok(지라이슈_검색엔진.지라이슈_기준일자별_제품_및_제품버전_집계검색(지라이슈_일자별_제품_및_제품버전_검색요청));
     }
 
+    @ResponseBody
+    @GetMapping("/normal-version/resolution")
+    public ResponseEntity<검색결과_목록_메인> 일반_버전필터_해결책유무_검색(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
+                                                 @RequestParam(required = false) String resolution) {
+
+        Boolean isReq = Optional.ofNullable(지라이슈_제품_및_제품버전_검색요청.getIsReqType())
+                .map(IsReqType::name)
+                .map(name -> name.equals(IsReqType.REQUIREMENT.name()) ? Boolean.TRUE
+                        : name.equals(IsReqType.ISSUE.name()) ? Boolean.FALSE
+                        : null)
+                .orElse(null);
+
+        EsQuery esQuery
+                = new EsQueryBuilder()
+                .bool(
+                        new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink())
+                        , new TermQueryMust("isReq", isReq)
+                        , new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks())
+                        , new ExistsQueryFilter(resolution)
+                );
+
+        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(지라이슈_제품_및_제품버전_검색요청, esQuery)));
+    }
 }
