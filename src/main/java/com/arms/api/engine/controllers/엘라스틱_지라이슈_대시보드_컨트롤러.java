@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import com.arms.api.engine.dtos.요구사항_별_상태_및_유일_작업자_수;
 import com.arms.api.engine.dtos.트리맵_담당자_요구사항_기여도;
 import com.arms.api.engine.models.*;
 import com.arms.api.engine.dtos.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
@@ -180,6 +181,14 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
             지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
     ) {
         return ResponseEntity.ok(지라이슈_검색엔진.작업자_별_요구사항_별_관여도(지라이슈_제품_및_제품버전_검색요청));
+    }
+
+    @ResponseBody
+    @GetMapping("/req-status-and-reqInvolved-unique-assignees")
+    public ResponseEntity<List<요구사항_별_상태_및_유일_작업자_수>> 요구사항_별_상태_및_관여_작업자_수(
+            지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
+
+        return ResponseEntity.ok(지라이슈_검색엔진.요구사항_별_상태_및_관여_작업자_수(지라이슈_제품_및_제품버전_검색요청));
     }
 
     @ResponseBody

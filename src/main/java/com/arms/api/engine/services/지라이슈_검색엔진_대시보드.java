@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.arms.api.engine.dtos.요구사항_별_상태_및_유일_작업자_수;
 import com.arms.api.engine.dtos.트리맵_담당자_요구사항_기여도;
 import com.arms.api.engine.dtos.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.api.engine.dtos.요구사항_지라이슈상태_주별_집계;
@@ -27,6 +28,8 @@ import com.arms.elasticsearch.util.query.bool.TermQueryMust;
 import com.arms.elasticsearch.util.query.bool.TermsQueryFilter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -203,6 +206,37 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
     }
 
+    @Override
+    public List<요구사항_별_상태_및_유일_작업자_수> 요구사항_별_상태_및_관여_작업자_수(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
+        로그.info("[ 지라이슈_검색엔진_대시보드 :: 요구사항_별_상태_및_관여_작업자_수 ] :: pdServiceLink => {}, pdServiceVersionLinks => {} ",
+                지라이슈_제품_및_제품버전_검색요청.getPdServiceLink(), 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks().toString());
+
+        List<지라이슈> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionIn(true,
+                지라이슈_제품_및_제품버전_검색요청.getPdServiceLink(), 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks());
+        List<String> allReqKeys = requirementIssues.stream().map(지라이슈::getKey).collect(Collectors.toList());
+        List<지라이슈> allSubTasks = 지라이슈저장소.findByParentReqKeyIn(allReqKeys);
+        List<요구사항_별_상태_및_유일_작업자_수> resultList = new ArrayList<>();
+
+        requirementIssues.forEach(issue -> {
+            요구사항_별_상태_및_유일_작업자_수 요구사항_별_상태_및_유일_작업자_수 = new 요구사항_별_상태_및_유일_작업자_수();
+            요구사항_별_상태_및_유일_작업자_수.setKey(issue.getKey());
+            요구사항_별_상태_및_유일_작업자_수.setSummary(issue.getSummary());
+            요구사항_별_상태_및_유일_작업자_수.setStatus(issue.getStatus().getName());
+            Set assigneeEmail = new HashSet();
+            if(ObjectUtils.isNotEmpty(issue.getAssignee())) {
+                assigneeEmail.add(issue.getAssignee().getEmailAddress());
+                for(지라이슈 이슈 : allSubTasks) {
+                    if(StringUtils.equals(issue.getKey(),이슈.getParentReqKey())) {
+                        assigneeEmail.add(이슈.getAssignee().getEmailAddress());
+                    }
+                }
+                요구사항_별_상태_및_유일_작업자_수.setUniqueAssignees(assigneeEmail.size());
+                resultList.add(요구사항_별_상태_및_유일_작업자_수);
+            }
+        });
+
+        return resultList;
+    }
 
     @Override
     public List<트리맵_담당자_요구사항_기여도> 작업자_별_요구사항_별_관여도(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
