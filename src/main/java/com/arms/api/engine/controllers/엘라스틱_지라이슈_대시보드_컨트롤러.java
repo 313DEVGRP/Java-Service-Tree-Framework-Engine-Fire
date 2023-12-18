@@ -234,6 +234,16 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     }
 
     @ResponseBody
+    @GetMapping("/standard-daily/updated-jira-issue")
+    public ResponseEntity<List<지라이슈>>
+    기준일자별_제품_및_제품버전목록_업데이트된_이슈조회(
+            지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청,
+            @RequestParam String sortField){
+
+        return ResponseEntity.ok(지라이슈_검색엔진.지라이슈_기준일자별_제품_및_제품버전_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청,sortField));
+    }
+
+    @ResponseBody
     @GetMapping("/normal-version/resolution")
     public ResponseEntity<검색결과_목록_메인> 일반_버전필터_해결책유무_검색(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
                                                  @RequestParam(required = false) String resolution) {
