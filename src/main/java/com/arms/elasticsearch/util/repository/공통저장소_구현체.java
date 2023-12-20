@@ -54,13 +54,6 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
             return null;
         }
 
-        인덱스_유틸 인덱스_유틸 = new 인덱스_유틸(operations);
-
-        if(!인덱스_유틸.인덱스_존재_확인(newIndex)) {
-            log.error("Failed to " + newIndex+ "index is empty");
-            return null;
-        }
-
         SearchHits<T> search = operations.search(query, entityClass, IndexCoordinates.of(newIndex));
         System.out.println(search);
         return new 검색결과_목록_메인(operations.search(query,entityClass, IndexCoordinates.of(newIndex)));
@@ -102,12 +95,6 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
             return Collections.emptyList();
         }
 
-        인덱스_유틸 인덱스_유틸 = new 인덱스_유틸(operations);
-
-        if(!인덱스_유틸.인덱스_존재_확인(newIndex)) {
-            log.error("Failed to " + newIndex+ "index is empty");
-            return Collections.emptyList();
-        }
         try {
             return operations.search(query, entityClass, IndexCoordinates.of(newIndex)).stream()
                     .map(a->a.getContent()).collect(Collectors.toList());
