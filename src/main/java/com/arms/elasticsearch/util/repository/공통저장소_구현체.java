@@ -1,7 +1,10 @@
 package com.arms.elasticsearch.util.repository;
 
+import com.arms.elasticsearch.helper.인덱스_유틸;
+import com.arms.elasticsearch.util.검색결과_목록_메인;
+import com.arms.elasticsearch.util.검색엔진_유틸;
+import com.arms.elasticsearch.util.검색조건;
 import lombok.extern.slf4j.Slf4j;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -21,10 +24,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.arms.elasticsearch.util.검색결과_목록_메인;
-import com.arms.elasticsearch.util.검색엔진_유틸;
-import com.arms.elasticsearch.util.검색조건;
 
 @Slf4j
 public class 공통저장소_구현체<T,ID extends Serializable> extends SimpleElasticsearchRepository<T,ID> implements 공통저장소<T,ID> {
@@ -48,6 +47,25 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         return new 검색결과_목록_메인(operations.search(query,entityClass));
     }
 
+    @Override
+    public 검색결과_목록_메인 aggregationSearch(Query query, String newIndex) {
+        if(newIndex == null || newIndex.isEmpty()) {
+            log.error("Failed to parameter newIndex is empty");
+            return null;
+        }
+
+        인덱스_유틸 인덱스_유틸 = new 인덱스_유틸(operations);
+
+        if(!인덱스_유틸.인덱스_존재_확인(newIndex)) {
+            log.error("Failed to " + newIndex+ "index is empty");
+            return null;
+        }
+
+        SearchHits<T> search = operations.search(query, entityClass, IndexCoordinates.of(newIndex));
+        System.out.println(search);
+        return new 검색결과_목록_메인(operations.search(query,entityClass, IndexCoordinates.of(newIndex)));
+    }
+
     public List<IndexedObjectInformation> bulkIndex(List<IndexQuery> indexQueryList){
         Document document = AnnotationUtils.findAnnotation(entityClass, Document.class);
 
@@ -66,6 +84,32 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         }
         try {
             return operations.search(query, entityClass).stream()
+                    .map(a->a.getContent()).collect(Collectors.toList());
+
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return Collections.emptyList();
+        }
+    }
+
+    public List<T> normalSearch(Query query, String newIndex) {
+        if (query == null) {
+            log.error("Failed to build search request");
+            return Collections.emptyList();
+        }
+        if(newIndex == null || newIndex.isEmpty()) {
+            log.error("Failed to index is empty");
+            return Collections.emptyList();
+        }
+
+        인덱스_유틸 인덱스_유틸 = new 인덱스_유틸(operations);
+
+        if(!인덱스_유틸.인덱스_존재_확인(newIndex)) {
+            log.error("Failed to " + newIndex+ "index is empty");
+            return Collections.emptyList();
+        }
+        try {
+            return operations.search(query, entityClass, IndexCoordinates.of(newIndex)).stream()
                     .map(a->a.getContent()).collect(Collectors.toList());
 
         } catch (Exception e) {
