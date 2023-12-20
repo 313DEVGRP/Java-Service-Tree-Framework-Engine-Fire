@@ -19,9 +19,13 @@ public interface 공통저장소<T,ID extends Serializable> extends Elasticsearc
 
 	검색결과_목록_메인 aggregationSearch(Query query) ;
 
+	검색결과_목록_메인 aggregationSearch(Query query, String newIndex) ;
+
     List<IndexedObjectInformation> bulkIndex(List<IndexQuery> indexQueryList);
 
     List<T> normalSearch(Query query);
+
+	List<T> normalSearch(Query query, String newIndex);
 
 	List<T>  getAllCreatedSince(Date date, Class<T> clazz);
 

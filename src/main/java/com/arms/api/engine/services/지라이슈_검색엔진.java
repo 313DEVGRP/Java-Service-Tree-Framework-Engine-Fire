@@ -11,27 +11,27 @@ import com.arms.api.jira.jiraissue.service.지라이슈_전략_호출;
 import com.arms.api.jira.jiraissuestatus.model.지라이슈상태_데이터;
 import com.arms.elasticsearch.helper.인덱스_유틸;
 import com.arms.elasticsearch.helper.인덱스자료;
+import com.arms.elasticsearch.util.query.EsQuery;
+import com.arms.elasticsearch.util.query.EsQueryBuilder;
+import com.arms.elasticsearch.util.query.bool.TermQueryMust;
+import com.arms.elasticsearch.util.query.bool.TermsQueryFilter;
 import com.arms.elasticsearch.util.검색결과;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
 import com.arms.elasticsearch.util.검색엔진_유틸;
 import com.arms.elasticsearch.util.검색조건;
 import com.arms.errors.codes.에러코드;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.*;
-import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
@@ -52,8 +52,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -68,14 +66,10 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
     private 지라이슈_전략_호출 지라이슈_전략_호출;
 
-    private 인덱스_유틸 인덱스_유틸;
-
-    private ObjectMapper objectMapper;
-
     private ElasticsearchOperations 엘라스틱서치_작업;
 
     @Autowired
-    private RestHighLevelClient client;
+    private 인덱스_유틸 인덱스_유틸;
 
     @Override
     public 지라이슈 이슈_추가하기(지라이슈 지라이슈) {
@@ -637,7 +631,6 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
             복합조회.must(담당자_조회);
         }
 
-
         NativeSearchQueryBuilder aggregationQuery = new NativeSearchQueryBuilder();
 
         aggregationQuery.withQuery(복합조회)
@@ -675,17 +668,17 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     @Override
     public 히트맵데이터 히트맵_제품서비스_버전목록으로_조회(Long pdServiceLink, List<Long> pdServiceVersionLinks) {
 
-        BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
+        EsQuery esQuery = new EsQueryBuilder()
+                .bool(new TermQueryMust("pdServiceId", pdServiceLink),
+                        new TermsQueryFilter("pdServiceVersion", pdServiceVersionLinks)
+                );
+        BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
+        });
 
-        TermQueryBuilder 제품서비스_조회 = QueryBuilders.termQuery("pdServiceId", pdServiceLink);
-        복합조회.must(제품서비스_조회);
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+                        .withQuery(boolQuery)
+                        .withPageable(PageRequest.of(0, 10000));
 
-        TermsQueryBuilder 제품서비스버전_조회 = QueryBuilders.termsQuery("pdServiceVersion", pdServiceVersionLinks);
-        복합조회.filter(제품서비스버전_조회);
-
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-        sourceBuilder.query(복합조회);
-        sourceBuilder.size(10000);
         List<지라이슈> 전체결과 = new ArrayList<>();
         boolean 인덱스존재시까지  = true;
 
@@ -706,33 +699,10 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
             today = today.minusDays(1);
 
+            List<지라이슈> 결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 호출할_지라인덱스);
 
-            SearchRequest searchRequest = new SearchRequest(호출할_지라인덱스); // 인덱스 이름을 동적으로 설정할 수 있습니다.
-            searchRequest.source(sourceBuilder);
-
-            try {
-                SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-                SearchHit[] searchHits = searchResponse.getHits().getHits();
-
-                List<지라이슈> 결과 = Optional.ofNullable(searchHits) // null 검사
-                        .map(Arrays::stream)
-                        .orElseGet(Stream::empty) // null인 경우 빈 스트림 반환
-                        .map(SearchHit::getSourceAsString) // getSourceAsString 메서드를 사용하여 JSON 문자열을 가져옴
-                        .filter(json -> json != null && !json.isEmpty()) // null이 아니고, 내용이 있는 경우만 처리
-                        .map(json -> {
-                            try {
-                                return objectMapper.readValue(json, 지라이슈.class); // JSON 문자열을 원하는 클래스로 변환
-                            } catch (JsonProcessingException e) {
-                                로그.error("지라이슈 파싱 오류 : " + e.getMessage());
-                                return null;
-                            }
-                        })
-                        .collect(Collectors.toList());
+            if (결과 != null && 결과.size() > 0) {
                 전체결과.addAll(결과);
-
-            } catch (IOException e) {
-                로그.error("백업인덱스_제품서비스_버전목록으로_조회 오류 : " + e.getMessage());
-                throw new RuntimeException(e);
             }
         }
 

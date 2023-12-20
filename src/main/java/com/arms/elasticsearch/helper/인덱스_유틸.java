@@ -165,7 +165,7 @@ public class 인덱스_유틸 {
         return false;
     }
 
-    private boolean 인덱스_존재_확인(String 인덱스명) {
+    public boolean 인덱스_존재_확인(String 인덱스명) {
         IndexOperations 인덱스작업 = 엘라스틱서치_작업.indexOps(IndexCoordinates.of(인덱스명));
         return 인덱스작업.exists();
     }
