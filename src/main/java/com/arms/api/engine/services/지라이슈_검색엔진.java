@@ -203,6 +203,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         String 백업_지라이슈인덱스 = 현재_지라이슈인덱스 + "-" + currentDate;
 
         boolean 인덱스백업 = 인덱스_유틸.리인덱스(현재_지라이슈인덱스, 백업_지라이슈인덱스);
+
         if (!인덱스백업) {
             로그.error("Failed to reindex!");
             return false;
@@ -228,7 +229,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     @Override
     public int 이슈_링크드이슈_서브테스크_벌크로_추가하기(Long 지라서버_아이디, String 이슈_키 , Long 제품서비스_아이디, Long 제품서비스_버전) throws Exception {
 
-        boolean 인덱스확인 = 인덱스_유틸.인덱스확인_및_생성_매핑(지라이슈.class);
+        boolean 인덱스확인 = 인덱스_유틸.인덱스확인_및_생성_매핑(인덱스자료.지라이슈_인덱스명);
 
         if (!인덱스확인) {
             로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 인덱스 확인 Error " + 에러코드.지라이슈_인덱스_NULL_오류.getErrorMsg());
@@ -691,8 +692,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
             String 호출할_지라인덱스 = 오늘일경우.format(formatter).equals(today.format(formatter))
                                             ? 지라인덱스 : 지라인덱스 + "-" + today.format(formatter);
 
-            IndexOperations 인덱스작업 = 엘라스틱서치_작업.indexOps(IndexCoordinates.of(호출할_지라인덱스));
-            if (!인덱스_유틸.인덱스확인(인덱스작업)) {
+            if (!인덱스_유틸.인덱스_존재_확인(호출할_지라인덱스)) {
                 인덱스존재시까지 = false;
                 break;
             }
