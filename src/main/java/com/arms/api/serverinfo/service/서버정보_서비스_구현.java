@@ -3,6 +3,7 @@ package com.arms.api.serverinfo.service;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.model.서버정보_엔티티;
 import com.arms.elasticsearch.helper.인덱스_유틸;
+import com.arms.elasticsearch.helper.인덱스자료;
 import com.arms.errors.codes.에러코드;
 
 import lombok.AllArgsConstructor;
@@ -81,7 +82,7 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
     @Override
     public Iterable<서버정보_엔티티> 서버정보백업_스케줄러() {
 
-        boolean 인덱스확인 = 인덱스_유틸.인덱스확인_및_생성_매핑(서버정보_엔티티.class);
+        boolean 인덱스확인 = 인덱스_유틸.인덱스확인_및_생성_매핑(인덱스자료.서버정보_인덱스명);
 
         if (!인덱스확인) {
             throw new IllegalArgumentException(에러코드.서버인덱스_NULL_오류.getErrorMsg());
