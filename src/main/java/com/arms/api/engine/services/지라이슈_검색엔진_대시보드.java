@@ -41,6 +41,7 @@ import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -576,44 +577,14 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 );
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
         });
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-        sourceBuilder.query(boolQuery);
-        sourceBuilder.sort(sortField, SortOrder.ASC);
-        sourceBuilder.size(10000);
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+                .withQuery(boolQuery)
+                .withSort(SortBuilders.fieldSort(sortField).order(SortOrder.ASC))
+                .withMaxResults(10000);
 
-        List<지라이슈> 전체결과 = new ArrayList<>();
-        String 지라인덱스 = 인덱스자료.지라이슈_인덱스명;
-
-        SearchRequest searchRequest = new SearchRequest(지라인덱스);
-        searchRequest.source(sourceBuilder);
-
-        try {
-            SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-            SearchHit[] searchHits = searchResponse.getHits().getHits();
-
-            List<지라이슈> 결과 = Optional.ofNullable(searchHits) // null 검사
-                    .map(Arrays::stream)
-                    .orElseGet(Stream::empty) // null인 경우 빈 스트림 반환
-                    .map(SearchHit::getSourceAsString) // getSourceAsString 메서드를 사용하여 JSON 문자열을 가져옴
-                    .filter(json -> json != null && !json.isEmpty()) // null이 아니고, 내용이 있는 경우만 처리
-                    .map(json -> {
-                        try {
-                            return objectMapper.readValue(json, 지라이슈.class); // JSON 문자열을 원하는 클래스로 변환
-                        } catch (JsonProcessingException e) {
-                            로그.error("지라이슈 파싱 오류 : " + e.getMessage());
-                            return null;
-                        }
-                    })
-                    .collect(Collectors.toList());
-            전체결과.addAll(결과);
-
-        } catch (IOException e) {
-            로그.error("제품서비스_버전목록으로_조회 오류 : " + e.getMessage());
-            throw new RuntimeException(e);
-        }
+        List<지라이슈> 전체결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build());
         return 전체결과;
     }
-
     private 일자별_요구사항_연결된이슈_생성개수_및_상태데이터 일별_생성개수_및_상태_데이터생성(검색결과 결과) {
         Map<String, Long> 요구사항여부결과 = new HashMap<>();
         Map<String, Map<String, Long>> 상태목록결과 = new HashMap<>();
