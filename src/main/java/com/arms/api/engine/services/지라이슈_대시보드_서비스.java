@@ -3,8 +3,8 @@ package com.arms.api.engine.services;
 import java.util.List;
 import java.util.Map;
 
+import com.arms.api.engine.dtos.Worker;
 import com.arms.api.engine.dtos.요구사항_별_상태_및_유일_작업자_수;
-import com.arms.api.engine.dtos.트리맵_담당자_요구사항_기여도;
 import com.arms.api.engine.dtos.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.api.engine.dtos.요구사항_지라이슈상태_주별_집계;
 import com.arms.api.engine.models.지라이슈;
@@ -25,7 +25,7 @@ public interface 지라이슈_대시보드_서비스 {
 
     List<검색결과> 제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청);
 
-    List<트리맵_담당자_요구사항_기여도> 작업자_별_요구사항_별_관여도(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청);
+    List<Worker> 작업자_별_요구사항_별_관여도(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청);
 
     Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항_지라이슈상태_주별_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청);
 
