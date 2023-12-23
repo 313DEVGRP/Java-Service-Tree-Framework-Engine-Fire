@@ -7,8 +7,9 @@ import java.util.List;
 import com.arms.elasticsearch.util.검색결과;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import lombok.Getter;
 
-@JsonSerialize
+@Getter
 public class 상품_서비스_버전 {
 	private final Long 상품_서비스_버전;
 	private final List<요구_사항> 요구사항들;

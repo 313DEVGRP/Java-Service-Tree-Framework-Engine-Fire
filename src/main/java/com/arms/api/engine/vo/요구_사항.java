@@ -4,6 +4,9 @@ import java.util.List;
 
 import com.arms.elasticsearch.util.검색결과;
 
+import lombok.Getter;
+
+@Getter
 public class 요구_사항 {
 
 	private final String 요구_사항_번호;

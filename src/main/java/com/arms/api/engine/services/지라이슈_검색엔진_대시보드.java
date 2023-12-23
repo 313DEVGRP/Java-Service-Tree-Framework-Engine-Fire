@@ -221,11 +221,9 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         List<하위_이슈_사항> 하위_이슈_사항들 = parentReqKeys.stream()
                 .map(issue -> new 하위_이슈_사항(issue)).collect(toList());
 
-        List<상품_서비스_버전> 상품_서비스_버전들 = pdServiceVersions.stream()
+        return pdServiceVersions.stream()
                 .map(request -> new 상품_서비스_버전(request,new 하위_이슈_사항들(하위_이슈_사항들))).collect(toList());
-        //System.out.println(상품_서비스_버전들);
 
-        return 상품_서비스_버전들;
     }
 
     private 검색결과_목록_메인 요구사항(지라이슈_제품_및_제품버전_검색요청 요청){
