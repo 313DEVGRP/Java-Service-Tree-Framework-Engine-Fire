@@ -8,8 +8,10 @@ import com.arms.api.engine.dtos.요구사항_별_상태_및_유일_작업자_수
 import com.arms.api.engine.dtos.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.api.engine.dtos.요구사항_지라이슈상태_주별_집계;
 import com.arms.api.engine.models.지라이슈;
+import com.arms.api.engine.models.지라이슈_일반_검색요청;
 import com.arms.api.engine.models.지라이슈_일자별_제품_및_제품버전_검색요청;
 import com.arms.api.engine.models.지라이슈_제품_및_제품버전_검색요청;
+import com.arms.api.engine.vo.상품_서비스_버전;
 import com.arms.elasticsearch.util.query.쿼리_추상_팩토리;
 import com.arms.elasticsearch.util.검색결과;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
@@ -36,4 +38,6 @@ public interface 지라이슈_대시보드_서비스 {
     List<지라이슈> 지라이슈_기준일자별_제품_및_제품버전_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청,String sortField);
 
     List<요구사항_별_상태_및_유일_작업자_수> 요구사항_별_상태_및_관여_작업자_수(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청);
+
+    List<상품_서비스_버전> 요구사항_별_상태_및_관여_작업자수_내용(지라이슈_제품_및_제품버전_검색요청 요청);
 }

@@ -5,7 +5,10 @@ import static java.util.stream.Collectors.*;
 import java.util.List;
 
 import com.arms.elasticsearch.util.검색결과;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+
+@JsonSerialize
 public class 상품_서비스_버전 {
 	private final Long 상품_서비스_버전;
 	private final List<요구_사항> 요구사항들;

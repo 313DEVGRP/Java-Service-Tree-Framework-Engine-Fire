@@ -14,10 +14,10 @@ import com.arms.api.engine.dtos.Worker;
 import com.arms.api.engine.dtos.요구사항_별_상태_및_유일_작업자_수;
 import com.arms.api.engine.dtos.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.api.engine.dtos.요구사항_지라이슈상태_주별_집계;
-import com.arms.api.engine.models.IsReqType;
-import com.arms.api.engine.models.지라이슈;
-import com.arms.api.engine.models.지라이슈_일자별_제품_및_제품버전_검색요청;
-import com.arms.api.engine.models.지라이슈_제품_및_제품버전_검색요청;
+import com.arms.api.engine.models.*;
+import com.arms.api.engine.vo.상품_서비스_버전;
+import com.arms.api.engine.vo.하위_이슈_사항;
+import com.arms.api.engine.vo.하위_이슈_사항들;
 import com.arms.elasticsearch.helper.인덱스자료;
 import com.arms.elasticsearch.util.aggregation.CustomAbstractAggregationBuilder;
 import com.arms.elasticsearch.util.aggregation.CustomDateHistogramAggregationBuilder;
@@ -59,6 +59,8 @@ import com.arms.elasticsearch.util.검색결과_목록_메인;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service("지라이슈_대시보드_서비스")
@@ -206,6 +208,58 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         return 검색결과_목록_메인.get검색결과().get("versions");
 
+    }
+
+    @Override
+    public List<상품_서비스_버전> 요구사항_별_상태_및_관여_작업자수_내용(지라이슈_제품_및_제품버전_검색요청 요청1) {
+        검색결과_목록_메인 요구사항 = 요구사항(요청1);
+        검색결과_목록_메인 하위이슈 = 하위이슈(요청1);
+
+        List<검색결과> pdServiceVersions = 요구사항.get검색결과().get("group_by_pdServiceVersion");
+        List<검색결과> parentReqKeys = 하위이슈.get검색결과().get("group_by_parentReqKey");
+
+        List<하위_이슈_사항> 하위_이슈_사항들 = parentReqKeys.stream()
+                .map(issue -> new 하위_이슈_사항(issue)).collect(toList());
+
+        List<상품_서비스_버전> 상품_서비스_버전들 = pdServiceVersions.stream()
+                .map(request -> new 상품_서비스_버전(request,new 하위_이슈_사항들(하위_이슈_사항들))).collect(toList());
+        //System.out.println(상품_서비스_버전들);
+
+        return 상품_서비스_버전들;
+    }
+
+    private 검색결과_목록_메인 요구사항(지라이슈_제품_및_제품버전_검색요청 요청){
+        지라이슈_일반_검색요청 지라이슈_일반_검색요청 = new 지라이슈_일반_검색요청();
+        지라이슈_일반_검색요청.set메인그룹필드("pdServiceVersion");
+        지라이슈_일반_검색요청.set크기(10000);
+        지라이슈_일반_검색요청.set컨텐츠보기여부(false);
+        지라이슈_일반_검색요청.set하위그룹필드들(List.of("key","assignee.assignee_emailAddress.keyword"));
+
+        EsQuery esQuery
+                = new EsQueryBuilder()
+                .bool( new TermsQueryFilter("pdServiceVersion",요청.getPdServiceVersionLinks()),
+                        new TermQueryMust("pdServiceId",요청.getPdServiceLink()),
+                        new TermQueryMust("isReq",true)
+                );
+
+        return this.집계결과_가져오기(검색_일반_요청.of(지라이슈_일반_검색요청, esQuery));
+    }
+
+    private 검색결과_목록_메인 하위이슈(지라이슈_제품_및_제품버전_검색요청 요청){
+        지라이슈_일반_검색요청 지라이슈_일반_검색요청 = new 지라이슈_일반_검색요청();
+        지라이슈_일반_검색요청.set메인그룹필드("parentReqKey");
+        지라이슈_일반_검색요청.set크기(10000);
+        지라이슈_일반_검색요청.set컨텐츠보기여부(false);
+        지라이슈_일반_검색요청.set하위그룹필드들(List.of("assignee.assignee_emailAddress.keyword"));
+
+        EsQuery esQuery
+                = new EsQueryBuilder()
+                .bool( new TermsQueryFilter("pdServiceVersion",요청.getPdServiceVersionLinks()),
+                        new TermQueryMust("pdServiceId",요청.getPdServiceLink()),
+                        new TermQueryMust("isReq",false)
+                );
+
+        return this.집계결과_가져오기(검색_일반_요청.of(지라이슈_일반_검색요청, esQuery));
     }
 
     @Override
