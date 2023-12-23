@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.arms.api.engine.dtos.Worker;
-import com.arms.api.engine.dtos.요구사항_별_상태_및_유일_작업자_수;
 import com.arms.api.engine.models.*;
 import com.arms.api.engine.dtos.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.api.engine.vo.상품_서비스_버전;
@@ -172,11 +171,23 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     }
 
     @GetMapping("/req-status-and-reqInvolved-unique-assignees")
-    public ResponseEntity<List<상품_서비스_버전>> 요구사항_별_상태_및_관여_작업자_수(
-            지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
-
-        return ResponseEntity.ok(지라이슈_검색엔진.요구사항_별_상태_및_관여_작업자수_내용(지라이슈_제품_및_제품버전_검색요청));
+    public ResponseEntity<List<상품_서비스_버전>>
+        요구사항_별_상태_및_관여_작업자_수(지라이슈_제품_및_제품버전_병합_검색_요청 지라이슈_제품_및_제품버전_병합_검색_요청) {
+        검색결과_목록_메인 요구사항 = 병합_요청_사항_요청값_생성(지라이슈_제품_및_제품버전_병합_검색_요청.get요구_사항());
+        검색결과_목록_메인 하위_이슈_사항 = 병합_요청_사항_요청값_생성(지라이슈_제품_및_제품버전_병합_검색_요청.get하위_이슈_사항());
+        return ResponseEntity.ok(지라이슈_검색엔진.요구사항_별_상태_및_관여_작업자수_내용(요구사항,하위_이슈_사항));
     }
+
+    private 검색결과_목록_메인 병합_요청_사항_요청값_생성(지라이슈_제품_및_제품버전_검색요청 요청){
+        EsQuery esQuery
+            = new EsQueryBuilder()
+            .bool( new TermsQueryFilter("pdServiceVersion",요청.getPdServiceVersionLinks()),
+                new TermQueryMust("pdServiceId",요청.getPdServiceLink()),
+                new TermQueryMust("isReq",요청.getIsReqType().isReq())
+            );
+        return 지라이슈_검색엔진.집계결과_가져오기(검색_일반_요청.of(요청, esQuery));
+    }
+
 
     @GetMapping("/exclusion-isreq-normal/{pdServiceId}")
     public ResponseEntity<검색결과_목록_메인> 요구사항여부제외_일반_검색(@PathVariable Long pdServiceId, 지라이슈_일반_검색요청 지라이슈_일반_검색요청) {
