@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.arms.api.engine.dtos.Worker;
-import com.arms.api.engine.dtos.요구사항_별_상태_및_유일_작업자_수;
 import com.arms.api.engine.models.*;
 import com.arms.api.engine.dtos.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.api.engine.vo.상품_서비스_버전;
@@ -198,14 +197,6 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
 
         검색결과_목록_메인 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(검색_크기별_요청.of(지라이슈_일반_검색요청, esQuery));
         return ResponseEntity.ok(집계결과_가져오기);
-    }
-
-    @GetMapping("/weekly-updated-issue-search")
-    public List<지라이슈> 제품서비스_버전목록으로_주간_업데이트된_이슈조회(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
-                                                 @RequestParam Integer baseWeek,
-                                                 @RequestParam String sortField){
-
-        return 지라이슈_검색엔진.제품서비스_버전목록으로_주간_업데이트된_이슈조회(지라이슈_제품_및_제품버전_검색요청, baseWeek, sortField);
     }
 
     @GetMapping("/standard-daily/jira-issue")
