@@ -197,10 +197,10 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     }
 
     @Override
-    public List<상품_서비스_버전> 요구사항_별_상태_및_관여_작업자수_내용(검색결과_목록_메인 요구사항,검색결과_목록_메인 하위이슈) {
+    public List<상품_서비스_버전> 요구사항_별_상태_및_관여_작업자수_내용(검색결과_목록_메인 요구사항, 검색결과_목록_메인 하위이슈) {
 
-        List<검색결과> pdServiceVersions = 요구사항.get검색결과().get("group_by_pdServiceVersion");
-        List<검색결과> parentReqKeys = 하위이슈.get검색결과().get("group_by_parentReqKey");
+        List<검색결과> pdServiceVersions = 요구사항.get검색결과().entrySet().stream().flatMap(a->a.getValue().stream()).collect(toList());
+        List<검색결과> parentReqKeys = 하위이슈.get검색결과().entrySet().stream().flatMap(a->a.getValue().stream()).collect(toList());
 
         List<하위_이슈_사항> 하위_이슈_사항들 = parentReqKeys.stream()
                 .map(issue -> new 하위_이슈_사항(issue)).collect(toList());
