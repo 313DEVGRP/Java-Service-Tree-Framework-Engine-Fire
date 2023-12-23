@@ -8,7 +8,6 @@ import com.arms.api.engine.dtos.요구사항_별_상태_및_유일_작업자_수
 import com.arms.api.engine.dtos.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.api.engine.dtos.요구사항_지라이슈상태_주별_집계;
 import com.arms.api.engine.models.지라이슈;
-import com.arms.api.engine.models.지라이슈_일반_검색요청;
 import com.arms.api.engine.models.지라이슈_일자별_제품_및_제품버전_검색요청;
 import com.arms.api.engine.models.지라이슈_제품_및_제품버전_검색요청;
 import com.arms.api.engine.vo.상품_서비스_버전;
@@ -30,8 +29,6 @@ public interface 지라이슈_대시보드_서비스 {
     List<Worker> 작업자_별_요구사항_별_관여도(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청);
 
     Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항_지라이슈상태_주별_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청);
-
-    List<지라이슈> 제품서비스_버전목록으로_주간_업데이트된_이슈조회(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, Integer baseWeek, String sortField);
 
     Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> 지라이슈_기준일자별_제품_및_제품버전_집계검색(지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청);
 
