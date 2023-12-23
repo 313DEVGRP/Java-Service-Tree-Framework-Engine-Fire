@@ -1,33 +1,30 @@
 package com.arms.api.engine.services;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import com.arms.api.engine.dtos.TaskList;
-import com.arms.api.engine.dtos.Worker;
-import com.arms.api.engine.dtos.요구사항_별_상태_및_유일_작업자_수;
-import com.arms.api.engine.dtos.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
-import com.arms.api.engine.dtos.요구사항_지라이슈상태_주별_집계;
-import com.arms.api.engine.models.*;
+import com.arms.api.engine.dtos.*;
+import com.arms.api.engine.models.IsReqType;
+import com.arms.api.engine.models.지라이슈;
+import com.arms.api.engine.models.지라이슈_일자별_제품_및_제품버전_검색요청;
+import com.arms.api.engine.models.지라이슈_제품_및_제품버전_검색요청;
+import com.arms.api.engine.repositories.지라이슈_저장소;
 import com.arms.api.engine.vo.상품_서비스_버전;
 import com.arms.api.engine.vo.하위_이슈_사항;
 import com.arms.api.engine.vo.하위_이슈_사항들;
 import com.arms.elasticsearch.util.aggregation.CustomAbstractAggregationBuilder;
 import com.arms.elasticsearch.util.aggregation.CustomDateHistogramAggregationBuilder;
 import com.arms.elasticsearch.util.aggregation.CustomTermsAggregationBuilder;
-import com.arms.elasticsearch.util.query.*;
-import com.arms.elasticsearch.util.query.bool.ExistsQueryFilter;
-import com.arms.elasticsearch.util.query.bool.RangeQueryFilter;
-import com.arms.elasticsearch.util.query.bool.TermQueryMust;
-import com.arms.elasticsearch.util.query.bool.TermsQueryFilter;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.arms.elasticsearch.util.query.EsQuery;
+import com.arms.elasticsearch.util.query.EsQueryBuilder;
+import com.arms.elasticsearch.util.query.bool.*;
+import com.arms.elasticsearch.util.query.쿼리_추상_팩토리;
+import com.arms.elasticsearch.util.검색결과;
+import com.arms.elasticsearch.util.검색결과_목록_메인;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
@@ -37,17 +34,17 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
-import com.arms.api.engine.repositories.지라이슈_저장소;
-import com.arms.elasticsearch.util.검색결과;
-import com.arms.elasticsearch.util.검색결과_목록_메인;
-
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -58,12 +55,6 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     private 지라이슈_저장소 지라이슈저장소;
-
-    private com.arms.elasticsearch.helper.인덱스_유틸 인덱스_유틸;
-
-    private ObjectMapper objectMapper;
-
-    private ElasticsearchOperations 엘라스틱서치_작업;
 
     @Override
     public Map<String, Long> 제품서비스별_담당자_이름_통계(Long 지라서버_아이디, Long 제품서비스_아이디) {
@@ -444,12 +435,15 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
          String from = 시작일;
          String to = 종료일;
 
-         EsQuery esQuery = new EsQueryBuilder()
-                 .bool(new TermQueryMust("pdServiceId", 지라이슈_일자별_제품_및_제품버전_검색요청.getPdServiceLink()),
-                         new TermsQueryFilter("pdServiceVersion", 지라이슈_일자별_제품_및_제품버전_검색요청.getPdServiceVersionLinks()),
-                         new RangeQueryFilter(지라이슈_일자별_제품_및_제품버전_검색요청.get일자기준(),
-                                                                    from, to, "fromto")
-                 );
+         EsBoolQuery[] esBoolQueries = Stream.of(
+                new TermQueryMust("pdServiceId", 지라이슈_일자별_제품_및_제품버전_검색요청.getPdServiceLink()),
+                new TermsQueryFilter("pdServiceVersion", 지라이슈_일자별_제품_및_제품버전_검색요청.getPdServiceVersionLinks()),
+                지라이슈_일자별_제품_및_제품버전_검색요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
+                지라이슈_일자별_제품_및_제품버전_검색요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null,
+                new RangeQueryFilter(지라이슈_일자별_제품_및_제품버전_검색요청.get일자기준(), from, to, "fromto")
+         ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
+
+         EsQueryBuilder esQuery = new EsQueryBuilder().bool(esBoolQueries);
          BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
          });
 
@@ -496,19 +490,15 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         String from = 시작일;
         String to = 종료일;
 
-        Boolean isReq = Optional.ofNullable(지라이슈_일자별_제품_및_제품버전_검색요청.getIsReqType())
-                .map(IsReqType::name)
-                .map(name -> name.equals(IsReqType.ISSUE.name()) ? Boolean.TRUE
-                        : name.equals(IsReqType.REQUIREMENT.name()) ? Boolean.FALSE
-                        : null)
-                .orElse(null);
+        EsBoolQuery[] esBoolQueries = Stream.of(
+                new TermQueryMust("pdServiceId", 지라이슈_일자별_제품_및_제품버전_검색요청.getPdServiceLink()),
+                new TermsQueryFilter("pdServiceVersion", 지라이슈_일자별_제품_및_제품버전_검색요청.getPdServiceVersionLinks()),
+                지라이슈_일자별_제품_및_제품버전_검색요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
+                지라이슈_일자별_제품_및_제품버전_검색요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null,
+                new RangeQueryFilter(지라이슈_일자별_제품_및_제품버전_검색요청.get일자기준(), from, to, "fromto")
+        ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
 
-        EsQuery esQuery = new EsQueryBuilder()
-                .bool(new TermQueryMust("pdServiceId", 지라이슈_일자별_제품_및_제품버전_검색요청.getPdServiceLink()),
-                        new TermsQueryFilter("pdServiceVersion", 지라이슈_일자별_제품_및_제품버전_검색요청.getPdServiceVersionLinks()),
-                        new TermQueryMust("isReq", isReq),
-                        new RangeQueryFilter("updated", from, to, "fromto")
-                );
+        EsQueryBuilder esQuery = new EsQueryBuilder().bool(esBoolQueries);
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
         });
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
