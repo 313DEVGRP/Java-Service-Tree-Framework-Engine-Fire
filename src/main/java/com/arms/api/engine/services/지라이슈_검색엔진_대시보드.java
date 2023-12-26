@@ -6,6 +6,7 @@ import com.arms.api.engine.repositories.지라이슈_저장소;
 import com.arms.api.engine.vo.제품_서비스_버전;
 import com.arms.api.engine.vo.하위_이슈_사항;
 import com.arms.api.engine.vo.하위_이슈_사항들;
+import com.arms.elasticsearch.helper.인덱스자료;
 import com.arms.elasticsearch.util.aggregation.CustomAbstractAggregationBuilder;
 import com.arms.elasticsearch.util.aggregation.CustomDateHistogramAggregationBuilder;
 import com.arms.elasticsearch.util.aggregation.CustomTermsAggregationBuilder;
@@ -31,6 +32,7 @@ import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
@@ -53,6 +55,8 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     private 지라이슈_저장소 지라이슈저장소;
+    @Autowired
+    private com.arms.elasticsearch.helper.인덱스_유틸 인덱스_유틸;
 
     @Override
     public Map<String, Long> 제품서비스별_담당자_이름_통계(Long 지라서버_아이디, Long 제품서비스_아이디) {
@@ -596,4 +600,114 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         return new 일자별_요구사항_연결된이슈_생성개수_및_상태데이터(요구사항_개수, 요구사항_상태목록, 연결된이슈_개수, 연결된이슈_상태목록);
     }
+
+    @Override
+    public Map<Long, Map<String, Map<String,List<요구사항_별_업데이트_데이터>>>>  요구사항별_업데이트_능선_데이터(지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청){
+        String 시작일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get시작일();
+        String 종료일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get종료일();
+
+        String from = 시작일;
+        String to = 종료일;
+
+        EsBoolQuery[] esBoolQueries = Stream.of(
+                new TermQueryMust("pdServiceId", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceLink()),
+                new TermsQueryFilter("pdServiceVersion", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
+                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
+                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null,
+                new RangeQueryFilter(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준(), from, to, "fromto")
+        ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
+
+        EsQueryBuilder esQuery = new EsQueryBuilder().bool(esBoolQueries);
+        BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
+        });
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+                .withQuery(boolQuery)
+                .withSort(SortBuilders.fieldSort(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준()).order(SortOrder.ASC))
+                .withMaxResults(10000);
+
+        List<지라이슈> 전체결과 = new ArrayList<>();
+
+       /* DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String 지라인덱스 = 인덱스자료.지라이슈_인덱스명;
+
+        LocalDate start = LocalDate.parse(from);
+        LocalDate end = LocalDate.parse(to);
+
+        for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
+            String 호출할_지라인덱스 = 지라인덱스 + "-" + date.format(formatter);
+            if (!인덱스_유틸.인덱스_존재_확인(호출할_지라인덱스)) {
+                continue;
+            }
+
+            List<지라이슈> 결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 호출할_지라인덱스);
+            if (결과 != null && 결과.size() > 0) {
+                전체결과.addAll(결과);
+            }
+        }*/
+        boolean 인덱스존재시까지  = true;
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String 지라인덱스 = 인덱스자료.지라이슈_인덱스명;
+
+        while(인덱스존재시까지) {
+            LocalDate 오늘일경우 = LocalDate.now();
+            String 호출할_지라인덱스 = 오늘일경우.format(formatter).equals(today.format(formatter))
+                    ? 지라인덱스 : 지라인덱스 + "-" + today.format(formatter);
+
+            if (!인덱스_유틸.인덱스_존재_확인(호출할_지라인덱스)) {
+                인덱스존재시까지 = false;
+                break;
+            }
+
+            today = today.minusDays(1);
+
+            List<지라이슈> 결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 호출할_지라인덱스);
+
+            if (결과 != null && 결과.size() > 0) {
+                전체결과.addAll(결과);
+            }
+        }
+        // 업데이트가 기준일에 일어난 모든 이슈를 조회
+        Map<Long, Map<String, Map<String,List<요구사항_별_업데이트_데이터>>>> 조회_결과 = null;
+
+        if (지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ) {
+            조회_결과= 전체결과.stream()
+                    .map(this::요구사항_별_업데이트_데이터)
+                    .collect(Collectors.groupingBy(요구사항_별_업데이트_데이터::getPdServiceVersion,
+                            Collectors.groupingBy(이슈 -> transformDateForUpdatedField(이슈.getUpdated()),
+                                    Collectors.groupingBy(요구사항_별_업데이트_데이터::getParentReqKey))));
+
+        }else if(지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT){
+            조회_결과= 전체결과.stream()
+                    .map(this::요구사항_별_업데이트_데이터)
+                    .collect(Collectors.groupingBy(요구사항_별_업데이트_데이터::getPdServiceVersion,
+                            Collectors.groupingBy(이슈 -> transformDateForUpdatedField(이슈.getUpdated()),
+                                    Collectors.groupingBy(요구사항_별_업데이트_데이터::getKey))));
+        }
+
+        return 조회_결과;
+
+    }
+
+    private 요구사항_별_업데이트_데이터 요구사항_별_업데이트_데이터(지라이슈 issue) {
+        요구사항_별_업데이트_데이터 요구사항_별_업데이트_데이터 = new 요구사항_별_업데이트_데이터();
+        요구사항_별_업데이트_데이터.setKey(issue.getKey());
+        요구사항_별_업데이트_데이터.setParentReqKey(issue.getParentReqKey());
+        요구사항_별_업데이트_데이터.setUpdated(issue.getUpdated());
+        요구사항_별_업데이트_데이터.setPdServiceVersion(issue.getPdServiceVersion());
+        요구사항_별_업데이트_데이터.setSummary(issue.getSummary());
+        return 요구사항_별_업데이트_데이터;
+    }
+    private String transformDateForUpdatedField(String date) {
+        DateTimeFormatter formatter;
+        if (date.contains(".")) {
+            formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+        } else {
+            formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX");
+        }
+        OffsetDateTime offsetDateTime = OffsetDateTime.parse(date, formatter);
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd").format(offsetDateTime);
+    }
+
+
 }

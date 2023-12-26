@@ -3,10 +3,7 @@ package com.arms.api.engine.services;
 import java.util.List;
 import java.util.Map;
 
-import com.arms.api.engine.dtos.Worker;
-import com.arms.api.engine.dtos.요구사항_별_상태_및_유일_작업자_수;
-import com.arms.api.engine.dtos.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
-import com.arms.api.engine.dtos.요구사항_지라이슈상태_주별_집계;
+import com.arms.api.engine.dtos.*;
 import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.models.지라이슈_일자별_제품_및_제품버전_집계_요청;
 import com.arms.api.engine.models.지라이슈_제품_및_제품버전_집계_요청;
@@ -37,6 +34,9 @@ public interface 지라이슈_대시보드_서비스 {
     List<지라이슈> 지라이슈_기준일자별_제품_및_제품버전_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청, String sortField);
 
     List<제품_서비스_버전> 요구사항_별_상태_및_관여_작업자수_내용(검색결과_목록_메인 요구사항, 검색결과_목록_메인 하위이슈);
+
+
+    Map<Long, Map<String, Map<String,List<요구사항_별_업데이트_데이터>>>>  요구사항별_업데이트_능선_데이터(지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청);
 
     List<요구사항_별_상태_및_유일_작업자_수> 요구사항_별_상태_및_관여_작업자_수(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청);
 
