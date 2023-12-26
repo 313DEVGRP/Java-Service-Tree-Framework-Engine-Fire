@@ -3,7 +3,7 @@ package com.arms.api.engine.services;
 import com.arms.api.engine.dtos.*;
 import com.arms.api.engine.models.*;
 import com.arms.api.engine.repositories.지라이슈_저장소;
-import com.arms.api.engine.vo.상품_서비스_버전;
+import com.arms.api.engine.vo.제품_서비스_버전;
 import com.arms.api.engine.vo.하위_이슈_사항;
 import com.arms.api.engine.vo.하위_이슈_사항들;
 import com.arms.elasticsearch.util.aggregation.CustomAbstractAggregationBuilder;
@@ -12,7 +12,7 @@ import com.arms.elasticsearch.util.aggregation.CustomTermsAggregationBuilder;
 import com.arms.elasticsearch.util.query.EsQuery;
 import com.arms.elasticsearch.util.query.EsQueryBuilder;
 import com.arms.elasticsearch.util.query.bool.*;
-import com.arms.elasticsearch.util.query.검색_일반_요청;
+import com.arms.elasticsearch.util.query.일반_집계_요청;
 import com.arms.elasticsearch.util.query.쿼리_추상_팩토리;
 import com.arms.elasticsearch.util.검색결과;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
@@ -152,12 +152,19 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         );
     }
 
+    @Override
+    public List<지라이슈> 지라이슈_조회(쿼리_추상_팩토리 쿼리추상팩토리) {
+        return 지라이슈저장소.normalSearch(
+                쿼리추상팩토리.생성()
+        );
+    }
+
 
     @Override
-    public List<검색결과> 제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
+    public List<검색결과> 제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
         EsQuery esQuery = new EsQueryBuilder()
-                .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink()),
-                        new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks()),
+                .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
+                        new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
                         new ExistsQueryFilter("assignee")
                 );
 
@@ -169,7 +176,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                         new CustomTermsAggregationBuilder("assignees")
                                 .field("assignee.assignee_accountId.keyword")
                                 .order(BucketOrder.count(false))
-                                .size(지라이슈_제품_및_제품버전_검색요청.get크기())
+                                .size(지라이슈_제품_및_제품버전_집계_요청.get크기())
                                 .addSubAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"))
                                 .build()
                 );
@@ -186,7 +193,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     }
 
     @Override
-    public List<상품_서비스_버전> 요구사항_별_상태_및_관여_작업자수_내용(검색결과_목록_메인 요구사항, 검색결과_목록_메인 하위이슈) {
+    public List<제품_서비스_버전> 요구사항_별_상태_및_관여_작업자수_내용(검색결과_목록_메인 요구사항, 검색결과_목록_메인 하위이슈) {
 
         List<검색결과> pdServiceVersions = 요구사항.get검색결과().entrySet().stream().flatMap(a->a.getValue().stream()).collect(toList());
         List<검색결과> parentReqKeys = 하위이슈.get검색결과().entrySet().stream().flatMap(a->a.getValue().stream()).collect(toList());
@@ -195,17 +202,17 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 .map(issue -> new 하위_이슈_사항(issue)).collect(toList());
 
         return pdServiceVersions.stream()
-                .map(request -> new 상품_서비스_버전(request,new 하위_이슈_사항들(하위_이슈_사항들))).collect(toList());
+                .map(request -> new 제품_서비스_버전(request,new 하위_이슈_사항들(하위_이슈_사항들))).collect(toList());
 
     }
 
     @Override
-    public List<요구사항_별_상태_및_유일_작업자_수> 요구사항_별_상태_및_관여_작업자_수(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
+    public List<요구사항_별_상태_및_유일_작업자_수> 요구사항_별_상태_및_관여_작업자_수(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
         로그.info("[ 지라이슈_검색엔진_대시보드 :: 요구사항_별_상태_및_관여_작업자_수 ] :: pdServiceLink => {}, pdServiceVersionLinks => {} ",
-                지라이슈_제품_및_제품버전_검색요청.getPdServiceLink(), 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks().toString());
+                지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink(), 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks().toString());
 
         List<지라이슈> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionIn(true,
-                지라이슈_제품_및_제품버전_검색요청.getPdServiceLink(), 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks());
+                지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink(), 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks());
         List<String> allReqKeys = requirementIssues.stream().map(지라이슈::getKey).collect(Collectors.toList());
         List<지라이슈> allSubTasks = 지라이슈저장소.findByParentReqKeyIn(allReqKeys);
         List<요구사항_별_상태_및_유일_작업자_수> resultList = new ArrayList<>();
@@ -232,7 +239,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     }
 
     @Override
-    public List<상품_서비스_버전> 요구사항_별_상태_및_관여_작업자수_내용1(지라이슈_제품_및_제품버전_검색요청 요청1) {
+    public List<제품_서비스_버전> 요구사항_별_상태_및_관여_작업자수_내용1(지라이슈_제품_및_제품버전_집계_요청 요청1) {
 
         검색결과_목록_메인 요구사항 = 요구사항(요청1);
         검색결과_목록_메인 하위이슈 = 하위이슈(요청1);
@@ -243,20 +250,20 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         List<하위_이슈_사항> 하위_이슈_사항들 = parentReqKeys.stream()
                 .map(issue -> new 하위_이슈_사항(issue)).collect(toList());
 
-        List<상품_서비스_버전> list = new ArrayList<>();
+        List<제품_서비스_버전> list = new ArrayList<>();
         for (검색결과 request : pdServiceVersions) {
-            상품_서비스_버전 상품_서비스_버전 = new 상품_서비스_버전(request, new 하위_이슈_사항들(하위_이슈_사항들));
-            list.add(상품_서비스_버전);
+            제품_서비스_버전 제품_서비스_버전 = new 제품_서비스_버전(request, new 하위_이슈_사항들(하위_이슈_사항들));
+            list.add(제품_서비스_버전);
         }
         return list;
     }
 
-    private 검색결과_목록_메인 요구사항(지라이슈_제품_및_제품버전_검색요청 요청){
-        지라이슈_일반_검색요청 지라이슈_일반_검색요청 = new 지라이슈_일반_검색요청();
-        지라이슈_일반_검색요청.set메인그룹필드("pdServiceVersion");
-        지라이슈_일반_검색요청.set크기(10000);
-        지라이슈_일반_검색요청.set컨텐츠보기여부(false);
-        지라이슈_일반_검색요청.set하위그룹필드들(List.of("key","assignee.assignee_emailAddress.keyword"));
+    private 검색결과_목록_메인 요구사항(지라이슈_제품_및_제품버전_집계_요청 요청){
+        지라이슈_일반_집계_요청 지라이슈_일반_집계_요청 = new 지라이슈_일반_집계_요청();
+        지라이슈_일반_집계_요청.set메인그룹필드("pdServiceVersion");
+        지라이슈_일반_집계_요청.set크기(10000);
+        지라이슈_일반_집계_요청.set컨텐츠보기여부(false);
+        지라이슈_일반_집계_요청.set하위그룹필드들(List.of("key","assignee.assignee_emailAddress.keyword"));
 
         EsQuery esQuery
                 = new EsQueryBuilder()
@@ -265,15 +272,15 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                         new TermQueryMust("isReq",true)
                 );
 
-        return this.집계결과_가져오기(검색_일반_요청.of(지라이슈_일반_검색요청, esQuery));
+        return this.집계결과_가져오기(일반_집계_요청.of(지라이슈_일반_집계_요청, esQuery));
     }
 
-    private 검색결과_목록_메인 하위이슈(지라이슈_제품_및_제품버전_검색요청 요청){
-        지라이슈_일반_검색요청 지라이슈_일반_검색요청 = new 지라이슈_일반_검색요청();
-        지라이슈_일반_검색요청.set메인그룹필드("parentReqKey");
-        지라이슈_일반_검색요청.set크기(10000);
-        지라이슈_일반_검색요청.set컨텐츠보기여부(false);
-        지라이슈_일반_검색요청.set하위그룹필드들(List.of("assignee.assignee_emailAddress.keyword"));
+    private 검색결과_목록_메인 하위이슈(지라이슈_제품_및_제품버전_집계_요청 요청){
+        지라이슈_일반_집계_요청 지라이슈_일반_집계_요청 = new 지라이슈_일반_집계_요청();
+        지라이슈_일반_집계_요청.set메인그룹필드("parentReqKey");
+        지라이슈_일반_집계_요청.set크기(10000);
+        지라이슈_일반_집계_요청.set컨텐츠보기여부(false);
+        지라이슈_일반_집계_요청.set하위그룹필드들(List.of("assignee.assignee_emailAddress.keyword"));
 
         EsQuery esQuery
                 = new EsQueryBuilder()
@@ -282,14 +289,14 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                         new TermQueryMust("isReq",false)
                 );
 
-        return this.집계결과_가져오기(검색_일반_요청.of(지라이슈_일반_검색요청, esQuery));
+        return this.집계결과_가져오기(일반_집계_요청.of(지라이슈_일반_집계_요청, esQuery));
     }
 
     @Override
-    public List<Worker> 작업자_별_요구사항_별_관여도(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
+    public List<Worker> 작업자_별_요구사항_별_관여도(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
         Map<String, Worker> contributionMap = new HashMap<>();
 
-        List<지라이슈> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionIn(true, 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink(), 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks());
+        List<지라이슈> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionIn(true, 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink(), 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks());
 
         // 요구사항의 키를 모두 추출
         List<String> allReqKeys = requirementIssues.stream().map(지라이슈::getKey).collect(Collectors.toList());
@@ -334,20 +341,20 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         return contributionMap.values().stream()
                 .sorted((w1, w2) -> w2.getData().get("totalInvolvedCount").compareTo(w1.getData().get("totalInvolvedCount")))
-                .limit(지라이슈_제품_및_제품버전_검색요청.get크기() > 0 ? 지라이슈_제품_및_제품버전_검색요청.get크기() : Long.MAX_VALUE)
+                .limit(지라이슈_제품_및_제품버전_집계_요청.get크기() > 0 ? 지라이슈_제품_및_제품버전_집계_요청.get크기() : Long.MAX_VALUE)
                 .collect(Collectors.toList());
 
     }
 
     @Override
-    public Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항_지라이슈상태_주별_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
+    public Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항_지라이슈상태_주별_집계(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
         LocalDate now = LocalDate.now(ZoneId.of("UTC"));
         LocalDate monthAgo = now.minusWeeks(4);
 
         // 1. 검색 범위에 포함되지 않은 누적 데이터를 가져온다. 기간이 길어지면 길어질수록 무의미한, 반복적인 연산이기 때문에 캐싱 고려
         요구사항_지라이슈상태_주별_집계 HistoricalData = 누적데이터조회(
-                지라이슈_제품_및_제품버전_검색요청.getPdServiceLink(),
-                지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks(),
+                지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink(),
+                지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks(),
                 monthAgo
         );
         Map<String, Long> totalStatuses = new HashMap<>(HistoricalData.getStatuses());
@@ -356,8 +363,8 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         // 2. 검색 범위 내의 데이터를 가져온다. 현재 검색 범위는 차트 UI를 고려하여, 4~5주 정도로 적용
         EsQuery esQuery = new EsQueryBuilder()
-                .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink()),
-                        new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks()),
+                .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
+                        new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
                         new RangeQueryFilter("created", monthAgo, now, "fromto")
                 );
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
@@ -479,20 +486,20 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     }
 
     @Override
-    public Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> 지라이슈_기준일자별_제품_및_제품버전_집계검색(지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청) {
+    public Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> 지라이슈_기준일자별_제품_및_제품버전_집계검색(지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청) {
 
-         String 시작일 = 지라이슈_일자별_제품_및_제품버전_검색요청.get시작일();
-         String 종료일 = 지라이슈_일자별_제품_및_제품버전_검색요청.get종료일();
+         String 시작일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get시작일();
+         String 종료일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get종료일();
 
          String from = 시작일;
          String to = 종료일;
 
          EsBoolQuery[] esBoolQueries = Stream.of(
-                new TermQueryMust("pdServiceId", 지라이슈_일자별_제품_및_제품버전_검색요청.getPdServiceLink()),
-                new TermsQueryFilter("pdServiceVersion", 지라이슈_일자별_제품_및_제품버전_검색요청.getPdServiceVersionLinks()),
-                지라이슈_일자별_제품_및_제품버전_검색요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
-                지라이슈_일자별_제품_및_제품버전_검색요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null,
-                new RangeQueryFilter(지라이슈_일자별_제품_및_제품버전_검색요청.get일자기준(), from, to, "fromto")
+                new TermQueryMust("pdServiceId", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceLink()),
+                new TermsQueryFilter("pdServiceVersion", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
+                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
+                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null,
+                new RangeQueryFilter(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준(), from, to, "fromto")
          ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
 
          EsQueryBuilder esQuery = new EsQueryBuilder().bool(esBoolQueries);
@@ -500,16 +507,16 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
          });
 
          CustomAbstractAggregationBuilder dailyAggregationBuilder = new CustomDateHistogramAggregationBuilder("aggregation_by_day")
-                 .field(지라이슈_일자별_제품_및_제품버전_검색요청.get일자기준())
+                 .field(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준())
                  .calendarInterval(DateHistogramInterval.DAY);
 
-         if (지라이슈_일자별_제품_및_제품버전_검색요청.get메인그룹필드() != null) {
+         if (지라이슈_일자별_제품_및_제품버전_집계_요청.get메인그룹필드() != null) {
              CustomTermsAggregationBuilder 요구사항여부Aggregation = new CustomTermsAggregationBuilder("요구사항여부")
-                     .field(지라이슈_일자별_제품_및_제품버전_검색요청.get메인그룹필드());
+                     .field(지라이슈_일자별_제품_및_제품버전_집계_요청.get메인그룹필드());
 
-             if (지라이슈_일자별_제품_및_제품버전_검색요청.get하위그룹필드들() != null && 지라이슈_일자별_제품_및_제품버전_검색요청.get하위그룹필드들().size() == 1) {
+             if (지라이슈_일자별_제품_및_제품버전_집계_요청.get하위그룹필드들() != null && 지라이슈_일자별_제품_및_제품버전_집계_요청.get하위그룹필드들().size() == 1) {
                  요구사항여부Aggregation.addSubAggregation(new CustomTermsAggregationBuilder("상태목록")
-                         .field(지라이슈_일자별_제품_및_제품버전_검색요청.get하위그룹필드들().get(0)).build());
+                         .field(지라이슈_일자별_제품_및_제품버전_집계_요청.get하위그룹필드들().get(0)).build());
              }
 
              dailyAggregationBuilder.addSubAggregation(요구사항여부Aggregation.build());
@@ -534,20 +541,20 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
          return 검색결과;
      }
     @Override
-    public List<지라이슈> 지라이슈_기준일자별_제품_및_제품버전_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청,String sortField){
+    public List<지라이슈> 지라이슈_기준일자별_제품_및_제품버전_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청, String sortField){
 
-        String 시작일 = 지라이슈_일자별_제품_및_제품버전_검색요청.get시작일();
-        String 종료일 = 지라이슈_일자별_제품_및_제품버전_검색요청.get종료일();
+        String 시작일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get시작일();
+        String 종료일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get종료일();
 
         String from = 시작일;
         String to = 종료일;
 
         EsBoolQuery[] esBoolQueries = Stream.of(
-                new TermQueryMust("pdServiceId", 지라이슈_일자별_제품_및_제품버전_검색요청.getPdServiceLink()),
-                new TermsQueryFilter("pdServiceVersion", 지라이슈_일자별_제품_및_제품버전_검색요청.getPdServiceVersionLinks()),
-                지라이슈_일자별_제품_및_제품버전_검색요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
-                지라이슈_일자별_제품_및_제품버전_검색요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null,
-                new RangeQueryFilter(지라이슈_일자별_제품_및_제품버전_검색요청.get일자기준(), from, to, "fromto")
+                new TermQueryMust("pdServiceId", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceLink()),
+                new TermsQueryFilter("pdServiceVersion", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
+                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
+                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null,
+                new RangeQueryFilter(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준(), from, to, "fromto")
         ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
 
         EsQueryBuilder esQuery = new EsQueryBuilder().bool(esBoolQueries);
