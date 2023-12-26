@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import com.arms.api.engine.dtos.Worker;
+import com.arms.api.engine.dtos.*;
 import com.arms.api.engine.models.*;
 import com.arms.api.engine.dtos.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.api.engine.vo.제품_서비스_버전;
@@ -15,13 +15,8 @@ import com.arms.elasticsearch.util.query.bool.*;
 import com.arms.elasticsearch.util.검색결과;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.arms.api.engine.dtos.요구사항_지라이슈상태_주별_집계;
 import com.arms.api.engine.services.지라이슈_대시보드_서비스;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
 
@@ -222,7 +217,13 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
 
         return ResponseEntity.ok(지라이슈_검색엔진.지라이슈_기준일자별_제품_및_제품버전_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_집계_요청,sortField));
     }
+    @ResponseBody
+    @GetMapping("/standard-daily/updated-ridgeline")
+    public Map<Long, Map<String, Map<String,List<요구사항_별_업데이트_데이터>>>>  기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회(
+            지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청) {
 
+        return 지라이슈_검색엔진.요구사항별_업데이트_능선_데이터(지라이슈_일자별_제품_및_제품버전_집계_요청);
+    }
     @GetMapping("/normal-version/resolution")
     public ResponseEntity<검색결과_목록_메인> 일반_버전필터_해결책유무_검색(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청,
                                                        @RequestParam(required = false) String resolution) {
