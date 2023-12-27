@@ -249,14 +249,15 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
 
 
 
-    @GetMapping("/requirement-linkedissue/{pdServiceId}")
+    @PostMapping("/requirement-linkedissue/{pdServiceId}")
     public ResponseEntity<List<지라이슈>> 제품별_요구사항_연결이슈_조회(@PathVariable Long pdServiceId, 지라이슈_일반_검색_요청 지라이슈_일반_검색_요청) {
+
+        IsReqType isReqType = IsReqType.ALL;
 
         EsQuery esQuery
                 = new EsQueryBuilder()
                 .bool(
                         new TermQueryMust("pdServiceId",pdServiceId),
-                        new TermQueryMust("isReq",지라이슈_일반_검색_요청.getIsReqType().isReq()),
                         new TermsQueryFilter("pdServiceVersion",지라이슈_일반_검색_요청.getPdServiceVersionLinks())
                 );
 

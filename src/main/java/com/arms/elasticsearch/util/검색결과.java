@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@EqualsAndHashCode(exclude = "count")
+@EqualsAndHashCode(exclude = "개수")
 @Getter
 @NoArgsConstructor
 public class 검색결과 {
