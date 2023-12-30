@@ -670,21 +670,25 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         // 업데이트가 기준일에 일어난 모든 이슈를 조회
         Map<Long, Map<String, Map<String,List<요구사항_별_업데이트_데이터>>>> 조회_결과 = null;
 
+
         if (지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ) {
+
             조회_결과= 전체결과.stream()
                     .map(this::요구사항_별_업데이트_데이터)
+                    .distinct()
                     .collect(Collectors.groupingBy(요구사항_별_업데이트_데이터::getPdServiceVersion,
                             Collectors.groupingBy(이슈 -> transformDateForUpdatedField(이슈.getUpdated()),
                                     Collectors.groupingBy(요구사항_별_업데이트_데이터::getParentReqKey))));
 
         }else if(지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT){
+
             조회_결과= 전체결과.stream()
                     .map(this::요구사항_별_업데이트_데이터)
+                    .distinct()
                     .collect(Collectors.groupingBy(요구사항_별_업데이트_데이터::getPdServiceVersion,
                             Collectors.groupingBy(이슈 -> transformDateForUpdatedField(이슈.getUpdated()),
                                     Collectors.groupingBy(요구사항_별_업데이트_데이터::getKey))));
         }
-
         return 조회_결과;
 
     }
@@ -696,6 +700,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         요구사항_별_업데이트_데이터.setUpdated(issue.getUpdated());
         요구사항_별_업데이트_데이터.setPdServiceVersion(issue.getPdServiceVersion());
         요구사항_별_업데이트_데이터.setSummary(issue.getSummary());
+        요구사항_별_업데이트_데이터.setIsReq(issue.getIsReq());
         return 요구사항_별_업데이트_데이터;
     }
     private String transformDateForUpdatedField(String date) {
