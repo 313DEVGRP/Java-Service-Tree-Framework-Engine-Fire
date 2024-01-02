@@ -1,9 +1,6 @@
 package com.arms.api.engine.controllers;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 import com.arms.api.engine.dtos.*;
@@ -212,10 +209,9 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     @GetMapping("/standard-daily/updated-jira-issue")
     public ResponseEntity<List<지라이슈>>
     기준일자별_제품_및_제품버전목록_업데이트된_이슈조회(
-            지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청,
-            @RequestParam String sortField){
+            지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청){
 
-        return ResponseEntity.ok(지라이슈_검색엔진.지라이슈_기준일자별_제품_및_제품버전_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_집계_요청,sortField));
+        return ResponseEntity.ok(지라이슈_검색엔진.지라이슈_기준일자별_제품_및_제품버전_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_집계_요청));
     }
     @ResponseBody
     @GetMapping("/standard-daily/updated-ridgeline")
@@ -248,11 +244,8 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     }
 
 
-
     @PostMapping("/requirement-linkedissue/{pdServiceId}")
     public ResponseEntity<List<지라이슈>> 제품별_요구사항_연결이슈_조회(@PathVariable Long pdServiceId, 지라이슈_일반_검색_요청 지라이슈_일반_검색_요청) {
-
-        IsReqType isReqType = IsReqType.ALL;
 
         EsQuery esQuery
                 = new EsQueryBuilder()
@@ -269,7 +262,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
                 = new EsQueryBuilder()
                 .bool( new TermsQueryFilter("pdServiceVersion",요청.getPdServiceVersionLinks()),
                         new TermQueryMust("pdServiceId",요청.getPdServiceLink()),
-                        new TermQueryMust("isReq",요청.getIsReqType().isReq())
+                        new TermQueryMust("isReq",요청.getIsReqType().isNotAllAndIsReq())
                 );
         return 지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(요청, esQuery));
     }
