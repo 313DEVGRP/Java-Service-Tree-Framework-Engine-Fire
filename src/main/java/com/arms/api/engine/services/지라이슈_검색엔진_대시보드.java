@@ -619,15 +619,9 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         return 요구사항_별_업데이트_데이터;
     }
     private String transformDateForUpdatedField(String date) {
-        DateTimeFormatter formatter;
-        if (date.contains(".")) {
-            formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
-        } else {
-            formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX");
-        }
-        OffsetDateTime offsetDateTime = OffsetDateTime.parse(date, formatter);
-        return DateTimeFormatter.ofPattern("yyyy-MM-dd").format(offsetDateTime);
+        String subDate = date.substring(0,10);
+        LocalDate localDate = LocalDate.parse(subDate);
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd").format(localDate);
     }
-
 
 }
