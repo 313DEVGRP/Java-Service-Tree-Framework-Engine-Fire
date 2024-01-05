@@ -162,12 +162,6 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         return ResponseEntity.ok(지라이슈_검색엔진.작업자_별_요구사항_별_관여도(지라이슈_제품_및_제품버전_집계_요청));
     }
 
-    @GetMapping("/req-status-and-reqInvolved-unique-assignees2")
-    public ResponseEntity<List<제품_서비스_버전>> 요구사항_별_상태_및_관여_작업자_수1(
-            지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
-        return ResponseEntity.ok(지라이슈_검색엔진.요구사항_별_상태_및_관여_작업자수_내용1(지라이슈_제품_및_제품버전_집계_요청));
-    }
-
     @GetMapping("/req-status-and-reqInvolved-unique-assignees")
     public ResponseEntity<List<제품_서비스_버전>>
         요구사항_별_상태_및_관여_작업자_수(지라이슈_제품_및_제품버전_병합_집계_요청 지라이슈_제품_및_제품버전_병합_집계_요청) {
