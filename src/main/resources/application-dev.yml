@@ -7,7 +7,7 @@ spring:
       matching-strategy: ant_path_matcher
 
 elasticsearch:
-  url: www.313.co.kr:9200
+  url: 313.co.kr:9200
 
 jira:
   maxResults: 50
