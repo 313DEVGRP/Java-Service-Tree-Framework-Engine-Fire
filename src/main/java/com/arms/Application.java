@@ -1,4 +1,4 @@
-package com;
+package com.arms;
 
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
