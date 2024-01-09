@@ -17,3 +17,6 @@ jira:
 arms:
   backend-core:
     url: http://backend-core:31313
+logging:
+  level:
+    web: debug
