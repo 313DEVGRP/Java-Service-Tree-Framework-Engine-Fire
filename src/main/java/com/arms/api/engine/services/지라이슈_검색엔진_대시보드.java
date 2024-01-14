@@ -213,7 +213,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     public List<Worker> 작업자_별_요구사항_별_관여도(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
         Map<String, Worker> contributionMap = new HashMap<>();
 
-        List<지라이슈> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionsIn(true, 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink(), 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks());
+        List<지라이슈> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionIn(true, 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink(), 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks());
 
         // 요구사항의 키를 모두 추출
         List<String> allReqKeys = requirementIssues.stream().map(지라이슈::getKey).collect(Collectors.toList());
@@ -479,11 +479,10 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         });
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
                 .withQuery(boolQuery)
-                .withSort(SortBuilders.fieldSort(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준()).order(SortOrder.ASC))
+                .withSorts(SortBuilders.fieldSort(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준()).order(SortOrder.ASC))
                 .withMaxResults(10000);
 
-        List<지라이슈> 전체결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build());
-        return 전체결과;
+        return 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build());
     }
     private 일자별_요구사항_연결된이슈_생성개수_및_상태데이터 일별_생성개수_및_상태_데이터생성(검색결과 결과) {
         Map<String, Long> 요구사항여부결과 = new HashMap<>();
@@ -535,7 +534,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         });
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
                 .withQuery(boolQuery)
-                .withSort(SortBuilders.fieldSort(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준()).order(SortOrder.ASC))
+                .withSorts(SortBuilders.fieldSort(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준()).order(SortOrder.ASC))
                 .withMaxResults(10000);
 
         List<지라이슈> 전체결과 = new ArrayList<>();
@@ -586,8 +585,11 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         if (지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ) {
 
+
             조회_결과= 전체결과.stream()
                     .map(this::요구사항_별_업데이트_데이터)
+                    .collect(toList())
+                    .stream().flatMap(업데이트_데이터들->업데이트_데이터들.stream())
                     .distinct()
                     .collect(Collectors.groupingBy(요구사항_별_업데이트_데이터::getPdServiceVersion,
                             Collectors.groupingBy(이슈 -> transformDateForUpdatedField(이슈.getUpdated()),
@@ -597,6 +599,8 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
             조회_결과= 전체결과.stream()
                     .map(this::요구사항_별_업데이트_데이터)
+                    .collect(toList())
+                    .stream().flatMap(업데이트_데이터들->업데이트_데이터들.stream())
                     .distinct()
                     .collect(Collectors.groupingBy(요구사항_별_업데이트_데이터::getPdServiceVersion,
                             Collectors.groupingBy(이슈 -> transformDateForUpdatedField(이슈.getUpdated()),
@@ -606,15 +610,20 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
     }
 
-    private 요구사항_별_업데이트_데이터 요구사항_별_업데이트_데이터(지라이슈 issue) {
-        요구사항_별_업데이트_데이터 요구사항_별_업데이트_데이터 = new 요구사항_별_업데이트_데이터();
-        요구사항_별_업데이트_데이터.setKey(issue.getKey());
-        요구사항_별_업데이트_데이터.setParentReqKey(issue.getParentReqKey());
-        요구사항_별_업데이트_데이터.setUpdated(issue.getUpdated());
-        // 요구사항_별_업데이트_데이터.setPdServiceVersion(issue.getPdServiceVersion()); ARMS-277
-        요구사항_별_업데이트_데이터.setSummary(issue.getSummary());
-        요구사항_별_업데이트_데이터.setIsReq(issue.getIsReq());
-        return 요구사항_별_업데이트_데이터;
+    private List<요구사항_별_업데이트_데이터> 요구사항_별_업데이트_데이터(지라이슈 issue) {
+
+        return Arrays.stream(issue.getPdServiceVersion()).collect(toList())
+            .stream()
+            .map(지라이슈->{
+                요구사항_별_업데이트_데이터 요구사항_별_업데이트_데이터 = new 요구사항_별_업데이트_데이터();
+                요구사항_별_업데이트_데이터.setKey(issue.getKey());
+                요구사항_별_업데이트_데이터.setParentReqKey(issue.getParentReqKey());
+                요구사항_별_업데이트_데이터.setUpdated(issue.getUpdated());
+                요구사항_별_업데이트_데이터.setPdServiceVersion(지라이슈.longValue());
+                요구사항_별_업데이트_데이터.setSummary(issue.getSummary());
+                요구사항_별_업데이트_데이터.setIsReq(issue.getIsReq());
+                return 요구사항_별_업데이트_데이터;
+            }).collect(toList());
     }
     private String transformDateForUpdatedField(String date) {
         String subDate = date.substring(0,10);

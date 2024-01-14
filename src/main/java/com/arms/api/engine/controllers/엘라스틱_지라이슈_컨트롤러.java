@@ -76,11 +76,11 @@ public class 엘라스틱_지라이슈_컨트롤러 {
     public 지라이슈 이슈_검색엔진_저장(@PathVariable("connectId") Long 지라서버_아이디,
                                @PathVariable("issueKey") String 이슈_키,
                                @RequestParam("pdServiceId") Long 제품서비스_아이디,
-                               @RequestParam("pdServiceVersion") Long 제품서비스_버전_아이디,
+                               @RequestParam("pdServiceVersion") List<Long> 제품서비스_버전_아이디들,
                                         ModelMap model, HttpServletRequest request) throws Exception {
         로그.info("지라 이슈_검색엔진_저장");
 
-        return 지라이슈_검색엔진.이슈_검색엔진_저장(지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디);
+        return 지라이슈_검색엔진.이슈_검색엔진_저장(지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디들);
     }
 
     @ResponseBody
@@ -113,12 +113,12 @@ public class 엘라스틱_지라이슈_컨트롤러 {
     public int 이슈_검색엔진_벌크_저장(@PathVariable("connectId") Long 지라서버_아이디,
                                        @PathVariable("issueKey") String 이슈_키,
                                        @RequestParam("pdServiceId") Long 제품서비스_아이디,
-                                        @RequestParam("pdServiceVersion") Long 제품서비스_버전_아이디,
+                                       @RequestParam("pdServiceVersion") List<Long> 제품서비스_버전_아이디들,
                                        ModelMap model, HttpServletRequest request) throws Exception {
 
         로그.info("지라 이슈_검색엔진_벌크_저장 컨트롤러");
 
-        return 지라이슈_검색엔진.이슈_링크드이슈_서브테스크_벌크로_추가하기(지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디);
+        return 지라이슈_검색엔진.이슈_링크드이슈_서브테스크_벌크로_추가하기(지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디들);
     }
 
     @ResponseBody

@@ -29,13 +29,13 @@ import java.util.Map;
 
      검색결과_목록_메인 특정필드_검색후_다른필드_그룹결과(String 인덱스이름, String 특정필드, String 특정필드검색어, String 그룹할필드) throws IOException;
 
-     지라이슈 이슈_검색엔진_저장(Long 지라서버_아이디, String 이슈_키, Long 제품서비스_아이디, Long 제품서비스_버전) throws Exception;
+     지라이슈 이슈_검색엔진_저장(Long 지라서버_아이디, String 이슈_키, Long 제품서비스_아이디, List<Long> 제품서비스_버전_아이디들) throws Exception;
 
      boolean 지라이슈_인덱스백업();
 
      boolean 지라이슈_인덱스삭제();
 
-     int 이슈_링크드이슈_서브테스크_벌크로_추가하기(Long 지라서버_아이디, String 이슈_키, Long 제품서비스_아이디, Long 제품서비스_버전) throws Exception;
+     int 이슈_링크드이슈_서브테스크_벌크로_추가하기(Long 지라서버_아이디, String 이슈_키, Long 제품서비스_아이디, List<Long> 제품서비스_버전들) throws Exception;
 
      List<지라이슈> 요구사항_링크드이슈_서브테스크_검색하기(Long 서버_아이디, String 이슈_키, int 페이지_번호, int 페이지_사이즈);
 
