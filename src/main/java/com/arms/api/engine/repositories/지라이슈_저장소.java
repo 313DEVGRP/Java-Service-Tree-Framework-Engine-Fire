@@ -9,9 +9,9 @@ import java.util.List;
 @Repository
 public interface 지라이슈_저장소 extends 공통저장소<지라이슈,String>{
 
-    List<지라이슈> findByPdServiceIdAndPdServiceVersionIn(Long pdServiceLink, List<Long> pdServiceVersionLinks);
+    List<지라이슈> findByPdServiceIdAndPdServiceVersionsIn(Long pdServiceLink, List<Long> pdServiceVersionLinks); //ARMS-277
 
-    List<지라이슈> findByIsReqAndPdServiceIdAndPdServiceVersionIn(boolean isReq, Long pdServiceLink, List<Long> pdServiceVersionLinks);
+    List<지라이슈> findByIsReqAndPdServiceIdAndPdServiceVersionsIn(boolean isReq, Long pdServiceLink, List<Long> pdServiceVersionLinks); //ARMS-277
 
     List<지라이슈> findByParentReqKeyIn(List<String> parentReqKeys);
 }

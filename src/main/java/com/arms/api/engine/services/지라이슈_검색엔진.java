@@ -33,8 +33,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.IndexOperations;
-import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
@@ -460,7 +458,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                 .timespent(Optional.ofNullable(지라이슈_데이터.getFields().getTimespent()).orElse(null))
                 .summary(Optional.ofNullable(지라이슈_데이터.getFields().getSummary()).orElse(null))
                 .pdServiceId(제품서비스_아이디)
-                .pdServiceVersion(제품서비스_버전)
+                // .pdServiceVersion(제품서비스_버전) -- ARMS-277
                 .build();
 
         이슈.generateId();
@@ -663,7 +661,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
     @Override
     public List<지라이슈> 제품서비스_버전목록으로_조회(Long pdServiceLink, List<Long> pdServiceVersionLinks) {
-        return 지라이슈저장소.findByPdServiceIdAndPdServiceVersionIn(pdServiceLink, pdServiceVersionLinks);
+        return 지라이슈저장소.findByPdServiceIdAndPdServiceVersionsIn(pdServiceLink, pdServiceVersionLinks);
     }
 
     @Override

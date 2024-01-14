@@ -13,14 +13,12 @@ import com.arms.elasticsearch.util.aggregation.CustomTermsAggregationBuilder;
 import com.arms.elasticsearch.util.query.EsQuery;
 import com.arms.elasticsearch.util.query.EsQueryBuilder;
 import com.arms.elasticsearch.util.query.bool.*;
-import com.arms.elasticsearch.util.query.일반_집계_요청;
 import com.arms.elasticsearch.util.query.쿼리_추상_팩토리;
 import com.arms.elasticsearch.util.검색결과;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
+
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -215,7 +213,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     public List<Worker> 작업자_별_요구사항_별_관여도(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
         Map<String, Worker> contributionMap = new HashMap<>();
 
-        List<지라이슈> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionIn(true, 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink(), 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks());
+        List<지라이슈> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionsIn(true, 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink(), 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks());
 
         // 요구사항의 키를 모두 추출
         List<String> allReqKeys = requirementIssues.stream().map(지라이슈::getKey).collect(Collectors.toList());
@@ -613,7 +611,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         요구사항_별_업데이트_데이터.setKey(issue.getKey());
         요구사항_별_업데이트_데이터.setParentReqKey(issue.getParentReqKey());
         요구사항_별_업데이트_데이터.setUpdated(issue.getUpdated());
-        요구사항_별_업데이트_데이터.setPdServiceVersion(issue.getPdServiceVersion());
+        // 요구사항_별_업데이트_데이터.setPdServiceVersion(issue.getPdServiceVersion()); ARMS-277
         요구사항_별_업데이트_데이터.setSummary(issue.getSummary());
         요구사항_별_업데이트_데이터.setIsReq(issue.getIsReq());
         return 요구사항_별_업데이트_데이터;
