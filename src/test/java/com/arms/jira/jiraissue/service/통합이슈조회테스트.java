@@ -55,7 +55,7 @@ class 통합이슈조회테스트 {
     // 온프레미스
     JiraRestClient restClient;
 
-    private String o_url = "http://www.313.co.kr/jira";
+    private String o_url = "http://313.co.kr/jira";
     private String o_id = "admin";
     private String o_pass = "flexjava";
     public String o_projectKey = "JSTFFW";
