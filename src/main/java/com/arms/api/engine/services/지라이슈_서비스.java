@@ -1,7 +1,7 @@
 package com.arms.api.engine.services;
 
-import com.arms.api.engine.dtos.히트맵데이터;
 import com.arms.api.engine.models.지라이슈;
+import com.arms.api.engine.vo.히트맵데이터;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
 import com.arms.elasticsearch.util.검색조건;
 

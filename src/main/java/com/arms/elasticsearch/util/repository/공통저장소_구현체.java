@@ -130,6 +130,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         return this.normalSearch(query.build());
 
     }
+
     @Override
     public boolean 인덱스확인_및_생성_매핑(String 인덱스명) {
         IndexOperations 인덱스작업 = operations.indexOps(IndexCoordinates.of(인덱스명));
@@ -141,17 +142,19 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
         boolean 생성확인 = 인덱스작업.create();
         if (!생성확인) {
-            throw new IllegalStateException("인덱스 생성에 실패하였습니다.");
+            로그.error(this.getClass().getName() + " :: 인덱스확인_및_생성_매핑(String 인덱스명) :: " + 인덱스명 +" -> 인덱스 생성에 실패하였습니다." );
+            return 생성확인;
         }
 
         boolean 매핑확인 = 인덱스작업.putMapping(인덱스작업.createMapping());
 
         if (!매핑확인) {
-            throw new IllegalStateException("인덱스 매핑 설정에 실패하였습니다.");
+            로그.error(this.getClass().getName() + " :: 인덱스확인_및_생성_매핑(String 인덱스명) :: " + 인덱스명 +" -> 인덱스 매핑 추가에 실패하였습니다." );
+            return 매핑확인;
         }
 
         인덱스작업.refresh();
-        로그.info("인덱스확인_및_생성_매핑 ::: " + 인덱스명);
+        로그.info(this.getClass().getName() +  " :: 인덱스확인_및_생성_매핑(String 인덱스명) -> " + 인덱스명);
 
         return 매핑확인;
     }
@@ -183,7 +186,8 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
             }
         }
         catch(Exception e) {
-            로그.error(e.getMessage());
+            로그.error(this.getClass().getName() + " :: 인덱스삭제(String 삭제할_지라이슈인덱스) :: 삭제할_지라이슈인덱스 -> " + 삭제할_지라이슈인덱스);
+            로그.error(this.getClass().getName() + " :: 인덱스삭제(String 삭제할_지라이슈인덱스) :: 에러 메세지 -> " + e.getMessage());
         }
 
         return 삭제결과;
@@ -199,6 +203,9 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
             }
 
             if (!인덱스_백업_생성(백업_인덱스, entityClass)) {
+                로그.error(this.getClass().getName() + " :: 리인덱스(String 현재_인덱스, String 백업_인덱스) :: 백업 인덱스 명 -> " + 백업_인덱스);
+                로그.error(this.getClass().getName() + " :: 리인덱스(String 현재_인덱스, String 백업_인덱스) :: 인덱스 백업 생성 실패!");
+
                 return false;
             }
         } else {

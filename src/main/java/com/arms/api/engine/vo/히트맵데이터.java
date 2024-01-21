@@ -1,4 +1,4 @@
-package com.arms.api.engine.dtos;
+package com.arms.api.engine.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
