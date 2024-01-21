@@ -1,6 +1,5 @@
 package com.arms.elasticsearch.util.repository;
 
-import com.arms.elasticsearch.helper.인덱스_유틸;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
 import com.arms.elasticsearch.util.검색엔진_유틸;
 import com.arms.elasticsearch.util.검색조건;

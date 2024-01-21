@@ -6,21 +6,19 @@ import com.arms.api.engine.repositories.지라이슈_저장소;
 import com.arms.api.engine.vo.제품_서비스_버전;
 import com.arms.api.engine.vo.하위_이슈_사항;
 import com.arms.api.engine.vo.하위_이슈_사항들;
-import com.arms.elasticsearch.helper.인덱스자료;
+import com.arms.api.engine.repositories.인덱스자료;
 import com.arms.elasticsearch.util.aggregation.CustomAbstractAggregationBuilder;
 import com.arms.elasticsearch.util.aggregation.CustomDateHistogramAggregationBuilder;
 import com.arms.elasticsearch.util.aggregation.CustomTermsAggregationBuilder;
 import com.arms.elasticsearch.util.query.EsQuery;
 import com.arms.elasticsearch.util.query.EsQueryBuilder;
 import com.arms.elasticsearch.util.query.bool.*;
-import com.arms.elasticsearch.util.query.일반_집계_요청;
 import com.arms.elasticsearch.util.query.쿼리_추상_팩토리;
 import com.arms.elasticsearch.util.검색결과;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
+
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -56,7 +54,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
     private 지라이슈_저장소 지라이슈저장소;
     @Autowired
-    private com.arms.elasticsearch.helper.인덱스_유틸 인덱스_유틸;
+    private com.arms.elasticsearch.util.helper.인덱스_유틸 인덱스_유틸;
 
     @Override
     public Map<String, Long> 제품서비스별_담당자_이름_통계(Long 지라서버_아이디, Long 제품서비스_아이디) {

@@ -1,4 +1,4 @@
-package com.arms.elasticsearch.helper;
+package com.arms.elasticsearch.util.helper;
 
 import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.repositories.지라이슈_저장소;
