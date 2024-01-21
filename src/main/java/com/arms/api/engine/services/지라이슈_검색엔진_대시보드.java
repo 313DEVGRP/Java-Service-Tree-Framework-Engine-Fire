@@ -566,7 +566,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
             String 호출할_지라인덱스 = 오늘일경우.format(formatter).equals(today.format(formatter))
                     ? 지라인덱스 : 지라인덱스 + "-" + today.format(formatter);
 
-            if (!인덱스_유틸.인덱스_존재_확인(호출할_지라인덱스)) {
+            if (!지라이슈저장소.인덱스_존재_확인(호출할_지라인덱스)) {
                 인덱스존재시까지 = false;
                 break;
             }

@@ -30,4 +30,12 @@ public interface 공통저장소<T,ID extends Serializable> extends Elasticsearc
 	List<T>  getAllCreatedSince(Date date, Class<T> clazz);
 
 	List<T>  searchCreatedSince(검색조건 dto, Date date, Class<T> clazz);
+
+	boolean 인덱스확인_및_생성_매핑(String 인덱스명);
+
+	boolean 인덱스_존재_확인(String 인덱스명);
+
+	boolean 인덱스삭제(String 삭제할_지라이슈인덱스);
+
+	boolean 리인덱스(String 현재_인덱스, String 백업_인덱스);
 }
