@@ -44,7 +44,7 @@ public class Swagger2Config {
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("Java Service Tree Framework")
-                .contact(new Contact("313 DEV GRP", "313.co.kr", "313cokr@gmail.com"))
+                .contact(new Contact("313 DEV GRP", "www.313.co.kr", "313cokr@gmail.com"))
                 .version("1.0")
                 .build();
     }
