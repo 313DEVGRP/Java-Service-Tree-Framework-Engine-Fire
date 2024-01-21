@@ -1,12 +1,15 @@
 package com.arms.api.engine.services;
 
 import com.arms.api.engine.dtos.*;
-import com.arms.api.engine.models.*;
+import com.arms.api.engine.models.IsReqType;
+import com.arms.api.engine.models.지라이슈;
+import com.arms.api.engine.models.지라이슈_일자별_제품_및_제품버전_집계_요청;
+import com.arms.api.engine.models.지라이슈_제품_및_제품버전_집계_요청;
+import com.arms.api.engine.repositories.인덱스자료;
 import com.arms.api.engine.repositories.지라이슈_저장소;
 import com.arms.api.engine.vo.제품_서비스_버전;
 import com.arms.api.engine.vo.하위_이슈_사항;
 import com.arms.api.engine.vo.하위_이슈_사항들;
-import com.arms.api.engine.repositories.인덱스자료;
 import com.arms.elasticsearch.util.aggregation.CustomAbstractAggregationBuilder;
 import com.arms.elasticsearch.util.aggregation.CustomDateHistogramAggregationBuilder;
 import com.arms.elasticsearch.util.aggregation.CustomTermsAggregationBuilder;
@@ -18,7 +21,6 @@ import com.arms.elasticsearch.util.검색결과;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -30,7 +32,6 @@ import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
@@ -53,8 +54,6 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     private 지라이슈_저장소 지라이슈저장소;
-    @Autowired
-    private com.arms.elasticsearch.util.helper.인덱스_유틸 인덱스_유틸;
 
     @Override
     public Map<String, Long> 제품서비스별_담당자_이름_통계(Long 지라서버_아이디, Long 제품서비스_아이디) {
