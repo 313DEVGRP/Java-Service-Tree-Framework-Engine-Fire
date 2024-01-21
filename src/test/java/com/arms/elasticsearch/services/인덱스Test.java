@@ -1,8 +1,8 @@
 package com.arms.elasticsearch.services;
 
 import com.arms.api.engine.models.지라이슈;
-import com.arms.elasticsearch.helper.인덱스자료;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import com.arms.api.engine.repositories.인덱스자료;
+
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.tasks.GetTaskRequest;

@@ -6,7 +6,7 @@ import com.arms.api.engine.repositories.지라이슈_저장소;
 import com.arms.api.engine.vo.제품_서비스_버전;
 import com.arms.api.engine.vo.하위_이슈_사항;
 import com.arms.api.engine.vo.하위_이슈_사항들;
-import com.arms.elasticsearch.helper.인덱스자료;
+import com.arms.api.engine.repositories.인덱스자료;
 import com.arms.elasticsearch.util.aggregation.CustomAbstractAggregationBuilder;
 import com.arms.elasticsearch.util.aggregation.CustomDateHistogramAggregationBuilder;
 import com.arms.elasticsearch.util.aggregation.CustomTermsAggregationBuilder;
@@ -54,7 +54,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
     private 지라이슈_저장소 지라이슈저장소;
     @Autowired
-    private com.arms.elasticsearch.helper.인덱스_유틸 인덱스_유틸;
+    private com.arms.elasticsearch.util.helper.인덱스_유틸 인덱스_유틸;
 
     @Override
     public Map<String, Long> 제품서비스별_담당자_이름_통계(Long 지라서버_아이디, Long 제품서비스_아이디) {

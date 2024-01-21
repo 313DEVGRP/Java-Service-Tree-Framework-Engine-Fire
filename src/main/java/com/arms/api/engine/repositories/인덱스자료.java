@@ -1,4 +1,4 @@
-package com.arms.elasticsearch.helper;
+package com.arms.api.engine.repositories;
 
 public final  class 인덱스자료 {
 

@@ -2,8 +2,8 @@ package com.arms.api.serverinfo.service;
 
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.model.서버정보_엔티티;
-import com.arms.elasticsearch.helper.인덱스_유틸;
-import com.arms.elasticsearch.helper.인덱스자료;
+import com.arms.elasticsearch.util.helper.인덱스_유틸;
+import com.arms.api.engine.repositories.인덱스자료;
 import com.arms.errors.codes.에러코드;
 
 import lombok.AllArgsConstructor;
