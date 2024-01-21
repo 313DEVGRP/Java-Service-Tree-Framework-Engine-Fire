@@ -1,9 +1,9 @@
 package com.arms.api.engine.services;
 
-import com.arms.api.engine.dtos.히트맵날짜데이터;
-import com.arms.api.engine.dtos.히트맵데이터;
 import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.repositories.지라이슈_저장소;
+import com.arms.api.engine.vo.히트맵날짜데이터;
+import com.arms.api.engine.vo.히트맵데이터;
 import com.arms.api.jira.jiraissue.model.지라이슈_데이터;
 import com.arms.api.jira.jiraissue.model.지라이슈필드_데이터;
 import com.arms.api.jira.jiraissue.model.지라프로젝트_데이터;
@@ -28,7 +28,6 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -200,7 +199,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         boolean 인덱스백업 = 지라이슈저장소.리인덱스(현재_지라이슈인덱스, 백업_지라이슈인덱스);
 
         if (!인덱스백업) {
-            로그.error("Failed to reindex!");
+            로그.error(this.getClass().getName() + " :: 지라이슈_인덱스백업() :: 리인덱스 실패!");
             return false;
         }
 
@@ -213,9 +212,9 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
         boolean 삭제성공 = 지라이슈저장소.인덱스삭제(현재_지라이슈인덱스);
         if (삭제성공) {
-            로그.info("Index deleted successfully!");
+            로그.info(this.getClass().getName() + " :: 지라이슈_인덱스삭제() :: 인덱스 삭제 완료!");
         } else {
-            로그.error("Failed to delete index!");
+            로그.error(this.getClass().getName() + " :: 지라이슈_인덱스삭제() :: 인덱스 삭제 실패!");
         }
 
         return 삭제성공;

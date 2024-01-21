@@ -96,12 +96,12 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
 
         if (body instanceof HashMap) {
             서버정보맵 = (HashMap<String, Object>) body;
-
-            if (서버정보맵 == null) {
-                throw new IllegalArgumentException(에러코드.서버정보_조회_오류.getErrorMsg());
-            }
         } else {
             throw new IllegalArgumentException("서버 응답이 올바르지 않습니다.");
+        }
+
+        if (서버정보맵 == null) {
+            throw new IllegalArgumentException(에러코드.서버정보_조회_오류.getErrorMsg());
         }
 
         Object 성공유무 = 서버정보맵.get("success");
