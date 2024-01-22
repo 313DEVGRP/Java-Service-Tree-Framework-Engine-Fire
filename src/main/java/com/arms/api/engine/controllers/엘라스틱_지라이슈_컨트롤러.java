@@ -76,7 +76,7 @@ public class 엘라스틱_지라이슈_컨트롤러 {
     public 지라이슈 이슈_검색엔진_저장(@PathVariable("connectId") Long 지라서버_아이디,
                                @PathVariable("issueKey") String 이슈_키,
                                @RequestParam("pdServiceId") Long 제품서비스_아이디,
-                               @RequestParam("pdServiceVersion") List<Long> 제품서비스_버전_아이디들,
+                               @RequestParam("pdServiceVersion") Long[] 제품서비스_버전_아이디들,
                                         ModelMap model, HttpServletRequest request) throws Exception {
         로그.info("지라 이슈_검색엔진_저장");
 
@@ -113,7 +113,7 @@ public class 엘라스틱_지라이슈_컨트롤러 {
     public int 이슈_검색엔진_벌크_저장(@PathVariable("connectId") Long 지라서버_아이디,
                                        @PathVariable("issueKey") String 이슈_키,
                                        @RequestParam("pdServiceId") Long 제품서비스_아이디,
-                                       @RequestParam("pdServiceVersion") List<Long> 제품서비스_버전_아이디들,
+                                       @RequestParam("pdServiceVersions") Long[] 제품서비스_버전_아이디들,
                                        ModelMap model, HttpServletRequest request) throws Exception {
 
         로그.info("지라 이슈_검색엔진_벌크_저장 컨트롤러");
@@ -170,17 +170,18 @@ public class 엘라스틱_지라이슈_컨트롤러 {
     @ResponseBody
     @GetMapping("/pdService/pdServiceVersions")
     public List<지라이슈> 제품서비스_버전목록으로_조회(@RequestParam Long pdServiceLink,
-                                    @RequestParam List<Long> pdServiceVersionLinks) throws IOException {
+                                    @RequestParam Long[] pdServiceVersionLinks) throws IOException {
 
         로그.info("제품서비스_버전목록으로_조회");
 
-        return 지라이슈_검색엔진.제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
+        List<지라이슈> 제품서비스_버전목록으로_조회 = 지라이슈_검색엔진.제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
+        return 제품서비스_버전목록으로_조회;
     }
 
     @ResponseBody
     @GetMapping("/pdService/pdServiceVersions/heatmap")
     public 히트맵데이터 히트맵_제품서비스_버전목록으로_조회(@RequestParam Long pdServiceLink,
-                                      @RequestParam List<Long> pdServiceVersionLinks) {
+                                      @RequestParam Long[] pdServiceVersionLinks) {
         로그.info("히트맵_제품서비스_버전목록으로_조회");
 
         return 지라이슈_검색엔진.히트맵_제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);

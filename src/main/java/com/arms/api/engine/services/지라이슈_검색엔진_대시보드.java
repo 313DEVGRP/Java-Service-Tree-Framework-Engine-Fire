@@ -212,7 +212,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     public List<Worker> 작업자_별_요구사항_별_관여도(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
         Map<String, Worker> contributionMap = new HashMap<>();
 
-        List<지라이슈> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionIn(true, 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink(), 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks());
+        List<지라이슈> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionsIn(true, 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink(), 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks());
 
         // 요구사항의 키를 모두 추출
         List<String> allReqKeys = requirementIssues.stream().map(지라이슈::getKey).collect(Collectors.toList());
@@ -326,7 +326,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         return 검색결과;
     }
 
-    public 요구사항_지라이슈상태_주별_집계 누적데이터조회(Long pdServiceLink, List<Long> pdServiceVersionLinks, LocalDate monthAgo) {
+    public 요구사항_지라이슈상태_주별_집계 누적데이터조회(Long pdServiceLink, Long[] pdServiceVersionLinks, LocalDate monthAgo) {
         // 총 이슈 개수를 구하기 위한 쿼리
         EsQuery issueEsQuery = new EsQueryBuilder()
                 .bool(new TermQueryMust("pdServiceId", pdServiceLink),
@@ -611,7 +611,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
     private List<요구사항_별_업데이트_데이터> 요구사항_별_업데이트_데이터(지라이슈 issue) {
 
-        return Arrays.stream(issue.getPdServiceVersion()).collect(toList())
+        return Arrays.stream(issue.getPdServiceVersions()).collect(toList())
             .stream()
             .map(지라이슈->{
                 요구사항_별_업데이트_데이터 요구사항_별_업데이트_데이터 = new 요구사항_별_업데이트_데이터();
