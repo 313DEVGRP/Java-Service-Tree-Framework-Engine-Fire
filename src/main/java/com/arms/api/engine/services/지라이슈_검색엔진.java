@@ -480,7 +480,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     }
 
     @Override
-    public Map<String, Long> 제품서비스_버전별_상태값_통계(Long 제품서비스_아이디, Long 버전_아이디) throws IOException {
+    public Map<String, Long> 제품서비스_버전별_상태값_통계(Long 제품서비스_아이디, Long[] 버전_아이디들) throws IOException {
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
 
         nativeSearchQueryBuilder.withQuery(QueryBuilders.matchAllQuery());
@@ -490,9 +490,11 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
             nativeSearchQueryBuilder.withQuery(제품서비스_조회);
         }
 
-        if ( 버전_아이디 != null && 버전_아이디 > 9L) {
-            MatchQueryBuilder 제품서비스_버전_조회 = QueryBuilders.matchQuery("pdServiceVersion", 버전_아이디);
-            nativeSearchQueryBuilder.withQuery(제품서비스_버전_조회);
+        if ( 버전_아이디들 != null) {
+            Arrays.stream(버전_아이디들).filter(버전아이디->버전아이디>9L).findAny().ifPresent(b->{
+                MatchQueryBuilder 제품서비스_버전_조회 = QueryBuilders.matchQuery("pdServiceVersions", 버전_아이디들);
+                nativeSearchQueryBuilder.withQuery(제품서비스_버전_조회);
+            });
         }
 
         nativeSearchQueryBuilder.withAggregations(
@@ -665,7 +667,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new TermQueryMust("pdServiceId", pdServiceLink),
-                        new TermsQueryFilter("pdServiceVersion", pdServiceVersionLinks)
+                        new TermsQueryFilter("pdServiceVersions", pdServiceVersionLinks)
                 );
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
         });

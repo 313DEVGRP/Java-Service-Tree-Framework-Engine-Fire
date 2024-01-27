@@ -76,7 +76,7 @@ public class 엘라스틱_지라이슈_컨트롤러 {
     public 지라이슈 이슈_검색엔진_저장(@PathVariable("connectId") Long 지라서버_아이디,
                                @PathVariable("issueKey") String 이슈_키,
                                @RequestParam("pdServiceId") Long 제품서비스_아이디,
-                               @RequestParam("pdServiceVersion") Long[] 제품서비스_버전_아이디들,
+                               @RequestParam("pdServiceVersions") Long[] 제품서비스_버전_아이디들,
                                         ModelMap model, HttpServletRequest request) throws Exception {
         로그.info("지라 이슈_검색엔진_저장");
 
@@ -139,7 +139,7 @@ public class 엘라스틱_지라이슈_컨트롤러 {
     @GetMapping("/getProgress/{pdServiceId}/{pdServiceVersion}")
     public Map<String, Long> 제품서비스_버전별_상태값_통계(@PathVariable("connectId") Long 지라서버_아이디,
                                        @PathVariable("pdServiceId") Long 제품서비스_아이디,
-                                       @PathVariable("pdServiceVersion") Long 제품서비스_버전_아이디) throws IOException {
+                                       @PathVariable("pdServiceVersions") Long[] 제품서비스_버전_아이디) throws IOException {
 
         return 지라이슈_검색엔진.제품서비스_버전별_상태값_통계(제품서비스_아이디,제품서비스_버전_아이디);
     }
