@@ -33,7 +33,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     ) {
         EsBoolQuery[] esBoolQueries = Stream.of(
                 new TermQueryMust("pdServiceId", 검색요청.getPdServiceLink()),
-                new TermsQueryFilter("pdServiceVersion", 검색요청.getPdServiceVersionLinks()),
+                new TermsQueryFilter("pdServiceVersions", 검색요청.getPdServiceVersionLinks()),
                 검색요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
                 검색요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null
         ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
@@ -49,7 +49,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     ) {
         EsBoolQuery[] esBoolQueries = Stream.of(
                 new TermQueryMust("pdServiceId", 검색요청.getPdServiceLink()),
-                new TermsQueryFilter("pdServiceVersion", 검색요청.getPdServiceVersionLinks()),
+                new TermsQueryFilter("pdServiceVersions", 검색요청.getPdServiceVersionLinks()),
                 검색요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
                 검색요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null
         ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
@@ -120,7 +120,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
                 .bool(
                         new TermQueryMust("pdServiceId",pdServiceId)
                         ,new TermQueryMust("isReq", 지라이슈_일반_집계_요청.getIsReq())
-                        ,new TermsQueryFilter("pdServiceVersion",pdServiceVersionLinks)
+                        ,new TermsQueryFilter("pdServiceVersions",pdServiceVersionLinks)
                 );
 
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(지라이슈_일반_집계_요청, esQuery)));
@@ -134,7 +134,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
             = new EsQueryBuilder()
                 .bool(
                         new TermQueryMust("pdServiceId",pdServiceId)
-                        ,new TermsQueryFilter("pdServiceVersion",pdServiceVersionLinks)
+                        ,new TermsQueryFilter("pdServiceVersions",pdServiceVersionLinks)
                 );
 
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(지라이슈_단순_검색_요청, esQuery)));
@@ -148,7 +148,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         EsQuery esQuery
                 = new EsQueryBuilder()
                 .bool(  new TermsQueryFilter("assignee.assignee_emailAddress.keyword", mailAddressList),
-                        new TermsQueryFilter("pdServiceVersion",pdServiceVersionLinks),
+                        new TermsQueryFilter("pdServiceVersions",pdServiceVersionLinks),
                         new TermQueryMust("pdServiceId",pdServiceId)
                 );
 
@@ -232,7 +232,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
                 .bool(
                         new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink())
                         , new TermQueryMust("isReq", isReq)
-                        , new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks())
+                        , new TermsQueryFilter("pdServiceVersions", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks())
                         , new ExistsQueryFilter(resolution)
                 );
 
@@ -247,7 +247,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
                 = new EsQueryBuilder()
                 .bool(
                         new TermQueryMust("pdServiceId",pdServiceId),
-                        new TermsQueryFilter("pdServiceVersion",지라이슈_일반_검색_요청.getPdServiceVersionLinks())
+                        new TermsQueryFilter("pdServiceVersions",지라이슈_일반_검색_요청.getPdServiceVersionLinks())
                 );
 
         return ResponseEntity.ok(지라이슈_검색엔진.지라이슈_조회(일반_검색_요청.of(지라이슈_일반_검색_요청, esQuery)));
@@ -256,7 +256,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     private 검색결과_목록_메인 병합_요청_사항_요청값_생성(지라이슈_제품_및_제품버전_집계_요청 요청){
         EsQuery esQuery
                 = new EsQueryBuilder()
-                .bool( new TermsQueryFilter("pdServiceVersion",요청.getPdServiceVersionLinks()),
+                .bool( new TermsQueryFilter("pdServiceVersions",요청.getPdServiceVersionLinks()),
                         new TermQueryMust("pdServiceId",요청.getPdServiceLink()),
                         new TermQueryMust("isReq",요청.getIsReqType().isNotAllAndIsReq())
                 );
