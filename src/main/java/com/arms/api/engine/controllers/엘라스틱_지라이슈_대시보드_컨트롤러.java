@@ -262,4 +262,11 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
                 );
         return 지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(요청, esQuery));
     }
+
+    @GetMapping("/version-req-assignees")
+    public ResponseEntity<List<검색결과>> 제품별_버전_및_요구사항별_작업자(
+            지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청
+    ) {
+        return ResponseEntity.ok(지라이슈_검색엔진.제품_버전별_요구사항별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청));
+    }
 }
