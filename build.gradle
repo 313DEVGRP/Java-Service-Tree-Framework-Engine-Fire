@@ -96,7 +96,10 @@ configurations {
 
 repositories {
 	mavenCentral()
-
+	maven {
+		url 'http://www.313.co.kr/nexus/repository/ple-releases/'
+		allowInsecureProtocol true
+	}
 }
 
 dependencies {
