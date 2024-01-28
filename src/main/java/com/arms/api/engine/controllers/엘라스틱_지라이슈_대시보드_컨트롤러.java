@@ -164,11 +164,15 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
 
     @PostMapping("/req-status-and-reqInvolved-unique-assignees")
     public ResponseEntity<List<제품_서비스_버전>>
-        요구사항_별_상태_및_관여_작업자_수(@RequestBody 지라이슈_제품_및_제품버전_병합_집계_요청 지라이슈_제품_및_제품버전_병합_집계_요청) {
+        요구사항_별_상태_및_관여_작업자_수(@RequestBody 지라이슈_제품_및_제품버전_병합_집계_요청 병합집계요청) {
 
-        log.info("[엘라스틱_지라이슈_대시보드_컨트롤러 :: 요구사항_별_상태_및_관여_작업자_수 ] :: 병합_요청_사항_요청값_생성 -> {}", 지라이슈_제품_및_제품버전_병합_집계_요청.get요구_사항());
-        검색결과_목록_메인 요구사항 = 병합_요청_사항_요청값_생성(지라이슈_제품_및_제품버전_병합_집계_요청.get요구_사항());
-        검색결과_목록_메인 하위_이슈_사항 = 병합_요청_사항_요청값_생성(지라이슈_제품_및_제품버전_병합_집계_요청.get하위_이슈_사항());
+        log.info("[엘라스틱_지라이슈_대시보드_컨트롤러 :: 요구사항_별_상태_및_관여_작업자_수 ] :: 병합_요청_사항_요청값_생성 -> {}", 병합집계요청.get요구_사항());
+        검색결과_목록_메인 요구사항
+            =  지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(병합집계요청.get요구_사항(), 병합_요청_사항_요청값_생성(병합집계요청.get요구_사항())));
+
+        검색결과_목록_메인 하위_이슈_사항
+            =  지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(병합집계요청.get요구_사항(), 병합_요청_사항_요청값_생성(병합집계요청.get하위_이슈_사항())));
+
         return ResponseEntity.ok(지라이슈_검색엔진.요구사항_별_상태_및_관여_작업자수_내용(요구사항,하위_이슈_사항));
     }
 
@@ -253,13 +257,14 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         return ResponseEntity.ok(지라이슈_검색엔진.지라이슈_조회(일반_검색_요청.of(지라이슈_일반_검색_요청, esQuery)));
     }
 
-    private 검색결과_목록_메인 병합_요청_사항_요청값_생성(지라이슈_제품_및_제품버전_집계_요청 요청){
+    private EsQuery 병합_요청_사항_요청값_생성(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청){
         EsQuery esQuery
                 = new EsQueryBuilder()
-                .bool( new TermsQueryFilter("pdServiceVersions",요청.getPdServiceVersionLinks()),
-                        new TermQueryMust("pdServiceId",요청.getPdServiceLink()),
-                        new TermQueryMust("isReq",요청.getIsReqType().isNotAllAndIsReq())
+                .bool( new TermsQueryFilter("pdServiceVersions",지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
+                        new TermQueryMust("pdServiceId",지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
+                        new TermQueryMust("isReq",지라이슈_제품_및_제품버전_집계_요청.getIsReqType().isNotAllAndIsReq())
                 );
-        return 지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(요청, esQuery));
+
+        return esQuery;
     }
 }
