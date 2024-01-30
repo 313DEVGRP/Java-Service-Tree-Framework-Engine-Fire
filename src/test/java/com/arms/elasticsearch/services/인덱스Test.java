@@ -27,6 +27,9 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.*;
 import org.springframework.data.elasticsearch.core.document.Document;
+import org.springframework.data.elasticsearch.core.index.AliasAction;
+import org.springframework.data.elasticsearch.core.index.AliasActionParameters;
+import org.springframework.data.elasticsearch.core.index.AliasActions;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
@@ -41,6 +44,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -68,7 +72,8 @@ public class 인덱스Test {
     public boolean 인덱스클래스로_인덱스백업(Class<?> clazz) {
         String 현재_지라이슈인덱스 = 인덱스자료.지라이슈_인덱스명;
         String currentDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        String 백업_지라이슈인덱스 = 현재_지라이슈인덱스 + "-1555-12-01";
+        currentDate = "-2024-01-04";
+        String 백업_지라이슈인덱스 = 현재_지라이슈인덱스 + currentDate;
 
         if (!인덱스_존재_확인(백업_지라이슈인덱스)) {
             if (!인덱스_존재_확인(현재_지라이슈인덱스)) {
@@ -80,7 +85,7 @@ public class 인덱스Test {
                 return false;
             }
 
-            if(리인덱스(현재_지라이슈인덱스, 백업_지라이슈인덱스)) {
+            if(리인덱스(현재_지라이슈인덱스, 백업_지라이슈인덱스, currentDate)) {
                 System.out.println("인덱스 재색인을 완료하였습니다.");
                 return true;
             }
@@ -126,6 +131,7 @@ public class 인덱스Test {
         Document 매핑정보 = 백업_인덱스작업.createMapping(clazz);
         백업_인덱스작업.create();
         백업_인덱스작업.putMapping(매핑정보);
+        // 별칭_지정하기(백업_지라이슈인덱스, "bakup_jiraissue");
 
         return 백업_인덱스작업.exists();
     }
@@ -340,7 +346,7 @@ public class 인덱스Test {
         NativeSearchQueryBuilder nativeSearchQueryBuilder
                 = new NativeSearchQueryBuilder().withQuery(boolQuery).withAggregations(dailyAggregationBuilder.build());
 
-        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build(), "jiraissue_backup");
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build(), "bakup_jiraissue");
 
         List<검색결과> aggregationByDay = 검색결과_목록_메인.get검색결과().get("aggregation_by_day");
 
@@ -397,7 +403,7 @@ public class 인덱스Test {
         return new 일자별_요구사항_연결된이슈_생성개수_및_상태데이터(요구사항_개수, 요구사항_상태목록, 연결된이슈_개수, 연결된이슈_상태목록);
     }
 
-    public boolean 리인덱스(String 현재_지라이슈인덱스, String 백업_지라이슈인덱스) {
+    public boolean 리인덱스(String 현재_지라이슈인덱스, String 백업_지라이슈인덱스, String 백업날짜) {
         boolean 결과 = false;
 
         if (!인덱스_존재_확인(백업_지라이슈인덱스)) {
@@ -429,7 +435,10 @@ public class 인덱스Test {
             List<IndexQuery> indexQueries = new ArrayList<>();
 
             for (지라이슈 이슈 : 지라이슈목록) {
+                String newId = 이슈.getId() + 백업날짜;
+
                 IndexQuery indexQuery = new IndexQueryBuilder()
+                        .withId(newId)
                         .withObject(이슈)
                         .build();
 
@@ -458,5 +467,29 @@ public class 인덱스Test {
     public void 지라이슈컨트롤러_인덱스삭제_Test() {
         boolean 결과 = 지라이슈_서비스.지라이슈_인덱스삭제();
         assertTrue(결과);
+    }
+
+    @Test
+    void 별칭추가() {
+        boolean 결과 = 별칭_지정하기("jiraissue-2024-01-05", "bakup_jiraissue");
+        assertFalse(결과);
+    }
+
+    public boolean 별칭_지정하기(String 별칭을_추가할_인덱스, String 별칭) {
+        AliasActions aliasActions = new AliasActions();
+        aliasActions.add(new AliasAction.Add(AliasActionParameters.builder()
+                .withIndices(별칭을_추가할_인덱스)
+                .withAliases(별칭)
+                .build()));
+
+        boolean 결과 = false;
+        try {
+            결과 = 엘라스틱서치_작업.indexOps(IndexCoordinates.of(별칭을_추가할_인덱스)).alias(aliasActions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 결과;
     }
 }
