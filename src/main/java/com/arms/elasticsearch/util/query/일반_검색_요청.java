@@ -5,6 +5,7 @@ import com.arms.elasticsearch.util.base.기본_집계_요청;
 import lombok.Getter;
 import lombok.Setter;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.springframework.core.ParameterizedTypeReference;
@@ -35,15 +36,21 @@ public class 일반_검색_요청 implements 쿼리_추상_팩토리 {
 	public NativeSearchQuery 생성() {
 		BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
 		Sort sort = esQuery.getQuery(new ParameterizedTypeReference<>(){});
+		QueryStringQueryBuilder queryStringQueryBuilder = esQuery.getQuery(new ParameterizedTypeReference<>(){});
 
 		NativeSearchQueryBuilder nativeSearchQueryBuilder
-			= new NativeSearchQueryBuilder()
-			.withMaxResults(크기);
+				= new NativeSearchQueryBuilder()
+				.withMaxResults(크기);
 
-		Optional.of(boolQuery)
-			.ifPresent(query->{
-				nativeSearchQueryBuilder.withQuery(boolQuery);
-			});
+		Optional.ofNullable(boolQuery)
+				.ifPresent(query->{
+					nativeSearchQueryBuilder.withQuery(boolQuery);
+				});
+
+		Optional.ofNullable(queryStringQueryBuilder)
+				.ifPresent(query->{
+					nativeSearchQueryBuilder.withQuery(queryStringQueryBuilder);
+				});
 
 		if(sort!=null){
 			nativeSearchQueryBuilder.withSort(sort);
