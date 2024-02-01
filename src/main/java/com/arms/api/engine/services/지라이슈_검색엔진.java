@@ -159,7 +159,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     }
 
     @Override
-    public 지라이슈 이슈_검색엔진_저장(Long 지라서버_아이디, String 이슈_키, Long 제품서비스_아이디, List<Long> 제품서비스_버전들) throws Exception {
+    public 지라이슈 이슈_검색엔진_저장(Long 지라서버_아이디, String 이슈_키, Long 제품서비스_아이디, Long[] 제품서비스_버전들) throws Exception {
 
         if (지라서버_아이디 == null) {
             로그.error("이슈_검색엔진_저장 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
@@ -221,7 +221,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     }
 
     @Override
-    public int 이슈_링크드이슈_서브테스크_벌크로_추가하기(Long 지라서버_아이디, String 이슈_키 , Long 제품서비스_아이디, List<Long> 제품서비스_버전들) throws Exception {
+    public int 이슈_링크드이슈_서브테스크_벌크로_추가하기(Long 지라서버_아이디, String 이슈_키 , Long 제품서비스_아이디, Long[] 제품서비스_버전들) throws Exception {
 
         boolean 인덱스확인 = 지라이슈저장소.인덱스확인_및_생성_매핑(인덱스자료.지라이슈_인덱스명);
 
@@ -325,7 +325,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
     private 지라이슈 ELK_데이터로_변환(Long 지라서버_아이디, 지라이슈_데이터 지라이슈_데이터,
                                  boolean 요구사항유형_여부, String 부모_요구사항_키,
-                                 Long 제품서비스_아이디, List<Long> 제품서비스_버전들) {
+                                 Long 제품서비스_아이디, Long[] 제품서비스_버전들) {
 
         지라이슈.프로젝트 프로젝트 = Optional.ofNullable(지라이슈_데이터.getFields().getProject())
                 .map(project -> 지라이슈.프로젝트.builder()
@@ -454,7 +454,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                 .timespent(Optional.ofNullable(지라이슈_데이터.getFields().getTimespent()).orElse(null))
                 .summary(Optional.ofNullable(지라이슈_데이터.getFields().getSummary()).orElse(null))
                 .pdServiceId(제품서비스_아이디)
-                // .pdServiceVersions(제품서비스_버전들)
+                .pdServiceVersions(제품서비스_버전들)
                 .build();
 
         이슈.generateId();
@@ -480,7 +480,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     }
 
     @Override
-    public Map<String, Long> 제품서비스_버전별_상태값_통계(Long 제품서비스_아이디, Long 버전_아이디) throws IOException {
+    public Map<String, Long> 제품서비스_버전별_상태값_통계(Long 제품서비스_아이디, Long[] 버전_아이디들) throws IOException {
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
 
         nativeSearchQueryBuilder.withQuery(QueryBuilders.matchAllQuery());
@@ -490,9 +490,11 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
             nativeSearchQueryBuilder.withQuery(제품서비스_조회);
         }
 
-        if ( 버전_아이디 != null && 버전_아이디 > 9L) {
-            MatchQueryBuilder 제품서비스_버전_조회 = QueryBuilders.matchQuery("pdServiceVersion", 버전_아이디);
-            nativeSearchQueryBuilder.withQuery(제품서비스_버전_조회);
+        if ( 버전_아이디들 != null) {
+            Arrays.stream(버전_아이디들).filter(버전아이디->버전아이디>9L).findAny().ifPresent(b->{
+                MatchQueryBuilder 제품서비스_버전_조회 = QueryBuilders.matchQuery("pdServiceVersions", 버전_아이디들);
+                nativeSearchQueryBuilder.withQuery(제품서비스_버전_조회);
+            });
         }
 
         nativeSearchQueryBuilder.withAggregations(
@@ -656,16 +658,16 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     }
 
     @Override
-    public List<지라이슈> 제품서비스_버전목록으로_조회(Long pdServiceLink, List<Long> pdServiceVersionLinks) {
-        return 지라이슈저장소.findByPdServiceIdAndPdServiceVersionIn(pdServiceLink, pdServiceVersionLinks);
+    public List<지라이슈> 제품서비스_버전목록으로_조회(Long pdServiceLink, Long[] pdServiceVersionLinks) {
+        return 지라이슈저장소.findByPdServiceIdAndPdServiceVersionsIn(pdServiceLink, pdServiceVersionLinks);
     }
 
     @Override
-    public 히트맵데이터 히트맵_제품서비스_버전목록으로_조회(Long pdServiceLink, List<Long> pdServiceVersionLinks) {
+    public 히트맵데이터 히트맵_제품서비스_버전목록으로_조회(Long pdServiceLink, Long[] pdServiceVersionLinks) {
 
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new TermQueryMust("pdServiceId", pdServiceLink),
-                        new TermsQueryFilter("pdServiceVersion", pdServiceVersionLinks)
+                        new TermsQueryFilter("pdServiceVersions", pdServiceVersionLinks)
                 );
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
         });

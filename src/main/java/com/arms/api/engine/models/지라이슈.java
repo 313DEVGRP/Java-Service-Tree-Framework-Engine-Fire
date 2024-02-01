@@ -110,8 +110,8 @@ public class 지라이슈 {
     @Field(type = FieldType.Text, name = "pdServiceId", fielddata = true)
     private Long pdServiceId;
 
-    @Field(type = FieldType.Keyword, name = "pdServiceVersion")
-    private Long[] pdServiceVersion;
+    @Field(type = FieldType.Keyword, name = "pdServiceVersions")
+    private Long[] pdServiceVersions;
 
     @Getter
     @Setter

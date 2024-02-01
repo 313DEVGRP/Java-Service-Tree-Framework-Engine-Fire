@@ -22,6 +22,14 @@ public class TermsQueryFilter extends Filter {
 		}
 	}
 
+	public TermsQueryFilter(String name, Long[] value){
+		if(name!=null&&value!=null){
+			this.termsQueryBuilder = QueryBuilders.termsQuery(name, value);
+		}
+	}
+
+
+
 	public TermsQueryBuilder termsQueryBuilder() {
 		return termsQueryBuilder;
 	}

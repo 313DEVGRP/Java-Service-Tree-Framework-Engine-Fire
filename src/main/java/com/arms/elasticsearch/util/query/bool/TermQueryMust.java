@@ -17,8 +17,8 @@ public class TermQueryMust extends Must {
 		if(name!=null&&value!=null){
 			this.termQueryBuilder = QueryBuilders.termQuery(name, value);
 		}
-
 	}
+
 
 	public TermQueryMust(String name, Boolean value){
 		if(name!=null&&value!=null){
