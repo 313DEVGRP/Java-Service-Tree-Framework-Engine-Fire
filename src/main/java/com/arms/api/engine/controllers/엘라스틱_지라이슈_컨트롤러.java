@@ -136,10 +136,10 @@ public class 엘라스틱_지라이슈_컨트롤러 {
 
     /* 통합으로 변경가능 API */
     @ResponseBody
-    @GetMapping("/getProgress/{pdServiceId}/{pdServiceVersion}")
+    @GetMapping("/getProgress/{pdServiceId}")
     public Map<String, Long> 제품서비스_버전별_상태값_통계(@PathVariable("connectId") Long 지라서버_아이디,
                                        @PathVariable("pdServiceId") Long 제품서비스_아이디,
-                                       @PathVariable("pdServiceVersions") Long[] 제품서비스_버전_아이디) throws IOException {
+                                       @RequestParam("pdServiceVersions") Long[] 제품서비스_버전_아이디) throws IOException {
 
         return 지라이슈_검색엔진.제품서비스_버전별_상태값_통계(제품서비스_아이디,제품서비스_버전_아이디);
     }
