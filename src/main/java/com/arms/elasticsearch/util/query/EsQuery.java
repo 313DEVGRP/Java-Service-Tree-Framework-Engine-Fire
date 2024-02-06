@@ -19,7 +19,11 @@ public abstract class EsQuery {
 		}
 	}
 
-	public <T> void put(ParameterizedTypeReference<T> parameterizedTypeReference, T t){
+	protected  <T> void setQuery(T t){
+		map.put(new ParameterizedTypeReference<T>(){}.getType(), t);
+	}
+
+	public <T> void setQuery(ParameterizedTypeReference<T> parameterizedTypeReference, T t){
 		map.put(parameterizedTypeReference.getType(), t);
 	}
 
