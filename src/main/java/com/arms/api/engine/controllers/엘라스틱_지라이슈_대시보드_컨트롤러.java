@@ -38,7 +38,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
                 검색요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null
         ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
 
-        EsQueryBuilder esQuery = new EsQueryBuilder().bool(esBoolQueries);
+        EsQuery esQuery = new EsQueryBuilder().bool(esBoolQueries);
 
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(검색요청, esQuery)));
     }
@@ -54,7 +54,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
                 검색요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null
         ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
 
-        EsQueryBuilder esQuery = new EsQueryBuilder().bool(esBoolQueries);
+        EsQuery esQuery = new EsQueryBuilder().bool(esBoolQueries);
 
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청_서브집계.of(검색요청, esQuery)));
     }

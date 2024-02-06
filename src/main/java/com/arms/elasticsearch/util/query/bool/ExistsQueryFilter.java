@@ -1,9 +1,10 @@
 package com.arms.elasticsearch.util.query.bool;
 
+import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 
-public class ExistsQueryFilter extends Exist {
+public class ExistsQueryFilter extends Filter<ExistsQueryBuilder> {
 
     private ExistsQueryBuilder existsQueryBuilder;
 
@@ -13,7 +14,8 @@ public class ExistsQueryFilter extends Exist {
         }
     }
 
-    public ExistsQueryBuilder existsQueryBuilder() {
+    @Override
+    public AbstractQueryBuilder<ExistsQueryBuilder> abstractQueryBuilder() {
         return existsQueryBuilder;
     }
 }

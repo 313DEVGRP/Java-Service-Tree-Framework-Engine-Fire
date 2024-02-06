@@ -1,19 +1,18 @@
 package com.arms.elasticsearch.util.query.bool;
 
+import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.TermsQueryBuilder;
 
-import com.arms.elasticsearch.util.query.EsQuery;
+public abstract class Filter<T extends AbstractQueryBuilder<T>> extends EsBoolQuery {
 
-public abstract class Filter extends EsBoolQuery {
-
-	public abstract TermsQueryBuilder termsQueryBuilder();
+	public abstract  AbstractQueryBuilder<T> abstractQueryBuilder();
 
 	@Override
-	public EsQuery boolQueryBuilder(BoolQueryBuilder boolQueryBuilder){
-		if(termsQueryBuilder()!=null){
-			boolQueryBuilder.filter(termsQueryBuilder());
+	public void boolQueryBuilder(BoolQueryBuilder boolQueryBuilder){
+		if(abstractQueryBuilder()!=null){
+			boolQueryBuilder.filter(abstractQueryBuilder());
 		}
-		return this;
 	}
+
+
 }
