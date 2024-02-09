@@ -126,16 +126,6 @@ public class 인덱스Test {
         return 인덱스작업.exists();
     }
 
-    private boolean 인덱스_백업_생성(String 백업_지라이슈인덱스, Class<?> clazz) {
-        IndexOperations 백업_인덱스작업 = 엘라스틱서치_작업.indexOps(IndexCoordinates.of(백업_지라이슈인덱스));
-        Document 매핑정보 = 백업_인덱스작업.createMapping(clazz);
-        백업_인덱스작업.create();
-        백업_인덱스작업.putMapping(매핑정보);
-        // 별칭_지정하기(백업_지라이슈인덱스, "bakup_jiraissue");
-
-        return 백업_인덱스작업.exists();
-    }
-
     @Test
     public void Doc백업() {
         String 현재_지라이슈인덱스 = 인덱스자료.지라이슈_인덱스명;
@@ -311,62 +301,6 @@ public class 인덱스Test {
                 .toInstant());
     }
 
-    @Test
-    public void 히트맵리팩토링() {
-
-        int page = 0;
-        int pageSize = 1000; // 한 번에 처리할 문서의 수
-
-        Long pdServiceLink = 22L;
-        List<Long> pdServiceVersionLinks = new ArrayList<>();
-        pdServiceVersionLinks.add(33L);
-        pdServiceVersionLinks.add(35L);
-        pdServiceVersionLinks.add(36L);
-
-        EsQuery esQuery = new EsQueryBuilder()
-                .bool(new TermQueryMust("pdServiceId", pdServiceLink),
-                        new TermsQueryFilter("pdServiceVersion", pdServiceVersionLinks)
-                );
-
-        BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
-        });
-
-        CustomAbstractAggregationBuilder dailyAggregationBuilder = new CustomDateHistogramAggregationBuilder("aggregation_by_day")
-                .field("updated")
-                .calendarInterval(DateHistogramInterval.DAY);
-
-        CustomTermsAggregationBuilder 요구사항여부Aggregation = new CustomTermsAggregationBuilder("요구사항여부")
-                .field("isReq");
-
-        요구사항여부Aggregation.addSubAggregation(new CustomTermsAggregationBuilder("key")
-                .field("key").build());
-
-        dailyAggregationBuilder.addSubAggregation(요구사항여부Aggregation.build());
-
-        NativeSearchQueryBuilder nativeSearchQueryBuilder
-                = new NativeSearchQueryBuilder().withQuery(boolQuery).withAggregations(dailyAggregationBuilder.build());
-
-        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build(), "bakup_jiraissue");
-
-        List<검색결과> aggregationByDay = 검색결과_목록_메인.get검색결과().get("aggregation_by_day");
-
-        Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> 검색결과 = aggregationByDay.stream()
-                .sorted(Comparator.comparing(bucket -> OffsetDateTime.parse(bucket.get필드명()).toLocalDate()))
-                .collect(Collectors.toMap(
-                        entry -> transformDate(entry.get필드명()),
-                        this::일별_생성개수_및_상태_데이터생성,
-                        (existingValue, newValue) -> existingValue,
-                        LinkedHashMap::new
-                ));
-
-        try {
-            String sso = objectMapper.writeValueAsString(aggregationByDay);
-            System.out.println(sso);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private String transformDate(String date) {
         OffsetDateTime offsetDateTime = OffsetDateTime.parse(date);
         return DateTimeFormatter
@@ -456,7 +390,6 @@ public class 인덱스Test {
         return 결과;
     }
 
-
     @Test
     public void 지라이슈컨트롤러_인덱스백업_Test() {
         boolean 결과 = 지라이슈_서비스.지라이슈_인덱스백업();
@@ -470,21 +403,32 @@ public class 인덱스Test {
     }
 
     @Test
-    void 별칭추가() {
-        boolean 결과 = 별칭_지정하기("jiraissue-2024-01-05", "bakup_jiraissue");
-        assertFalse(결과);
+    void 별칭추가Test() {
+        boolean 결과 = 별칭_지정하기("jiraissue-2024-01-04", "bakup_jiraissue");
+        assertTrue(결과);
     }
 
-    public boolean 별칭_지정하기(String 별칭을_추가할_인덱스, String 별칭) {
+    // 인덱스 백업 시 인덱스에 alias 지정하는 부분
+    private boolean 인덱스_백업_생성(String 백업_지라이슈인덱스, Class<?> clazz) {
+        IndexOperations 백업_인덱스작업 = 엘라스틱서치_작업.indexOps(IndexCoordinates.of(백업_지라이슈인덱스));
+        Document 매핑정보 = 백업_인덱스작업.createMapping(clazz);
+        백업_인덱스작업.create();
+        백업_인덱스작업.putMapping(매핑정보);
+        별칭_지정하기(백업_지라이슈인덱스, "bakup_jiraissue");
+
+        return 백업_인덱스작업.exists();
+    }
+
+    public boolean 별칭_지정하기(String 별칭을_추가할_인덱스명, String 별칭명) {
         AliasActions aliasActions = new AliasActions();
         aliasActions.add(new AliasAction.Add(AliasActionParameters.builder()
-                .withIndices(별칭을_추가할_인덱스)
-                .withAliases(별칭)
+                .withIndices(별칭을_추가할_인덱스명)
+                .withAliases(별칭명)
                 .build()));
 
         boolean 결과 = false;
         try {
-            결과 = 엘라스틱서치_작업.indexOps(IndexCoordinates.of(별칭을_추가할_인덱스)).alias(aliasActions);
+            결과 = 엘라스틱서치_작업.indexOps(IndexCoordinates.of(별칭을_추가할_인덱스명)).alias(aliasActions);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -492,4 +436,61 @@ public class 인덱스Test {
 
         return 결과;
     }
+
+    @Test
+    public void 히트맵데이터_리팩토링_Alias조회() {
+
+        int page = 0;
+        int pageSize = 1000; // 한 번에 처리할 문서의 수
+
+        Long pdServiceLink = 22L;
+        List<Long> pdServiceVersionLinks = new ArrayList<>();
+        pdServiceVersionLinks.add(33L);
+        pdServiceVersionLinks.add(35L);
+        pdServiceVersionLinks.add(36L);
+
+        EsQuery esQuery = new EsQueryBuilder()
+                .bool(new TermQueryMust("pdServiceId", pdServiceLink),
+                        new TermsQueryFilter("pdServiceVersion", pdServiceVersionLinks)
+                );
+
+        BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
+        });
+
+        CustomAbstractAggregationBuilder dailyAggregationBuilder = new CustomDateHistogramAggregationBuilder("aggregation_by_day")
+                .field("updated")
+                .calendarInterval(DateHistogramInterval.DAY);
+
+        CustomTermsAggregationBuilder 요구사항여부Aggregation = new CustomTermsAggregationBuilder("요구사항여부")
+                .field("isReq");
+
+        요구사항여부Aggregation.addSubAggregation(new CustomTermsAggregationBuilder("key")
+                .field("key").build());
+
+        dailyAggregationBuilder.addSubAggregation(요구사항여부Aggregation.build());
+
+        NativeSearchQueryBuilder nativeSearchQueryBuilder
+                = new NativeSearchQueryBuilder().withQuery(boolQuery).withAggregations(dailyAggregationBuilder.build());
+
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build(), "bakup_jiraissue");
+
+        List<검색결과> aggregationByDay = 검색결과_목록_메인.get검색결과().get("aggregation_by_day");
+
+        Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> 검색결과 = aggregationByDay.stream()
+                .sorted(Comparator.comparing(bucket -> OffsetDateTime.parse(bucket.get필드명()).toLocalDate()))
+                .collect(Collectors.toMap(
+                        entry -> transformDate(entry.get필드명()),
+                        this::일별_생성개수_및_상태_데이터생성,
+                        (existingValue, newValue) -> existingValue,
+                        LinkedHashMap::new
+                ));
+
+        try {
+            String json = objectMapper.writeValueAsString(aggregationByDay);
+            System.out.println(json);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
