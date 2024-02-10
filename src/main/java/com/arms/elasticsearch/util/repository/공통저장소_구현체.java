@@ -9,6 +9,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -24,6 +25,7 @@ import org.springframework.data.elasticsearch.repository.support.ElasticsearchEn
 import org.springframework.data.elasticsearch.repository.support.SimpleElasticsearchRepository;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -250,4 +252,22 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         return 결과;
     }
 
+    public IndexCoordinates indexName() {
+        Document document = AnnotationUtils.findAnnotation(entityClass, Document.class);
+        if(document!=null){
+            var indexName = document.indexName()+"-"+LocalDate.now();
+            return IndexCoordinates.of(indexName);
+        }
+       throw new RuntimeException("인덱스명을 확인해주시길 바랍니다.");
+    }
+
+    @Override
+    public <S extends T> S save(S entity){
+        return operations.save(entity, indexName());
+    };
+
+    @Override
+    public <S extends T> Iterable<S> saveAll(Iterable<S> entities) {
+        return operations.save(entities, indexName());
+    }
 }

@@ -1,6 +1,7 @@
 package com.arms.api.engine.models;
 
 import com.arms.api.engine.repositories.인덱스자료;
+import com.arms.elasticsearch.util.custom.index.ElasticSearchIndex;
 import com.fasterxml.jackson.annotation.*;
 import lombok.*;
 import org.springframework.data.elasticsearch.annotations.*;
@@ -14,10 +15,11 @@ import org.springframework.data.annotation.Id;
 @AllArgsConstructor
 @Getter
 @Setter
-@Document(indexName = 인덱스자료.지라이슈_인덱스명)
+@Document(indexName = 인덱스자료.지라이슈_인덱스명, createIndex = false)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "_class")
 @JsonTypeName("com.arms.api.engine.models.지라이슈")
 @JsonIgnoreProperties(ignoreUnknown = true)
+@ElasticSearchIndex
 public class 지라이슈 {
 
     //////////////
