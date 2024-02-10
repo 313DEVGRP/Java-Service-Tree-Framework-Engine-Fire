@@ -2,11 +2,11 @@ package com.arms.elasticsearch.util.query.bool;
 
 import java.util.List;
 
+import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 
-public class TermsQueryFilter extends Filter {
+public class TermsQueryFilter extends Filter<TermsQueryBuilder> {
 
 	private TermsQueryBuilder termsQueryBuilder;
 
@@ -22,9 +22,9 @@ public class TermsQueryFilter extends Filter {
 		}
 	}
 
-	public TermsQueryBuilder termsQueryBuilder() {
-		return termsQueryBuilder;
+	@Override
+	public AbstractQueryBuilder<TermsQueryBuilder> abstractQueryBuilder() {
+		return  termsQueryBuilder;
 	}
-
 
 }

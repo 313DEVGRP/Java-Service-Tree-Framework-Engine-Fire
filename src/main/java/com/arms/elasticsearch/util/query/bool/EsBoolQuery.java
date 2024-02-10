@@ -6,6 +6,6 @@ import com.arms.elasticsearch.util.query.EsQuery;
 
 public abstract class EsBoolQuery extends EsQuery {
 
-	public abstract EsQuery boolQueryBuilder(BoolQueryBuilder boolQueryBuilder);
+	public abstract void boolQueryBuilder(BoolQueryBuilder boolQueryBuilder);
 
 }
