@@ -33,6 +33,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
@@ -116,8 +117,12 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
     @Override
     public 지라이슈 이슈_조회하기(String 조회조건_아이디) {
-        // 지라이슈저장소.test();
-        return 지라이슈저장소.findById(조회조건_아이디).orElse(null);
+
+        NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
+            .withQuery(QueryBuilders.termQuery("id", 조회조건_아이디))
+            .build();
+
+        return 지라이슈저장소.normalSearch(searchQuery).stream().findFirst().orElseGet(지라이슈::new);
     }
 
     @Override
