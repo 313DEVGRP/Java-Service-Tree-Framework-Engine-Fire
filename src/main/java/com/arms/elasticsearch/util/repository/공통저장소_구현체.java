@@ -73,8 +73,9 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
             throw new IllegalArgumentException("bulkIndex Document null 오류");
         }
 
-        return operations.bulkIndex(indexQueryList, IndexCoordinates.of(document.indexName()));
+        return operations.bulkIndex(indexQueryList, indexName());
     }
+
 
     public List<T> normalSearch(Query query) {
         if (query == null) {
@@ -169,7 +170,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
     private boolean 인덱스_백업_생성(String 백업_인덱스, Class<?> clazz) {
         IndexOperations 백업_인덱스작업 = operations.indexOps(IndexCoordinates.of(백업_인덱스));
-        org.springframework.data.elasticsearch.core.document.Document 매핑정보 = 백업_인덱스작업.createMapping(clazz);
+        var 매핑정보 = 백업_인덱스작업.createMapping(clazz);
         백업_인덱스작업.create();
         백업_인덱스작업.putMapping(매핑정보);
 
