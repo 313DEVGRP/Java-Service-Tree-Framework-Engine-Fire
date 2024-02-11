@@ -260,7 +260,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                         .orElseGet(() -> {
                             Map<String, Integer> dataList = new HashMap<>();
                             dataList.put("involvedCount", 0);
-                            TaskList newTask = new TaskList(key, "[ " + versionNames + " ] " + summary, dataList);
+                            TaskList newTask = new TaskList(key, "[ " + versionNames + " ] - " + summary, dataList);
                             worker.getChildren().add(newTask);
                             return newTask;
                         });
