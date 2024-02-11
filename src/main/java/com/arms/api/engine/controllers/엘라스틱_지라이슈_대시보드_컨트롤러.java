@@ -155,11 +155,11 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(지라이슈_단순_검색_요청, esQuery)));
     }
 
-    @GetMapping("/assignees-requirements-involvements")
+    @PostMapping("/assignees-requirements-involvements")
     public ResponseEntity<List<Worker>> 작업자_별_요구사항_별_관여도_apache(
-            지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청
+            @RequestBody 트리맵_검색요청 트리맵_검색요청
     ) {
-        return ResponseEntity.ok(지라이슈_검색엔진.작업자_별_요구사항_별_관여도(지라이슈_제품_및_제품버전_집계_요청));
+        return ResponseEntity.ok(지라이슈_검색엔진.작업자_별_요구사항_별_관여도(트리맵_검색요청));
     }
 
     @PostMapping("/req-status-and-reqInvolved-unique-assignees")

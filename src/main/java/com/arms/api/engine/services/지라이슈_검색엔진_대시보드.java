@@ -2,9 +2,11 @@ package com.arms.api.engine.services;
 
 import com.arms.api.engine.dtos.*;
 import com.arms.api.engine.models.IsReqType;
+import com.arms.api.engine.models.제품버전목록;
 import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.models.지라이슈_일자별_제품_및_제품버전_집계_요청;
 import com.arms.api.engine.models.지라이슈_제품_및_제품버전_집계_요청;
+import com.arms.api.engine.models.트리맵_검색요청;
 import com.arms.api.engine.repositories.인덱스자료;
 import com.arms.api.engine.repositories.지라이슈_저장소;
 import com.arms.api.engine.vo.제품_서비스_버전;
@@ -210,10 +212,12 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
 
     @Override
-    public List<Worker> 작업자_별_요구사항_별_관여도(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
+    public List<Worker> 작업자_별_요구사항_별_관여도(트리맵_검색요청 트리맵_검색요청) {
         Map<String, Worker> contributionMap = new HashMap<>();
 
-        List<지라이슈> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionsIn(true, 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink(), 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks());
+        List<제품버전목록> 제품버전목록데이터 = 트리맵_검색요청.get제품버전목록();
+       
+        List<지라이슈> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionsIn(true, 트리맵_검색요청.getPdServiceLink(), 트리맵_검색요청.getPdServiceVersionLinks());
 
         // 요구사항의 키를 모두 추출
         List<String> allReqKeys = requirementIssues.stream().map(지라이슈::getKey).collect(Collectors.toList());
@@ -229,6 +233,16 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         requirementIssues.stream().forEach(reqIssue -> {
             String key = reqIssue.getKey();
             String summary = reqIssue.getSummary();
+            Long[] pdServiceVersions = reqIssue.getPdServiceVersions();
+            String versionNames =  Stream.of(pdServiceVersions)
+                    .map(versionId -> 제품버전목록데이터.stream()
+                            .filter(p -> p.getC_id().equals(versionId.toString()))
+                            .findFirst()
+                            .map(제품버전목록::getC_title)
+                            .orElse(null)
+                    )
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.joining(", "));
 
             Optional.ofNullable(subTasksByParent.get(key)).orElse(Collections.emptyList()).stream().forEach(subtask -> {
                 String assigneeId = subtask.getAssignee().getAccountId();
@@ -246,7 +260,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                         .orElseGet(() -> {
                             Map<String, Integer> dataList = new HashMap<>();
                             dataList.put("involvedCount", 0);
-                            TaskList newTask = new TaskList(key, summary, dataList);
+                            TaskList newTask = new TaskList(key, "[ " + versionNames + " ] " + summary, dataList);
                             worker.getChildren().add(newTask);
                             return newTask;
                         });
@@ -258,7 +272,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         return contributionMap.values().stream()
                 .sorted((w1, w2) -> w2.getData().get("totalInvolvedCount").compareTo(w1.getData().get("totalInvolvedCount")))
-                .limit(지라이슈_제품_및_제품버전_집계_요청.get크기() > 0 ? 지라이슈_제품_및_제품버전_집계_요청.get크기() : Long.MAX_VALUE)
+                .limit(트리맵_검색요청.get크기() > 0 ? 트리맵_검색요청.get크기() : Long.MAX_VALUE)
                 .collect(Collectors.toList());
 
     }
