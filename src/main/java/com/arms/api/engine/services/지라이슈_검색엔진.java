@@ -228,12 +228,6 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     @Override
     public int 이슈_링크드이슈_서브테스크_벌크로_추가하기(Long 지라서버_아이디, String 이슈_키 , Long 제품서비스_아이디, Long[] 제품서비스_버전들) throws Exception {
 
-        boolean 인덱스확인 = 지라이슈저장소.인덱스확인_및_생성_매핑(인덱스자료.지라이슈_인덱스명);
-
-        if (!인덱스확인) {
-            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 인덱스 확인 Error " + 에러코드.지라이슈_인덱스_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException(에러코드.지라이슈_인덱스_NULL_오류.getErrorMsg());
-        }
 
         if (지라서버_아이디 == null) {
             로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
