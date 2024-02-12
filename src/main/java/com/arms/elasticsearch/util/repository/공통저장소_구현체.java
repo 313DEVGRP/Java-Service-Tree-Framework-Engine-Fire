@@ -15,6 +15,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.IndexedObjectInformation;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
@@ -49,8 +50,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
     @Override
     public 검색결과_목록_메인 aggregationSearch(Query query) {
-        SearchHits<T> search = operations.search(query, entityClass);
-        return new 검색결과_목록_메인(operations.search(query,entityClass));
+        return new 검색결과_목록_메인(operations.search(query,entityClass,indexName()));
     }
 
     @Override
@@ -83,8 +83,8 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
             return Collections.emptyList();
         }
         try {
-            return operations.search(query, entityClass).stream()
-                    .map(a->a.getContent()).collect(Collectors.toList());
+            return operations.search(query, entityClass,indexName()).stream()
+                    .map(SearchHit::getContent).collect(Collectors.toList());
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
