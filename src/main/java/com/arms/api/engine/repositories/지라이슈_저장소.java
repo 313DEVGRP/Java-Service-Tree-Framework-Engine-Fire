@@ -21,7 +21,7 @@ public interface 지라이슈_저장소 extends 공통저장소<지라이슈,Str
         EsQuery esQuery = new EsQueryBuilder()
             .bool(
                 new TermQueryMust("pdServiceId", pdServiceLink),
-                new TermsQueryFilter("pdServiceVersion", pdServiceVersionLinks)
+                new TermsQueryFilter("pdServiceVersions", pdServiceVersionLinks)
             );
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
         });
@@ -39,7 +39,7 @@ public interface 지라이슈_저장소 extends 공통저장소<지라이슈,Str
             .bool(
                 new TermQueryMust("isReq", isReq),
                 new TermQueryMust("pdServiceId", pdServiceLink),
-                new TermsQueryFilter("pdServiceVersion", pdServiceVersionLinks)
+                new TermsQueryFilter("pdServiceVersions", pdServiceVersionLinks)
             );
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
         });
