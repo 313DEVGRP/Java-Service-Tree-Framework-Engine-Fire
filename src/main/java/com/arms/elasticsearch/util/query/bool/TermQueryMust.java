@@ -1,9 +1,10 @@
 package com.arms.elasticsearch.util.query.bool;
 
+import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 
-public class TermQueryMust extends Must {
+public class TermQueryMust extends Must<TermQueryBuilder> {
 
 	private TermQueryBuilder termQueryBuilder;
 
@@ -26,7 +27,8 @@ public class TermQueryMust extends Must {
 		}
 	}
 
-	public TermQueryBuilder termQueryBuilder() {
+	@Override
+	public AbstractQueryBuilder<TermQueryBuilder> abstractQueryBuilder() {
 		return termQueryBuilder;
 	}
 }

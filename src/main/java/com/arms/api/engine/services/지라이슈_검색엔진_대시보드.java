@@ -708,4 +708,9 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         return 검색결과_목록_메인.get검색결과().get("versions");
 
     }
+
+    @Override
+    public List<지라이슈> 요구사항키로_하위이슈_조회(String 지라키){ // parentReqKey
+        return 지라이슈저장소.findByParentReqKeyIn(Collections.singletonList(지라키));
+    }
 }

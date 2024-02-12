@@ -9,11 +9,13 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.IndexedObjectInformation;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
@@ -24,6 +26,7 @@ import org.springframework.data.elasticsearch.repository.support.ElasticsearchEn
 import org.springframework.data.elasticsearch.repository.support.SimpleElasticsearchRepository;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -47,8 +50,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
     @Override
     public 검색결과_목록_메인 aggregationSearch(Query query) {
-        SearchHits<T> search = operations.search(query, entityClass);
-        return new 검색결과_목록_메인(operations.search(query,entityClass));
+        return new 검색결과_목록_메인(operations.search(query,entityClass,indexName()));
     }
 
     @Override
@@ -71,8 +73,9 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
             throw new IllegalArgumentException("bulkIndex Document null 오류");
         }
 
-        return operations.bulkIndex(indexQueryList, IndexCoordinates.of(document.indexName()));
+        return operations.bulkIndex(indexQueryList, indexName());
     }
+
 
     public List<T> normalSearch(Query query) {
         if (query == null) {
@@ -80,8 +83,8 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
             return Collections.emptyList();
         }
         try {
-            return operations.search(query, entityClass).stream()
-                    .map(a->a.getContent()).collect(Collectors.toList());
+            return operations.search(query, entityClass,indexName()).stream()
+                    .map(SearchHit::getContent).collect(Collectors.toList());
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -167,7 +170,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
     private boolean 인덱스_백업_생성(String 백업_인덱스, Class<?> clazz) {
         IndexOperations 백업_인덱스작업 = operations.indexOps(IndexCoordinates.of(백업_인덱스));
-        org.springframework.data.elasticsearch.core.document.Document 매핑정보 = 백업_인덱스작업.createMapping(clazz);
+        var 매핑정보 = 백업_인덱스작업.createMapping(clazz);
         백업_인덱스작업.create();
         백업_인덱스작업.putMapping(매핑정보);
 
@@ -250,4 +253,22 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         return 결과;
     }
 
+    public IndexCoordinates indexName() {
+        Document document = AnnotationUtils.findAnnotation(entityClass, Document.class);
+        if(document!=null){
+            var indexName = document.indexName()+"-"+LocalDate.now();
+            return IndexCoordinates.of(indexName);
+        }
+       throw new RuntimeException("인덱스명을 확인해주시길 바랍니다.");
+    }
+
+    @Override
+    public <S extends T> S save(S entity){
+        return operations.save(entity, indexName());
+    };
+
+    @Override
+    public <S extends T> Iterable<S> saveAll(Iterable<S> entities) {
+        return operations.save(entities, indexName());
+    }
 }

@@ -274,4 +274,10 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     ) {
         return ResponseEntity.ok(지라이슈_검색엔진.제품_버전별_요구사항별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청));
     }
+
+    @GetMapping("/get-linkedissue-req")
+    public ResponseEntity<List<지라이슈>> 요구사항키로_하위이슈_조회(@RequestParam String 지라키) {
+        return ResponseEntity.ok(지라이슈_검색엔진.요구사항키로_하위이슈_조회(지라키));
+    }
+
 }
