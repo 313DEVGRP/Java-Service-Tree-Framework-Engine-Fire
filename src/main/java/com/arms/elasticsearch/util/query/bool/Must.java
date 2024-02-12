@@ -1,15 +1,15 @@
 package com.arms.elasticsearch.util.query.bool;
 
+import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.TermQueryBuilder;
 
-public abstract class Must extends EsBoolQuery {
-	public abstract TermQueryBuilder termQueryBuilder();
+public abstract class Must<T extends AbstractQueryBuilder<T>>  extends EsBoolQuery {
+	public abstract  AbstractQueryBuilder<T> abstractQueryBuilder();
 
 	@Override
 	public void boolQueryBuilder(BoolQueryBuilder boolQueryBuilder){
-		if(termQueryBuilder()!=null){
-			boolQueryBuilder.must(termQueryBuilder());
+		if(abstractQueryBuilder()!=null){
+			boolQueryBuilder.must(abstractQueryBuilder());
 		}
 	}
 }

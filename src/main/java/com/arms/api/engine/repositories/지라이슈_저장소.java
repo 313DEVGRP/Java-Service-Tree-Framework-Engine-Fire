@@ -17,7 +17,7 @@ import java.util.List;
 @Repository
 public interface 지라이슈_저장소 extends 공통저장소<지라이슈,String>{
 
-    default List<지라이슈> findByPdServiceIdAndPdServiceVersionIn(Long pdServiceLink, List<Long> pdServiceVersionLinks){
+    default List<지라이슈> findByPdServiceIdAndPdServiceVersionsIn(Long pdServiceLink, Long[] pdServiceVersionLinks){
         EsQuery esQuery = new EsQueryBuilder()
             .bool(
                 new TermQueryMust("pdServiceId", pdServiceLink),
@@ -33,8 +33,8 @@ public interface 지라이슈_저장소 extends 공통저장소<지라이슈,Str
         return this.normalSearch(nativeSearchQueryBuilder.build());
     };
 
-    default List<지라이슈> findByIsReqAndPdServiceIdAndPdServiceVersionIn(boolean isReq, Long pdServiceLink
-        , List<Long> pdServiceVersionLinks){
+    default List<지라이슈> findByIsReqAndPdServiceIdAndPdServiceVersionsIn(boolean isReq, Long pdServiceLink
+        , Long[] pdServiceVersionLinks){
         EsQuery esQuery = new EsQueryBuilder()
             .bool(
                 new TermQueryMust("isReq", isReq),
@@ -44,7 +44,23 @@ public interface 지라이슈_저장소 extends 공통저장소<지라이슈,Str
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
         });
 
-    List<지라이슈> findByIsReqAndPdServiceIdAndPdServiceVersionIn(boolean isReq, Long pdServiceLink, List<Long> pdServiceVersionLinks);
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+            .withQuery(boolQuery)
+            .withMaxResults(10000);
+        return this.normalSearch(nativeSearchQueryBuilder.build());
+    };
 
-    List<지라이슈> findByParentReqKeyIn(List<String> parentReqKeys);
+    default List<지라이슈> findByParentReqKeyIn(List<String> parentReqKeys){
+        EsQuery esQuery = new EsQueryBuilder()
+            .bool(
+                new TermsQueryFilter("parentReqKey", parentReqKeys)
+            );
+        BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
+        });
+
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+            .withQuery(boolQuery)
+            .withMaxResults(10000);
+        return this.normalSearch(nativeSearchQueryBuilder.build());
+    };
 }
