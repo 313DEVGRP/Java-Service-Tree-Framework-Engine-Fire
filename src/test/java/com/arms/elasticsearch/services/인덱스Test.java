@@ -470,7 +470,7 @@ public class 인덱스Test {
         dailyAggregationBuilder.addSubAggregation(요구사항여부Aggregation.build());
 
         NativeSearchQueryBuilder nativeSearchQueryBuilder
-                = new NativeSearchQueryBuilder().withQuery(boolQuery).withAggregations(dailyAggregationBuilder.build());
+                = new NativeSearchQueryBuilder().withQuery(boolQuery).addAggregation(dailyAggregationBuilder.build());
 
         검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build(), "bakup_jiraissue");
 

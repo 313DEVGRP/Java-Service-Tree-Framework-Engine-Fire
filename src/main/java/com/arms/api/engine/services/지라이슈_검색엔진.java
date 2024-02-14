@@ -137,7 +137,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
         nativeSearchQueryBuilder
             .withQuery(QueryBuilders.matchAllQuery())
-            .withAggregations(
+            .addAggregation(
                 AggregationBuilders.terms("group_by")
                         .field(groupByField)
                         .size(100)
@@ -157,7 +157,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                 .filter(QueryBuilders.termQuery(특정필드, 특정필드검색어));
 
         nativeSearchQueryBuilder.withQuery(boolQuery)
-                .withAggregations( AggregationBuilders.terms("group_by_" + 특정필드)
+                .addAggregation( AggregationBuilders.terms("group_by_" + 특정필드)
                         .field(그룹할필드)
                         .size(1000));
         return 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
@@ -494,7 +494,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
             nativeSearchQueryBuilder.withQuery(제품서비스_버전_조회);
         }
 
-        nativeSearchQueryBuilder.withAggregations(
+        nativeSearchQueryBuilder.addAggregation(
                 AggregationBuilders.terms("status_name_agg").field("status.status_name.keyword")
         );
 
@@ -558,7 +558,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         NativeSearchQueryBuilder aggregationQuery = new NativeSearchQueryBuilder();
 
         aggregationQuery.withQuery(복합조회)
-                .withAggregations(AggregationBuilders.terms("상태값_집계").field("status.status_name.keyword"))
+                .addAggregation(AggregationBuilders.terms("상태값_집계").field("status.status_name.keyword"))
                 .withMaxResults(10000);
 
         검색결과_목록_메인 검색결과_목록_메인_집계 = 지라이슈저장소.aggregationSearch(aggregationQuery.build());
@@ -628,7 +628,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         NativeSearchQueryBuilder aggregationQuery = new NativeSearchQueryBuilder();
 
         aggregationQuery.withQuery(복합조회)
-                .withAggregations(AggregationBuilders.terms("상태값_집계").field("status.status_name.keyword"))
+                .addAggregation(AggregationBuilders.terms("상태값_집계").field("status.status_name.keyword"))
                 .withMaxResults(10000);
 
         검색결과_목록_메인 검색결과_목록_메인_집계 = 지라이슈저장소.aggregationSearch(aggregationQuery.build());
@@ -780,7 +780,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         MatchQueryBuilder 사용자별_조회 = QueryBuilders.matchQuery("jira_server_id", 지라서버_아이디);
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
                 .withQuery(사용자별_조회)
-                .withAggregations(AggregationBuilders.terms("이슈_상태별_집계").field("status.status_name.keyword"));
+                .addAggregation(AggregationBuilders.terms("이슈_상태별_집계").field("status.status_name.keyword"));
 
        ;
 
@@ -815,7 +815,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
                 .withQuery(사용자별_조회)
-                .withAggregations(프로젝트별_집계);
+                .addAggregation(프로젝트별_집계);
         검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
         List<검색결과> 프로젝트키별_집계 = 검색결과_목록_메인.get검색결과().get("프로젝트키별_집계");
         Map<String, Map<String, Integer>> 프로젝트별상태값_집계= new HashMap<>();
@@ -853,7 +853,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
         nativeSearchQueryBuilder.withQuery(복합조회)
             .withMaxResults(0)
-            .withAggregations( AggregationBuilders.terms("담당자별_집계").field("assignee.assignee_emailAddress.keyword"));
+            .addAggregation( AggregationBuilders.terms("담당자별_집계").field("assignee.assignee_emailAddress.keyword"));
 
         검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
         long 결과 = 검색결과_목록_메인.get전체합계();

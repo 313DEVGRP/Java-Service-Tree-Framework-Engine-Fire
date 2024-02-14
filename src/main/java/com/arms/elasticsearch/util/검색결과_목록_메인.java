@@ -10,8 +10,6 @@ import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
 import org.elasticsearch.search.aggregations.bucket.filter.ParsedFilter;
-import org.springframework.data.elasticsearch.core.AggregationsContainer;
-import org.springframework.data.elasticsearch.core.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 
 import lombok.Getter;
@@ -55,14 +53,10 @@ public class 검색결과_목록_메인 {
 	}
 
 
-	private Map<String, Aggregation> getTerm(AggregationsContainer aggregationsContainer){
-		Aggregations aggregations = getAggregations(aggregationsContainer);
-		return aggregations.getAsMap();
+	private Map<String, Aggregation> getTerm(Aggregations aggregationsContainer){
+		return aggregationsContainer.getAsMap();
 	}
 
-	private Aggregations getAggregations(AggregationsContainer aggregationsContainer){
-		return ((ElasticsearchAggregations) aggregationsContainer).aggregations();
-	}
 
 
 }

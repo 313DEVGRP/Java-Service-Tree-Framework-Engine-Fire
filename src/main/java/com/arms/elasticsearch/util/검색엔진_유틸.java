@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -24,10 +25,8 @@ public final class 검색엔진_유틸 {
                 .withQuery(getQueryBuilder(dto))
                 .withPageable(PageRequest.of(dto.getPage(), dto.getSize()));
                 if(dto.getSortBy()!=null){
-                    nativeSearchQueryBuilder.withSort(Sort.by(
-                        Direction.fromString(
-                            Optional.ofNullable(dto.getOrder()).orElseGet(() -> SortOrder.ASC).name())
-                        , dto.getSortBy()));
+                    nativeSearchQueryBuilder.withSort(SortBuilders.fieldSort(dto.getSortBy())
+                        .order(Optional.ofNullable(dto.getOrder()).orElseGet(() -> SortOrder.ASC)));
                 }
 
                 return nativeSearchQueryBuilder;
@@ -54,10 +53,8 @@ public final class 검색엔진_유틸 {
                 .withPageable(PageRequest.of(dto.getPage(), dto.getSize()));
 
             if(dto.getSortBy()!=null){
-                nativeSearchQueryBuilder.withSort(Sort.by(
-                    Direction.fromString(
-                        Optional.ofNullable(dto.getOrder()).orElseGet(() -> SortOrder.ASC).name())
-                    , dto.getSortBy()));
+                nativeSearchQueryBuilder.withSort(SortBuilders.fieldSort(dto.getSortBy())
+                    .order(Optional.ofNullable(dto.getOrder()).orElseGet(() -> SortOrder.ASC)));
             }
 
             return nativeSearchQueryBuilder;
@@ -92,10 +89,8 @@ public final class 검색엔진_유틸 {
                 .withQuery(boolQuery)
                 .withPageable(PageRequest.of(dto.getPage(), dto.getSize()));
             if(dto.getSortBy()!=null){
-                nativeSearchQueryBuilder.withSort(Sort.by(
-                    Direction.fromString(
-                        Optional.ofNullable(dto.getOrder()).orElseGet(() -> SortOrder.ASC).name())
-                    , dto.getSortBy()));
+                nativeSearchQueryBuilder.withSort(SortBuilders.fieldSort(dto.getSortBy())
+                    .order(Optional.ofNullable(dto.getOrder()).orElseGet(() -> SortOrder.ASC)));
             }
             return nativeSearchQueryBuilder;
         } catch (final Exception e) {

@@ -67,7 +67,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
                 .withQuery(복합조회)
-                .withAggregations(
+                .addAggregation(
                         AggregationBuilders
                                 .terms("담당자별_집계").field("assignee.assignee_displayName.keyword")
                 ).withMaxResults(0);
@@ -108,7 +108,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
                 .withQuery(제품아이디별_조회)
-                .withAggregations(담당자별_집계)
+                .addAggregation(담당자별_집계)
                 .withMaxResults(0);
 
         검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
@@ -185,7 +185,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
                 .withQuery(boolQuery)
-                .withAggregations(versionsAgg.build())
+                .addAggregation(versionsAgg.build())
                 .build();
 
         검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(searchQuery);
@@ -296,7 +296,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 .addSubAggregation(new CustomTermsAggregationBuilder("requirements").field("isReq").build());
 
         NativeSearchQueryBuilder nativeSearchQueryBuilder
-                = new NativeSearchQueryBuilder().withQuery(boolQuery).withAggregations(weeklyAggregationBuilder.build());
+                = new NativeSearchQueryBuilder().withQuery(boolQuery).addAggregation(weeklyAggregationBuilder.build());
 
         검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
 
@@ -352,7 +352,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         // 총 이슈 개수 검색
         NativeSearchQueryBuilder nativeSearchQueryBuilderForTotalIssues
-                = new NativeSearchQueryBuilder().withQuery(boolQueryForTotalIssues).withAggregations(totalAggregationBuilder);
+                = new NativeSearchQueryBuilder().withQuery(boolQueryForTotalIssues).addAggregation(totalAggregationBuilder);
 
         검색결과_목록_메인 searchResponseForTotalIssues
                 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilderForTotalIssues.build());
@@ -443,7 +443,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
          }
 
          NativeSearchQueryBuilder nativeSearchQueryBuilder
-                 = new NativeSearchQueryBuilder().withQuery(boolQuery).withAggregations(dailyAggregationBuilder.build());
+                 = new NativeSearchQueryBuilder().withQuery(boolQuery).addAggregation(dailyAggregationBuilder.build());
 
          검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
 
@@ -680,7 +680,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
                 .withQuery(boolQuery)
-                .withAggregations(versionsAgg.build())
+                .addAggregation(versionsAgg.build())
                 .build();
 
         검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(searchQuery);
