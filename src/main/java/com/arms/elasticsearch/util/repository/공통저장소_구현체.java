@@ -27,6 +27,7 @@ import org.springframework.data.elasticsearch.repository.support.SimpleElasticse
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -271,4 +272,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
     public <S extends T> Iterable<S> saveAll(Iterable<S> entities) {
         return operations.save(entities, indexName());
     }
+
+
+
 }
