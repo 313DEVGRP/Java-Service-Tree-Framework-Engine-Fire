@@ -184,26 +184,26 @@ ext {
 	//patchVersion = auto generation
 
 	//mac 사용자 아래 114까지 주석처리!!
-//	if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-//		println "*** Windows is not support build "
-//	}else {
-//		exec {
-//			executable "wget"
-//			args "-O", "${projectDir}/metadata.xml", "${metadataUrl}"
-//		}
-//	}
-//	def metadataFile = new XmlSlurper().parse(new File("${projectDir}/metadata.xml"))
-//	String latest = metadataFile."versioning"."latest"
-//	String versionPrefix = latest.split("-")[0]
-//	def (latestMajorVersion, latestMinorVersion, latestPatchVersion) = versionPrefix.tokenize(".")
-//	if ( majorVersion > latestMajorVersion.toInteger()){
-//		minorVersion = 0
-//		patchVersion = 0
-//	} else if (minorVersion > latestMinorVersion.toInteger()){
-//		patchVersion = 0
-//	} else {
-//		patchVersion = latestPatchVersion.toInteger() + 1
-//	}
+	if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+		println "*** Windows is not support build "
+	}else {
+		exec {
+			executable "wget"
+			args "-O", "${projectDir}/metadata.xml", "${metadataUrl}"
+		}
+	}
+	def metadataFile = new XmlSlurper().parse(new File("${projectDir}/metadata.xml"))
+	String latest = metadataFile."versioning"."latest"
+	String versionPrefix = latest.split("-")[0]
+	def (latestMajorVersion, latestMinorVersion, latestPatchVersion) = versionPrefix.tokenize(".")
+	if ( majorVersion > latestMajorVersion.toInteger()){
+		minorVersion = 0
+		patchVersion = 0
+	} else if (minorVersion > latestMinorVersion.toInteger()){
+		patchVersion = 0
+	} else {
+		patchVersion = latestPatchVersion.toInteger() + 1
+	}
 }
 
 dependencyManagement {
@@ -222,8 +222,8 @@ task printVersion(){
 	}
 }
 
-//group = "313devgrp"
-//version = "${majorVersion}.${minorVersion}.${patchVersion}"
+group = "313devgrp"
+version = "${majorVersion}.${minorVersion}.${patchVersion}"
 
 bootJar {
 	baseName = project.name
