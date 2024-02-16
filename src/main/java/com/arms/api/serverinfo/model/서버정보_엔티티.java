@@ -20,7 +20,6 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "_class")
 @JsonTypeName("com.arms.api.serverinfo.model.서버정보_엔티티")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ElasticSearchIndex
 public class 서버정보_엔티티 {
 
     @Id

@@ -183,11 +183,7 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
 
     private 서버정보_데이터 서버정보_조회(Long 서버_아이디) {
 
-        NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(QueryBuilders.termQuery("id", 서버_아이디))
-                .build();
-
-        Optional<서버정보_엔티티> optionalEntity = Optional.ofNullable(서버정보_저장소.normalSearch(searchQuery).stream().findFirst().orElse(null));
+        Optional<서버정보_엔티티> optionalEntity = Optional.ofNullable(서버정보_저장소.findById(서버_아이디).orElse(null));
 
         if (!optionalEntity.isPresent()) {
             return null;
