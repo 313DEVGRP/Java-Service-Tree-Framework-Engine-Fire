@@ -7,6 +7,9 @@ import lombok.Setter;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
@@ -42,7 +45,8 @@ public class 크기별_집계_요청 implements 쿼리_추상_팩토리 {
 	public NativeSearchQuery 생성() {
 
 		BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>(){});
-		Sort sort = esQuery.getQuery(new ParameterizedTypeReference<>(){});
+		FieldSortBuilder fieldSortBuilder = esQuery.getQuery(new ParameterizedTypeReference<>(){});
+
 		서브_집계_요청 서브_집계_요청 = new 서브_집계_요청(하위그룹필드들, 크기);
 
 		NativeSearchQueryBuilder nativeSearchQueryBuilder
@@ -54,8 +58,8 @@ public class 크기별_집계_요청 implements 쿼리_추상_팩토리 {
 				nativeSearchQueryBuilder.withQuery(boolQuery);
 			});
 
-		if(sort!=null){
-			nativeSearchQueryBuilder.withSort(sort);
+		if(fieldSortBuilder!=null){
+			nativeSearchQueryBuilder.withSort(fieldSortBuilder);
 		}
 
 		Optional.ofNullable(메인그룹필드)
@@ -64,7 +68,7 @@ public class 크기별_집계_요청 implements 쿼리_추상_팩토리 {
 					= AggregationBuilders.terms("group_by_" + 그룹_필드)
 						.field(그룹_필드)
 						.size(크기);
-				nativeSearchQueryBuilder.withAggregations(
+				nativeSearchQueryBuilder.addAggregation(
 					termsAggregationBuilder
 				);
 				Optional.ofNullable(하위그룹필드들)

@@ -16,6 +16,7 @@ import reactor.core.publisher.Mono;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Optional;
 
@@ -133,4 +134,11 @@ public class 지라유틸 {
         return response.map(entity -> entity.getStatusCode() == HttpStatus.NO_CONTENT) // 결과가 204인가 확인
                 .blockOptional();
     }
+
+    public static LocalDateTime roundToNearest30Minutes(LocalDateTime dateTime) {
+        long minutes = dateTime.getMinute();
+        int remainder = (int) (minutes % 30);
+        return dateTime.plusMinutes(remainder >= 30 ? 30 - remainder : -remainder);//30분 단위 리턴 시간
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.arms.api.serverinfo.model;
 
 import com.arms.api.engine.repositories.인덱스자료;
+import com.arms.elasticsearch.util.custom.index.ElasticSearchIndex;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;

@@ -1,5 +1,6 @@
 package com.arms.api.serverinfo.service;
 
+import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.repositories.지라이슈_저장소;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.model.서버정보_엔티티;
@@ -9,10 +10,13 @@ import com.arms.errors.codes.에러코드;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -83,11 +87,11 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
     @Override
     public Iterable<서버정보_엔티티> 서버정보백업_스케줄러() {
 
-        boolean 인덱스확인 = 지라이슈저장소.인덱스확인_및_생성_매핑(인덱스자료.서버정보_인덱스명);
-
-        if (!인덱스확인) {
-            throw new IllegalArgumentException(에러코드.서버인덱스_NULL_오류.getErrorMsg());
-        }
+//        boolean 인덱스확인 = 지라이슈저장소.인덱스확인_및_생성_매핑(인덱스자료.서버정보_인덱스명);
+//
+//        if (!인덱스확인) {
+//            throw new IllegalArgumentException(에러코드.서버인덱스_NULL_오류.getErrorMsg());
+//        }
 
         ResponseEntity<?> 결과 = 백엔드통신기.지라서버정보_가져오기();
 
@@ -175,6 +179,7 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
 
         return 조회한_서버정보;
     }
+
 
     private 서버정보_데이터 서버정보_조회(Long 서버_아이디) {
 
