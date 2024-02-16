@@ -24,7 +24,7 @@ public class 서버정보_엔티티 {
 
     @Id
     @Field(type = FieldType.Keyword, name = "connectId")
-    private Long connectId;
+    private String connectId;
 
     @Field(type = FieldType.Text, name = "type")
     private String type;
