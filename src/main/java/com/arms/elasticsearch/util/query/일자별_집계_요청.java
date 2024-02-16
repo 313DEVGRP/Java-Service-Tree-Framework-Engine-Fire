@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
+import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
@@ -42,7 +43,7 @@ public class 일자별_집계_요청 implements 쿼리_추상_팩토리 {
 	public NativeSearchQuery 생성() {
 		BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>(){});
 
-		Sort sort = esQuery.getQuery(new ParameterizedTypeReference<>(){});
+		FieldSortBuilder sort = esQuery.getQuery(new ParameterizedTypeReference<>(){});
 
 		서브_집계_요청 서브_집계_요청 = new 서브_집계_요청(하위그룹필드들, 크기);
 
@@ -66,7 +67,7 @@ public class 일자별_집계_요청 implements 쿼리_추상_팩토리 {
 					.field(시간그룹필드)
 					.calendarInterval(DateHistogramInterval.DAY)
 					.minDocCount(0); // 집계 간격을 지정
-				nativeSearchQueryBuilder.withAggregations(
+				nativeSearchQueryBuilder.addAggregation(
 					dateHistogramAggregationBuilder
 				);
 				Optional.ofNullable(하위그룹필드들)

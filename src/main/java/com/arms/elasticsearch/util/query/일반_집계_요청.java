@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
@@ -43,7 +44,7 @@ public class 일반_집계_요청 implements 쿼리_추상_팩토리 {
 	@Override
 	public NativeSearchQuery 생성() {
 		BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
-		Sort sort = esQuery.getQuery(new ParameterizedTypeReference<>(){});
+		FieldSortBuilder sort = esQuery.getQuery(new ParameterizedTypeReference<>(){});
 
 		서브_집계_요청 서브_집계_요청 = new 서브_집계_요청(하위그룹필드들, 크기);
 
@@ -66,7 +67,7 @@ public class 일반_집계_요청 implements 쿼리_추상_팩토리 {
 					= AggregationBuilders.terms("group_by_" + 그룹_필드)
 						.field(그룹_필드)
 						.size(크기);
-				nativeSearchQueryBuilder.withAggregations(
+				nativeSearchQueryBuilder.addAggregation(
 					termsAggregationBuilder
 				);
 				Optional.ofNullable(하위그룹필드들)

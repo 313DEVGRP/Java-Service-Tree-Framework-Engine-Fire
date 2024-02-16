@@ -6,7 +6,7 @@ buildscript {
 
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '2.7.14'
+	id 'org.springframework.boot' version '2.5.5'
 	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 	id "org.sonarqube" version "3.4.0.2513"
 	id 'com.palantir.docker' version '0.28.0'
@@ -146,7 +146,7 @@ dependencies {
 	// jpa
 	//	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	// elasticsearch
-	implementation 'org.springframework.data:spring-data-elasticsearch:4.4.14'
+	implementation 'org.springframework.data:spring-data-elasticsearch:4.2.12'
 
 	// mysql
 	implementation 'mysql:mysql-connector-java:8.0.32'
@@ -159,13 +159,15 @@ dependencies {
 	implementation('io.springfox:springfox-swagger-ui:3.0.0')
 
 	implementation("jakarta.json:jakarta.json-api:2.0.1")
+	implementation group: 'io.netty', name: 'netty-resolver-dns-native-macos', version: '4.1.73.Final', classifier: 'osx-aarch_64'
+
 
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os
 
 ext {
-	set('springCloudVersion', "2021.0.8")
+	set('springCloudVersion', "2020.0.5")
 
 	image = "313devgrp/java-service-tree-framework-engine-fire"
 

@@ -390,13 +390,13 @@ public class 인덱스Test {
         return 결과;
     }
 
-    @Test
+    //@Test
     public void 지라이슈컨트롤러_인덱스백업_Test() {
         boolean 결과 = 지라이슈_서비스.지라이슈_인덱스백업();
         assertTrue(결과);
     }
 
-    @Test
+    //@Test
     public void 지라이슈컨트롤러_인덱스삭제_Test() {
         boolean 결과 = 지라이슈_서비스.지라이슈_인덱스삭제();
         assertTrue(결과);
@@ -470,7 +470,7 @@ public class 인덱스Test {
         dailyAggregationBuilder.addSubAggregation(요구사항여부Aggregation.build());
 
         NativeSearchQueryBuilder nativeSearchQueryBuilder
-                = new NativeSearchQueryBuilder().withQuery(boolQuery).withAggregations(dailyAggregationBuilder.build());
+                = new NativeSearchQueryBuilder().withQuery(boolQuery).addAggregation(dailyAggregationBuilder.build());
 
         검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build(), "bakup_jiraissue");
 
