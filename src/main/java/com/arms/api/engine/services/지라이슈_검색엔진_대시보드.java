@@ -493,7 +493,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         });
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
                 .withQuery(boolQuery)
-                .withSorts(SortBuilders.fieldSort(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준()).order(SortOrder.ASC))
+                .withSort(SortBuilders.fieldSort(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준()).order(SortOrder.ASC))
                 .withMaxResults(10000);
 
         return 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build());
@@ -548,7 +548,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         });
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
                 .withQuery(boolQuery)
-                .withSorts(SortBuilders.fieldSort(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준()).order(SortOrder.ASC))
+                .withSort(SortBuilders.fieldSort(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준()).order(SortOrder.ASC))
                 .withMaxResults(10000);
 
         List<지라이슈> 전체결과 = new ArrayList<>();
