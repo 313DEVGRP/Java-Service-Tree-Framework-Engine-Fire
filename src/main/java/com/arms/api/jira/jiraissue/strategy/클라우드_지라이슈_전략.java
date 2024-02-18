@@ -167,10 +167,11 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
         지라사용자_데이터 사용자 = 사용자_정보_조회(webClient);
 
         if (사용자 == null) {
-            throw new IllegalArgumentException("이슈 생성 필드 확인에 필요한 사용자 데이터가 Null입니다.");
+            로그.info("이슈 생성 필드 확인에 필요한 사용자 데이터가 Null입니다.");
         }
-
-        클라우드_필드_데이터.setReporter(사용자);
+        else {
+            클라우드_필드_데이터.setReporter(사용자);
+        }
 
         /* ***
         * 프로젝트 와 이슈 유형에 따라 이슈 생성 시 들어가는 fields의 내용을 확인하는 부분(현재 priority만 적용)
