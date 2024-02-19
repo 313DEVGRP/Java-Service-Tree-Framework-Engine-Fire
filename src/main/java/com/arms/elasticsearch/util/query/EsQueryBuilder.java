@@ -1,6 +1,7 @@
 package com.arms.elasticsearch.util.query;
 
 import com.arms.elasticsearch.util.query.bool.EsBoolQuery;
+import com.arms.elasticsearch.util.query.query_string.QueryString;
 import com.arms.elasticsearch.util.query.sort.SortBy;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -21,6 +22,11 @@ public class EsQueryBuilder extends EsQuery {
 
 	public EsQueryBuilder sort(SortBy sortBy){
 		put(new ParameterizedTypeReference<>(){},sortBy.sortQuery());
+		return this;
+	}
+
+	public EsQueryBuilder queryString(QueryString queryString) {
+		put(new ParameterizedTypeReference<>(){}, queryString.queryString());
 		return this;
 	}
 
