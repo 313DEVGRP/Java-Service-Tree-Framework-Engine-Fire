@@ -1,6 +1,7 @@
 package com.arms.elasticsearch.util.repository;
 
 import org.springframework.data.elasticsearch.core.IndexedObjectInformation;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.Query;
@@ -22,6 +23,8 @@ public interface 공통저장소<T,ID extends Serializable> extends Elasticsearc
 	검색결과_목록_메인 aggregationSearch(Query query, String newIndex) ;
 
     List<IndexedObjectInformation> bulkIndex(List<IndexQuery> indexQueryList);
+
+	public List<SearchHit<T>> fetchSearchHits(Query query);
 
     List<T> normalSearch(Query query);
 

@@ -7,5 +7,5 @@ import lombok.Setter;
 @Getter
 public abstract class 기본_검색_요청 {
 	private int 크기 = 1000;
-
+	private int 페이지 = 0;
 }
