@@ -28,9 +28,4 @@ public class EsQueryBuilder extends EsQuery {
 		return this;
 	}
 
-	public EsQueryBuilder queryString(QueryString queryString) {
-		put(new ParameterizedTypeReference<>(){}, queryString.queryString());
-		return this;
-	}
-
 }
