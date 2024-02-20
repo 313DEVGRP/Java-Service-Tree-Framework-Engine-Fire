@@ -702,12 +702,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
     @Override
     public List<SearchHit<지라이슈>> 지라이슈_검색(검색어_기본_검색_요청 검색어_기본_검색_요청) {
-        if(검색어_기본_검색_요청.get검색어() != null && !StringUtils.isEmpty(검색어_기본_검색_요청.get검색어())) {
-            EsQuery esQuery = new EsQueryBuilder().queryString(new QueryString(검색어_기본_검색_요청.get검색어()));
-            return 지라이슈저장소.fetchSearchHits(일반_검색_요청.of(검색어_기본_검색_요청, esQuery).생성());
-        } else {
-            EsQuery esQuery = new EsQueryBuilder();
-            return 지라이슈저장소.fetchSearchHits(일반_검색_요청.of(검색어_기본_검색_요청, esQuery).생성());
-        }
+        EsQuery esQuery = new EsQueryBuilder().queryString(new QueryString(검색어_기본_검색_요청.get검색어()));
+        return 지라이슈저장소.fetchSearchHits(일반_검색_요청.of(검색어_기본_검색_요청, esQuery).생성());
     }
 }
