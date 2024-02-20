@@ -127,7 +127,7 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
                         서버정보_엔티티.setType((String) 서버정보.get("c_jira_server_type"));
                         서버정보_엔티티.setUserId((String) 서버정보.get("c_jira_server_connect_id"));
                         서버정보_엔티티.setPasswordOrToken((String) 서버정보.get("c_jira_server_connect_pw"));
-                        서버정보_엔티티.setConnectId(Long.parseLong((String) 서버정보.get("c_jira_server_etc")));
+                        서버정보_엔티티.setConnectId((String) 서버정보.get("c_jira_server_etc"));
 
                         return 서버정보_엔티티;
                     })

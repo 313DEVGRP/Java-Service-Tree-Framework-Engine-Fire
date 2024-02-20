@@ -9,7 +9,9 @@ public class QueryString extends EsQuery {
 	private QueryStringQueryBuilder queryBuilder;
 
 	public QueryString(String queryString ){
-		this.queryBuilder = QueryBuilders.queryStringQuery(queryString);
+		if(queryString!=null){
+			this.queryBuilder = QueryBuilders.queryStringQuery(queryString);
+		}
 	};
 
 	public QueryStringQueryBuilder queryString() {

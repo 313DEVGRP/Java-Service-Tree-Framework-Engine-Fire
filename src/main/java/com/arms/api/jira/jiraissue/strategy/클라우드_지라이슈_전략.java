@@ -165,7 +165,13 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
         }
 
         지라사용자_데이터 사용자 = 사용자_정보_조회(webClient);
-        클라우드_필드_데이터.setReporter(사용자);
+
+        if (사용자 == null) {
+            로그.info("이슈 생성 필드 확인에 필요한 사용자 데이터가 Null입니다.");
+        }
+        else {
+            클라우드_필드_데이터.setReporter(사용자);
+        }
 
         /* ***
         * 프로젝트 와 이슈 유형에 따라 이슈 생성 시 들어가는 fields의 내용을 확인하는 부분(현재 priority만 적용)
@@ -395,10 +401,23 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
 
         String endpoint = "/rest/api/3/myself";
 
-        지라사용자_데이터 사용자_정보 = 지라유틸.get(webClient, endpoint, 지라사용자_데이터.class)
-                .onErrorMap(e -> new IllegalArgumentException(에러코드.사용자_정보조회_실패.getErrorMsg()+" "+e.getMessage())).block();
+        지라사용자_데이터 사용자_정보 = null;
+        try {
+            사용자_정보 = 지라유틸.get(webClient, endpoint, 지라사용자_데이터.class).block();
+        } catch (Exception e) {
+            if (e instanceof WebClientResponseException) {
+                WebClientResponseException wcException = (WebClientResponseException) e;
+                HttpStatus status = wcException.getStatusCode();
+                String body = wcException.getResponseBodyAsString();
 
-        지라사용자_데이터 사용자 = 사용자_정보_설정(사용자_정보);
+                로그.error(status + " : " + body);
+            }
+        }
+
+        지라사용자_데이터 사용자 = null;
+        if (사용자_정보 != null) {
+            사용자 = 사용자_정보_설정(사용자_정보);
+        }
 
         return 사용자;
     }
@@ -434,11 +453,11 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
                         = 지라유틸.get(webClient, endpoint, 지라이슈조회_데이터.class).block();
 
                 if (이슈링크_조회결과 == null) {
-                    로그.error("클라우드 지라 연결된 이슈 목록이 Null입니다.");
+                    로그.info("클라우드 지라 연결된 이슈 목록이 Null입니다.");
                     return null;
                 }
                 else if (이슈링크_조회결과.getIssues() == null || 이슈링크_조회결과.getIssues().size() == 0) {
-                    로그.error("클라우드 지라 연결된 이슈 목록이 없습니다.");
+                    로그.info("클라우드 지라 연결된 이슈 목록이 없습니다.");
                     return null;
                 }
 
@@ -481,11 +500,11 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
                         = 지라유틸.get(webClient, endpoint, 지라이슈조회_데이터.class).block();
 
                 if (서브테스크_조회결과 == null) {
-                    로그.error("클라우드 지라 서브테스크 이슈 목록이 Null입니다.");
+                    로그.info("클라우드 지라 서브테스크 이슈 목록이 Null입니다.");
                     return null;
                 }
                 else if (서브테스크_조회결과.getIssues() == null || 서브테스크_조회결과.getIssues().size() == 0) {
-                    로그.error("클라우드 지라 서브테스크 이슈 목록이 없습니다.");
+                    로그.info("클라우드 지라 서브테스크 이슈 목록이 없습니다.");
                     return null;
                 }
 
