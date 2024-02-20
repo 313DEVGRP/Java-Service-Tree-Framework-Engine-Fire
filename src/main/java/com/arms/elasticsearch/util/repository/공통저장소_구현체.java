@@ -81,6 +81,33 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
     }
 
 
+    public List<SearchHit<T>> fetchSearchHits(Query query) {
+
+        if (query == null) {
+            log.error("Failed to build search request");
+            return Collections.emptyList();
+        }
+
+        try {
+
+            ElasticSearchIndex annotation = AnnotationUtils.findAnnotation(entityClass, ElasticSearchIndex.class);
+
+            if(annotation==null){
+                return operations.search(query, entityClass).stream()
+                        .collect(Collectors.toList());
+            }
+
+            // 확인필요
+            return operations.search(query, entityClass,indexName()).stream()
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return Collections.emptyList();
+        }
+    }
+
+
     public List<T> normalSearch(Query query) {
         if (query == null) {
             log.error("Failed to build search request");

@@ -16,11 +16,15 @@ import com.arms.elasticsearch.util.aggregation.CustomTermsAggregationBuilder;
 import com.arms.elasticsearch.util.query.EsQuery;
 import com.arms.elasticsearch.util.query.EsQueryBuilder;
 import com.arms.elasticsearch.util.query.bool.*;
+import com.arms.elasticsearch.util.query.query_string.QueryString;
+import com.arms.elasticsearch.util.query.일반_검색_요청;
 import com.arms.elasticsearch.util.query.쿼리_추상_팩토리;
+import com.arms.elasticsearch.util.repository.공통저장소_구현체;
 import com.arms.elasticsearch.util.검색결과;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -34,6 +38,7 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
@@ -694,60 +699,10 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         return 지라이슈저장소.findByParentReqKeyIn(Collections.singletonList(지라키));
     }
 
+
     @Override
-    public Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>> 요구사항_지라이슈키별_업데이트_목록(List<String> 지라키_목록){
-
-        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        for (String 지라키 : 지라키_목록) {
-            boolQuery.should(QueryBuilders.termQuery("parentReqKey", 지라키));
-        }
-
-        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
-                .withQuery(boolQuery)
-                .withMaxResults(10000);
-
-        List<지라이슈> 전체결과 = new ArrayList<>();
-
-        boolean 인덱스존재시까지  = true;
-        LocalDate today = LocalDate.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String 지라인덱스 = 인덱스자료.지라이슈_인덱스명;
-
-        while(인덱스존재시까지) {
-            LocalDate 오늘일경우 = LocalDate.now();
-            String 호출할_지라인덱스 = 오늘일경우.format(formatter).equals(today.format(formatter))
-                    ? 지라인덱스 : 지라인덱스 + "-" + today.format(formatter);
-
-            if (!지라이슈저장소.인덱스_존재_확인(호출할_지라인덱스)) {
-                인덱스존재시까지 = false;
-                break;
-            }
-
-            today = today.minusDays(1);
-
-            List<지라이슈> 결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 호출할_지라인덱스);
-
-            if (결과 != null && 결과.size() > 0) {
-                전체결과.addAll(결과);
-            }
-        }
-
-        Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>>  조회_결과= 전체결과.stream()
-                .map(this::요구사항_지라이슈키별_업데이트_목록_데이터)
-                .collect(Collectors.groupingBy(요구사항_지라이슈키별_업데이트_목록_데이터::getParentReqKey));
-
-        return 조회_결과;
+    public List<SearchHit<지라이슈>> 지라이슈_검색(검색어_기본_검색_요청 검색어_기본_검색_요청) {
+        EsQuery esQuery = new EsQueryBuilder().queryString(new QueryString(검색어_기본_검색_요청.get검색어()));
+        return 지라이슈저장소.fetchSearchHits(일반_검색_요청.of(검색어_기본_검색_요청, esQuery).생성());
     }
-
-    private 요구사항_지라이슈키별_업데이트_목록_데이터 요구사항_지라이슈키별_업데이트_목록_데이터(지라이슈 지라이슈){
-        return new 요구사항_지라이슈키별_업데이트_목록_데이터(
-                지라이슈.getKey(),
-                지라이슈.getParentReqKey(),
-                지라이슈.getUpdated(),
-                지라이슈.getResolutiondate(),
-                지라이슈.getAssignee()
-        );
-
-    }
-
 }

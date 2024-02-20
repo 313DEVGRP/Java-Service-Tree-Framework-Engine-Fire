@@ -11,6 +11,7 @@ import com.arms.api.engine.vo.제품_서비스_버전;
 import com.arms.elasticsearch.util.query.쿼리_추상_팩토리;
 import com.arms.elasticsearch.util.검색결과;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
+import org.springframework.data.elasticsearch.core.SearchHit;
 
 public interface 지라이슈_대시보드_서비스 {
 
@@ -42,5 +43,5 @@ public interface 지라이슈_대시보드_서비스 {
 
     List<지라이슈> 요구사항키로_하위이슈_조회(String 지라키);
 
-    Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>> 요구사항_지라이슈키별_업데이트_목록(List<String> 지라키_목록);
+    List<SearchHit<지라이슈>> 지라이슈_검색(검색어_기본_검색_요청 검색어_기본_검색_요청);
 }
