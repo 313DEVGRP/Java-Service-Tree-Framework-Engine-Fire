@@ -701,8 +701,67 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
 
     @Override
+    public Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>> 요구사항_지라이슈키별_업데이트_목록(List<String> 지라키_목록){
+
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        for (String 지라키 : 지라키_목록) {
+            boolQuery.should(QueryBuilders.termQuery("parentReqKey", 지라키));
+        }
+
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+                .withQuery(boolQuery)
+                .withMaxResults(10000);
+
+        List<지라이슈> 전체결과 = new ArrayList<>();
+
+        boolean 인덱스존재시까지  = true;
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String 지라인덱스 = 인덱스자료.지라이슈_인덱스명;
+
+        while(인덱스존재시까지) {
+            LocalDate 오늘일경우 = LocalDate.now();
+            String 호출할_지라인덱스 = 오늘일경우.format(formatter).equals(today.format(formatter))
+                    ? 지라인덱스 : 지라인덱스 + "-" + today.format(formatter);
+
+            if (!지라이슈저장소.인덱스_존재_확인(호출할_지라인덱스)) {
+                인덱스존재시까지 = false;
+                break;
+            }
+
+            today = today.minusDays(1);
+
+            List<지라이슈> 결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 호출할_지라인덱스);
+
+            if (결과 != null && 결과.size() > 0) {
+                전체결과.addAll(결과);
+            }
+        }
+
+        Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>>  조회_결과= 전체결과.stream()
+                .map(this::요구사항_지라이슈키별_업데이트_목록_데이터)
+                .collect(Collectors.groupingBy(요구사항_지라이슈키별_업데이트_목록_데이터::getParentReqKey));
+
+        return 조회_결과;
+    }
+
+    private 요구사항_지라이슈키별_업데이트_목록_데이터 요구사항_지라이슈키별_업데이트_목록_데이터(지라이슈 지라이슈){
+        return new 요구사항_지라이슈키별_업데이트_목록_데이터(
+                지라이슈.getKey(),
+                지라이슈.getParentReqKey(),
+                지라이슈.getUpdated(),
+                지라이슈.getResolutiondate(),
+                지라이슈.getAssignee()
+        );
+
+    }
+
+
+
+    @Override
     public List<SearchHit<지라이슈>> 지라이슈_검색(검색어_기본_검색_요청 검색어_기본_검색_요청) {
         EsQuery esQuery = new EsQueryBuilder().queryString(new QueryString(검색어_기본_검색_요청.get검색어()));
         return 지라이슈저장소.fetchSearchHits(일반_검색_요청.of(검색어_기본_검색_요청, esQuery).생성());
     }
+
 }
