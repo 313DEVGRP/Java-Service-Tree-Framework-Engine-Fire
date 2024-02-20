@@ -6,7 +6,6 @@ import java.util.stream.Stream;
 import com.arms.api.engine.dtos.*;
 import com.arms.api.engine.models.*;
 import com.arms.api.engine.dtos.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
-import com.arms.api.engine.services.지라이슈_검색엔진_대시보드;
 import com.arms.api.engine.vo.제품_서비스_버전;
 import com.arms.elasticsearch.util.query.*;
 import com.arms.elasticsearch.util.query.bool.*;
@@ -178,6 +177,14 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         return ResponseEntity.ok(지라이슈_검색엔진.요구사항_별_상태_및_관여_작업자수_내용(요구사항,하위_이슈_사항));
     }
 
+    @GetMapping("/req-status-and-reqInvolved-unique-assignees-per-version/{pdServiceId}")
+    public ResponseEntity<List<요구사항_버전_이슈_키_상태_작업자수>> 버전배열_요구사항_별_상태_및_관여_작업자_수(@PathVariable Long pdServiceId,
+                                                                                @RequestParam Long[] pdServiceVersionLinks) {
+
+        List<요구사항_버전_이슈_키_상태_작업자수> 요구사항_버전배열_이슈키_작업자수_목록 = 지라이슈_검색엔진.버전별_요구사항_상태_및_관여_작업자수_내용(pdServiceId, pdServiceVersionLinks);
+        return ResponseEntity.ok(요구사항_버전배열_이슈키_작업자수_목록);
+    }
+
     @GetMapping("/exclusion-isreq-normal/{pdServiceId}")
     public ResponseEntity<검색결과_목록_메인> 요구사항여부제외_일반_검색(@PathVariable Long pdServiceId, 지라이슈_일반_집계_요청 지라이슈_일반_집계_요청) {
 
@@ -290,4 +297,6 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         List<SearchHit<지라이슈>> 지라이슈_검색결과 = 지라이슈_검색엔진.지라이슈_검색(검색어_기본_검색_요청);
         return ResponseEntity.ok(지라이슈_검색결과);
     }
+
+
 }

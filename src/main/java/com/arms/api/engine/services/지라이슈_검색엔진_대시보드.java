@@ -21,12 +21,10 @@ import com.arms.elasticsearch.util.query.bool.*;
 import com.arms.elasticsearch.util.query.query_string.QueryString;
 import com.arms.elasticsearch.util.query.일반_검색_요청;
 import com.arms.elasticsearch.util.query.쿼리_추상_팩토리;
-import com.arms.elasticsearch.util.repository.공통저장소_구현체;
 import com.arms.elasticsearch.util.검색결과;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -215,6 +213,51 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
     }
 
+    @Override
+    public List<요구사항_버전_이슈_키_상태_작업자수> 버전별_요구사항_상태_및_관여_작업자수_내용(Long pdServiceLink, Long[] pdServiceVersionLinks){
+        List<지라이슈> 요구사항_이슈_목록 = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionsIn(true, pdServiceLink, pdServiceVersionLinks);
+        List<지라이슈> 담당자_존재_요구사항_이슈_목록 = 요구사항_이슈_목록.stream()
+                                        .filter(지라이슈 -> 지라이슈.getAssignee() != null)
+                                        .collect(toList());
+        log.info(String.valueOf(요구사항_이슈_목록.size()));
+
+        // 담당자 있는 요구사항_이슈의 키만 뽑기
+        List<String> 담당자_존재_요구사항_이슈_키 = 담당자_존재_요구사항_이슈_목록.stream()
+                .map(지라이슈::getKey).collect(Collectors.toList());
+        List<지라이슈> allSubTasks = 지라이슈저장소.findByParentReqKeyIn(담당자_존재_요구사항_이슈_키);
+
+        //담당자가 있는 연결이슈만, 요구사항_이슈키에 매핑
+        Map<String, List<지라이슈>> 요구사항이슈_담당자있는_하위이슈들 = allSubTasks.stream()
+                .filter(subtask -> subtask.getAssignee() != null)
+                .collect(Collectors.groupingBy(지라이슈::getParentReqKey));
+
+        List<요구사항_버전_이슈_키_상태_작업자수> 요구사항_버전이슈키상태_작업자수_목록 = new ArrayList<>();
+
+        // 요구사항_이슈의 작업자의 메일을 set에 담고, 하위이슈 담당자 메일을 set에 담아서
+        // 그 결과 set의 크기를 해당 요구사항_이슈에 관련된 작업자수로 가져가는게 나을듯 싶음.
+        for(지라이슈 요구사항_이슈 : 담당자_존재_요구사항_이슈_목록) {
+            Set 메일_세트 = new HashSet();
+            메일_세트.add(요구사항_이슈.getAssignee().getEmailAddress());
+
+            String 이슈키 = 요구사항_이슈.getKey();
+            if(요구사항이슈_담당자있는_하위이슈들.containsKey(이슈키)) {
+                List<지라이슈> 하위이슈들 = 요구사항이슈_담당자있는_하위이슈들.get(이슈키);
+                for(지라이슈 하위이슈 : 하위이슈들) {
+                    메일_세트.add(하위이슈.getAssignee().getEmailAddress());
+                }
+            }
+            요구사항_버전_이슈_키_상태_작업자수 요구사항_버전_이슈_키_상태_작업자수 = new 요구사항_버전_이슈_키_상태_작업자수();
+            요구사항_버전_이슈_키_상태_작업자수.setVersionArr(요구사항_이슈.getPdServiceVersions());
+            요구사항_버전_이슈_키_상태_작업자수.setIssueKey(요구사항_이슈.getKey());
+            요구사항_버전_이슈_키_상태_작업자수.setStatusName(요구사항_이슈.getStatus().getName());
+            요구사항_버전_이슈_키_상태_작업자수.setNumOfWorkers(메일_세트.size());
+
+            요구사항_버전이슈키상태_작업자수_목록.add(요구사항_버전_이슈_키_상태_작업자수);
+            //담당자 수 매핑이 끝난 요구사항은 Map에서 제거
+            요구사항이슈_담당자있는_하위이슈들.remove(이슈키);
+        }
+        return 요구사항_버전이슈키상태_작업자수_목록;
+    }
 
     @Override
     public List<Worker> 작업자_별_요구사항_별_관여도(트리맵_검색요청 트리맵_검색요청) {
