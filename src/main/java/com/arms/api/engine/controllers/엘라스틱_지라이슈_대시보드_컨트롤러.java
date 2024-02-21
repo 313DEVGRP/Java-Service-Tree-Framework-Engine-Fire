@@ -291,8 +291,8 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
 
 
     @GetMapping("/req-updated-list")
-    public ResponseEntity<Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>>> 요구사항_지라이슈키별_업데이트_목록(@RequestParam List<String> 지라키_목록) {
-        return ResponseEntity.ok(지라이슈_검색엔진.요구사항_지라이슈키별_업데이트_목록(지라키_목록));
+    public ResponseEntity<Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>>> 요구사항_지라이슈키별_업데이트_목록(@RequestParam List<String> issueList) {
+        return ResponseEntity.ok(지라이슈_검색엔진.요구사항_지라이슈키별_업데이트_목록(issueList));
     }
 
 
