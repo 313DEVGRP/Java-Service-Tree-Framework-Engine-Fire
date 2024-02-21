@@ -289,6 +289,13 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         return ResponseEntity.ok(지라이슈_검색엔진.요구사항키로_하위이슈_조회(지라키));
     }
 
+
+    @GetMapping("/req-updated-list")
+    public ResponseEntity<Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>>> 요구사항_지라이슈키별_업데이트_목록(@RequestParam List<String> 지라키_목록) {
+        return ResponseEntity.ok(지라이슈_검색엔진.요구사항_지라이슈키별_업데이트_목록(지라키_목록));
+    }
+
+
     @GetMapping("/search")
     public ResponseEntity<?> 검색엔진_검색(@RequestParam("search_string") String 검색어) {
         log.info("[엘라스틱_지라이슈_대시보드_컨트롤러 :: 검색엔진_검색] :: 검색어 => {}" , 검색어);
@@ -297,6 +304,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         List<SearchHit<지라이슈>> 지라이슈_검색결과 = 지라이슈_검색엔진.지라이슈_검색(검색어_기본_검색_요청);
         return ResponseEntity.ok(지라이슈_검색결과);
     }
+
 
 
 }
