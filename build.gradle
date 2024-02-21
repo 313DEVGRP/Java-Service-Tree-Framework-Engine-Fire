@@ -152,16 +152,26 @@ dependencies {
 	implementation 'mysql:mysql-connector-java:8.0.32'
 	// modelmapper
 	implementation 'org.modelmapper:modelmapper:3.1.1'
-
 	// Swagger
-
 	implementation('io.springfox:springfox-boot-starter:3.0.0')
 	implementation('io.springfox:springfox-swagger-ui:3.0.0')
-
 	implementation("jakarta.json:jakarta.json-api:2.0.1")
 	implementation group: 'io.netty', name: 'netty-resolver-dns-native-macos', version: '4.1.73.Final', classifier: 'osx-aarch_64'
 
 
+	//https://github.com/gradle/gradle/issues/13656
+	components {
+		withModule('org.dom4j:dom4j', ClearDependencies)
+	}
+
+}
+
+//https://github.com/gradle/gradle/issues/13656
+class ClearDependencies implements ComponentMetadataRule {
+	@Override
+	void execute(ComponentMetadataContext context) {
+		context.details.allVariants { withDependencies { clear() } }
+	}
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os

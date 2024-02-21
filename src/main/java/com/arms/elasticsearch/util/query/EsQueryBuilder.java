@@ -9,24 +9,22 @@ import org.springframework.core.ParameterizedTypeReference;
 
 public class EsQueryBuilder extends EsQuery {
 
-	public EsQueryBuilder bool(EsBoolQuery... esBoolQuery){
-
+	public EsQueryBuilder bool(EsBoolQuery ... esBoolQuery){
 		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
 		for (EsBoolQuery esQuery : esBoolQuery) {
 			esQuery.boolQueryBuilder(boolQueryBuilder);
 		}
-		put(new ParameterizedTypeReference<>(){},boolQueryBuilder);
-
+		setQuery(new ParameterizedTypeReference<>() {},boolQueryBuilder);
 		return this;
 	}
 
 	public EsQueryBuilder sort(SortBy sortBy){
-		put(new ParameterizedTypeReference<>(){},sortBy.sortQuery());
+		setQuery(new ParameterizedTypeReference<>() {},sortBy);
 		return this;
 	}
 
-	public EsQueryBuilder queryString(QueryString queryString) {
-		put(new ParameterizedTypeReference<>(){}, queryString.queryString());
+	public EsQueryBuilder queryString(QueryString queryString){
+		setQuery(new ParameterizedTypeReference<>() {},queryString);
 		return this;
 	}
 

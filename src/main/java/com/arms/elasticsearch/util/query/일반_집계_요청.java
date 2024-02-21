@@ -52,7 +52,7 @@ public class 일반_집계_요청 implements 쿼리_추상_팩토리 {
 			= new NativeSearchQueryBuilder()
 			.withMaxResults(컨텐츠보기여부 ? 크기 : 0);
 
-		Optional.of(boolQuery)
+		Optional.ofNullable(boolQuery)
 			.ifPresent(query->{
 				nativeSearchQueryBuilder.withQuery(boolQuery);
 			});

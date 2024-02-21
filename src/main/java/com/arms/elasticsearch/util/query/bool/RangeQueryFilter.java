@@ -1,18 +1,14 @@
 package com.arms.elasticsearch.util.query.bool;
 
-import java.time.LocalDate;
-
 import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 
+import java.time.LocalDate;
+
 public class RangeQueryFilter extends Filter<RangeQueryBuilder> {
 
     private RangeQueryBuilder rangeQueryBuilder;
-
-    private RangeQueryFilter(){
-
-    }
 
     public RangeQueryFilter(String name, Object from, Object to, String flag) {
         if (name != null && flag != null) {
