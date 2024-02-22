@@ -707,7 +707,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
                         new TermQueryMust("isReq", 요구사항여부),
-                        new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
+                        new TermsQueryFilter("pdServiceVersions", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
                         new ExistsQueryFilter("assignee")
                 );
 
@@ -743,7 +743,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         }
 
         CustomAbstractAggregationBuilder versionsAgg = new CustomTermsAggregationBuilder("versions")
-                .field("pdServiceVersion")
+                .field("pdServiceVersions")
                 .addSubAggregation(subAggregation);
 
         NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
