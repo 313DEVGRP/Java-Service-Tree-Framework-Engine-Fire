@@ -16,16 +16,15 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @AllArgsConstructor
 @Getter
 @Setter
-@Document(indexName = 인덱스자료.서버정보_인덱스명,createIndex = false)
+@Document(indexName = 인덱스자료.서버정보_인덱스명)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "_class")
 @JsonTypeName("com.arms.api.serverinfo.model.서버정보_엔티티")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ElasticSearchIndex
 public class 서버정보_엔티티 {
 
     @Id
     @Field(type = FieldType.Keyword, name = "connectId")
-    private Long connectId;
+    private String connectId;
 
     @Field(type = FieldType.Text, name = "type")
     private String type;

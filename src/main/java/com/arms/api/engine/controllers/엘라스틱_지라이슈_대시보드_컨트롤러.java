@@ -11,6 +11,7 @@ import com.arms.elasticsearch.util.query.*;
 import com.arms.elasticsearch.util.query.bool.*;
 import com.arms.elasticsearch.util.검색결과;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,12 +34,12 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     ) {
         EsBoolQuery[] esBoolQueries = Stream.of(
                 new TermQueryMust("pdServiceId", 검색요청.getPdServiceLink()),
-                new TermsQueryFilter("pdServiceVersion", 검색요청.getPdServiceVersionLinks()),
+                new TermsQueryFilter("pdServiceVersions", 검색요청.getPdServiceVersionLinks()),
                 검색요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
                 검색요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null
         ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
 
-        EsQueryBuilder esQuery = new EsQueryBuilder().bool(esBoolQueries);
+        EsQuery esQuery = new EsQueryBuilder().bool(esBoolQueries);
 
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(검색요청, esQuery)));
     }
@@ -49,12 +50,12 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     ) {
         EsBoolQuery[] esBoolQueries = Stream.of(
                 new TermQueryMust("pdServiceId", 검색요청.getPdServiceLink()),
-                new TermsQueryFilter("pdServiceVersion", 검색요청.getPdServiceVersionLinks()),
+                new TermsQueryFilter("pdServiceVersions", 검색요청.getPdServiceVersionLinks()),
                 검색요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
                 검색요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null
         ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
 
-        EsQueryBuilder esQuery = new EsQueryBuilder().bool(esBoolQueries);
+        EsQuery esQuery = new EsQueryBuilder().bool(esBoolQueries);
 
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청_서브집계.of(검색요청, esQuery)));
     }
@@ -120,7 +121,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
                 .bool(
                         new TermQueryMust("pdServiceId",pdServiceId)
                         ,new TermQueryMust("isReq", 지라이슈_일반_집계_요청.getIsReq())
-                        ,new TermsQueryFilter("pdServiceVersion",pdServiceVersionLinks)
+                        ,new TermsQueryFilter("pdServiceVersions",pdServiceVersionLinks)
                 );
 
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(지라이슈_일반_집계_요청, esQuery)));
@@ -134,7 +135,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
             = new EsQueryBuilder()
                 .bool(
                         new TermQueryMust("pdServiceId",pdServiceId)
-                        ,new TermsQueryFilter("pdServiceVersion",pdServiceVersionLinks)
+                        ,new TermsQueryFilter("pdServiceVersions",pdServiceVersionLinks)
                 );
 
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(지라이슈_단순_검색_요청, esQuery)));
@@ -148,28 +149,40 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         EsQuery esQuery
                 = new EsQueryBuilder()
                 .bool(  new TermsQueryFilter("assignee.assignee_emailAddress.keyword", mailAddressList),
-                        new TermsQueryFilter("pdServiceVersion",pdServiceVersionLinks),
+                        new TermsQueryFilter("pdServiceVersions",pdServiceVersionLinks),
                         new TermQueryMust("pdServiceId",pdServiceId)
                 );
 
         return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(지라이슈_단순_검색_요청, esQuery)));
     }
 
-    @GetMapping("/assignees-requirements-involvements")
+    @PostMapping("/assignees-requirements-involvements")
     public ResponseEntity<List<Worker>> 작업자_별_요구사항_별_관여도_apache(
-            지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청
+            @RequestBody 트리맵_검색요청 트리맵_검색요청
     ) {
-        return ResponseEntity.ok(지라이슈_검색엔진.작업자_별_요구사항_별_관여도(지라이슈_제품_및_제품버전_집계_요청));
+        return ResponseEntity.ok(지라이슈_검색엔진.작업자_별_요구사항_별_관여도(트리맵_검색요청));
     }
 
     @PostMapping("/req-status-and-reqInvolved-unique-assignees")
     public ResponseEntity<List<제품_서비스_버전>>
-        요구사항_별_상태_및_관여_작업자_수(@RequestBody 지라이슈_제품_및_제품버전_병합_집계_요청 지라이슈_제품_및_제품버전_병합_집계_요청) {
+        요구사항_별_상태_및_관여_작업자_수(@RequestBody 지라이슈_제품_및_제품버전_병합_집계_요청 병합집계요청) {
 
-        log.info("[엘라스틱_지라이슈_대시보드_컨트롤러 :: 요구사항_별_상태_및_관여_작업자_수 ] :: 병합_요청_사항_요청값_생성 -> {}", 지라이슈_제품_및_제품버전_병합_집계_요청.get요구_사항());
-        검색결과_목록_메인 요구사항 = 병합_요청_사항_요청값_생성(지라이슈_제품_및_제품버전_병합_집계_요청.get요구_사항());
-        검색결과_목록_메인 하위_이슈_사항 = 병합_요청_사항_요청값_생성(지라이슈_제품_및_제품버전_병합_집계_요청.get하위_이슈_사항());
+        log.info("[엘라스틱_지라이슈_대시보드_컨트롤러 :: 요구사항_별_상태_및_관여_작업자_수 ] :: 병합_요청_사항_요청값_생성 -> {}", 병합집계요청.get요구_사항());
+        검색결과_목록_메인 요구사항
+            =  지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(병합집계요청.get요구_사항(), 병합_요청_사항_요청값_생성(병합집계요청.get요구_사항())));
+
+        검색결과_목록_메인 하위_이슈_사항
+            =  지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(병합집계요청.get요구_사항(), 병합_요청_사항_요청값_생성(병합집계요청.get하위_이슈_사항())));
+
         return ResponseEntity.ok(지라이슈_검색엔진.요구사항_별_상태_및_관여_작업자수_내용(요구사항,하위_이슈_사항));
+    }
+
+    @GetMapping("/req-status-and-reqInvolved-unique-assignees-per-version/{pdServiceId}")
+    public ResponseEntity<List<요구사항_버전_이슈_키_상태_작업자수>> 버전배열_요구사항_별_상태_및_관여_작업자_수(@PathVariable Long pdServiceId,
+                                                                                @RequestParam Long[] pdServiceVersionLinks) {
+
+        List<요구사항_버전_이슈_키_상태_작업자수> 요구사항_버전배열_이슈키_작업자수_목록 = 지라이슈_검색엔진.버전별_요구사항_상태_및_관여_작업자수_내용(pdServiceId, pdServiceVersionLinks);
+        return ResponseEntity.ok(요구사항_버전배열_이슈키_작업자수_목록);
     }
 
     @GetMapping("/exclusion-isreq-normal/{pdServiceId}")
@@ -232,7 +245,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
                 .bool(
                         new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink())
                         , new TermQueryMust("isReq", isReq)
-                        , new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks())
+                        , new TermsQueryFilter("pdServiceVersions", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks())
                         , new ExistsQueryFilter(resolution)
                 );
 
@@ -247,20 +260,21 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
                 = new EsQueryBuilder()
                 .bool(
                         new TermQueryMust("pdServiceId",pdServiceId),
-                        new TermsQueryFilter("pdServiceVersion",지라이슈_일반_검색_요청.getPdServiceVersionLinks())
+                        new TermsQueryFilter("pdServiceVersions",지라이슈_일반_검색_요청.getPdServiceVersionLinks())
                 );
 
         return ResponseEntity.ok(지라이슈_검색엔진.지라이슈_조회(일반_검색_요청.of(지라이슈_일반_검색_요청, esQuery)));
     }
 
-    private 검색결과_목록_메인 병합_요청_사항_요청값_생성(지라이슈_제품_및_제품버전_집계_요청 요청){
+    private EsQuery 병합_요청_사항_요청값_생성(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청){
         EsQuery esQuery
                 = new EsQueryBuilder()
-                .bool( new TermsQueryFilter("pdServiceVersion",요청.getPdServiceVersionLinks()),
-                        new TermQueryMust("pdServiceId",요청.getPdServiceLink()),
-                        new TermQueryMust("isReq",요청.getIsReqType().isNotAllAndIsReq())
+                .bool( new TermsQueryFilter("pdServiceVersions",지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
+                        new TermQueryMust("pdServiceId",지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
+                        new TermQueryMust("isReq",지라이슈_제품_및_제품버전_집계_요청.getIsReqType().isNotAllAndIsReq())
                 );
-        return 지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(요청, esQuery));
+
+        return esQuery;
     }
 
     @GetMapping("/version-req-assignees")
@@ -274,5 +288,23 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     public ResponseEntity<List<지라이슈>> 요구사항키로_하위이슈_조회(@RequestParam String 지라키) {
         return ResponseEntity.ok(지라이슈_검색엔진.요구사항키로_하위이슈_조회(지라키));
     }
+
+
+    @GetMapping("/req-updated-list")
+    public ResponseEntity<Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>>> 요구사항_지라이슈키별_업데이트_목록(@RequestParam List<String> issueList) {
+        return ResponseEntity.ok(지라이슈_검색엔진.요구사항_지라이슈키별_업데이트_목록(issueList));
+    }
+
+
+    @GetMapping("/search")
+    public ResponseEntity<?> 검색엔진_검색(@RequestParam("search_string") String 검색어) {
+        log.info("[엘라스틱_지라이슈_대시보드_컨트롤러 :: 검색엔진_검색] :: 검색어 => {}" , 검색어);
+        검색어_기본_검색_요청 검색어_기본_검색_요청 = new 검색어_기본_검색_요청();
+        검색어_기본_검색_요청.set검색어(검색어);
+        List<SearchHit<지라이슈>> 지라이슈_검색결과 = 지라이슈_검색엔진.지라이슈_검색(검색어_기본_검색_요청);
+        return ResponseEntity.ok(지라이슈_검색결과);
+    }
+
+
 
 }

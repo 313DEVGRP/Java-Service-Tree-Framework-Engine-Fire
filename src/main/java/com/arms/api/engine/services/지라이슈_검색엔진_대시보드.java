@@ -2,9 +2,11 @@ package com.arms.api.engine.services;
 
 import com.arms.api.engine.dtos.*;
 import com.arms.api.engine.models.IsReqType;
+import com.arms.api.engine.models.제품버전목록;
 import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.models.지라이슈_일자별_제품_및_제품버전_집계_요청;
 import com.arms.api.engine.models.지라이슈_제품_및_제품버전_집계_요청;
+import com.arms.api.engine.models.트리맵_검색요청;
 import com.arms.api.engine.repositories.인덱스자료;
 import com.arms.api.engine.repositories.지라이슈_저장소;
 import com.arms.api.engine.vo.제품_서비스_버전;
@@ -16,6 +18,8 @@ import com.arms.elasticsearch.util.aggregation.CustomTermsAggregationBuilder;
 import com.arms.elasticsearch.util.query.EsQuery;
 import com.arms.elasticsearch.util.query.EsQueryBuilder;
 import com.arms.elasticsearch.util.query.bool.*;
+import com.arms.elasticsearch.util.query.query_string.QueryString;
+import com.arms.elasticsearch.util.query.일반_검색_요청;
 import com.arms.elasticsearch.util.query.쿼리_추상_팩토리;
 import com.arms.elasticsearch.util.검색결과;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
@@ -34,6 +38,7 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
@@ -166,14 +171,14 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     public List<검색결과> 제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
-                        new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
+                        new TermsQueryFilter("pdServiceVersions", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
                         new ExistsQueryFilter("assignee")
                 );
 
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
 
         CustomAbstractAggregationBuilder versionsAgg = new CustomTermsAggregationBuilder("versions")
-                .field("pdServiceVersion")
+                .field("pdServiceVersions")
                 .addSubAggregation(
                         new CustomTermsAggregationBuilder("assignees")
                                 .field("assignee.assignee_accountId.keyword")
@@ -208,15 +213,59 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
     }
 
+    @Override
+    public List<요구사항_버전_이슈_키_상태_작업자수> 버전별_요구사항_상태_및_관여_작업자수_내용(Long pdServiceLink, Long[] pdServiceVersionLinks){
+        List<지라이슈> 요구사항_이슈_목록 = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionsIn(true, pdServiceLink, pdServiceVersionLinks);
+        List<지라이슈> 담당자_존재_요구사항_이슈_목록 = 요구사항_이슈_목록.stream()
+                                        .filter(지라이슈 -> 지라이슈.getAssignee() != null)
+                                        .collect(toList());
+        log.info(String.valueOf(요구사항_이슈_목록.size()));
+
+        // 담당자 있는 요구사항_이슈의 키만 뽑기
+        List<String> 담당자_존재_요구사항_이슈_키 = 담당자_존재_요구사항_이슈_목록.stream()
+                .map(지라이슈::getKey).collect(Collectors.toList());
+        List<지라이슈> allSubTasks = 지라이슈저장소.findByParentReqKeyIn(담당자_존재_요구사항_이슈_키);
+
+        //담당자가 있는 연결이슈만, 요구사항_이슈키에 매핑
+        Map<String, List<지라이슈>> 요구사항이슈_담당자있는_하위이슈들 = allSubTasks.stream()
+                .filter(subtask -> subtask.getAssignee() != null)
+                .collect(Collectors.groupingBy(지라이슈::getParentReqKey));
+
+        List<요구사항_버전_이슈_키_상태_작업자수> 요구사항_버전이슈키상태_작업자수_목록 = new ArrayList<>();
+
+        // 요구사항_이슈의 작업자의 메일을 set에 담고, 하위이슈 담당자 메일을 set에 담아서
+        // 그 결과 set의 크기를 해당 요구사항_이슈에 관련된 작업자수로 가져가는게 나을듯 싶음.
+        for(지라이슈 요구사항_이슈 : 담당자_존재_요구사항_이슈_목록) {
+            Set 메일_세트 = new HashSet();
+            메일_세트.add(요구사항_이슈.getAssignee().getEmailAddress());
+
+            String 이슈키 = 요구사항_이슈.getKey();
+            if(요구사항이슈_담당자있는_하위이슈들.containsKey(이슈키)) {
+                List<지라이슈> 하위이슈들 = 요구사항이슈_담당자있는_하위이슈들.get(이슈키);
+                for(지라이슈 하위이슈 : 하위이슈들) {
+                    메일_세트.add(하위이슈.getAssignee().getEmailAddress());
+                }
+            }
+            요구사항_버전_이슈_키_상태_작업자수 요구사항_버전_이슈_키_상태_작업자수 = new 요구사항_버전_이슈_키_상태_작업자수();
+            요구사항_버전_이슈_키_상태_작업자수.setVersionArr(요구사항_이슈.getPdServiceVersions());
+            요구사항_버전_이슈_키_상태_작업자수.setIssueKey(요구사항_이슈.getKey());
+            요구사항_버전_이슈_키_상태_작업자수.setStatusName(요구사항_이슈.getStatus().getName());
+            요구사항_버전_이슈_키_상태_작업자수.setNumOfWorkers(메일_세트.size());
+
+            요구사항_버전이슈키상태_작업자수_목록.add(요구사항_버전_이슈_키_상태_작업자수);
+            //담당자 수 매핑이 끝난 요구사항은 Map에서 제거
+            요구사항이슈_담당자있는_하위이슈들.remove(이슈키);
+        }
+        return 요구사항_버전이슈키상태_작업자수_목록;
+    }
 
     @Override
-    public List<Worker> 작업자_별_요구사항_별_관여도(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
+    public List<Worker> 작업자_별_요구사항_별_관여도(트리맵_검색요청 트리맵_검색요청) {
         Map<String, Worker> contributionMap = new HashMap<>();
 
-        List<지라이슈> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionIn(
-            true
-            , 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()
-            , 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks());
+        List<제품버전목록> 제품버전목록데이터 = 트리맵_검색요청.get제품버전목록();
+       
+        List<지라이슈> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionsIn(true, 트리맵_검색요청.getPdServiceLink(), 트리맵_검색요청.getPdServiceVersionLinks());
 
         // 요구사항의 키를 모두 추출
         List<String> allReqKeys = requirementIssues.stream().map(지라이슈::getKey).collect(Collectors.toList());
@@ -232,6 +281,16 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         requirementIssues.stream().forEach(reqIssue -> {
             String key = reqIssue.getKey();
             String summary = reqIssue.getSummary();
+            Long[] pdServiceVersions = reqIssue.getPdServiceVersions();
+            String versionNames =  Stream.of(pdServiceVersions)
+                    .map(versionId -> 제품버전목록데이터.stream()
+                            .filter(p -> p.getC_id().equals(versionId.toString()))
+                            .findFirst()
+                            .map(제품버전목록::getC_title)
+                            .orElse(null)
+                    )
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.joining(", "));
 
             Optional.ofNullable(subTasksByParent.get(key)).orElse(Collections.emptyList()).stream().forEach(subtask -> {
                 String assigneeId = subtask.getAssignee().getAccountId();
@@ -249,7 +308,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                         .orElseGet(() -> {
                             Map<String, Integer> dataList = new HashMap<>();
                             dataList.put("involvedCount", 0);
-                            TaskList newTask = new TaskList(key, summary, dataList);
+                            TaskList newTask = new TaskList(key, "[ " + versionNames + " ] - " + summary, dataList);
                             worker.getChildren().add(newTask);
                             return newTask;
                         });
@@ -261,7 +320,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         return contributionMap.values().stream()
                 .sorted((w1, w2) -> w2.getData().get("totalInvolvedCount").compareTo(w1.getData().get("totalInvolvedCount")))
-                .limit(지라이슈_제품_및_제품버전_집계_요청.get크기() > 0 ? 지라이슈_제품_및_제품버전_집계_요청.get크기() : Long.MAX_VALUE)
+                .limit(트리맵_검색요청.get크기() > 0 ? 트리맵_검색요청.get크기() : Long.MAX_VALUE)
                 .collect(Collectors.toList());
 
     }
@@ -284,7 +343,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         // 2. 검색 범위 내의 데이터를 가져온다. 현재 검색 범위는 차트 UI를 고려하여, 4~5주 정도로 적용
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
-                        new TermsQueryFilter("pdServiceVersion", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
+                        new TermsQueryFilter("pdServiceVersions", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
                         new RangeQueryFilter("created", monthAgo, now, "fromto")
                 );
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
@@ -330,11 +389,11 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         return 검색결과;
     }
 
-    public 요구사항_지라이슈상태_주별_집계 누적데이터조회(Long pdServiceLink, List<Long> pdServiceVersionLinks, LocalDate monthAgo) {
+    public 요구사항_지라이슈상태_주별_집계 누적데이터조회(Long pdServiceLink, Long[] pdServiceVersionLinks, LocalDate monthAgo) {
         // 총 이슈 개수를 구하기 위한 쿼리
         EsQuery issueEsQuery = new EsQueryBuilder()
                 .bool(new TermQueryMust("pdServiceId", pdServiceLink),
-                        new TermsQueryFilter("pdServiceVersion", pdServiceVersionLinks),
+                        new TermsQueryFilter("pdServiceVersions", pdServiceVersionLinks),
                         new RangeQueryFilter("created", null, monthAgo, "lt")
                 );
         BoolQueryBuilder boolQueryForTotalIssues = issueEsQuery.getQuery(new ParameterizedTypeReference<>() {});
@@ -416,7 +475,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
          EsBoolQuery[] esBoolQueries = Stream.of(
                 new TermQueryMust("pdServiceId", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceLink()),
-                new TermsQueryFilter("pdServiceVersion", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
+                new TermsQueryFilter("pdServiceVersions", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
                 지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
                 지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null,
                 new RangeQueryFilter(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준(), from, to, "fromto")
@@ -471,7 +530,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         EsBoolQuery[] esBoolQueries = Stream.of(
                 new TermQueryMust("pdServiceId", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceLink()),
-                new TermsQueryFilter("pdServiceVersion", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
+                new TermsQueryFilter("pdServiceVersions", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
                 지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
                 지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null,
                 new RangeQueryFilter(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준(), from, to, "fromto")
@@ -485,8 +544,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 .withSort(SortBuilders.fieldSort(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준()).order(SortOrder.ASC))
                 .withMaxResults(10000);
 
-        List<지라이슈> 전체결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build());
-        return 전체결과;
+        return 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build());
     }
     private 일자별_요구사항_연결된이슈_생성개수_및_상태데이터 일별_생성개수_및_상태_데이터생성(검색결과 결과) {
         Map<String, Long> 요구사항여부결과 = new HashMap<>();
@@ -527,7 +585,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         EsBoolQuery[] esBoolQueries = Stream.of(
                 new TermQueryMust("pdServiceId", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceLink()),
-                new TermsQueryFilter("pdServiceVersion", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
+                new TermsQueryFilter("pdServiceVersions", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
                 지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
                 지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null,
                 new RangeQueryFilter(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준(), from, to, "fromto")
@@ -589,8 +647,11 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         if (지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ) {
 
+
             조회_결과= 전체결과.stream()
                     .map(this::요구사항_별_업데이트_데이터)
+                    .collect(toList())
+                    .stream().flatMap(업데이트_데이터들->업데이트_데이터들.stream())
                     .distinct()
                     .collect(Collectors.groupingBy(요구사항_별_업데이트_데이터::getPdServiceVersion,
                             Collectors.groupingBy(이슈 -> transformDateForUpdatedField(이슈.getUpdated()),
@@ -600,6 +661,8 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
             조회_결과= 전체결과.stream()
                     .map(this::요구사항_별_업데이트_데이터)
+                    .collect(toList())
+                    .stream().flatMap(업데이트_데이터들->업데이트_데이터들.stream())
                     .distinct()
                     .collect(Collectors.groupingBy(요구사항_별_업데이트_데이터::getPdServiceVersion,
                             Collectors.groupingBy(이슈 -> transformDateForUpdatedField(이슈.getUpdated()),
@@ -609,15 +672,20 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
     }
 
-    private 요구사항_별_업데이트_데이터 요구사항_별_업데이트_데이터(지라이슈 issue) {
-        요구사항_별_업데이트_데이터 요구사항_별_업데이트_데이터 = new 요구사항_별_업데이트_데이터();
-        요구사항_별_업데이트_데이터.setKey(issue.getKey());
-        요구사항_별_업데이트_데이터.setParentReqKey(issue.getParentReqKey());
-        요구사항_별_업데이트_데이터.setUpdated(issue.getUpdated());
-        요구사항_별_업데이트_데이터.setPdServiceVersion(issue.getPdServiceVersion());
-        요구사항_별_업데이트_데이터.setSummary(issue.getSummary());
-        요구사항_별_업데이트_데이터.setIsReq(issue.getIsReq());
-        return 요구사항_별_업데이트_데이터;
+    private List<요구사항_별_업데이트_데이터> 요구사항_별_업데이트_데이터(지라이슈 issue) {
+
+        return Arrays.stream(issue.getPdServiceVersions()).collect(toList())
+            .stream()
+            .map(지라이슈->{
+                요구사항_별_업데이트_데이터 요구사항_별_업데이트_데이터 = new 요구사항_별_업데이트_데이터();
+                요구사항_별_업데이트_데이터.setKey(issue.getKey());
+                요구사항_별_업데이트_데이터.setParentReqKey(issue.getParentReqKey());
+                요구사항_별_업데이트_데이터.setUpdated(issue.getUpdated());
+                요구사항_별_업데이트_데이터.setPdServiceVersion(지라이슈.longValue());
+                요구사항_별_업데이트_데이터.setSummary(issue.getSummary());
+                요구사항_별_업데이트_데이터.setIsReq(issue.getIsReq());
+                return 요구사항_별_업데이트_데이터;
+            }).collect(toList());
     }
     private String transformDateForUpdatedField(String date) {
         String subDate = date.substring(0,10);
@@ -693,4 +761,71 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     public List<지라이슈> 요구사항키로_하위이슈_조회(String 지라키){ // parentReqKey
         return 지라이슈저장소.findByParentReqKeyIn(Collections.singletonList(지라키));
     }
+
+
+    @Override
+    public Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>> 요구사항_지라이슈키별_업데이트_목록(List<String> 지라키_목록){
+
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        for (String 지라키 : 지라키_목록) {
+            boolQuery.should(QueryBuilders.termQuery("parentReqKey", 지라키));
+        }
+
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+                .withQuery(boolQuery)
+                .withMaxResults(10000);
+
+        List<지라이슈> 전체결과 = new ArrayList<>();
+
+        boolean 인덱스존재시까지  = true;
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String 지라인덱스 = 인덱스자료.지라이슈_인덱스명;
+
+        while(인덱스존재시까지) {
+            LocalDate 오늘일경우 = LocalDate.now();
+            String 호출할_지라인덱스 = 오늘일경우.format(formatter).equals(today.format(formatter))
+                    ? 지라인덱스 : 지라인덱스 + "-" + today.format(formatter);
+
+            if (!지라이슈저장소.인덱스_존재_확인(호출할_지라인덱스)) {
+                인덱스존재시까지 = false;
+                break;
+            }
+
+            today = today.minusDays(1);
+
+            List<지라이슈> 결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 호출할_지라인덱스);
+
+            if (결과 != null && 결과.size() > 0) {
+                전체결과.addAll(결과);
+            }
+        }
+
+        Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>>  조회_결과= 전체결과.stream()
+                .map(this::요구사항_지라이슈키별_업데이트_목록_데이터)
+                .distinct()
+                .collect(Collectors.groupingBy(요구사항_지라이슈키별_업데이트_목록_데이터::getParentReqKey));
+
+        return 조회_결과;
+    }
+
+    private 요구사항_지라이슈키별_업데이트_목록_데이터 요구사항_지라이슈키별_업데이트_목록_데이터(지라이슈 지라이슈){
+        return new 요구사항_지라이슈키별_업데이트_목록_데이터(
+                지라이슈.getKey(),
+                지라이슈.getParentReqKey(),
+                지라이슈.getUpdated(),
+                지라이슈.getResolutiondate(),
+                지라이슈.getAssignee()
+        );
+
+    }
+
+
+
+    @Override
+    public List<SearchHit<지라이슈>> 지라이슈_검색(검색어_기본_검색_요청 검색어_기본_검색_요청) {
+        EsQuery esQuery = new EsQueryBuilder().queryString(new QueryString(검색어_기본_검색_요청.get검색어()));
+        return 지라이슈저장소.fetchSearchHits(일반_검색_요청.of(검색어_기본_검색_요청, esQuery).생성());
+    }
+
 }

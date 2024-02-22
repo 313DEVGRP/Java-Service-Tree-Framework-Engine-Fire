@@ -1,16 +1,23 @@
 package com.arms.api.engine.models;
 
-import com.arms.elasticsearch.util.base.기본_집계_요청;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.List;
 
+import com.arms.elasticsearch.util.base.기본_집계_요청;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+
 @Getter
 @Setter
-public class 지라이슈_제품_및_제품버전_집계_요청 extends 기본_집계_요청 {
+@NoArgsConstructor
+@AllArgsConstructor
+public class 트리맵_검색요청 extends 기본_집계_요청 {
     private Long pdServiceLink;
     private Long[] pdServiceVersionLinks;
+    private List<제품버전목록> 제품버전목록;
     private IsReqType isReqType;
-
 }

@@ -7,10 +7,12 @@ import com.arms.api.engine.dtos.*;
 import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.models.지라이슈_일자별_제품_및_제품버전_집계_요청;
 import com.arms.api.engine.models.지라이슈_제품_및_제품버전_집계_요청;
+import com.arms.api.engine.models.트리맵_검색요청;
 import com.arms.api.engine.vo.제품_서비스_버전;
 import com.arms.elasticsearch.util.query.쿼리_추상_팩토리;
 import com.arms.elasticsearch.util.검색결과;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
+import org.springframework.data.elasticsearch.core.SearchHit;
 
 public interface 지라이슈_대시보드_서비스 {
 
@@ -25,7 +27,7 @@ public interface 지라이슈_대시보드_서비스 {
 
     List<검색결과> 제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청);
 
-    List<Worker> 작업자_별_요구사항_별_관여도(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청);
+    List<Worker> 작업자_별_요구사항_별_관여도(트리맵_검색요청 트리맵_검색요청);
 
     Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항_지라이슈상태_주별_집계(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청);
 
@@ -41,4 +43,12 @@ public interface 지라이슈_대시보드_서비스 {
     List<검색결과> 제품_버전별_요구사항별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청);
 
     List<지라이슈> 요구사항키로_하위이슈_조회(String 지라키);
+
+
+    Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>> 요구사항_지라이슈키별_업데이트_목록(List<String> 지라키_목록);
+
+    List<SearchHit<지라이슈>> 지라이슈_검색(검색어_기본_검색_요청 검색어_기본_검색_요청);
+
+    List<요구사항_버전_이슈_키_상태_작업자수> 버전별_요구사항_상태_및_관여_작업자수_내용(Long pdServiceLink, Long[] pdServiceVersionLinks);
+
 }

@@ -1,5 +1,8 @@
 package com.arms.elasticsearch.util.repository;
 
+import com.arms.api.engine.models.지라이슈;
+import com.arms.api.serverinfo.model.서버정보_엔티티;
+import com.arms.elasticsearch.util.custom.index.ElasticSearchIndex;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
 import com.arms.elasticsearch.util.검색엔진_유틸;
 import com.arms.elasticsearch.util.검색조건;
@@ -78,12 +81,48 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
     }
 
 
+    public List<SearchHit<T>> fetchSearchHits(Query query) {
+
+        if (query == null) {
+            log.error("Failed to build search request");
+            return Collections.emptyList();
+        }
+
+        try {
+
+            ElasticSearchIndex annotation = AnnotationUtils.findAnnotation(entityClass, ElasticSearchIndex.class);
+
+            if(annotation==null){
+                return operations.search(query, entityClass).stream()
+                        .collect(Collectors.toList());
+            }
+
+            // 확인필요
+            return operations.search(query, entityClass,indexName()).stream()
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return Collections.emptyList();
+        }
+    }
+
+
     public List<T> normalSearch(Query query) {
         if (query == null) {
             log.error("Failed to build search request");
             return Collections.emptyList();
         }
+
         try {
+
+            ElasticSearchIndex annotation = AnnotationUtils.findAnnotation(entityClass, ElasticSearchIndex.class);
+
+            if(annotation==null){
+                return operations.search(query, entityClass).stream()
+                    .map(SearchHit::getContent).collect(Collectors.toList());
+            }
+
             return operations.search(query, entityClass,indexName()).stream()
                     .map(SearchHit::getContent).collect(Collectors.toList());
 
@@ -265,14 +304,21 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
     @Override
     public <S extends T> S save(S entity){
+        ElasticSearchIndex annotation = AnnotationUtils.findAnnotation(entityClass, ElasticSearchIndex.class);
+        if(annotation==null){
+            return operations.save(entity);
+        }
         return operations.save(entity, indexName());
     };
 
     @Override
     public <S extends T> Iterable<S> saveAll(Iterable<S> entities) {
+        ElasticSearchIndex annotation = AnnotationUtils.findAnnotation(entityClass, ElasticSearchIndex.class);
+        if(annotation==null){
+            return operations.save(entities);
+        }
         return operations.save(entities, indexName());
     }
-
 
 
 }
