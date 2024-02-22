@@ -19,12 +19,12 @@ public class EsQueryBuilder extends EsQuery {
 	}
 
 	public EsQueryBuilder sort(SortBy sortBy){
-		setQuery(new ParameterizedTypeReference<>() {},sortBy);
+		setQuery(new ParameterizedTypeReference<>() {},sortBy.sortQuery());
 		return this;
 	}
 
 	public EsQueryBuilder queryString(QueryString queryString){
-		setQuery(new ParameterizedTypeReference<>() {},queryString);
+		setQuery(new ParameterizedTypeReference<>() {},queryString.queryString());
 		return this;
 	}
 
