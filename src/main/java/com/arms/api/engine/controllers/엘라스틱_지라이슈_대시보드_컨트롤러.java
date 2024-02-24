@@ -16,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.arms.api.engine.services.지라이슈_대시보드_서비스;
+import com.arms.api.engine.services.플루언트디_서비스;
+import com.arms.api.engine.repositories.플루언트디_저장소;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
 
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +29,9 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
 
     @Autowired
     private 지라이슈_대시보드_서비스 지라이슈_검색엔진;
+
+    @Autowired
+    private 플루언트디_서비스 플루언트디_서비스;
 
     @GetMapping("/aggregation/nested")
     public ResponseEntity<검색결과_목록_메인> nestedAggregation(
@@ -305,6 +310,17 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         return ResponseEntity.ok(지라이슈_검색결과);
     }
 
-
+    @GetMapping("/search/fluentd")
+    public ResponseEntity<?> 검색엔진_플루언트디_검색(@RequestParam("search_string") String 검색어,
+                                           @RequestParam(value = "page", defaultValue = "0") int 페이지,
+                                           @RequestParam(value = "size", defaultValue = "1000") int 크기) {
+        log.info("[엘라스틱_지라이슈_대시보드_컨트롤러 :: 검색엔진_플루언트디_검색] :: 검색어 => {}" , 검색어);
+        검색어_기본_검색_요청 검색어_기본_검색_요청 = new 검색어_기본_검색_요청();
+        검색어_기본_검색_요청.set검색어(검색어);
+        검색어_기본_검색_요청.set페이지(페이지);
+        검색어_기본_검색_요청.set크기(크기);
+        List<SearchHit<플루언트디>> 플루언트디_검색결과 = 플루언트디_서비스.플푸언트디_검색(검색어_기본_검색_요청);
+        return ResponseEntity.ok(플루언트디_검색결과);
+    }
 
 }
