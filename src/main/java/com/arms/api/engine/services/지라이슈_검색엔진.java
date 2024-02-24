@@ -119,7 +119,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     public 지라이슈 이슈_조회하기(String 조회조건_아이디) {
 
         NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
-            .withQuery(QueryBuilders.termQuery("id", 조회조건_아이디))
+            .withQuery(QueryBuilders.termQuery("id.keyword", 조회조건_아이디))
             .build();
 
         return 지라이슈저장소.normalSearch(searchQuery).stream().findFirst().orElseGet(지라이슈::new);
