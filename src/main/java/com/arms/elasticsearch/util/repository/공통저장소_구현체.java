@@ -8,6 +8,7 @@ import com.arms.elasticsearch.util.검색엔진_유틸;
 import com.arms.elasticsearch.util.검색조건;
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,7 @@ import org.springframework.data.elasticsearch.repository.support.SimpleElasticse
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -296,7 +298,17 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
     public IndexCoordinates indexName() {
         Document document = AnnotationUtils.findAnnotation(entityClass, Document.class);
         if(document!=null){
-            var indexName = document.indexName()+"-"+LocalDate.now();
+            String indexName;
+            if(StringUtils.contains(document.indexName(),"fluentd")) {
+                // 포맷 지정
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+                // 포맷 적용
+                String formattedDate = LocalDate.now().format(formatter);
+                indexName = document.indexName() + "-" + formattedDate;
+            } else {
+                indexName = document.indexName() + "-" + LocalDate.now();
+            }
+
             return IndexCoordinates.of(indexName);
         }
        throw new RuntimeException("인덱스명을 확인해주시길 바랍니다.");
