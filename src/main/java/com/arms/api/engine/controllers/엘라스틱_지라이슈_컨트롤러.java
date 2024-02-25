@@ -110,11 +110,11 @@ public class 엘라스틱_지라이슈_컨트롤러 {
             value = {"/loadToES/bulk/{issueKey}"},
             method = {RequestMethod.GET}
     )
-    public int 이슈_검색엔진_벌크_저장(@PathVariable("connectId") Long 지라서버_아이디,
-                                       @PathVariable("issueKey") String 이슈_키,
-                                       @RequestParam("pdServiceId") Long 제품서비스_아이디,
-                                       @RequestParam("pdServiceVersions") Long[] 제품서비스_버전_아이디들,
-                                       ModelMap model, HttpServletRequest request) throws Exception {
+    public int 이슈_검색엔진_벌크_저장( @PathVariable("connectId") Long 지라서버_아이디,
+                                    @PathVariable("issueKey") String 이슈_키,
+                                    @RequestParam("pdServiceId") Long 제품서비스_아이디,
+                                    @RequestParam("pdServiceVersions") Long[] 제품서비스_버전_아이디들,
+                                    ModelMap model, HttpServletRequest request) throws Exception {
 
         로그.info("지라 이슈_검색엔진_벌크_저장 컨트롤러");
 
