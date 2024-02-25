@@ -37,19 +37,6 @@ public class 지라이슈_컨트롤러 {
 
     @ResponseBody
     @RequestMapping(
-            value = {"/{issueKeyOrId}"},
-            method = {RequestMethod.GET}
-    )
-    public 지라이슈_데이터 이슈_상세정보_가져오기(@PathVariable("connectId") Long 연결_아이디,
-                                                     @PathVariable("issueKeyOrId") String 이슈_키_또는_아이디,
-                                                    ModelMap model, HttpServletRequest request) throws Exception {
-        로그.info("지라 이슈_상세정보_가져오기");
-
-        return 지라이슈_전략_호출.이슈_상세정보_가져오기(연결_아이디, 이슈_키_또는_아이디);
-    }
-
-    @ResponseBody
-    @RequestMapping(
             value = {""},
             method = {RequestMethod.POST}
     )
@@ -88,13 +75,26 @@ public class 지라이슈_컨트롤러 {
 
     @ResponseBody
     @RequestMapping(
+            value = {"/{issueKeyOrId}"},
+            method = {RequestMethod.GET}
+    )
+    public 지라이슈_데이터 이슈_상세정보_가져오기(@PathVariable("connectId") Long 연결_아이디,
+                                 @PathVariable("issueKeyOrId") String 이슈_키_또는_아이디,
+                                 ModelMap model, HttpServletRequest request) throws Exception {
+        로그.info("연결_아이디 : {}, 이슈_키_또는_아이디 : {}", 연결_아이디, 이슈_키_또는_아이디);
+
+        return 지라이슈_전략_호출.이슈_상세정보_가져오기(연결_아이디, 이슈_키_또는_아이디);
+    }
+
+    @ResponseBody
+    @RequestMapping(
             value = {"/link/{issueKeyOrId}"},
             method = {RequestMethod.GET}
     )
     public List<지라이슈_데이터> 이슈링크_가져오기(@PathVariable("connectId") Long 연결_아이디,
                                     @PathVariable("issueKeyOrId") String 이슈_키_또는_아이디,
                                     ModelMap model, HttpServletRequest request) throws Exception {
-        로그.info("이슈링크_가져오기");
+        로그.info("연결_아이디 : {}, 이슈_키_또는_아이디 : {}", 연결_아이디, 이슈_키_또는_아이디);
 
         return 지라이슈_전략_호출.이슈링크_가져오기(연결_아이디, 이슈_키_또는_아이디);
     }
@@ -107,8 +107,47 @@ public class 지라이슈_컨트롤러 {
     public List<지라이슈_데이터> 서브테스크_가져오기(@PathVariable("connectId") Long 연결_아이디,
                                            @PathVariable("issueKeyOrId") String 이슈_키_또는_아이디,
                                            ModelMap model, HttpServletRequest request) throws Exception {
-        로그.info("서브테스크_가져오기");
+        로그.info("연결_아이디 : {}, 이슈_키_또는_아이디 : {}", 연결_아이디, 이슈_키_또는_아이디);
 
         return 지라이슈_전략_호출.서브테스크_가져오기(연결_아이디, 이슈_키_또는_아이디);
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/increment/{issueKeyOrId}"},
+            method = {RequestMethod.GET}
+    )
+    public 지라이슈_데이터 증분이슈_상세정보_가져오기(@PathVariable("connectId") Long 연결_아이디,
+                                 @PathVariable("issueKeyOrId") String 이슈_키_또는_아이디,
+                                 ModelMap model, HttpServletRequest request) throws Exception {
+        로그.info("연결_아이디 : {}, 이슈_키_또는_아이디 : {}", 연결_아이디, 이슈_키_또는_아이디);
+
+        return 지라이슈_전략_호출.증분이슈_상세정보_가져오기(연결_아이디, 이슈_키_또는_아이디);
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/increment/link/{issueKeyOrId}"},
+            method = {RequestMethod.GET}
+    )
+    public List<지라이슈_데이터> 증분이슈링크_가져오기(@PathVariable("connectId") Long 연결_아이디,
+                                    @PathVariable("issueKeyOrId") String 이슈_키_또는_아이디,
+                                    ModelMap model, HttpServletRequest request) throws Exception {
+        로그.info("연결_아이디 : {}, 이슈_키_또는_아이디 : {}", 연결_아이디, 이슈_키_또는_아이디);
+
+        return 지라이슈_전략_호출.증분이슈링크_가져오기(연결_아이디, 이슈_키_또는_아이디);
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/increment/subtask/{issueKeyOrId}"},
+            method = {RequestMethod.GET}
+    )
+    public List<지라이슈_데이터> 증분서브테스크_가져오기(@PathVariable("connectId") Long 연결_아이디,
+                                     @PathVariable("issueKeyOrId") String 이슈_키_또는_아이디,
+                                     ModelMap model, HttpServletRequest request) throws Exception {
+        로그.info("연결_아이디 : {}, 이슈_키_또는_아이디 : {}", 연결_아이디, 이슈_키_또는_아이디);
+
+        return 지라이슈_전략_호출.증분서브테스크_가져오기(연결_아이디, 이슈_키_또는_아이디);
     }
 }

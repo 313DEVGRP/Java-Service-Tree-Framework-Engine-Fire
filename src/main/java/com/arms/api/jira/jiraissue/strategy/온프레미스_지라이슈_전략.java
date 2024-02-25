@@ -10,6 +10,8 @@ import com.arms.api.jira.jiraissue.model.지라이슈생성_데이터;
 import com.arms.api.jira.jiraissue.model.지라이슈생성필드_데이터;
 import com.arms.api.jira.jiraissue.model.지라이슈필드_데이터;
 import com.arms.api.jira.jiraissue.model.지라프로젝트_데이터;
+import com.arms.api.jira.utils.에러로그_유틸;
+import com.arms.api.jira.utils.지라API_정보;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.errors.codes.에러코드;
 import com.arms.api.jira.jiraissuestatus.model.지라이슈상태_데이터;
@@ -34,11 +36,18 @@ public class 온프레미스_지라이슈_전략 implements 지라이슈_전략 
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
-    private 서버정보_서비스 서버정보_서비스;
+    private final 서버정보_서비스 서버정보_서비스;
+
+    private final 지라유틸 지라유틸;
+
+    private final 지라API_정보 지라API_정보;
 
     @Autowired
-    private 지라유틸 지라유틸;
+    public 온프레미스_지라이슈_전략(서버정보_서비스 서버정보_서비스, 지라유틸 지라유틸, 지라API_정보 지라API_정보) {
+        this.서버정보_서비스 = 서버정보_서비스;
+        this.지라유틸 = 지라유틸;
+        this.지라API_정보 = 지라API_정보;
+    }
 
     @Override
     public List<지라이슈_데이터> 이슈_목록_가져오기(Long 연결_아이디, String 프로젝트_키_또는_아이디) throws Exception {
@@ -86,30 +95,6 @@ public class 온프레미스_지라이슈_전략 implements 지라이슈_전략 
         }
     }
 
-    @Override
-    public 지라이슈_데이터 이슈_상세정보_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) throws Exception {
-
-        로그.info("온프레미스 지라 이슈 조회하기");
-
-        if (이슈_키_또는_아이디==null || 이슈_키_또는_아이디.isEmpty()) {
-            throw new IllegalArgumentException(에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
-
-        try {
-            서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
-            JiraRestClient restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(),
-                    서버정보.getUserId(),
-                    서버정보.getPasswordOrToken());
-            Issue 지라이슈 = restClient.getIssueClient().getIssue(이슈_키_또는_아이디).claim();
-
-            return 지라이슈_데이터로_변환(지라이슈);
-
-        } catch (Exception e) {
-            로그.error("온프레미스 이슈 조회시 오류가 발생하였습니다.");
-            return null;
-        }
-    }
-
     /* ***
      * 수정사항: null 체크하여 에러 처리 필요
      *** */
@@ -120,8 +105,8 @@ public class 온프레미스_지라이슈_전략 implements 지라이슈_전략 
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
         JiraRestClient restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(),
-                                                                         서버정보.getUserId(),
-                                                                         서버정보.getPasswordOrToken());
+                                                            서버정보.getUserId(),
+                                                            서버정보.getPasswordOrToken());
 
         지라이슈생성필드_데이터 필드_데이터 = 지라이슈생성_데이터.getFields();
         if (필드_데이터 == null) {
@@ -194,8 +179,8 @@ public class 온프레미스_지라이슈_전략 implements 지라이슈_전략 
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
         JiraRestClient restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(),
-                                                                         서버정보.getUserId(),
-                                                                         서버정보.getPasswordOrToken());
+                                                            서버정보.getUserId(),
+                                                            서버정보.getPasswordOrToken());
 
         Map<String, Object> 결과 = new HashMap<>();
 
@@ -502,14 +487,56 @@ public class 온프레미스_지라이슈_전략 implements 지라이슈_전략 
         return 포맷팅.toString().trim();
     }
 
-    public List<지라이슈_데이터> 이슈링크_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) throws URISyntaxException, IOException, ExecutionException, InterruptedException {
+    @Override
+    public 지라이슈_데이터 이슈_상세정보_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디)  {
+
+        로그.info("온프레미스 지라 이슈 조회하기");
+
+        if (이슈_키_또는_아이디==null || 이슈_키_또는_아이디.isEmpty()) {
+            throw new IllegalArgumentException(에러코드.파라미터_NULL_오류.getErrorMsg());
+        }
+
+        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+        JiraRestClient restClient = null;
+
+        try {
+            restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(),
+                    서버정보.getUserId(),
+                    서버정보.getPasswordOrToken());
+        }
+        catch (URISyntaxException | IOException e) {
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "이슈_상세정보_가져오기 :: 온프레미스_통신기_생성");
+            return null;
+        }
+
+        try {
+
+            Issue 지라이슈 = restClient.getIssueClient().getIssue(이슈_키_또는_아이디).claim();
+
+            return 지라이슈_데이터로_변환(지라이슈);
+
+        } catch (Exception e) {
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "이슈_상세정보_가져오기");
+            return null;
+        }
+    }
+
+    public List<지라이슈_데이터> 이슈링크_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) {
 
         로그.info("온프레미스 지라 이슈링크_가져오기");
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
-        JiraRestClient restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(),
-                                                            서버정보.getUserId(),
-                                                            서버정보.getPasswordOrToken());
+        JiraRestClient restClient = null;
+
+        try {
+            restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(),
+                    서버정보.getUserId(),
+                    서버정보.getPasswordOrToken());
+        }
+        catch (URISyntaxException | IOException e) {
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "이슈링크_가져오기 :: 온프레미스_통신기_생성");
+            return null;
+        }
 
         String jql = "issue in linkedIssues("+이슈_키_또는_아이디+")";
 
@@ -541,26 +568,32 @@ public class 온프레미스_지라이슈_전략 implements 지라이슈_전략 
             Thread.currentThread().interrupt(); // 스레드를 다시 interrupt
 
             로그.error("온프레미스에서 조회하려는 이슈 키의 연결된 이슈 정보 가져오기에 실패하였습니다. 조회 대상 정보 확인이 필요합니다.");
-            로그.error(e.getClass().getName() + " : "+ e.getMessage());
-
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "이슈링크_가져오기");
             return null;
         }
         catch (Exception e) {
             로그.error("온프레미스에서 조회하려는 이슈 키의 연결된 이슈 정보 가져오기에 실패하였습니다. 조회 대상 정보 확인이 필요합니다.");
-            로그.error(e.getClass().getName() + " : "+ e.getMessage());
-
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "이슈링크_가져오기");
             return null;
         }
     }
 
-    public List<지라이슈_데이터> 서브테스크_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) throws URISyntaxException, IOException, ExecutionException, InterruptedException {
+    public List<지라이슈_데이터> 서브테스크_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) {
 
         로그.info("온프레미스 지라 이슈링크_가져오기");
-        
+
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
-        JiraRestClient restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(),
-                                                            서버정보.getUserId(),
-                                                            서버정보.getPasswordOrToken());
+        JiraRestClient restClient = null;
+
+        try {
+            restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(),
+                    서버정보.getUserId(),
+                    서버정보.getPasswordOrToken());
+        }
+        catch (URISyntaxException | IOException e) {
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "서브테스크_가져오기 :: 온프레미스_통신기_생성");
+            return null;
+        }
 
         String jql = "parent="+ 이슈_키_또는_아이디;
 
@@ -590,15 +623,197 @@ public class 온프레미스_지라이슈_전략 implements 지라이슈_전략 
             Thread.currentThread().interrupt(); // 스레드를 다시 interrupt
 
             로그.error("온프레미스에서 조회하려는 이슈 키의 서브테스크 정보 가져오기에 실패하였습니다. 조회 대상 정보 확인이 필요합니다.");
-            로그.error(e.getClass().getName() + " : "+ e.getMessage());
-
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "서브테스크_가져오기");
             return null;
         }
         catch (Exception e) {
             로그.error("온프레미스에서 조회하려는 이슈 키의 서브테스크 정보 가져오기에 실패하였습니다. 조회 대상 정보 확인이 필요합니다.");
-            로그.error(e.getClass().getName() + " : "+ e.getMessage());
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "서브테스크_가져오기");
+            return null;
+        }
+    }
+
+    public 지라이슈_데이터 증분이슈_상세정보_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) {
+
+        로그.info("온프레미스 지라 증분 이슈 조회하기");
+
+        if (이슈_키_또는_아이디==null || 이슈_키_또는_아이디.isEmpty()) {
+            throw new IllegalArgumentException(에러코드.파라미터_NULL_오류.getErrorMsg());
+        }
+
+        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+        JiraRestClient restClient = null;
+
+        try {
+            restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(),
+                    서버정보.getUserId(),
+                    서버정보.getPasswordOrToken());
+        }
+        catch (URISyntaxException | IOException e) {
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "증분이슈_상세정보_가져오기 :: 온프레미스_통신기_생성");
+            return null;
+        }
+
+        String issueJql = 지라API_정보.이슈키_대체하기(지라API_정보.getParameter().getJql().getIssue(), 이슈_키_또는_아이디);
+        String updateJql = 지라API_정보.getParameter().getJql().getUpdated();
+        String jql = issueJql + " and " + updateJql;
+        Set<String> fields = new HashSet<>(Arrays.asList("*all")); // 검색 필드
+
+        int startAt = 0;
+        int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
+
+        List<지라이슈_데이터> 반환할_이슈상세_목록 = new ArrayList<>();
+        SearchResult searchResult;
+        try {
+            do {
+                searchResult = restClient.getSearchClient()
+                        .searchJql(jql, 최대_검색수, startAt, fields)
+                        .get();
+                for (Issue issue : searchResult.getIssues()) {
+                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터로_변환(issue);
+                    반환할_이슈상세_목록.add(지라이슈_데이터);
+                }
+
+                startAt += 최대_검색수;
+            } while (searchResult.getTotal() > startAt);
+
+            if (반환할_이슈상세_목록.size() == 1) {
+                지라이슈_데이터 지라이슈_데이터 = 반환할_이슈상세_목록.get(0);
+                return 지라이슈_데이터;
+            }
 
             return null;
-            }
         }
+        catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // 스레드를 다시 interrupt
+
+            로그.error("온프레미스에서 조회하려는 이슈 키의 정보 가져오기에 실패하였습니다. 조회 대상 정보 확인이 필요합니다.");
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "증분이슈_상세정보_가져오기");
+            return null;
+        }
+        catch (Exception e) {
+            로그.error("온프레미스에서 조회하려는 이슈 키의 정보 가져오기에 실패하였습니다. 조회 대상 정보 확인이 필요합니다.");
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "증분이슈_상세정보_가져오기");
+            return null;
+        }
+    }
+
+    public List<지라이슈_데이터> 증분이슈링크_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) {
+
+        로그.info("온프레미스 지라 이슈링크_가져오기");
+
+        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+        JiraRestClient restClient = null;
+
+        try {
+            restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(),
+                    서버정보.getUserId(),
+                    서버정보.getPasswordOrToken());
+        }
+        catch (URISyntaxException | IOException e) {
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "증분이슈링크_가져오기 :: 온프레미스_통신기_생성");
+            return null;
+        }
+
+        String linkedIssueJql = 지라API_정보.이슈키_대체하기(지라API_정보.getParameter().getJql().getLinkedIssue(), 이슈_키_또는_아이디);
+        String updateJql = 지라API_정보.getParameter().getJql().getUpdated();
+        String jql = linkedIssueJql + " and " + updateJql;
+
+        int startAt = 0;
+        int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
+
+        Set<String> fields = new HashSet<>(Arrays.asList("*all")); // 검색 필드
+
+        // 이슈 건수가 1000이 넘을때 이슈 조회를 위한 처리
+        List<지라이슈_데이터> 반환할_이슈링크_목록 = new ArrayList<>();
+        SearchResult searchResult;
+
+        try {
+            do {
+                searchResult = restClient.getSearchClient()
+                        .searchJql(jql, 최대_검색수, startAt, fields)
+                        .claim();
+                for (Issue issue : searchResult.getIssues()) {
+                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터로_변환(issue);
+                    반환할_이슈링크_목록.add(지라이슈_데이터);
+                }
+
+                startAt += 최대_검색수;
+
+            } while (searchResult.getTotal() > startAt);
+
+            return 반환할_이슈링크_목록;
+        }
+//        catch (InterruptedException e) {
+//            Thread.currentThread().interrupt(); // 스레드를 다시 interrupt
+//
+//            로그.error("온프레미스에서 조회하려는 이슈 키의 연결된 이슈 정보 가져오기에 실패하였습니다. 조회 대상 정보 확인이 필요합니다.");
+//            로그.error(e.getClass().getName() + " : "+ e.getMessage());
+//
+//            return null;
+//        }
+        catch (Exception e) {
+            로그.error("온프레미스에서 조회하려는 이슈 키의 연결된 이슈 정보 가져오기에 실패하였습니다. 조회 대상 정보 확인이 필요합니다.");
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "증분이슈링크_가져오기");
+            return null;
+        }
+    }
+
+    public List<지라이슈_데이터> 증분서브테스크_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) {
+
+        로그.info("온프레미스 지라 이슈링크_가져오기");
+
+        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+        JiraRestClient restClient = null;
+
+        try {
+            restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(),
+                    서버정보.getUserId(),
+                    서버정보.getPasswordOrToken());
+        }
+        catch (URISyntaxException | IOException e) {
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "증분서브테스크_가져오기 :: 온프레미스_통신기_생성");
+            return null;
+        }
+
+        String subtaskJql = 지라API_정보.이슈키_대체하기(지라API_정보.getParameter().getJql().getSubtask(), 이슈_키_또는_아이디);
+        String updateJql = 지라API_정보.getParameter().getJql().getUpdated();
+        String jql = subtaskJql + " and " + updateJql;
+
+        int startAt = 0;
+        int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
+
+        Set<String> fields = new HashSet<>(Arrays.asList("*all")); // 검색 필드
+
+        // 이슈 건수가 1000이 넘을때 이슈 조회를 위한 처리
+        List<지라이슈_데이터> 반환할_서브테스크_목록 = new ArrayList<>();
+        SearchResult searchResult;
+        try {
+            do {
+                searchResult = restClient.getSearchClient()
+                        .searchJql(jql, 최대_검색수, startAt, fields)
+                        .get();
+                for (Issue issue : searchResult.getIssues()) {
+                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터로_변환(issue);
+                    반환할_서브테스크_목록.add(지라이슈_데이터);
+                }
+
+                startAt += 최대_검색수;
+            } while (searchResult.getTotal() > startAt);
+
+            return 반환할_서브테스크_목록;
+        }
+        catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // 스레드를 다시 interrupt
+
+            로그.error("온프레미스에서 조회하려는 이슈 키의 서브테스크 정보 가져오기에 실패하였습니다. 조회 대상 정보 확인이 필요합니다.");
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "증분서브테스크_가져오기");
+            return null;
+        }
+        catch (Exception e) {
+            로그.error("온프레미스에서 조회하려는 이슈 키의 서브테스크 정보 가져오기에 실패하였습니다. 조회 대상 정보 확인이 필요합니다.");
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "증분서브테스크_가져오기");
+            return null;
+        }
+    }
 }
