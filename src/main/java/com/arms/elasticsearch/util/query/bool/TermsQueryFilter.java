@@ -22,6 +22,12 @@ public class TermsQueryFilter extends Filter<TermsQueryBuilder> {
 		}
 	}
 
+	public TermsQueryFilter(String name, boolean value){
+		if(name!=null){
+			this.termsQueryBuilder = QueryBuilders.termsQuery(name, value);
+		}
+	}
+
 	public TermsQueryFilter(String name, Long[] value){
 		if(name!=null&&value!=null){
 			this.termsQueryBuilder = QueryBuilders.termsQuery(name, value);

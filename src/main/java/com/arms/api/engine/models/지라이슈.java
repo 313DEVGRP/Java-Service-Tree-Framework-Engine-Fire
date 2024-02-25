@@ -2,6 +2,7 @@ package com.arms.api.engine.models;
 
 import com.arms.api.engine.repositories.인덱스자료;
 import com.arms.elasticsearch.util.custom.index.ElasticSearchIndex;
+import com.arms.elasticsearch.util.custom.index.Recent;
 import com.fasterxml.jackson.annotation.*;
 import lombok.*;
 import org.springframework.data.elasticsearch.annotations.*;
@@ -20,12 +21,18 @@ import org.springframework.data.annotation.Id;
 @JsonTypeName("com.arms.api.engine.models.지라이슈")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ElasticSearchIndex
+@EqualsAndHashCode(exclude = {"id","recent","created","updated"})
 public class 지라이슈 {
 
     //////////////
     @Id
     @Field(type = FieldType.Keyword)
     private String id; // Elasticsearch의 문서 식별자
+
+    @Recent
+    @Field(type = FieldType.Boolean, name = "recent")
+    private boolean recent;
+
 
     public 지라이슈() {
     }
@@ -122,6 +129,7 @@ public class 지라이슈 {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @EqualsAndHashCode
     public static class 프로젝트 {
         @Field(type = FieldType.Text, name = "project_self")
         @JsonProperty("project_self")
@@ -147,6 +155,7 @@ public class 지라이슈 {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @EqualsAndHashCode
     public static class 이슈유형 {
         // 온프레미스, 클라우드 공통
         @Field(type = FieldType.Text, name = "issuetype_self")
@@ -186,6 +195,7 @@ public class 지라이슈 {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @EqualsAndHashCode
     public static class 생성자 {
 
         @Field(type = FieldType.Text, name = "creator_accountId")
@@ -208,6 +218,7 @@ public class 지라이슈 {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @EqualsAndHashCode
     public static class 보고자 {
 
         @Field(type = FieldType.Text, name = "reporter_accountId")
@@ -230,6 +241,7 @@ public class 지라이슈 {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @EqualsAndHashCode
     public static class 담당자 {
 
         @Field(type = FieldType.Text, name = "assignee_accountId")
@@ -252,6 +264,7 @@ public class 지라이슈 {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @EqualsAndHashCode
     public static class 우선순위 {
 
         // 온프레미스, 클라우드 공통
@@ -284,6 +297,7 @@ public class 지라이슈 {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @EqualsAndHashCode
     public static class 상태 {
 
         // 온프레미스, 클라우드 공통
@@ -311,6 +325,7 @@ public class 지라이슈 {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @EqualsAndHashCode
     public static class 해결책 {
 
 
@@ -344,6 +359,7 @@ public class 지라이슈 {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @EqualsAndHashCode
     public static class 워크로그 {
 
         @Field(type = FieldType.Text, name = "worklogs_self")
@@ -392,6 +408,7 @@ public class 지라이슈 {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @EqualsAndHashCode
     public static class 저자 {
 
         @Field(type = FieldType.Text, name = "worklogs_author_accountId")
@@ -411,6 +428,7 @@ public class 지라이슈 {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @EqualsAndHashCode
     public static class 수정한_저자 {
 
         @Field(type = FieldType.Text, name = "worklogs_updateAuthor_accountId")

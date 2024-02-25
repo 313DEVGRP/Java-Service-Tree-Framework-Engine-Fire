@@ -23,6 +23,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -49,6 +50,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.*;
+import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
 
@@ -76,13 +78,9 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     @Override
     public int 대량이슈_추가하기(List<지라이슈> 대량이슈_리스트) {
 
-        List<IndexQuery> 검색엔진_쿼리 = 대량이슈_리스트.stream()
-                .map(지라이슈 -> new IndexQueryBuilder().withId(String.valueOf(지라이슈.getId()))
-                        .withObject(지라이슈).build())
-                .collect(toList());
-        지라이슈저장소.bulkIndex(검색엔진_쿼리);
-
-        return 검색엔진_쿼리.size();
+        Iterable<지라이슈> 지라이슈s = 지라이슈저장소.saveAll(대량이슈_리스트);
+        int size = StreamSupport.stream(지라이슈s.spliterator(), false).collect(toList()).size();
+        return size;
     }
 
     @Override
