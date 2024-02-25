@@ -23,10 +23,10 @@ import java.util.Optional;
 @Component
 public class 지라유틸 {
 
-    @Value("${jira.maxResults}")
+    @Value("${jira.api.parameter.maxResults}")
     private Integer 최대_검색수;
 
-    @Value("${jira.issue.fields}")
+    @Value("${jira.api.parameter.fields}")
     private String 조회할_필드_목록;
 
     public Integer 최대_검색수_가져오기() {

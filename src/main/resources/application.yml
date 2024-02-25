@@ -21,3 +21,26 @@ spring:
       - org.springframework.boot.actuate.autoconfigure.elasticsearch.ElasticSearchReactiveHealthContributorAutoConfiguration
       - org.springframework.boot.autoconfigure.data.elasticsearch.ReactiveElasticsearchRepositoriesAutoConfiguration
       - org.springframework.boot.autoconfigure.data.elasticsearch.ReactiveElasticsearchRestClientAutoConfiguration
+
+
+jira:
+  api:
+    parameter:
+      maxResults: 50
+      fields: fields=project,issuetype,creator,reporter,assignee,labels,priority,status,resolution,resolutiondate,created,updated,worklogs,timespent,summary
+      jql:
+        updated: (updated >= startOfDay(-1) and updated < startOfDay())
+        issue: issue={이슈키}
+        subtask: issue in linkedIssues({이슈키})
+        linkedIssue: parent={이슈키}
+    endpoint:
+      search: /rest/api/3/search
+      issue:
+        full:
+          detail: ${jira.api.endpoint.search}?jql=${jira.api.parameter.jql.issue}&${jira.api.parameter.fields}
+          subtask: ${jira.api.endpoint.search}?jql=${jira.api.parameter.jql.subtask}&${jira.api.parameter.fields}
+          linkedIssue: ${jira.api.endpoint.search}?jql=${jira.api.parameter.jql.linkedIssue}&${jira.api.parameter.fields}
+        increment:
+          detail: ${jira.api.endpoint.search}?jql=${jira.api.parameter.jql.issue} and ${jira.api.parameter.jql.updated}&${jira.api.parameter.fields}
+          subtask: ${jira.api.endpoint.search}?jql=${jira.api.parameter.jql.subtask} and ${jira.api.parameter.jql.updated}&${jira.api.parameter.fields}
+          linkedIssue: ${jira.api.endpoint.search}?jql=${jira.api.parameter.jql.linkedIssue} and ${jira.api.parameter.jql.updated}&${jira.api.parameter.fields}

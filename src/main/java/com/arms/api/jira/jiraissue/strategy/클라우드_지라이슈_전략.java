@@ -9,6 +9,8 @@ import com.arms.api.jira.jiraissue.model.지라이슈생성필드_데이터;
 import com.arms.api.jira.jiraissue.model.지라이슈전체워크로그_데이터;
 import com.arms.api.jira.jiraissue.model.지라이슈조회_데이터;
 import com.arms.api.jira.jiraissue.model.클라우드_지라이슈생성_데이터;
+import com.arms.api.jira.utils.지라API_정보;
+import com.arms.api.jira.utils.에러로그_유틸;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.errors.codes.에러코드;
 import com.arms.api.serverinfo.service.서버정보_서비스;
@@ -31,14 +33,18 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
-    private 서버정보_서비스 서버정보_서비스;
+    private final 서버정보_서비스 서버정보_서비스;
+    private final ModelMapper modelMapper;
+    private final 지라유틸 지라유틸;
+    private final 지라API_정보 지라API_정보;
 
     @Autowired
-    private ModelMapper modelMapper;
-
-    @Autowired
-    private 지라유틸 지라유틸;
+    public 클라우드_지라이슈_전략(서버정보_서비스 서버정보_서비스, ModelMapper modelMapper, 지라유틸 지라유틸, 지라API_정보 지라API_정보) {
+        this.서버정보_서비스 = 서버정보_서비스;
+        this.modelMapper = modelMapper;
+        this.지라유틸 = 지라유틸;
+        this.지라API_정보 = 지라API_정보;
+    }
 
     @Override
     public List<지라이슈_데이터> 이슈_목록_가져오기(Long 연결_아이디, String 프로젝트_키_또는_아이디) {
@@ -93,39 +99,6 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
             로그.error("클라우드 이슈 전체 조회시 오류가 발생하였습니다."+e.getMessage());
             throw new IllegalArgumentException(에러코드.이슈_조회_오류.getErrorMsg());
 
-        }
-    }
-
-    @Override
-    public 지라이슈_데이터 이슈_상세정보_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) {
-
-        로그.info("클라우드 지라 이슈 조회하기");
-
-        if (이슈_키_또는_아이디==null || 이슈_키_또는_아이디.isEmpty()) {
-            throw new IllegalArgumentException(에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
-
-        try {
-            String endpoint = "/rest/api/3/issue/" + 이슈_키_또는_아이디 + "?" + 지라유틸.조회할_필드_목록_가져오기();
-
-            서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
-            WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
-
-            지라이슈_데이터 지라이슈_데이터 = 지라유틸.get(webClient, endpoint, 지라이슈_데이터.class).block();
-
-            if(지라이슈_데이터 != null && 지라이슈_데이터.getFields() != null) {
-                지라이슈_데이터.getFields().setWorklogs(이슈_워크로그_조회(webClient, 이슈_키_또는_아이디));
-            } else {
-                로그.error("이슈 정보 가져오기에 실패하였습니다. 조회 대상 정보 확인이 필요합니다.");
-                return null;
-            }
-
-            로그.info(지라이슈_데이터.toString());
-
-            return 지라이슈_데이터;
-        } catch (Exception e) {
-            로그.error("이슈 정보 가져오기에 실패하였습니다. 조회 대상 정보 확인이 필요합니다.");
-            return null;
         }
     }
 
@@ -405,13 +378,7 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
         try {
             사용자_정보 = 지라유틸.get(webClient, endpoint, 지라사용자_데이터.class).block();
         } catch (Exception e) {
-            if (e instanceof WebClientResponseException) {
-                WebClientResponseException wcException = (WebClientResponseException) e;
-                HttpStatus status = wcException.getStatusCode();
-                String body = wcException.getResponseBodyAsString();
-
-                로그.error(status + " : " + body);
-            }
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "사용자_정보_조회");
         }
 
         지라사용자_데이터 사용자 = null;
@@ -431,6 +398,41 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
                 .build();
     }
 
+
+    @Override
+    public 지라이슈_데이터 이슈_상세정보_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) {
+
+        로그.info("클라우드 지라 이슈_상세정보_가져오기");
+        로그.info("지라서버 아이디 : {}, 이슈 키 : {}", 연결_아이디, 이슈_키_또는_아이디);
+
+        if (이슈_키_또는_아이디==null || 이슈_키_또는_아이디.isEmpty()) {
+            throw new IllegalArgumentException(에러코드.파라미터_NULL_오류.getErrorMsg());
+        }
+
+        try {
+            String endpoint = "/rest/api/3/issue/" + 이슈_키_또는_아이디 + "?" + 지라유틸.조회할_필드_목록_가져오기();
+
+            서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+            WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
+
+            지라이슈_데이터 지라이슈_데이터 = 지라유틸.get(webClient, endpoint, 지라이슈_데이터.class).block();
+
+            if(지라이슈_데이터 != null && 지라이슈_데이터.getFields() != null) {
+                지라이슈_데이터.getFields().setWorklogs(이슈_워크로그_조회(webClient, 이슈_키_또는_아이디));
+            } else {
+                로그.error("이슈 정보 가져오기에 실패하였습니다. 조회 대상 정보 확인이 필요합니다.");
+                return null;
+            }
+
+            로그.info(지라이슈_데이터.toString());
+
+            return 지라이슈_데이터;
+        } catch (Exception e) {
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "이슈_상세정보_가져오기");
+            return null;
+        }
+    }
+
     public List<지라이슈_데이터> 이슈링크_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) {
 
         로그.info("클라우드 이슈 링크 가져오기");
@@ -439,7 +441,7 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
         WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
 
         int 검색_시작_지점 = 0;
-        int 최대_검색수 = 50;
+        int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
         boolean isLast = false;
 
         List<지라이슈_데이터> 이슈링크_목록 = new ArrayList<>(); // 이슈 저장
@@ -485,7 +487,7 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
         WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
 
         int 검색_시작_지점 = 0;
-        int 최대_검색수 = 50;
+        int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
         boolean isLast = false;
 
         List<지라이슈_데이터> 서브테스크_목록 = new ArrayList<>(); // 이슈 저장
@@ -557,4 +559,154 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
         return 지라이슈워크로그_목록;
     }
 
+    public 지라이슈_데이터 증분이슈_상세정보_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) {
+
+        if (이슈_키_또는_아이디==null || 이슈_키_또는_아이디.isEmpty()) {
+            throw new IllegalArgumentException(에러코드.파라미터_NULL_오류.getErrorMsg());
+        }
+
+        로그.info("지라서버 아이디 : {}, 이슈 키 : {}", 연결_아이디, 이슈_키_또는_아이디);
+
+        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+        WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
+
+        int 검색_시작_지점 = 0;
+        int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
+        boolean isLast = false;
+
+        List<지라이슈_데이터> 이슈상세_목록 = new ArrayList<>();
+
+        try {
+            while (!isLast) {
+                String detailEndpoint = 지라API_정보.getEndpoint().getIssue().getIncrement().getDetail();
+                String endpoint = 지라API_정보.이슈키_대체하기(detailEndpoint, 이슈_키_또는_아이디)
+                        + "&startAt=" + 검색_시작_지점 + "&maxResults=" + 최대_검색수;
+
+                지라이슈조회_데이터 이슈상세정보_조회결과
+                        = 지라유틸.get(webClient, endpoint, 지라이슈조회_데이터.class).block();
+
+                if (이슈상세정보_조회결과 == null) {
+                    return null;
+                }
+                else if (이슈상세정보_조회결과.getIssues() == null || 이슈상세정보_조회결과.getIssues().size() == 0) {
+                    return null;
+                }
+
+                이슈상세_목록.addAll(이슈상세정보_조회결과.getIssues());
+
+                if (이슈상세정보_조회결과.getTotal() == 이슈상세_목록.size()) {
+                    isLast = true;
+                } else {
+                    검색_시작_지점 += 최대_검색수;
+                }
+            }
+
+            if (이슈상세_목록.size() == 1) {
+                지라이슈_데이터 지라이슈_데이터 = 이슈상세_목록.get(0);
+                return 지라이슈_데이터;
+            }
+
+            return null;
+        }
+        catch (Exception e) {
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "증분이슈_상세정보_가져오기");
+            return null;
+        }
+    }
+
+    public List<지라이슈_데이터> 증분이슈링크_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) {
+
+        로그.info("클라우드 증분 이슈 링크 가져오기");
+        로그.info("지라서버 아이디 : {}, 이슈 키 : {}", 연결_아이디, 이슈_키_또는_아이디);
+
+        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+        WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
+
+        int 검색_시작_지점 = 0;
+        int 최대_검색수 = 지라유틸.최대_검색수_가져오기();
+        boolean isLast = false;
+
+        List<지라이슈_데이터> 이슈링크_목록 = new ArrayList<>(); // 이슈 저장
+
+        try {
+            while (!isLast) {
+                String linkedIssueEndpoint = 지라API_정보.getEndpoint().getIssue().getIncrement().getLinkedIssue();
+                String endpoint = 지라API_정보.이슈키_대체하기(linkedIssueEndpoint, 이슈_키_또는_아이디)
+                        + "&startAt=" + 검색_시작_지점 + "&maxResults=" + 최대_검색수;
+
+                지라이슈조회_데이터 이슈링크_조회결과
+                        = 지라유틸.get(webClient, endpoint, 지라이슈조회_데이터.class).block();
+
+                // 증분 데이터가 없는 경우
+                if (이슈링크_조회결과 == null) {
+                    return null;
+                }
+                else if (이슈링크_조회결과.getIssues() == null || 이슈링크_조회결과.getIssues().size() == 0) {
+                    return null;
+                }
+
+                이슈링크_목록.addAll(이슈링크_조회결과.getIssues());
+
+                if (이슈링크_조회결과.getTotal() == 이슈링크_목록.size()) {
+                    isLast = true;
+                } else {
+                    검색_시작_지점 += 최대_검색수;
+                }
+            }
+
+            return 이슈링크_목록;
+        }
+        catch (Exception e) {
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "증분이슈링크_가져오기");
+            return null;
+        }
+    }
+
+    public List<지라이슈_데이터> 증분서브테스크_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) {
+
+        로그.info("클라우드 증분 서브테스크 가져오기");
+        로그.info("지라서버 아이디 : {}, 이슈 키 : {}", 연결_아이디, 이슈_키_또는_아이디);
+
+        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+        WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
+
+        int 검색_시작_지점 = 0;
+        int 최대_검색수 = 지라유틸.최대_검색수_가져오기();
+        boolean isLast = false;
+
+        List<지라이슈_데이터> 서브테스크_목록 = new ArrayList<>(); // 이슈 저장
+
+        try {
+            while (!isLast) {
+                String subtaskEndpoint = 지라API_정보.getEndpoint().getIssue().getIncrement().getSubtask();
+                String endpoint = 지라API_정보.이슈키_대체하기(subtaskEndpoint, 이슈_키_또는_아이디)
+                        + "&startAt=" + 검색_시작_지점 + "&maxResults=" + 최대_검색수;
+
+                지라이슈조회_데이터 서브테스크_조회결과
+                        = 지라유틸.get(webClient, endpoint, 지라이슈조회_데이터.class).block();
+
+                // 증분 데이터가 없는 경우
+                if (서브테스크_조회결과 == null) {
+                    return null;
+                }
+                else if (서브테스크_조회결과.getIssues() == null || 서브테스크_조회결과.getIssues().size() == 0) {
+                    return null;
+                }
+
+                서브테스크_목록.addAll(서브테스크_조회결과.getIssues());
+
+                if (서브테스크_조회결과.getTotal() == 서브테스크_목록.size()) {
+                    isLast = true;
+                } else {
+                    검색_시작_지점 += 최대_검색수;
+                }
+            }
+
+            return 서브테스크_목록;
+        }
+        catch (Exception e) {
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "증분서브테스크_가져오기");
+            return null;
+        }
+    }
 }
