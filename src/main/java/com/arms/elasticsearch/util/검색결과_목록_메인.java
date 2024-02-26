@@ -2,9 +2,13 @@ package com.arms.elasticsearch.util;
 
 import static java.util.stream.Collectors.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
+
+import javax.swing.text.html.Option;
 
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.Aggregations;
@@ -54,7 +58,8 @@ public class 검색결과_목록_메인 {
 
 
 	private Map<String, Aggregation> getTerm(Aggregations aggregationsContainer){
-		return aggregationsContainer.getAsMap();
+		return Optional.ofNullable(aggregationsContainer).map(Aggregations::getAsMap).orElseGet(
+			HashMap::new);
 	}
 
 
