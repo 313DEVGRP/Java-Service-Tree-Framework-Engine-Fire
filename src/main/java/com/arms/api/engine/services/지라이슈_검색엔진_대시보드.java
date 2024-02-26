@@ -171,6 +171,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     public List<검색결과> 제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
+                        new TermQueryMust("isReq", 지라이슈_제품_및_제품버전_집계_요청.getIsReqType().isNotAllAndIsReq()),
                         new TermsQueryFilter("pdServiceVersions", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
                         new ExistsQueryFilter("assignee")
                 );
@@ -179,11 +180,12 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         CustomAbstractAggregationBuilder versionsAgg = new CustomTermsAggregationBuilder("versions")
                 .field("pdServiceVersions")
+                .size(지라이슈_제품_및_제품버전_집계_요청.get크기())
                 .addSubAggregation(
                         new CustomTermsAggregationBuilder("assignees")
                                 .field("assignee.assignee_accountId.keyword")
                                 .order(BucketOrder.count(false))
-                                .size(지라이슈_제품_및_제품버전_집계_요청.get크기())
+                                .size(지라이슈_제품_및_제품버전_집계_요청.get하위크기())
                                 .addSubAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"))
                                 .build()
                 );
