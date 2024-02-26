@@ -119,7 +119,7 @@ public class 지라이슈 {
     @Field(type = FieldType.Text, name = "pdServiceId", fielddata = true)
     private Long pdServiceId;
 
-    @Field(type = FieldType.Keyword, name = "pdServiceVersions")
+    @Field(type = FieldType.Long, name = "pdServiceVersions")
     private Long[] pdServiceVersions;
 
     @Getter
