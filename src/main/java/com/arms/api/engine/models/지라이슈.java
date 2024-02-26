@@ -21,7 +21,7 @@ import org.springframework.data.annotation.Id;
 @JsonTypeName("com.arms.api.engine.models.지라이슈")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ElasticSearchIndex
-@EqualsAndHashCode(exclude = {"id","recent","created","updated"})
+@EqualsAndHashCode(exclude = {"recent","timestamp"})
 public class 지라이슈 {
 
     //////////////
