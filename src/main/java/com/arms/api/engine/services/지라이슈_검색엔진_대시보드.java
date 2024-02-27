@@ -771,6 +771,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         for (String 지라키 : 지라키_목록) {
             boolQuery.should(QueryBuilders.termQuery("parentReqKey", 지라키));
+            boolQuery.should(QueryBuilders.termQuery("key", 지라키));
         }
 
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
@@ -803,10 +804,17 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
             }
         }
 
-        Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>>  조회_결과= 전체결과.stream()
+        Map<String, List<요구사항_지라이슈키별_업데이트_목록_데이터>> 조회_결과 = 전체결과.stream()
                 .map(this::요구사항_지라이슈키별_업데이트_목록_데이터)
                 .distinct()
-                .collect(Collectors.groupingBy(요구사항_지라이슈키별_업데이트_목록_데이터::getParentReqKey));
+                .collect(Collectors.groupingBy(data -> data.getIsReq() ? data.getKey() : data.getParentReqKey()));
+
+        // 하위 이슈로 작업한 경우 요구사항 데이터는 제거
+        조회_결과.forEach((key, valueList) -> {
+            if (valueList.stream().anyMatch(data -> data.getIsReq() == false)) {
+                valueList.removeIf(data -> data.getIsReq() == true);
+            }
+        });
 
         return 조회_결과;
     }
@@ -817,12 +825,10 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 지라이슈.getParentReqKey(),
                 지라이슈.getUpdated(),
                 지라이슈.getResolutiondate(),
-                지라이슈.getAssignee()
+                지라이슈.getIsReq()
         );
 
     }
-
-
 
     @Override
     public List<SearchHit<지라이슈>> 지라이슈_검색(검색어_기본_검색_요청 검색어_기본_검색_요청) {
