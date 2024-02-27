@@ -180,7 +180,6 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         CustomAbstractAggregationBuilder versionsAgg = new CustomTermsAggregationBuilder("versions")
                 .field("pdServiceVersions")
-                .size(지라이슈_제품_및_제품버전_집계_요청.get크기())
                 .addSubAggregation(
                         new CustomTermsAggregationBuilder("assignees")
                                 .field("assignee.assignee_accountId.keyword")
@@ -197,8 +196,9 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(searchQuery);
 
-        return 검색결과_목록_메인.get검색결과().get("versions");
+        List<Long> filteredVersionIds = Arrays.asList(지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks());
 
+        return 검색결과_목록_메인.get검색결과().get("versions").stream().filter(검색결과 -> filteredVersionIds.contains(검색결과.get필드명())).collect(toList());
     }
 
     @Override
