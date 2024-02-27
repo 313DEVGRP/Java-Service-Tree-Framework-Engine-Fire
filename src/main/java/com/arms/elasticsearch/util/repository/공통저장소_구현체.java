@@ -104,25 +104,6 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
     }
 
 
-    public List<SearchHit<T>> fetchSearchHits(Query query) {
-
-        if (query == null) {
-            log.error("Failed to build search request");
-            return Collections.emptyList();
-        }
-
-        try {
-
-            return operations.search(query, entityClass).stream()
-                    .collect(Collectors.toList());
-
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return Collections.emptyList();
-        }
-    }
-
-
     //recentAll(true and false) 전부 조회
     public List<T> normalSearchAll(Query query) {
         if (query == null) {
@@ -515,7 +496,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         ).orElse(null);
     }
 
-    private  SearchHits<T> search(Query query) {
+    public SearchHits<T> search(Query query) {
         try{
             return operations.search(query, entityClass);
         }catch (Exception e){
