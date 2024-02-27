@@ -113,15 +113,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
         try {
 
-            ElasticSearchIndex annotation = AnnotationUtils.findAnnotation(entityClass, ElasticSearchIndex.class);
-
-            if(annotation==null){
-                return operations.search(query, entityClass).stream()
-                        .collect(Collectors.toList());
-            }
-
-            // 확인필요
-            return operations.search(query, entityClass,indexName()).stream()
+            return operations.search(query, entityClass).stream()
                     .collect(Collectors.toList());
 
         } catch (Exception e) {
