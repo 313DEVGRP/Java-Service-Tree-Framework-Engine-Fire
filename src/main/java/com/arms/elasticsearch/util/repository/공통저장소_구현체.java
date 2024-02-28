@@ -2,17 +2,23 @@ package com.arms.elasticsearch.util.repository;
 
 import static java.util.stream.Collectors.*;
 
-import com.arms.api.engine.models.지라이슈;
-import com.arms.api.serverinfo.model.서버정보_엔티티;
-import com.arms.elasticsearch.util.custom.index.ElasticSearchIndex;
-import com.arms.elasticsearch.util.custom.index.Recent;
-import com.arms.elasticsearch.util.query.EsQuery;
-import com.arms.elasticsearch.util.query.EsQueryBuilder;
-import com.arms.elasticsearch.util.query.bool.TermsQueryFilter;
-import com.arms.elasticsearch.util.검색결과_목록_메인;
-import com.arms.elasticsearch.util.검색엔진_유틸;
-import com.arms.elasticsearch.util.검색조건;
-import lombok.extern.slf4j.Slf4j;
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -39,24 +45,16 @@ import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.data.elasticsearch.repository.support.ElasticsearchEntityInformation;
 import org.springframework.data.elasticsearch.repository.support.SimpleElasticsearchRepository;
 
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import com.arms.elasticsearch.util.custom.index.ElasticSearchIndex;
+import com.arms.elasticsearch.util.custom.index.Recent;
+import com.arms.elasticsearch.util.query.EsQuery;
+import com.arms.elasticsearch.util.query.EsQueryBuilder;
+import com.arms.elasticsearch.util.query.bool.TermsQueryFilter;
+import com.arms.elasticsearch.util.검색결과_목록_메인;
+import com.arms.elasticsearch.util.검색엔진_유틸;
+import com.arms.elasticsearch.util.검색조건;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class 공통저장소_구현체<T,ID extends Serializable> extends SimpleElasticsearchRepository<T,ID> implements 공통저장소<T,ID> {
@@ -75,8 +73,11 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
     @Override
     public 검색결과_목록_메인 aggregationSearch(Query query) {
-        return new 검색결과_목록_메인(operations.search(query,entityClass,indexName()));
+        NativeSearchQuery nativeSearchQuery = recentQueryMerge((NativeSearchQuery)query);
+        return new 검색결과_목록_메인(operations.search(nativeSearchQuery,entityClass));
     }
+
+
 
     @Override
     public 검색결과_목록_메인 aggregationSearch(Query query, String newIndex) {
@@ -90,6 +91,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         return new 검색결과_목록_메인(operations.search(query,entityClass, IndexCoordinates.of(newIndex)));
     }
 
+    //현재 디펜던시 없음
     public List<IndexedObjectInformation> bulkIndex(List<IndexQuery> indexQueryList){
         Document document = AnnotationUtils.findAnnotation(entityClass, Document.class);
 
@@ -102,34 +104,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
     }
 
 
-    public List<SearchHit<T>> fetchSearchHits(Query query) {
-
-        if (query == null) {
-            log.error("Failed to build search request");
-            return Collections.emptyList();
-        }
-
-        try {
-
-            ElasticSearchIndex annotation = AnnotationUtils.findAnnotation(entityClass, ElasticSearchIndex.class);
-
-            if(annotation==null){
-                return operations.search(query, entityClass).stream()
-                        .collect(Collectors.toList());
-            }
-
-            // 확인필요
-            return operations.search(query, entityClass,indexName()).stream()
-                    .collect(Collectors.toList());
-
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return Collections.emptyList();
-        }
-    }
-
-
-    //증분처리 안하는 조회
+    //recentAll(true and false) 전부 조회
     public List<T> normalSearchAll(Query query) {
         if (query == null) {
             log.error("Failed to build search request");
@@ -157,24 +132,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
                     .map(SearchHit::getContent).collect(toList());
             }
 
-            String recentFieldName = fieldInfo(entityClass, Recent.class).getName();
-
-            EsQuery esQuery
-                = new EsQueryBuilder()
-                .bool(
-                    new TermsQueryFilter(recentFieldName,true)
-                );
-
-            BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
-            });
-
-            QueryBuilder combinedQuery = QueryBuilders.boolQuery()
-                .must(((NativeSearchQuery)query).getQuery())
-                .filter(boolQuery);
-
-            NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(combinedQuery)
-                .build();
+            NativeSearchQuery searchQuery = recentQueryMerge((NativeSearchQuery)query);
 
             return operations.search(searchQuery, entityClass).stream()
                     .map(SearchHit::getContent).collect(toList());
@@ -185,6 +143,36 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         }
     }
 
+    private NativeSearchQuery recentQueryMerge(NativeSearchQuery query) {
+        String recentFieldName = fieldInfo(entityClass, Recent.class).getName();
+
+        EsQuery esQuery
+            = new EsQueryBuilder()
+            .bool(
+                new TermsQueryFilter(recentFieldName, true)
+            );
+
+        BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
+        });
+
+
+        QueryBuilder combinedQuery = QueryBuilders.boolQuery()
+            .filter(query.getQuery())
+            .filter(boolQuery);
+
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+            .withQuery(combinedQuery);
+
+
+        Optional.ofNullable(query.getAggregations()).ifPresent(aggs->{
+            aggs.forEach(nativeSearchQueryBuilder::addAggregation);
+        });
+
+        return nativeSearchQueryBuilder.build();
+
+    }
+
+    //우선 증분처리 제외
     public List<T> normalSearch(Query query, String newIndex) {
         if (query == null) {
             log.error("Failed to build search request");
@@ -205,6 +193,8 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         }
     }
 
+
+    //현재 디펜던시 없음
     @Override
     public List<T>  getAllCreatedSince(final Date date, Class<T> clazz) {
 
@@ -216,6 +206,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
     }
 
+    //현재 디펜던시 없음
     @Override
     public List<T>  searchCreatedSince(final 검색조건 dto, final Date date, Class<T> clazz) {
 
@@ -227,6 +218,8 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
     }
 
+
+    //현재 디펜던시 없음
     @Override
     public boolean 인덱스확인_및_생성_매핑(String 인덱스명) {
         IndexOperations 인덱스작업 = operations.indexOps(IndexCoordinates.of(인덱스명));
@@ -366,6 +359,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
     }
 
 
+    ///////////////////증분 저장 모음//////////////////////
     @Override
     public <S extends T> S save(S entity){
         ElasticSearchIndex annotation = AnnotationUtils.findAnnotation(entityClass, ElasticSearchIndex.class);
@@ -502,7 +496,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         ).orElse(null);
     }
 
-    private  SearchHits<T> search(Query query) {
+    public SearchHits<T> search(Query query) {
         try{
             return operations.search(query, entityClass);
         }catch (Exception e){

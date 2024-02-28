@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
@@ -171,6 +172,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     public List<검색결과> 제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
+                        new TermQueryMust("isReq", 지라이슈_제품_및_제품버전_집계_요청.getIsReqType().isNotAllAndIsReq()),
                         new TermsQueryFilter("pdServiceVersions", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
                         new ExistsQueryFilter("assignee")
                 );
@@ -183,7 +185,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                         new CustomTermsAggregationBuilder("assignees")
                                 .field("assignee.assignee_accountId.keyword")
                                 .order(BucketOrder.count(false))
-                                .size(지라이슈_제품_및_제품버전_집계_요청.get크기())
+                                .size(지라이슈_제품_및_제품버전_집계_요청.get하위크기())
                                 .addSubAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"))
                                 .build()
                 );
@@ -195,8 +197,13 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(searchQuery);
 
-        return 검색결과_목록_메인.get검색결과().get("versions");
+        List<검색결과> 버전검색결과 = 검색결과_목록_메인.get검색결과().get("versions");
 
+        List<String> filteredVersionIds = Arrays.stream(지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks())
+                .map(String::valueOf)
+                .collect(Collectors.toList());
+
+        return 버전검색결과.stream().filter(버전 -> filteredVersionIds.contains(버전.get필드명())).collect(toList());
     }
 
     @Override
@@ -769,6 +776,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         for (String 지라키 : 지라키_목록) {
             boolQuery.should(QueryBuilders.termQuery("parentReqKey", 지라키));
+            boolQuery.should(QueryBuilders.termQuery("key", 지라키));
         }
 
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
@@ -801,10 +809,17 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
             }
         }
 
-        Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>>  조회_결과= 전체결과.stream()
+        Map<String, List<요구사항_지라이슈키별_업데이트_목록_데이터>> 조회_결과 = 전체결과.stream()
                 .map(this::요구사항_지라이슈키별_업데이트_목록_데이터)
                 .distinct()
-                .collect(Collectors.groupingBy(요구사항_지라이슈키별_업데이트_목록_데이터::getParentReqKey));
+                .collect(Collectors.groupingBy(data -> data.getIsReq() ? data.getKey() : data.getParentReqKey()));
+
+        // 하위 이슈로 작업한 경우 요구사항 데이터는 제거
+        조회_결과.forEach((key, valueList) -> {
+            if (valueList.stream().anyMatch(data -> data.getIsReq() == false)) {
+                valueList.removeIf(data -> data.getIsReq() == true);
+            }
+        });
 
         return 조회_결과;
     }
@@ -815,17 +830,20 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 지라이슈.getParentReqKey(),
                 지라이슈.getUpdated(),
                 지라이슈.getResolutiondate(),
-                지라이슈.getAssignee()
+                지라이슈.getIsReq()
         );
 
     }
 
 
-
     @Override
-    public List<SearchHit<지라이슈>> 지라이슈_검색(검색어_기본_검색_요청 검색어_기본_검색_요청) {
+    public 검색어_검색결과<SearchHit<지라이슈>> 지라이슈_검색(검색어_기본_검색_요청 검색어_기본_검색_요청) {
         EsQuery esQuery = new EsQueryBuilder().queryString(new QueryString(검색어_기본_검색_요청.get검색어()));
-        return 지라이슈저장소.fetchSearchHits(일반_검색_요청.of(검색어_기본_검색_요청, esQuery).생성());
+        SearchHits<지라이슈> 지라이슈_검색결과= 지라이슈저장소.search(일반_검색_요청.of(검색어_기본_검색_요청, esQuery).생성());
+        검색어_검색결과<SearchHit<지라이슈>> 검색결과_목록 = new 검색어_검색결과<>();
+        검색결과_목록.set검색결과_목록(지라이슈_검색결과.getSearchHits());
+        검색결과_목록.set결과_총수(지라이슈_검색결과.getTotalHits());
+        return 검색결과_목록;
     }
 
 }

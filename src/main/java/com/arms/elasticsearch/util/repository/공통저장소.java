@@ -4,6 +4,7 @@ import org.springframework.data.elasticsearch.core.IndexedObjectInformation;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 import org.springframework.data.repository.NoRepositoryBean;
@@ -24,11 +25,11 @@ public interface 공통저장소<T,ID extends Serializable> extends Elasticsearc
 
     List<IndexedObjectInformation> bulkIndex(List<IndexQuery> indexQueryList);
 
-	public List<SearchHit<T>> fetchSearchHits(Query query);
-
     List<T> normalSearch(Query query);
 
 	List<T> normalSearch(Query query, String newIndex);
+
+	SearchHits<T> search(Query query);
 
 	List<T>  getAllCreatedSince(Date date, Class<T> clazz);
 

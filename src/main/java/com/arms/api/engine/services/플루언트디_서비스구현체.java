@@ -1,5 +1,6 @@
 package com.arms.api.engine.services;
 
+import com.arms.api.engine.dtos.검색어_검색결과;
 import com.arms.api.engine.dtos.검색어_기본_검색_요청;
 import com.arms.api.engine.models.플루언트디;
 import com.arms.api.engine.repositories.플루언트디_저장소;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,8 +27,12 @@ public class 플루언트디_서비스구현체 implements 플루언트디_서�
 
     private 플루언트디_저장소 플루언트디_저장소;
 
-    public List<SearchHit<플루언트디>> 플푸언트디_검색(검색어_기본_검색_요청 검색어_기본_검색_요청){
+    public 검색어_검색결과<SearchHit<플루언트디>> 플루언트디_검색(검색어_기본_검색_요청 검색어_기본_검색_요청){
         EsQuery esQuery = new EsQueryBuilder().queryString(new QueryString(검색어_기본_검색_요청.get검색어()));
-        return 플루언트디_저장소.fetchSearchHits(일반_검색_요청.of(검색어_기본_검색_요청, esQuery).생성());
-    };
+        SearchHits<플루언트디> 플루언트디_검색결과 = 플루언트디_저장소.search(일반_검색_요청.of(검색어_기본_검색_요청, esQuery).생성());
+        검색어_검색결과<SearchHit<플루언트디>> 검색결과_목록 = new 검색어_검색결과<>();
+        검색결과_목록.set검색결과_목록(플루언트디_검색결과.getSearchHits());
+        검색결과_목록.set결과_총수(플루언트디_검색결과.getTotalHits());
+        return 검색결과_목록;
+    }
 }

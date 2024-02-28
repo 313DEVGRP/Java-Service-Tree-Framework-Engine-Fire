@@ -6,12 +6,14 @@ import java.util.stream.Stream;
 import com.arms.api.engine.dtos.*;
 import com.arms.api.engine.models.*;
 import com.arms.api.engine.dtos.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
+import com.arms.api.engine.services.지라이슈_검색엔진;
 import com.arms.api.engine.vo.제품_서비스_버전;
 import com.arms.elasticsearch.util.query.*;
 import com.arms.elasticsearch.util.query.bool.*;
 import com.arms.elasticsearch.util.검색결과;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +23,8 @@ import com.arms.api.engine.repositories.플루언트디_저장소;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
 
 import lombok.extern.slf4j.Slf4j;
+
+import javax.naming.directory.SearchResult;
 
 @RestController
 @RequestMapping("/engine/jira/dashboard")
@@ -301,26 +305,30 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     }
 
 
-    @GetMapping("/search")
-    public ResponseEntity<?> 검색엔진_검색(@RequestParam("search_string") String 검색어) {
-        log.info("[엘라스틱_지라이슈_대시보드_컨트롤러 :: 검색엔진_검색] :: 검색어 => {}" , 검색어);
+
+    @GetMapping("/search/jiraissue")
+    public ResponseEntity<?> 검색엔진_지라이슈_검색(@RequestParam("search_string") String 검색어,
+                                     @RequestParam("page") String 페이지,
+                                     @RequestParam("size") String 크기) {
+        log.info("[엘라스틱_지라이슈_대시보드_컨트롤러 :: 검색엔진_지라이슈_검색] :: 검색어 => {}" , 검색어);
         검색어_기본_검색_요청 검색어_기본_검색_요청 = new 검색어_기본_검색_요청();
         검색어_기본_검색_요청.set검색어(검색어);
-        List<SearchHit<지라이슈>> 지라이슈_검색결과 = 지라이슈_검색엔진.지라이슈_검색(검색어_기본_검색_요청);
-        return ResponseEntity.ok(지라이슈_검색결과);
+        검색어_기본_검색_요청.set페이지(Integer.parseInt(페이지));
+        검색어_기본_검색_요청.set크기(Integer.parseInt(크기));
+        검색어_검색결과<SearchHit<지라이슈>> 검색결과_목록 = 지라이슈_검색엔진.지라이슈_검색(검색어_기본_검색_요청);
+        return ResponseEntity.ok(검색결과_목록);
     }
 
-    @GetMapping("/search/fluentd")
-    public ResponseEntity<?> 검색엔진_플루언트디_검색(@RequestParam("search_string") String 검색어,
-                                           @RequestParam(value = "page", defaultValue = "0") int 페이지,
-                                           @RequestParam(value = "size", defaultValue = "1000") int 크기) {
+    @GetMapping("/search/log")
+    public ResponseEntity<?> 검색엔진_플루언트디_검색_new(@RequestParam("search_string") String 검색어,
+                                           @RequestParam("page") String 페이지,
+                                           @RequestParam("size") String 크기) {
         log.info("[엘라스틱_지라이슈_대시보드_컨트롤러 :: 검색엔진_플루언트디_검색] :: 검색어 => {}" , 검색어);
         검색어_기본_검색_요청 검색어_기본_검색_요청 = new 검색어_기본_검색_요청();
         검색어_기본_검색_요청.set검색어(검색어);
-        검색어_기본_검색_요청.set페이지(페이지);
-        검색어_기본_검색_요청.set크기(크기);
-        List<SearchHit<플루언트디>> 플루언트디_검색결과 = 플루언트디_서비스.플푸언트디_검색(검색어_기본_검색_요청);
-        return ResponseEntity.ok(플루언트디_검색결과);
+        검색어_기본_검색_요청.set페이지(Integer.parseInt(페이지));
+        검색어_기본_검색_요청.set크기(Integer.parseInt(크기));
+        검색어_검색결과<SearchHit<플루언트디>> 검색결과_목록 = 플루언트디_서비스.플루언트디_검색(검색어_기본_검색_요청);
+        return ResponseEntity.ok(검색결과_목록);
     }
-
 }

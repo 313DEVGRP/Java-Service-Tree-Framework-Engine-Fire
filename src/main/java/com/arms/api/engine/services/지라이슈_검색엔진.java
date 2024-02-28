@@ -326,17 +326,17 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
         if (지라서버_아이디 == null) {
             로그.error("증분이슈_링크드이슈_서브테스크_벌크추가 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
-            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기2 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
+            throw new IllegalArgumentException("증분이슈_링크드이슈_서브테스크_벌크추가 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
         }
 
         if (이슈_키 == null || 이슈_키.isEmpty()) {
             로그.error("증분이슈_링크드이슈_서브테스크_벌크추가 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기2 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+            throw new IllegalArgumentException("증분이슈_링크드이슈_서브테스크_벌크추가 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
         }
 
         if (제품서비스_아이디 == null || 제품서비스_버전들 == null) {
             로그.error("증분이슈_링크드이슈_서브테스크_벌크추가 Error 제품서비스_아이디 또는 제품서비스_버전 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기2 Error 제품서비스_아이디 또는 제품서비스_버전 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+            throw new IllegalArgumentException("증분이슈_링크드이슈_서브테스크_벌크추가 Error 제품서비스_아이디 또는 제품서비스_버전 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
         }
 
         List<지라이슈> 증분벌크_저장_목록 = new ArrayList<지라이슈>();
@@ -375,10 +375,10 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
             지라프로젝트_데이터.setKey(프로젝트_키);
 
             지라이슈상태_데이터 지라이슈상태_데이터 = new 지라이슈상태_데이터();
-            지라이슈상태_데이터.setId("조회 불가 상태");
-            지라이슈상태_데이터.setSelf("조회 불가 상태");
-            지라이슈상태_데이터.setName("조회 불가 상태");
-            지라이슈상태_데이터.setDescription("조회 불가 상태");
+            지라이슈상태_데이터.setId("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
+            지라이슈상태_데이터.setSelf("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
+            지라이슈상태_데이터.setName("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
+            지라이슈상태_데이터.setDescription("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
 
             지라이슈필드_데이터 지라이슈필드_데이터 = new 지라이슈필드_데이터();
 
@@ -396,10 +396,10 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                         .stream()
                         .map(링크드이슈_서브테스크 -> {
                             if (링크드이슈_서브테스크.getStatus() != null) {
-                                링크드이슈_서브테스크.getStatus().setId("조회 불가 상태");
-                                링크드이슈_서브테스크.getStatus().setName("조회 불가 상태");
-                                링크드이슈_서브테스크.getStatus().setSelf("조회 불가 상태");
-                                링크드이슈_서브테스크.getStatus().setDescription("조회 불가 상태");
+                                링크드이슈_서브테스크.getStatus().setId("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
+                                링크드이슈_서브테스크.getStatus().setName("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
+                                링크드이슈_서브테스크.getStatus().setSelf("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
+                                링크드이슈_서브테스크.getStatus().setDescription("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
                             }
                             return 링크드이슈_서브테스크;
                         })
@@ -431,6 +431,9 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
             }
         }
 
+        /*
+        * 대량이슈_추가하기 방어코드
+        * */
         if (증분벌크_저장_목록.size() == 0) {
             return 0;
         }

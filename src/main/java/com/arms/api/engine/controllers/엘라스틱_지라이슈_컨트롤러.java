@@ -134,7 +134,7 @@ public class 엘라스틱_지라이슈_컨트롤러 {
                              @RequestParam("pdServiceVersions") Long[] 제품서비스_버전_아이디들,
                              ModelMap model, HttpServletRequest request) throws Exception {
 
-        로그.info("지라서버 아이디 : {}\n이슈 키 : {}\n제품서비스 아이디 : {}\n제품서비스 버전 목록 : {}"
+        로그.info("지라서버 아이디 : {},\t이슈 키 : {},\t제품서비스 아이디 : {},\t제품서비스 버전 목록 : {}"
                             , 지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디들);
 
         return 지라이슈_검색엔진.증분이슈_링크드이슈_서브테스크_벌크추가(지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디들);

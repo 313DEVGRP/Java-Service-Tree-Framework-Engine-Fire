@@ -1,21 +1,19 @@
 package com.arms.elasticsearch.util.query;
 
 import com.arms.elasticsearch.util.base.기본_검색_요청;
-import com.arms.elasticsearch.util.base.기본_집계_요청;
 import lombok.Getter;
 import lombok.Setter;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 
-import java.util.List;
 import java.util.Optional;
 
 @Setter
@@ -39,10 +37,15 @@ public class 일반_검색_요청 implements 쿼리_추상_팩토리 {
 	@Override
 	public NativeSearchQuery 생성() {
 		BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
-		FieldSortBuilder sort = esQuery.getQuery(new ParameterizedTypeReference<>(){});
+
+		FieldSortBuilder sort = SortBuilders.fieldSort("@timestamp").order(SortOrder.DESC);
 		QueryStringQueryBuilder queryStringQueryBuilder = esQuery.getQuery(new ParameterizedTypeReference<>(){});
 
 		NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
+
+		HighlightBuilder highlightBuilder = new HighlightBuilder();
+		highlightBuilder.field("*").preTags("<b><em>").postTags("</em></b>");
+
 
 		Optional.ofNullable(크기)
 						.ifPresent(크기->{
@@ -61,6 +64,7 @@ public class 일반_검색_요청 implements 쿼리_추상_팩토리 {
 		Optional.ofNullable(queryStringQueryBuilder)
 				.ifPresent(query->{
 					nativeSearchQueryBuilder.withQuery(queryStringQueryBuilder);
+					nativeSearchQueryBuilder.withHighlightBuilder(highlightBuilder);
 				});
 
 		if(sort!=null){
