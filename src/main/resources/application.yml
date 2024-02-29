@@ -16,6 +16,8 @@ springfox:
       base-url: /engine-fire-api
 
 spring:
+  application:
+    name: javaServiceTreeFrameworkEngineFire
   autoconfigure:
     exclude:
       - org.springframework.boot.actuate.autoconfigure.elasticsearch.ElasticSearchReactiveHealthContributorAutoConfiguration
