@@ -2,6 +2,8 @@ package com.arms.utils;
 
 import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory;
+import com.taskadapter.redmineapi.RedmineManager;
+import com.taskadapter.redmineapi.RedmineManagerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -56,6 +58,10 @@ public class 지라유틸 {
     private static String getBase64Credentials(String jiraID, String jiraPass) {
         String credentials = jiraID + ":" + jiraPass;
         return new String(Base64.getEncoder().encode(credentials.getBytes()));
+    }
+
+    public static RedmineManager 레드마인_온프레미스_통신기_생성(String uri,  String apiKey) {
+        return RedmineManagerFactory.createWithApiKey(uri, apiKey);
     }
 
     public static <T> Mono<T> get(WebClient webClient, String uri, Class<T> responseType) {

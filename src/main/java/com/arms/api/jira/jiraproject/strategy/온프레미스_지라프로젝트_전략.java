@@ -26,7 +26,7 @@ public class 온프레미스_지라프로젝트_전략 implements 지라프로�
     private 서버정보_서비스 서버정보_서비스;
 
     @Override
-    public 지라프로젝트_데이터 프로젝트_상세정보_가져오기(Long 연결_아이디, String 프로젝트_키_또는_아이디) throws URISyntaxException, IOException {
+    public 지라프로젝트_데이터 프로젝트_상세정보_가져오기(Long 연결_아이디, String 프로젝트_키_또는_아이디) {
 
         로그.info("온프레미스 지라 프로젝트 "+ 프로젝트_키_또는_아이디 +" 상세정보 가져오기");
 
@@ -56,7 +56,7 @@ public class 온프레미스_지라프로젝트_전략 implements 지라프로�
     }
 
     @Override
-    public List<지라프로젝트_데이터> 프로젝트_목록_가져오기(Long 연결_아이디) throws URISyntaxException, IOException {
+    public List<지라프로젝트_데이터> 프로젝트_목록_가져오기(Long 연결_아이디) {
 
         로그.info("온프레미스 지라 프로젝트 전체목록 가져오기");
 

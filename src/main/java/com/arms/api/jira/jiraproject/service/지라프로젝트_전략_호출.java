@@ -7,6 +7,7 @@ import com.arms.api.serverinfo.service.서버정보_서비스;
 import com.arms.api.jira.jiraproject.strategy.온프레미스_지라프로젝트_전략;
 import com.arms.api.jira.jiraproject.strategy.지라프로젝트_전략_등록_및_실행;
 import com.arms.api.jira.jiraproject.strategy.클라우드_지라프로젝트_전략;
+import com.arms.api.jira.jiraproject.strategy.레드마인_온프레미스_프로젝트_전략;
 import com.arms.api.serverinfo.helper.서버유형_정보;
 
 import lombok.RequiredArgsConstructor;
@@ -23,23 +24,27 @@ public class 지라프로젝트_전략_호출 {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
-    지라프로젝트_전략_등록_및_실행 지라프로젝트_전략_등록_및_실행;
+    private 지라프로젝트_전략_등록_및_실행 지라프로젝트_전략_등록_및_실행;
 
-    클라우드_지라프로젝트_전략 클라우드_지라프로젝트_전략;
+    private 클라우드_지라프로젝트_전략 클라우드_지라프로젝트_전략;
 
-    온프레미스_지라프로젝트_전략 온프레미스_지라프로젝트_전략;
+    private 온프레미스_지라프로젝트_전략 온프레미스_지라프로젝트_전략;
 
-    서버정보_서비스 서버정보_서비스;
+    private 레드마인_온프레미스_프로젝트_전략 레드마인_온프레미스_프로젝트_전략;
+
+    private 서버정보_서비스 서버정보_서비스;
+
     @Autowired
-
     public 지라프로젝트_전략_호출(지라프로젝트_전략_등록_및_실행 지라프로젝트_전략_등록_및_실행,
                         클라우드_지라프로젝트_전략 클라우드_지라프로젝트_전략,
                         온프레미스_지라프로젝트_전략 온프레미스_지라프로젝트_전략,
+                        레드마인_온프레미스_프로젝트_전략 레드마인_온프레미스_프로젝트_전략,
                         서버정보_서비스 서버정보_서비스) {
 
         this.지라프로젝트_전략_등록_및_실행 = 지라프로젝트_전략_등록_및_실행;
         this.클라우드_지라프로젝트_전략 = 클라우드_지라프로젝트_전략;
         this.온프레미스_지라프로젝트_전략 = 온프레미스_지라프로젝트_전략;
+        this.레드마인_온프레미스_프로젝트_전략 = 레드마인_온프레미스_프로젝트_전략;
         this.서버정보_서비스 = 서버정보_서비스;
     }
 
@@ -57,6 +62,9 @@ public class 지라프로젝트_전략_호출 {
         }
         else if (지라_유형 == 서버유형_정보.온프레미스) {
             지라프로젝트_전략_등록_및_실행.지라프로젝트_전략_등록(온프레미스_지라프로젝트_전략);
+        }
+        else if (지라_유형 == 서버유형_정보.레드마인_온프레미스) {
+            지라프로젝트_전략_등록_및_실행.지라프로젝트_전략_등록(레드마인_온프레미스_프로젝트_전략);
         }
 
         return 지라프로젝트_전략_등록_및_실행;
