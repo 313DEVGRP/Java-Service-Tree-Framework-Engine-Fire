@@ -320,7 +320,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     }
 
     @GetMapping("/search/log")
-    public ResponseEntity<?> 검색엔진_플루언트디_검색_new(@RequestParam("search_string") String 검색어,
+    public ResponseEntity<?> 검색엔진_플루언트디_검색(@RequestParam("search_string") String 검색어,
                                            @RequestParam("page") String 페이지,
                                            @RequestParam("size") String 크기) {
         log.info("[엘라스틱_지라이슈_대시보드_컨트롤러 :: 검색엔진_플루언트디_검색] :: 검색어 => {}" , 검색어);

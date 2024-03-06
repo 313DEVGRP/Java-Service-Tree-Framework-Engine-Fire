@@ -40,11 +40,38 @@ public class 플루언트디 {
     @Field(type = FieldType.Text, name ="log")
     private String log;
 
+    @Field(type = FieldType.Text, name ="chunk")
+    private String chunk;
+
+    @Field(type = FieldType.Text, name ="chunk_id")
+    private String chunk_id;
+
     @Field(type = FieldType.Keyword, name="container_id")
     private String container_id;
 
     @Field(type = FieldType.Keyword, name="container_name")
     private String container_name;
+
+    @Field(type = FieldType.Text, name="error")
+    private String error;
+
+    @Field(type = FieldType.Text, name="message")
+    private String message;
+
+    @Field(type = FieldType.Text, name="partial_id")
+    private String partial_id;
+
+    @Field(type = FieldType.Text, name="partial_last")
+    private String partial_last;
+
+    @Field(type = FieldType.Text, name="partial_message")
+    private String partial_message;
+
+    @Field(type = FieldType.Text, name="partial_ordinal")
+    private String partial_ordinal;
+
+    @Field(type = FieldType.Text, name="retry_time")
+    private String retry_time;
 
     @Field(type = FieldType.Keyword, name="source")
     private String source;
