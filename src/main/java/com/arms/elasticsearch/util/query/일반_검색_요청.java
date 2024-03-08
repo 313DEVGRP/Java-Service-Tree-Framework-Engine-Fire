@@ -38,13 +38,15 @@ public class 일반_검색_요청 implements 쿼리_추상_팩토리 {
 	public NativeSearchQuery 생성() {
 		BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
 
-		FieldSortBuilder sort = SortBuilders.fieldSort("@timestamp").order(SortOrder.DESC);
+		FieldSortBuilder sort1 = SortBuilders.fieldSort("_score").order(SortOrder.DESC);
+		FieldSortBuilder sort2 = SortBuilders.fieldSort("@timestamp").order(SortOrder.DESC);
+
 		QueryStringQueryBuilder queryStringQueryBuilder = esQuery.getQuery(new ParameterizedTypeReference<>(){});
 
 		NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
 
 		HighlightBuilder highlightBuilder = new HighlightBuilder();
-		highlightBuilder.field("*").preTags("<b><em>").postTags("</em></b>");
+		highlightBuilder.field("*").preTags("<em>").postTags("</em>");
 
 
 		Optional.ofNullable(크기)
@@ -60,15 +62,17 @@ public class 일반_검색_요청 implements 쿼리_추상_팩토리 {
 
 		Optional.ofNullable(boolQuery)
 				.ifPresent(nativeSearchQueryBuilder::withQuery);
-
 		Optional.ofNullable(queryStringQueryBuilder)
 				.ifPresent(query->{
 					nativeSearchQueryBuilder.withQuery(queryStringQueryBuilder);
 					nativeSearchQueryBuilder.withHighlightBuilder(highlightBuilder);
 				});
 
-		if(sort!=null){
-			nativeSearchQueryBuilder.withSort(sort);
+		if(sort1!=null){
+			nativeSearchQueryBuilder.withSort(sort1);
+		}
+		if(sort2!=null) {
+			nativeSearchQueryBuilder.withSort(sort2);
 		}
 
 		return nativeSearchQueryBuilder.build();
