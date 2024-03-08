@@ -5,9 +5,6 @@ import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.repositories.인덱스자료;
 import com.arms.api.engine.repositories.지라이슈_저장소;
 import com.arms.api.engine.services.지라이슈_서비스;
-import com.arms.elasticsearch.util.aggregation.CustomAbstractAggregationBuilder;
-import com.arms.elasticsearch.util.aggregation.CustomDateHistogramAggregationBuilder;
-import com.arms.elasticsearch.util.aggregation.CustomTermsAggregationBuilder;
 import com.arms.elasticsearch.util.query.EsQuery;
 import com.arms.elasticsearch.util.query.EsQueryBuilder;
 import com.arms.elasticsearch.util.query.bool.TermQueryMust;
@@ -19,7 +16,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -457,20 +457,21 @@ public class 인덱스Test {
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
         });
 
-        CustomAbstractAggregationBuilder dailyAggregationBuilder = new CustomDateHistogramAggregationBuilder("aggregation_by_day")
+        DateHistogramAggregationBuilder dailyAggregationBuilder = AggregationBuilders.dateHistogram("aggregation_by_day")
                 .field("updated")
                 .calendarInterval(DateHistogramInterval.DAY);
 
-        CustomTermsAggregationBuilder 요구사항여부Aggregation = new CustomTermsAggregationBuilder("요구사항여부")
+
+        TermsAggregationBuilder 요구사항여부Aggregation = AggregationBuilders.terms("요구사항여부")
                 .field("isReq");
 
-        요구사항여부Aggregation.addSubAggregation(new CustomTermsAggregationBuilder("key")
-                .field("key").build());
+        요구사항여부Aggregation.subAggregation(AggregationBuilders.terms("key")
+                .field("key"));
 
-        dailyAggregationBuilder.addSubAggregation(요구사항여부Aggregation.build());
+        dailyAggregationBuilder.subAggregation(요구사항여부Aggregation);
 
         NativeSearchQueryBuilder nativeSearchQueryBuilder
-                = new NativeSearchQueryBuilder().withQuery(boolQuery).addAggregation(dailyAggregationBuilder.build());
+                = new NativeSearchQueryBuilder().withQuery(boolQuery).addAggregation(dailyAggregationBuilder);
 
         검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build(), "bakup_jiraissue");
 
