@@ -287,7 +287,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         requirementIssues.stream().forEach(reqIssue -> {
             String key = reqIssue.getKey();
-            String summary = reqIssue.getSummary();
+            String summary = reqIssue.getSummary() == null ? "해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다." : reqIssue.getSummary();
             Long[] pdServiceVersions = reqIssue.getPdServiceVersions();
             String versionNames =  Stream.of(pdServiceVersions)
                     .map(versionId -> 제품버전목록데이터.stream()
