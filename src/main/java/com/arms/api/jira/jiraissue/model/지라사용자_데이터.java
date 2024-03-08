@@ -18,4 +18,8 @@ public class 지라사용자_데이터 {
 
     private String displayName;
 
+    public 지라사용자_데이터(String accountId, String displayName) {
+        this.accountId = accountId;
+        this.displayName = displayName;
+    }
 }

@@ -20,4 +20,9 @@ public class 지라이슈우선순위_데이터 {
     
     // 클라우드
     private boolean isDefault;
+
+    public 지라이슈우선순위_데이터(String id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }
