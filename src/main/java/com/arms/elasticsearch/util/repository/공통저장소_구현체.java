@@ -1,29 +1,19 @@
 package com.arms.elasticsearch.util.repository;
 
-import static java.util.stream.Collectors.*;
-
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import org.apache.commons.lang3.StringUtils;
+import com.arms.elasticsearch.util.custom.index.ElasticSearchIndex;
+import com.arms.elasticsearch.util.custom.index.Recent;
+import com.arms.elasticsearch.util.custom.index.RollingIndexName;
+import com.arms.elasticsearch.util.query.EsQuery;
+import com.arms.elasticsearch.util.query.EsQueryBuilder;
+import com.arms.elasticsearch.util.query.bool.TermsQueryFilter;
+import com.arms.elasticsearch.util.검색결과_목록_메인;
+import com.arms.elasticsearch.util.검색엔진_유틸;
+import com.arms.elasticsearch.util.검색조건;
+import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -31,33 +21,27 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.IndexOperations;
-import org.springframework.data.elasticsearch.core.IndexedObjectInformation;
-import org.springframework.data.elasticsearch.core.SearchHit;
-import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.*;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
-import org.springframework.data.elasticsearch.core.query.IndexQuery;
-import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.Query;
+import org.springframework.data.elasticsearch.core.query.*;
 import org.springframework.data.elasticsearch.repository.support.ElasticsearchEntityInformation;
 import org.springframework.data.elasticsearch.repository.support.SimpleElasticsearchRepository;
 
-import com.arms.elasticsearch.util.custom.index.ElasticSearchIndex;
-import com.arms.elasticsearch.util.custom.index.Recent;
-import com.arms.elasticsearch.util.query.EsQuery;
-import com.arms.elasticsearch.util.query.EsQueryBuilder;
-import com.arms.elasticsearch.util.query.bool.TermsQueryFilter;
-import com.arms.elasticsearch.util.검색결과_목록_메인;
-import com.arms.elasticsearch.util.검색엔진_유틸;
-import com.arms.elasticsearch.util.검색조건;
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
-import lombok.extern.slf4j.Slf4j;
+import static java.util.stream.Collectors.*;
+import static org.apache.commons.lang3.StringUtils.*;
 
 @Slf4j
-public class 공통저장소_구현체<T,ID extends Serializable> extends SimpleElasticsearchRepository<T,ID> implements 공통저장소<T,ID> {
+public class 공통저장소_구현체<T,ID extends Serializable> extends SimpleElasticsearchRepository<T,ID> implements com.arms.elasticsearch.util.repository.공통저장소<T,ID> {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
@@ -104,16 +88,28 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
     }
 
 
-    //recentAll(true and false) 전부 조회
-    public List<T> normalSearchAll(Query query) {
-        if (query == null) {
-            log.error("Failed to build search request");
-            return Collections.emptyList();
-        }
+    @Override
+    public List<T> normalSearchAll() {
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
+        return operations.search(nativeSearchQueryBuilder.build(), entityClass).stream()
+                .map(SearchHit::getContent).collect(toList());
+    }
 
-        return operations.search(query, entityClass).stream()
-            .map(SearchHit::getContent).collect(toList());
 
+    @Override
+    public List<T> normalRecentTrueAll() {
+
+        String recentFieldName = fieldInfo(entityClass, Recent.class).getName();
+        TermsQueryBuilder termsQueryBuilder = QueryBuilders.termsQuery(recentFieldName, true);
+
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        boolQueryBuilder.must(termsQueryBuilder);
+
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
+        nativeSearchQueryBuilder.withQuery(boolQueryBuilder);
+
+        return operations.search(nativeSearchQueryBuilder.build(), entityClass).stream()
+                .map(SearchHit::getContent).collect(toList());
     }
 
     public List<T> normalSearch(Query query) {
@@ -122,14 +118,13 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
             return Collections.emptyList();
         }
 
-
         try {
 
             ElasticSearchIndex annotation = AnnotationUtils.findAnnotation(entityClass, ElasticSearchIndex.class);
 
             if(annotation==null){
                 return operations.search(query, entityClass).stream()
-                    .map(SearchHit::getContent).collect(toList());
+                        .map(SearchHit::getContent).collect(toList());
             }
 
             NativeSearchQuery searchQuery = recentQueryMerge((NativeSearchQuery)query);
@@ -147,21 +142,21 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         String recentFieldName = fieldInfo(entityClass, Recent.class).getName();
 
         EsQuery esQuery
-            = new EsQueryBuilder()
-            .bool(
-                new TermsQueryFilter(recentFieldName, true)
-            );
+                = new EsQueryBuilder()
+                .bool(
+                        new TermsQueryFilter(recentFieldName, true)
+                );
 
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
         });
 
 
         QueryBuilder combinedQuery = QueryBuilders.boolQuery()
-            .filter(query.getQuery())
-            .filter(boolQuery);
+                .filter(query.getQuery())
+                .filter(boolQuery);
 
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
-            .withQuery(combinedQuery);
+                .withQuery(combinedQuery);
 
 
         Optional.ofNullable(query.getAggregations()).ifPresent(aggs->{
@@ -309,8 +304,8 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
         while (true) {
             NativeSearchQueryBuilder searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(QueryBuilders.matchAllQuery())
-                .withPageable(PageRequest.of(페이지, 페이지크기));
+                    .withQuery(QueryBuilders.matchAllQuery())
+                    .withPageable(PageRequest.of(페이지, 페이지크기));
 
             List<T> 목록 = this.normalSearch(searchQuery.build());
 
@@ -322,8 +317,8 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
             for (T 이슈 : 목록) {
                 IndexQuery indexQuery = new IndexQueryBuilder()
-                    .withObject(이슈)
-                    .build();
+                        .withObject(이슈)
+                        .build();
 
                 indexQueries.add(indexQuery);
             }
@@ -340,23 +335,33 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
     }
 
     public IndexCoordinates indexName() {
+
         Document document = AnnotationUtils.findAnnotation(entityClass, Document.class);
         if(document!=null){
-            String indexName;
-            if(StringUtils.contains(document.indexName(),"fluentd")) {
+            if(contains(document.indexName(),"fluentd")) {
                 // 포맷 지정
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
                 // 포맷 적용
                 String formattedDate = LocalDate.now().format(formatter);
-                indexName = document.indexName() + "-" + formattedDate;
+                return IndexCoordinates.of(document.indexName() + "-" + formattedDate);
             } else {
-                indexName = document.indexName() + "-" + LocalDate.now();
+                Method method = methodInfo(entityClass, RollingIndexName.class);
+                if(method!=null){
+                    try{
+                        Constructor<T> constructor = entityClass.getConstructor();
+                        T t = constructor.newInstance();
+                        return IndexCoordinates.of(document.indexName()+"-"+method.invoke(t));
+                    }catch (Exception e) {
+                        return IndexCoordinates.of(document.indexName());
+                    }
+                }else{
+                    return IndexCoordinates.of(document.indexName());
+                }
             }
-
-            return IndexCoordinates.of(indexName);
         }
-       throw new RuntimeException("인덱스명을 확인해주시길 바랍니다.");
+        throw new IllegalArgumentException("인덱스명을 확인해주시길 바랍니다.");
     }
+
 
 
     ///////////////////증분 저장 모음//////////////////////
@@ -380,119 +385,131 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         Map<Object, List<SearchHit<T>>> originalEntityMap = this.originalList(entities);
 
         List<S> recentTrueList = StreamSupport.stream(entities.spliterator(), false)
-            .map(newEntity -> {
-                try {
-                    Object keyObject = fieldInfo(newEntity.getClass(), Id.class).get(newEntity);
+                .map(newEntity -> {
+                    try {
+                        Object keyObject = fieldInfo(newEntity.getClass(), Id.class).get(newEntity);
 
-                    if(originalEntityMap!=null&&originalEntityMap.containsKey(keyObject)){
+                        if(originalEntityMap!=null&&originalEntityMap.containsKey(keyObject)){
 
-                        SearchHit<T> searchHit = originalEntityMap.get(keyObject)
-                            .stream()
-                            .findFirst()
-                            .orElseThrow(() -> new RuntimeException("값이 비어 있습니다."));
+                            SearchHit<T> searchHit = originalEntityMap.get(keyObject)
+                                    .stream()
+                                    .findFirst()
+                                    .orElseThrow(() -> new RuntimeException("값이 비워 있습니다."));
 
-                        if(newEntity.equals(searchHit.getContent())){
-                            return null;
+                            if(newEntity.equals(searchHit.getContent())){
+                                return null;
+                            }else{
+                                fieldInfo(newEntity.getClass(), Recent.class).setBoolean(newEntity, true);
+                                return newEntity;
+                            }
+
                         }else{
                             fieldInfo(newEntity.getClass(), Recent.class).setBoolean(newEntity, true);
                             return newEntity;
                         }
 
-                    }else{
-                        fieldInfo(newEntity.getClass(), Recent.class).setBoolean(newEntity, true);
-                        return newEntity;
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
                     }
-
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
-            })
-            .filter(Objects::nonNull)
-            .collect(toList());
+                })
+                .filter(Objects::nonNull)
+                .collect(toList());
 
         Map<String, List<T>> collect = StreamSupport.stream(entities.spliterator(), false)
-            .map(newEntity -> {
-                try {
-                    Object keyObject = fieldInfo(newEntity.getClass(), Id.class).get(newEntity);
-                    return Optional.ofNullable(originalEntityMap)
-                        .map(map -> map.getOrDefault(keyObject, Collections.emptyList())
-                            .stream()
-                            .filter(hit -> !newEntity.equals(hit.getContent()))
-                            .map(hit -> {
-                                try {
-                                    fieldInfo(hit.getContent().getClass(), Recent.class).setBoolean(hit.getContent(),
-                                        false);
-                                    return hit;
-                                } catch (IllegalAccessException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }).collect(toList()))
-                        .orElseGet(() -> null);
+                .map(newEntity -> {
+                    try {
+                        Object keyObject = fieldInfo(newEntity.getClass(), Id.class).get(newEntity);
+                        return Optional.ofNullable(originalEntityMap)
+                                .map(map -> map.getOrDefault(keyObject, Collections.emptyList())
+                                        .stream()
+                                        .filter(hit -> !newEntity.equals(hit.getContent()))
+                                        .map(hit -> {
+                                            try {
+                                                fieldInfo(hit.getContent().getClass(), Recent.class).setBoolean(hit.getContent(),
+                                                        false);
+                                                return hit;
+                                            } catch (IllegalAccessException e) {
+                                                throw new RuntimeException(e);
+                                            }
+                                        }).collect(toList()))
+                                .orElseGet(() -> null);
 
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
-            })
-            .filter(Objects::nonNull)
-            .flatMap(Collection::stream)
-            .collect(groupingBy(SearchHit::getIndex, mapping(SearchHit::getContent, toList())));
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .collect(groupingBy(SearchHit::getIndex, mapping(SearchHit::getContent, toList())));
 
         collect
-            .forEach((key, value) -> operations.save(value, IndexCoordinates.of(key)));
-
-        return operations.save(recentTrueList, indexName());
+                .forEach((key, value) -> operations.save(value, IndexCoordinates.of(key)));
+        IndexCoordinates indexCoordinates = indexName();
+        return operations.save(recentTrueList, indexCoordinates);
     }
 
     private  <S extends T> List<Object> fieldValues(Iterable<S> entities, Class<? extends Annotation> annotation){
         return StreamSupport.stream(entities.spliterator(), false)
-            .collect(toList())
-            .stream().map(a -> {
-                try {
-                    return fieldInfo(a.getClass(),annotation).get(a);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
-            }).collect(toList());
+                .collect(toList())
+                .stream().map(a -> {
+                    try {
+                        return fieldInfo(a.getClass(),annotation).get(a);
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).collect(toList());
     }
 
     public Field fieldInfo(Class<?> entityClass, Class<? extends Annotation> annotation){
         return Arrays.stream(entityClass.getDeclaredFields())
-            .filter(field -> field.isAnnotationPresent(annotation))
-            .map(field -> {
-                field.setAccessible(true);
-                return field;
-            }).findAny().orElseThrow(() -> new RuntimeException("해당 어노테이션이 지정 되어있지 않습니다."));
+                .filter(field -> field.isAnnotationPresent(annotation))
+                .map(field -> {
+                    field.setAccessible(true);
+                    return field;
+                }).findAny().orElseThrow(() -> new RuntimeException("해당 어노테이션이 지정 되어있지 않습니다."));
     }
+
+
+    public Method methodInfo(Class<?> entityClass, Class<? extends Annotation> annotation){
+        Method method = Arrays.stream(entityClass.getDeclaredMethods())
+                .filter(m -> m.isAnnotationPresent(annotation))
+                .map(m -> {
+                    m.setAccessible(true);
+                    return m;
+                }).findAny().orElseThrow(() -> new RuntimeException("해당 어노테이션이 지정 되어있지 않습니다."));
+        return method;
+    }
+
 
     private <S extends T> Map<Object,List<SearchHit<T>>> originalList(Iterable<S> entities){
         String recentFieldName = fieldInfo(entityClass, Recent.class).getName();
         String idFieldName = fieldInfo(entityClass,Id.class).getName();
 
         EsQuery esQuery
-            = new EsQueryBuilder()
-            .bool(
-                new TermsQueryFilter(idFieldName, fieldValues(entities,Id.class)),
-                new TermsQueryFilter(recentFieldName,true)
-            );
+                = new EsQueryBuilder()
+                .bool(
+                        new TermsQueryFilter(idFieldName, fieldValues(entities,Id.class)),
+                        new TermsQueryFilter(recentFieldName,true)
+                );
 
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
         });
 
         NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
-            .withQuery(boolQuery)
-            .build();
+                .withQuery(boolQuery)
+                .build();
 
 
         return Optional.ofNullable(this.search(searchQuery)).map(searchHits ->
-            searchHits.getSearchHits().stream()
-                .sorted(Comparator.comparing(a->a.getIndex(),Comparator.reverseOrder()))
-                .collect(groupingBy(a -> {
-                    try {
-                        return fieldInfo(a.getContent().getClass(), Id.class).get(a.getContent());
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e);
-                    }
-                }))
+                searchHits.getSearchHits().stream()
+                        .sorted(Comparator.comparing(a->a.getIndex(),Comparator.reverseOrder()))
+                        .collect(groupingBy(a -> {
+                            try {
+                                return fieldInfo(a.getContent().getClass(), Id.class).get(a.getContent());
+                            } catch (IllegalAccessException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }))
         ).orElse(null);
     }
 
