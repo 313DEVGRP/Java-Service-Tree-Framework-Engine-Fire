@@ -3,10 +3,12 @@ package com.arms.api.engine.models;
 import com.arms.api.engine.repositories.인덱스자료;
 import com.arms.elasticsearch.util.custom.index.ElasticSearchIndex;
 import com.arms.elasticsearch.util.custom.index.Recent;
+import com.arms.elasticsearch.util.custom.index.RollingIndexName;
 import com.fasterxml.jackson.annotation.*;
 import lombok.*;
 import org.springframework.data.elasticsearch.annotations.*;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import org.springframework.data.annotation.Id;
@@ -441,4 +443,8 @@ public class 지라이슈 {
 
     }
 
+    @RollingIndexName
+    private String localDate() {
+        return String.valueOf(LocalDate.now());
+    }
 }

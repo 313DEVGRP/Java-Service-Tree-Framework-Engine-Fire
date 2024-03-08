@@ -1,10 +1,10 @@
 package com.arms.elasticsearch.util.repository;
 
+import com.arms.elasticsearch.util.검색결과_목록_메인;
+import com.arms.elasticsearch.util.검색조건;
 import org.springframework.data.elasticsearch.core.IndexedObjectInformation;
-import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 import org.springframework.data.repository.NoRepositoryBean;
@@ -13,9 +13,6 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import com.arms.elasticsearch.util.검색결과_목록_메인;
-import com.arms.elasticsearch.util.검색조건;
-
 @NoRepositoryBean
 public interface 공통저장소<T,ID extends Serializable> extends ElasticsearchRepository<T,ID> {
 
@@ -23,9 +20,14 @@ public interface 공통저장소<T,ID extends Serializable> extends Elasticsearc
 
 	검색결과_목록_메인 aggregationSearch(Query query, String newIndex) ;
 
-    List<IndexedObjectInformation> bulkIndex(List<IndexQuery> indexQueryList);
+	List<IndexedObjectInformation> bulkIndex(List<IndexQuery> indexQueryList);
 
-    List<T> normalSearch(Query query);
+	//recentAll(true and false) 전부 조회
+	List<T> normalSearchAll();
+
+	List<T> normalRecentTrueAll();
+
+	List<T> normalSearch(Query query);
 
 	List<T> normalSearch(Query query, String newIndex);
 
