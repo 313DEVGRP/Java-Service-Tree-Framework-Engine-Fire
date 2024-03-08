@@ -12,9 +12,6 @@ import com.arms.api.engine.repositories.지라이슈_저장소;
 import com.arms.api.engine.vo.제품_서비스_버전;
 import com.arms.api.engine.vo.하위_이슈_사항;
 import com.arms.api.engine.vo.하위_이슈_사항들;
-import com.arms.elasticsearch.util.aggregation.CustomAbstractAggregationBuilder;
-import com.arms.elasticsearch.util.aggregation.CustomDateHistogramAggregationBuilder;
-import com.arms.elasticsearch.util.aggregation.CustomTermsAggregationBuilder;
 import com.arms.elasticsearch.util.query.EsQuery;
 import com.arms.elasticsearch.util.query.EsQueryBuilder;
 import com.arms.elasticsearch.util.query.bool.*;
@@ -31,6 +28,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.BucketOrder;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
@@ -179,20 +177,19 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
 
-        CustomAbstractAggregationBuilder versionsAgg = new CustomTermsAggregationBuilder("versions")
-                .field("pdServiceVersions")
-                .addSubAggregation(
-                        new CustomTermsAggregationBuilder("assignees")
+
+        TermsAggregationBuilder versionsAgg = AggregationBuilders.terms("versions").field("pdServiceVersions")
+                .subAggregation(
+                        AggregationBuilders.terms("assignees")
                                 .field("assignee.assignee_accountId.keyword")
                                 .order(BucketOrder.count(false))
                                 .size(지라이슈_제품_및_제품버전_집계_요청.get하위크기())
-                                .addSubAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"))
-                                .build()
+                                .subAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"))
                 );
 
         NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
                 .withQuery(boolQuery)
-                .addAggregation(versionsAgg.build())
+                .addAggregation(versionsAgg)
                 .build();
 
         검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(searchQuery);
@@ -355,14 +352,15 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 );
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
 
-        CustomAbstractAggregationBuilder weeklyAggregationBuilder = new CustomDateHistogramAggregationBuilder("aggregation_by_week")
+        DateHistogramAggregationBuilder weeklyAggregationBuilder = AggregationBuilders
+                .dateHistogram("aggregation_by_week")
                 .field("created")
                 .calendarInterval(DateHistogramInterval.WEEK)
-                .addSubAggregation(new CustomTermsAggregationBuilder("statuses").field("status.status_name.keyword").build())
-                .addSubAggregation(new CustomTermsAggregationBuilder("requirements").field("isReq").build());
+                .subAggregation(AggregationBuilders.terms("statuses").field("status.status_name.keyword"))
+                .subAggregation(AggregationBuilders.terms("requirements").field("isReq"));
 
         NativeSearchQueryBuilder nativeSearchQueryBuilder
-                = new NativeSearchQueryBuilder().withQuery(boolQuery).addAggregation(weeklyAggregationBuilder.build());
+                = new NativeSearchQueryBuilder().withQuery(boolQuery).addAggregation(weeklyAggregationBuilder);
 
         검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
 
@@ -492,24 +490,27 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
          BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
          });
 
-         CustomAbstractAggregationBuilder dailyAggregationBuilder = new CustomDateHistogramAggregationBuilder("aggregation_by_day")
-                 .field(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준())
-                 .calendarInterval(DateHistogramInterval.DAY);
+
+        DateHistogramAggregationBuilder dailyAggregationBuilder = AggregationBuilders
+                .dateHistogram("aggregation_by_day")
+                .field(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준())
+                .calendarInterval(DateHistogramInterval.DAY);
+
 
          if (지라이슈_일자별_제품_및_제품버전_집계_요청.get메인그룹필드() != null) {
-             CustomTermsAggregationBuilder 요구사항여부Aggregation = new CustomTermsAggregationBuilder("요구사항여부")
+             TermsAggregationBuilder 요구사항여부Aggregation = AggregationBuilders
+                     .terms("요구사항여부")
                      .field(지라이슈_일자별_제품_및_제품버전_집계_요청.get메인그룹필드());
 
              if (지라이슈_일자별_제품_및_제품버전_집계_요청.get하위그룹필드들() != null && 지라이슈_일자별_제품_및_제품버전_집계_요청.get하위그룹필드들().size() == 1) {
-                 요구사항여부Aggregation.addSubAggregation(new CustomTermsAggregationBuilder("상태목록")
-                         .field(지라이슈_일자별_제품_및_제품버전_집계_요청.get하위그룹필드들().get(0)).build());
+                 요구사항여부Aggregation.subAggregation(AggregationBuilders.terms("상태목록").field(지라이슈_일자별_제품_및_제품버전_집계_요청.get하위그룹필드들().get(0)));
              }
 
-             dailyAggregationBuilder.addSubAggregation(요구사항여부Aggregation.build());
+             dailyAggregationBuilder.subAggregation(요구사항여부Aggregation);
          }
 
          NativeSearchQueryBuilder nativeSearchQueryBuilder
-                 = new NativeSearchQueryBuilder().withQuery(boolQuery).addAggregation(dailyAggregationBuilder.build());
+                 = new NativeSearchQueryBuilder().withQuery(boolQuery).addAggregation(dailyAggregationBuilder);
 
          검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
 
@@ -722,40 +723,38 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         AggregationBuilder subAggregation;
         if (요구사항여부) {
-            subAggregation = new CustomTermsAggregationBuilder("requirement")
+            subAggregation = AggregationBuilders
+                    .terms("requirement")
                     .field("key")
                     .size(지라이슈_제품_및_제품버전_집계_요청.get크기())
-                    .addSubAggregation(
-                            new CustomTermsAggregationBuilder("assignees")
+                    .subAggregation(
+                            AggregationBuilders.terms("assignees")
                                     .field("assignee.assignee_accountId.keyword")
                                     .order(BucketOrder.count(false))
                                     .size(지라이슈_제품_및_제품버전_집계_요청.get크기())
-                                    .addSubAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"))
-                                    .build()
-                    )
-                    .build();
+                                    .subAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"))
+                    );
+
         } else {
-            subAggregation = new CustomTermsAggregationBuilder("parentRequirement")
+            subAggregation = AggregationBuilders
+                    .terms("parentRequirement")
                     .field("parentReqKey")
                     .size(지라이슈_제품_및_제품버전_집계_요청.get크기())
-                    .addSubAggregation(
-                            new CustomTermsAggregationBuilder("assignees")
-                                    .field("assignee.assignee_accountId.keyword")
-                                    .order(BucketOrder.count(false))
-                                    .size(지라이슈_제품_및_제품버전_집계_요청.get크기())
-                                    .addSubAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"))
-                                    .build()
-                    )
-                    .build();
+                    .subAggregation(AggregationBuilders.terms("assignees")
+                            .field("assignee.assignee_accountId.keyword")
+                            .order(BucketOrder.count(false))
+                            .size(지라이슈_제품_및_제품버전_집계_요청.get크기())
+                            .subAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"))
+                    );
         }
 
-        CustomAbstractAggregationBuilder versionsAgg = new CustomTermsAggregationBuilder("versions")
-                .field("pdServiceVersions")
-                .addSubAggregation(subAggregation);
+
+        TermsAggregationBuilder versionsAgg = AggregationBuilders.terms("versions").field("pdServiceVersions").subAggregation(subAggregation);
+
 
         NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
                 .withQuery(boolQuery)
-                .addAggregation(versionsAgg.build())
+                .addAggregation(versionsAgg)
                 .build();
 
         검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(searchQuery);
