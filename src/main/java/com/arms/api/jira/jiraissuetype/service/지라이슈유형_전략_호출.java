@@ -1,9 +1,7 @@
 package com.arms.api.jira.jiraissuetype.service;
 
 import com.arms.api.jira.jiraissuetype.model.지라이슈유형_데이터;
-import com.arms.api.jira.jiraissuetype.strategy.온프레미스_지라이슈유형_전략;
-import com.arms.api.jira.jiraissuetype.strategy.지라이슈유형_전략_등록_및_실행;
-import com.arms.api.jira.jiraissuetype.strategy.클라우드_지라이슈유형_전략;
+import com.arms.api.jira.jiraissuetype.strategy.*;
 import com.arms.errors.codes.에러코드;
 import com.arms.api.serverinfo.helper.서버유형_정보;
 import com.arms.api.serverinfo.model.서버정보_데이터;
@@ -25,24 +23,27 @@ import java.util.List;
 public class 지라이슈유형_전략_호출 {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
+    private 지라이슈유형_전략_등록_및_실행 지라이슈유형_전략_등록_및_실행;
 
-    지라이슈유형_전략_등록_및_실행 지라이슈유형_전략_등록_및_실행;
+    private 클라우드_지라이슈유형_전략 클라우드_지라이슈유형_전략;
 
-    클라우드_지라이슈유형_전략 클라우드_지라이슈유형_전략;
+    private 온프레미스_지라이슈유형_전략 온프레미스_지라이슈유형_전략;
 
-    온프레미스_지라이슈유형_전략 온프레미스_지라이슈유형_전략;
+    private 레드마인_온프레미스_이슈유형_전략 레드마인_온프레미스_이슈유형_전략;
 
-    서버정보_서비스 서버정보_서비스;
+    private 서버정보_서비스 서버정보_서비스;
 
     @Autowired
     public 지라이슈유형_전략_호출(지라이슈유형_전략_등록_및_실행 지라이슈유형_전략_등록_및_실행,
                         클라우드_지라이슈유형_전략 클라우드_지라이슈유형_전략,
                         온프레미스_지라이슈유형_전략 온프레미스_지라이슈유형_전략,
+                        레드마인_온프레미스_이슈유형_전략 레드마인_온프레미스_이슈유형_전략,
                         서버정보_서비스 서버정보_서비스) {
 
         this.지라이슈유형_전략_등록_및_실행 = 지라이슈유형_전략_등록_및_실행;
         this.클라우드_지라이슈유형_전략 = 클라우드_지라이슈유형_전략;
         this.온프레미스_지라이슈유형_전략 = 온프레미스_지라이슈유형_전략;
+        this.레드마인_온프레미스_이슈유형_전략 = 레드마인_온프레미스_이슈유형_전략;
         this.서버정보_서비스 = 서버정보_서비스;
     }
 
@@ -61,6 +62,9 @@ public class 지라이슈유형_전략_호출 {
         }
         else if (지라_유형 == 서버유형_정보.온프레미스) {
             지라이슈유형_전략_등록_및_실행.지라이슈유형_전략_등록(온프레미스_지라이슈유형_전략);
+        }
+        else if (지라_유형 == 서버유형_정보.레드마인_온프레미스) {
+            지라이슈유형_전략_등록_및_실행.지라이슈유형_전략_등록(레드마인_온프레미스_이슈유형_전략);
         }
 
         return 지라이슈유형_전략_등록_및_실행;
