@@ -21,4 +21,9 @@ public class 지라이슈유형_데이터 {
     // 클라우드만 사용
     private String untranslatedName;
     private Integer hierarchyLevel;
+
+    public 지라이슈유형_데이터(String id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }
