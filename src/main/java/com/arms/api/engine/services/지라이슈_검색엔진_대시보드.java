@@ -42,9 +42,7 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -845,4 +843,18 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         return 검색결과_목록;
     }
 
+    @Override
+    public 검색어_검색결과<SearchHit<지라이슈>> 지라이슈_날짜포함_검색(검색어_날짜포함_검색_요청 검색어_날짜포함_검색_요청) {
+        LocalDateTime start_date = LocalDate.parse(검색어_날짜포함_검색_요청.get시작_날짜()).atStartOfDay();
+        LocalDateTime end_date =LocalDate.parse(검색어_날짜포함_검색_요청.get끝_날짜()).atTime(LocalTime.MAX);
+
+        EsQuery esQuery = new EsQueryBuilder()
+                .rangeQueryBuilder(new RangeQueryFilter("@timestamp", start_date, end_date,"fromto"))
+                .queryString(new QueryString(검색어_날짜포함_검색_요청.get검색어()));
+        SearchHits<지라이슈> 지라이슈_검색결과= 지라이슈저장소.search(일반_검색_요청.of(검색어_날짜포함_검색_요청, esQuery).생성());
+        검색어_검색결과<SearchHit<지라이슈>> 검색결과_목록 = new 검색어_검색결과<>();
+        검색결과_목록.set검색결과_목록(지라이슈_검색결과.getSearchHits());
+        검색결과_목록.set결과_총수(지라이슈_검색결과.getTotalHits());
+        return 검색결과_목록;
+    }
 }

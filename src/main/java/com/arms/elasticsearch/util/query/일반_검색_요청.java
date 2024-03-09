@@ -1,10 +1,10 @@
 package com.arms.elasticsearch.util.query;
 
 import com.arms.elasticsearch.util.base.기본_검색_요청;
+import com.arms.elasticsearch.util.query.bool.RangeQueryFilter;
 import lombok.Getter;
 import lombok.Setter;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryStringQueryBuilder;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
@@ -42,6 +42,7 @@ public class 일반_검색_요청 implements 쿼리_추상_팩토리 {
 		FieldSortBuilder sort2 = SortBuilders.fieldSort("@timestamp").order(SortOrder.DESC);
 
 		QueryStringQueryBuilder queryStringQueryBuilder = esQuery.getQuery(new ParameterizedTypeReference<>(){});
+		RangeQueryFilter rangeQueryFilter = esQuery.getQuery(new ParameterizedTypeReference<>(){});
 
 		NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
 
@@ -67,7 +68,10 @@ public class 일반_검색_요청 implements 쿼리_추상_팩토리 {
 					nativeSearchQueryBuilder.withQuery(queryStringQueryBuilder);
 					nativeSearchQueryBuilder.withHighlightBuilder(highlightBuilder);
 				});
-
+		Optional.ofNullable(rangeQueryFilter)
+				.ifPresent(filter -> {
+					nativeSearchQueryBuilder.withFilter(rangeQueryFilter.abstractQueryBuilder());
+				});
 		if(sort1!=null){
 			nativeSearchQueryBuilder.withSort(sort1);
 		}

@@ -75,7 +75,7 @@ public class RangeQueryFilter extends Filter<RangeQueryBuilder> {
     }
 
     @Override
-    public AbstractQueryBuilder<RangeQueryBuilder>abstractQueryBuilder() {
+    public AbstractQueryBuilder<RangeQueryBuilder> abstractQueryBuilder() {
         return rangeQueryBuilder;
     }
 }
