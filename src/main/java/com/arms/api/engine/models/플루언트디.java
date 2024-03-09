@@ -3,6 +3,7 @@ package com.arms.api.engine.models;
 
 import com.arms.api.engine.repositories.인덱스자료;
 import com.arms.elasticsearch.util.custom.index.ElasticSearchIndex;
+import com.arms.elasticsearch.util.custom.index.RollingIndexName;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -12,7 +13,10 @@ import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 @Data
@@ -75,6 +79,13 @@ public class 플루언트디 {
 
     @Field(type = FieldType.Keyword, name="source")
     private String source;
+
+    @RollingIndexName
+    private String indexName() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        // 포맷 적용
+        return LocalDate.now().format(formatter);
+    }
 
 
 }

@@ -335,29 +335,21 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
     }
 
     public IndexCoordinates indexName() {
-
         Document document = AnnotationUtils.findAnnotation(entityClass, Document.class);
         if(document!=null){
-            if(contains(document.indexName(),"fluentd")) {
-                // 포맷 지정
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-                // 포맷 적용
-                String formattedDate = LocalDate.now().format(formatter);
-                return IndexCoordinates.of(document.indexName() + "-" + formattedDate);
-            } else {
-                Method method = methodInfo(entityClass, RollingIndexName.class);
-                if(method!=null){
-                    try{
-                        Constructor<T> constructor = entityClass.getConstructor();
-                        T t = constructor.newInstance();
-                        return IndexCoordinates.of(document.indexName()+"-"+method.invoke(t));
-                    }catch (Exception e) {
-                        return IndexCoordinates.of(document.indexName());
-                    }
-                }else{
+            Method method = methodInfo(entityClass, RollingIndexName.class);
+            if(method!=null){
+                try{
+                    Constructor<T> constructor = entityClass.getConstructor();
+                    T t = constructor.newInstance();
+                    return IndexCoordinates.of(document.indexName()+"-"+method.invoke(t));
+                }catch (Exception e) {
                     return IndexCoordinates.of(document.indexName());
                 }
+            }else{
+                return IndexCoordinates.of(document.indexName());
             }
+
         }
         throw new IllegalArgumentException("인덱스명을 확인해주시길 바랍니다.");
     }
