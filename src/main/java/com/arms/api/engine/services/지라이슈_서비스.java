@@ -17,17 +17,11 @@ import java.util.Map;
 
      Iterable<지라이슈> 이슈리스트_추가하기(List<지라이슈> 지라이슈_리스트);
 
-     지라이슈 이슈_갱신하기(지라이슈 지라이슈);
-
      지라이슈 이슈_삭제하기(지라이슈 지라이슈);
 
      지라이슈 이슈_조회하기(String 조회조건_아이디);
 
      List<지라이슈> 이슈_검색하기(검색조건 검색조건);
-
-	 검색결과_목록_메인 특정필드의_값들을_그룹화하여_빈도수가져오기(String indexName, String groupByField) throws IOException;
-
-     검색결과_목록_메인 특정필드_검색후_다른필드_그룹결과(String 인덱스이름, String 특정필드, String 특정필드검색어, String 그룹할필드) throws IOException;
 
      지라이슈 이슈_검색엔진_저장(Long 지라서버_아이디, String 이슈_키, Long 제품서비스_아이디, Long[] 제품서비스_버전_아이디들) throws Exception;
 
@@ -51,11 +45,5 @@ import java.util.Map;
 
     히트맵데이터 히트맵_제품서비스_버전목록으로_조회(Long pdServiceLink, Long[] pdServiceVersionLinks);
 
-//     Map<String,Integer> 요구사항_릴레이션이슈_상태값_전체통계(Long 지라서버_아이디) throws IOException;
 
-//     Map<String, Map<String, Integer>> 요구사항_릴레이션이슈_상태값_프로젝트별통계(Long 지라서버_아이디) throws IOException;
-
-//     Map<String, Long> 제품서비스별_담당자_통계(Long 지라서버_아이디, Long 제품서비스_아이디) throws IOException;
-
-//     Map<String, Long> 제품서비스별_소요일_통계(Long 서버_아이디, Long 제품서비스_아이디) throws IOException;
  }

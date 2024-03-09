@@ -349,7 +349,6 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
             }else{
                 return IndexCoordinates.of(document.indexName());
             }
-
         }
         throw new IllegalArgumentException("인덱스명을 확인해주시길 바랍니다.");
     }

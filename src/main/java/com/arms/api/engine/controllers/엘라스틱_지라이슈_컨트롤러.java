@@ -54,19 +54,6 @@ public class 엘라스틱_지라이슈_컨트롤러 {
         return 지라이슈_검색엔진.이슈_검색하기(검색조건);
     }
 
-    @ResponseBody
-    @GetMapping("/test/{groupByField}")
-    public 검색결과_목록_메인 테스트_조회(@PathVariable("groupByField") String 조회조건_필드) throws IOException {
-
-        return 지라이슈_검색엔진.특정필드의_값들을_그룹화하여_빈도수가져오기(인덱스자료.지라이슈_인덱스명, 조회조건_필드);
-    }
-
-    @ResponseBody
-    @GetMapping("/test/{searchField}/{searchTerm}/{groupField}")
-    public 검색결과_목록_메인 테스트2_조회(@PathVariable("searchField") String 특정필드, @PathVariable("searchTerm") String 특정필드검색어, @PathVariable("groupField") String 그룹할필드) throws IOException {
-
-        return 지라이슈_검색엔진.특정필드_검색후_다른필드_그룹결과(인덱스자료.지라이슈_인덱스명, 특정필드, 특정필드검색어, 그룹할필드 );
-    }
 
     @ResponseBody
     @RequestMapping(
