@@ -7,9 +7,10 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class CloudUserStrategy implements UserStrategy {
@@ -25,7 +26,11 @@ public class CloudUserStrategy implements UserStrategy {
                 })
                 .block();
 
-        return users;
+        return Optional.ofNullable(users)
+                .orElse(Collections.emptyList())
+                .stream()
+                .filter(user -> user.getLocale() != null && user.isActive())
+                .collect(Collectors.toList());
     }
 
     @Override

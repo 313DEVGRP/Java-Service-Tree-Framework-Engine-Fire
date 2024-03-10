@@ -4,7 +4,6 @@ import com.arms.api.jira.user.model.UserDTO;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.utils.지라유틸;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
-import com.atlassian.jira.rest.client.api.domain.Status;
 import com.atlassian.jira.rest.client.api.domain.User;
 import io.atlassian.util.concurrent.Promise;
 import org.springframework.stereotype.Component;
@@ -13,6 +12,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class OnPremiseUserStrategy implements UserStrategy {
@@ -23,14 +23,13 @@ public class OnPremiseUserStrategy implements UserStrategy {
                 serverInfo.getPasswordOrToken());
 
         Promise<Iterable<User>> iterablePromise = restClient.getUserClient().findUsers(serverInfo.getUserId());
-        Iterable<User> users = iterablePromise.claim();
-        List<UserDTO> userDTOs = new ArrayList<>();
-        for (User user : users) {
-            UserDTO userDTO = convertToUserDTO(user);
-            userDTOs.add(userDTO);
-        }
+        List<User> users = new ArrayList<>();
+        iterablePromise.claim().forEach(users::add);
 
-        return userDTOs;
+        return users.stream()
+                .filter(User::isActive)
+                .map(this::convertToUserDTO)
+                .collect(Collectors.toList());
     }
 
     private UserDTO convertToUserDTO(User user) {
@@ -39,6 +38,7 @@ public class OnPremiseUserStrategy implements UserStrategy {
         userDTO.setAccountId(user.getName());
         userDTO.setDisplayName(user.getDisplayName());
         userDTO.setEmailAddress(user.getEmailAddress());
+        userDTO.setLocale(user.getTimezone());
         return userDTO;
     }
 
