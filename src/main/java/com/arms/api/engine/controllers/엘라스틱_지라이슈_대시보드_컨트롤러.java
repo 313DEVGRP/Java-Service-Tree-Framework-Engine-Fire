@@ -323,8 +323,8 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     public ResponseEntity<?> 검색엔진_지라이슈_날짜포함_검색(@RequestParam("search_string") String 검색어,
                                           @RequestParam("page") String 페이지,
                                           @RequestParam("size") String 크기,
-                                          @RequestParam("from") String 시작_날짜,
-                                          @RequestParam("to") String 끝_날짜) {
+                                          @RequestParam(value = "from",required = false) String 시작_날짜,
+                                          @RequestParam(value = "to",  required = false) String 끝_날짜) {
         log.info("[엘라스틱_지라이슈_대시보드_컨트롤러 :: 검색엔진_지라이슈_검색] :: 검색어 => {}" , 검색어);
         검색어_날짜포함_검색_요청 검색어_날짜포함_검색_요청 = new 검색어_날짜포함_검색_요청();
         검색어_날짜포함_검색_요청.set검색어(검색어);
@@ -354,8 +354,8 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     public ResponseEntity<?> 검색엔진_플루언트디_날짜포함_검색(@RequestParam("search_string") String 검색어,
                                                @RequestParam("page") String 페이지,
                                                @RequestParam("size") String 크기,
-                                               @RequestParam("from") String 시작_날짜,
-                                               @RequestParam("to") String 끝_날짜) {
+                                               @RequestParam(value = "from",required = false) String 시작_날짜,
+                                               @RequestParam(value = "to",  required = false) String 끝_날짜) {
         log.info("[엘라스틱_지라이슈_대시보드_컨트롤러 :: 검색엔진_지라이슈_검색] :: 검색어 => {}" , 검색어);
         검색어_날짜포함_검색_요청 검색어_날짜포함_검색_요청 = new 검색어_날짜포함_검색_요청();
         검색어_날짜포함_검색_요청.set검색어(검색어);

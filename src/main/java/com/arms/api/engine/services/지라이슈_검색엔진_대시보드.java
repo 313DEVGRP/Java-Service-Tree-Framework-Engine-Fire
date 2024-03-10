@@ -843,8 +843,14 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
     @Override
     public 검색어_검색결과<SearchHit<지라이슈>> 지라이슈_날짜포함_검색(검색어_날짜포함_검색_요청 검색어_날짜포함_검색_요청) {
-        LocalDateTime start_date = LocalDate.parse(검색어_날짜포함_검색_요청.get시작_날짜()).atStartOfDay();
-        LocalDateTime end_date =LocalDate.parse(검색어_날짜포함_검색_요청.get끝_날짜()).atTime(LocalTime.MAX);
+        String start_date = null;
+        String end_date = null;
+        if(검색어_날짜포함_검색_요청.get시작_날짜() != null && !검색어_날짜포함_검색_요청.get시작_날짜().isBlank()) {
+            start_date = 검색어_날짜포함_검색_요청.get시작_날짜();
+        }
+        if(검색어_날짜포함_검색_요청.get끝_날짜() != null &&!검색어_날짜포함_검색_요청.get끝_날짜().isBlank()) {
+            end_date = 검색어_날짜포함_검색_요청.get끝_날짜();
+        }
 
         EsQuery esQuery = new EsQueryBuilder()
                 .rangeQueryBuilder(new RangeQueryFilter("@timestamp", start_date, end_date,"fromto"))
