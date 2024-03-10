@@ -61,7 +61,7 @@ public class 플루언트디_서비스구현체 implements 플루언트디_서�
         LocalDateTime end_date =LocalDate.parse(검색어_날짜포함_검색_요청.get끝_날짜()).atTime(LocalTime.MAX);
 
         EsQuery esQuery = new EsQueryBuilder()
-                .bool(new RangeQueryFilter("@timestamp", start_date, end_date,"fromto"))
+                .rangeQueryBuilder(new RangeQueryFilter("@timestamp", start_date, end_date,"fromto"))
                 .sort(new SortBy(
                     List.of(
                              정렬_요청.builder().필드("_score").정렬기준("desc").build()

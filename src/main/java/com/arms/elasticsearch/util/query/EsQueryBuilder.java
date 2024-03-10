@@ -1,6 +1,7 @@
 package com.arms.elasticsearch.util.query;
 
 import com.arms.elasticsearch.util.query.bool.EsBoolQuery;
+import com.arms.elasticsearch.util.query.bool.RangeQueryFilter;
 import com.arms.elasticsearch.util.query.query_string.QueryString;
 import com.arms.elasticsearch.util.query.sort.SortBy;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -28,5 +29,8 @@ public class EsQueryBuilder extends EsQuery {
 		return this;
 	}
 
-
+	public EsQueryBuilder rangeQueryBuilder(RangeQueryFilter rangeQueryFilter) {
+		setQuery(new ParameterizedTypeReference<>() {},rangeQueryFilter);
+		return this;
+	}
 }
