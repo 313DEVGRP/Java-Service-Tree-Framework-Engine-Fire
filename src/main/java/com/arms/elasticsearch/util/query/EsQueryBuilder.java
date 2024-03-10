@@ -6,7 +6,6 @@ import com.arms.elasticsearch.util.query.query_string.QueryString;
 import com.arms.elasticsearch.util.query.sort.SortBy;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 
 public class EsQueryBuilder extends EsQuery {
@@ -21,7 +20,7 @@ public class EsQueryBuilder extends EsQuery {
 	}
 
 	public EsQueryBuilder sort(SortBy sortBy){
-		setQuery(new ParameterizedTypeReference<>() {},sortBy.sortQuery());
+		setQuery(new ParameterizedTypeReference<>() {},sortBy.sortBy());
 		return this;
 	}
 
@@ -34,5 +33,4 @@ public class EsQueryBuilder extends EsQuery {
 		setQuery(new ParameterizedTypeReference<>() {},rangeQueryFilter);
 		return this;
 	}
-
 }
