@@ -41,7 +41,7 @@ public class 레드마인_온프레미스_프로젝트_전략 implements 지라�
         지라프로젝트_데이터 지라프로젝트_데이터;
         try {
             Project 프로젝트 = 레드마인_매니저.getProjectManager().getProjectById(Integer.parseInt(프로젝트_키_또는_아이디));
-            지라프로젝트_데이터 = 지라프로젝트_데이터형_변환(프로젝트);
+            지라프로젝트_데이터 = 지라프로젝트_데이터형_변환(프로젝트, 서버정보.getUri());
         }
         catch (RedmineException e) {
             로그.error("레드마인 온프레미스 프로젝트 상세 정보 가져오기에 실패하였습니다.");
@@ -73,7 +73,7 @@ public class 레드마인_온프레미스_프로젝트_전략 implements 지라�
         }
 
         지라프로젝트_목록 = 프로젝트_목록.stream().map(프로젝트 -> {
-                지라프로젝트_데이터 지라프로젝트_데이터 = 지라프로젝트_데이터형_변환(프로젝트);
+                지라프로젝트_데이터 지라프로젝트_데이터 = 지라프로젝트_데이터형_변환(프로젝트, 서버정보.getUri());
                 return 지라프로젝트_데이터;
             })
             .filter(Objects::nonNull)
@@ -82,13 +82,13 @@ public class 레드마인_온프레미스_프로젝트_전략 implements 지라�
         return 지라프로젝트_목록;
     }
 
-    private 지라프로젝트_데이터 지라프로젝트_데이터형_변환(Project 프로젝트) {
+    private 지라프로젝트_데이터 지라프로젝트_데이터형_변환(Project 프로젝트, String 서버정보경로) {
         지라프로젝트_데이터 지라프로젝트_데이터 = new 지라프로젝트_데이터();
 
         지라프로젝트_데이터.setId(String.valueOf(프로젝트.getId()));
         지라프로젝트_데이터.setName(프로젝트.getName());
         지라프로젝트_데이터.setKey(프로젝트.getIdentifier());
-        지라프로젝트_데이터.setSelf(프로젝트.getHomepage());
+        지라프로젝트_데이터.setSelf(서버정보경로 + "/projects/"+프로젝트.getId()+".json");
 
         return 지라프로젝트_데이터;
     }

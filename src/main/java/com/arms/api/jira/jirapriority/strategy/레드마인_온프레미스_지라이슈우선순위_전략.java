@@ -47,7 +47,7 @@ public class 레드마인_온프레미스_지라이슈우선순위_전략 implem
         }
 
         지라이슈우선순위_목록 = 우선순위_목록.stream().map(우선순위 -> {
-                        지라이슈우선순위_데이터 지라이슈우선순위_데이터 = 지라이슈우선순위_데이터형_변환(우선순위);
+                        지라이슈우선순위_데이터 지라이슈우선순위_데이터 = 지라이슈우선순위_데이터형_변환(우선순위, 서버정보.getUri());
                         return 지라이슈우선순위_데이터;
                     })
                     .filter(Objects::nonNull)
@@ -56,12 +56,13 @@ public class 레드마인_온프레미스_지라이슈우선순위_전략 implem
         return 지라이슈우선순위_목록;
     }
 
-    private 지라이슈우선순위_데이터 지라이슈우선순위_데이터형_변환(IssuePriority 우선순위) {
+    private 지라이슈우선순위_데이터 지라이슈우선순위_데이터형_변환(IssuePriority 우선순위, String 서버정보경로) {
         지라이슈우선순위_데이터 지라이슈우선순위_데이터 = new 지라이슈우선순위_데이터();
 
         지라이슈우선순위_데이터.setId(String.valueOf(우선순위.getId()));
         지라이슈우선순위_데이터.setName(우선순위.getName());
         지라이슈우선순위_데이터.setDefault(우선순위.isDefault());
+        지라이슈우선순위_데이터.setSelf(서버정보경로 + "/enumerations/issue_priorities/"+우선순위.getId()+".json");
 
         return 지라이슈우선순위_데이터;
     }
