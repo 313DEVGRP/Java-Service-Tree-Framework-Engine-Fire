@@ -4,6 +4,7 @@ import com.arms.api.jira.jiraissuestatus.model.지라이슈상태_데이터;
 import com.arms.api.jira.jiraissuestatus.strategy.온프레미스_지라이슈상태_전략;
 import com.arms.api.jira.jiraissuestatus.strategy.지라이슈상태_전략_등록_및_실행;
 import com.arms.api.jira.jiraissuestatus.strategy.클라우드_지라이슈상태_전략;
+import com.arms.api.jira.jiraissuestatus.strategy.레드마인_온프레미스_이슈상태_전략;
 import com.arms.api.serverinfo.helper.서버유형_정보;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.service.서버정보_서비스;
@@ -23,23 +24,27 @@ public class 지라이슈상태_전략_호출 {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
-    지라이슈상태_전략_등록_및_실행 지라이슈상태_전략_등록_및_실행;
+    private 지라이슈상태_전략_등록_및_실행 지라이슈상태_전략_등록_및_실행;
 
-    클라우드_지라이슈상태_전략 클라우드_지라이슈상태_전략;
+    private 클라우드_지라이슈상태_전략 클라우드_지라이슈상태_전략;
 
-    온프레미스_지라이슈상태_전략 온프레미스_지라이슈상태_전략;
+    private 온프레미스_지라이슈상태_전략 온프레미스_지라이슈상태_전략;
 
-    서버정보_서비스 서버정보_서비스;
+    private 레드마인_온프레미스_이슈상태_전략 레드마인_온프레미스_이슈상태_전략;
+
+    private 서버정보_서비스 서버정보_서비스;
 
     @Autowired
     public 지라이슈상태_전략_호출(지라이슈상태_전략_등록_및_실행 지라이슈상태_전략_등록_및_실행,
                         클라우드_지라이슈상태_전략 클라우드_지라이슈상태_전략,
                         온프레미스_지라이슈상태_전략 온프레미스_지라이슈상태_전략,
+                        레드마인_온프레미스_이슈상태_전략 레드마인_온프레미스_이슈상태_전략,
                         서버정보_서비스 서버정보_서비스) {
 
         this.지라이슈상태_전략_등록_및_실행 = 지라이슈상태_전략_등록_및_실행;
         this.클라우드_지라이슈상태_전략 = 클라우드_지라이슈상태_전략;
         this.온프레미스_지라이슈상태_전략 = 온프레미스_지라이슈상태_전략;
+        this.레드마인_온프레미스_이슈상태_전략 = 레드마인_온프레미스_이슈상태_전략;
         this.서버정보_서비스 = 서버정보_서비스;
     }
 
@@ -57,6 +62,9 @@ public class 지라이슈상태_전략_호출 {
         }
         else if (지라_유형 == 서버유형_정보.온프레미스) {
             지라이슈상태_전략_등록_및_실행.지라이슈상태_전략_등록(온프레미스_지라이슈상태_전략);
+        }
+        else if (지라_유형 == 서버유형_정보.레드마인_온프레미스) {
+            지라이슈상태_전략_등록_및_실행.지라이슈상태_전략_등록(레드마인_온프레미스_이슈상태_전략);
         }
 
         return 지라이슈상태_전략_등록_및_실행;
@@ -106,6 +114,10 @@ public class 지라이슈상태_전략_호출 {
 
         if (지라_유형 == 서버유형_정보.온프레미스) {
             throw new IllegalArgumentException("온프레미스 타입은 프로젝트별 이슈 상태 목록 가져오기를 사용할 수 없습니다.");
+        }
+        else if (지라_유형 == 서버유형_정보.레드마인_온프레미스) {
+            로그.info("레드마인_온프레미스_이슈상태_전략 "+ 연결_아이디 +" 프로젝트별_이슈상태_목록_가져오기를 사용하지 않습니다.");
+            throw new IllegalArgumentException("레드마인 온프레미스 타입은 프로젝트별 이슈 상태 목록 가져오기를 사용할 수 없습니다.");
         }
 
         지라이슈상태_전략_등록_및_실행 = 지라이슈상태_전략_확인(서버정보);
