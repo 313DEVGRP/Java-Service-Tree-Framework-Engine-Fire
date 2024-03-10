@@ -16,6 +16,7 @@ import com.arms.elasticsearch.util.query.EsQuery;
 import com.arms.elasticsearch.util.query.EsQueryBuilder;
 import com.arms.elasticsearch.util.query.bool.*;
 import com.arms.elasticsearch.util.query.query_string.QueryString;
+import com.arms.elasticsearch.util.query.bool.RangeQueryFilter;
 import com.arms.elasticsearch.util.query.일반_검색_요청;
 import com.arms.elasticsearch.util.query.쿼리_추상_팩토리;
 import com.arms.elasticsearch.util.검색결과;
@@ -174,7 +175,6 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 );
 
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
-
 
         TermsAggregationBuilder versionsAgg = AggregationBuilders.terms("versions").field("pdServiceVersions")
                 .subAggregation(
@@ -849,7 +849,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         LocalDateTime end_date =LocalDate.parse(검색어_날짜포함_검색_요청.get끝_날짜()).atTime(LocalTime.MAX);
 
         EsQuery esQuery = new EsQueryBuilder()
-                .rangeQueryBuilder(new RangeQueryFilter("@timestamp", start_date, end_date,"fromto"))
+                .bool(new RangeQueryFilter("@timestamp", start_date, end_date,"fromto"))
                 .queryString(new QueryString(검색어_날짜포함_검색_요청.get검색어()));
         SearchHits<지라이슈> 지라이슈_검색결과= 지라이슈저장소.search(일반_검색_요청.of(검색어_날짜포함_검색_요청, esQuery).생성());
         검색어_검색결과<SearchHit<지라이슈>> 검색결과_목록 = new 검색어_검색결과<>();
