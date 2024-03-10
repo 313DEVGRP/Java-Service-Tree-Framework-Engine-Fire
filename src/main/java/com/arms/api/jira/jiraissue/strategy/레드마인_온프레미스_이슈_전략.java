@@ -9,11 +9,9 @@ import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.service.서버정보_서비스;
 import com.arms.errors.codes.에러코드;
 import com.arms.utils.지라유틸;
+import com.taskadapter.redmineapi.Include;
 import com.taskadapter.redmineapi.RedmineManager;
-import com.taskadapter.redmineapi.bean.Issue;
-import com.taskadapter.redmineapi.bean.IssueFactory;
-import com.taskadapter.redmineapi.bean.Tracker;
-import com.taskadapter.redmineapi.bean.TrackerFactory;
+import com.taskadapter.redmineapi.bean.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +55,7 @@ public class 레드마인_온프레미스_이슈_전략 implements 지라이슈_
         try {
             List<Issue> 이슈목록 = 레드마인_매니저.getIssueManager().getIssues(프로젝트_키_또는_아이디, null);
             이슈_목록 = 이슈목록.stream().map(이슈 -> {
-                        지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터형_변환(이슈);
+                        지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터형_변환(이슈, 서버정보.getUri());
                         return 지라이슈_데이터;
                     })
                     .filter(Objects::nonNull)
@@ -93,7 +91,7 @@ public class 레드마인_온프레미스_이슈_전략 implements 지라이슈_
             생성할_이슈.setPriorityId(Integer.parseInt(우선순위_데이터.getId()));
 
             Issue 생성된_이슈 = 레드마인_매니저.getIssueManager().createIssue(생성할_이슈);
-            이슈_데이터 = 지라이슈_데이터형_변환(생성된_이슈);
+            이슈_데이터 = 지라이슈_데이터형_변환(생성된_이슈, 서버정보.getUri());
         }
         catch (Exception e) {
             로그.error("레드마인 온프레미스 이슈 생성하기에 실패하였습니다." +e.getMessage());
@@ -115,17 +113,88 @@ public class 레드마인_온프레미스_이슈_전략 implements 지라이슈_
 
     @Override
     public 지라이슈_데이터 이슈_상세정보_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) throws Exception {
-        return null;
+
+        로그.info("레드마인_온프레미스_이슈_전략 "+ 연결_아이디 +" 이슈_상세정보_가져오기");
+
+        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+        RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+
+        지라이슈_데이터 이슈_데이터 = null;
+
+        try {
+            Issue 조회할_이슈 = 레드마인_매니저.getIssueManager().getIssueById(Integer.parseInt(이슈_키_또는_아이디));
+            if (조회할_이슈 == null) {
+                로그.info(이슈_키_또는_아이디 + "는 존재하지 않는 이슈입니다.");
+                return null;
+            }
+            이슈_데이터 = 지라이슈_데이터형_변환(조회할_이슈, 서버정보.getUri());
+        }
+        catch (Exception e) {
+            로그.error("레드마인 온프레미스 이슈 상세정보 가져오기에 실패하였습니다." +e.getMessage());
+            throw new IllegalArgumentException(에러코드.이슈_조회_오류.getErrorMsg());
+        }
+
+        return 이슈_데이터;
     }
 
     @Override
     public List<지라이슈_데이터> 이슈링크_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) throws URISyntaxException, IOException, ExecutionException, InterruptedException {
-        return null;
+
+        로그.info("레드마인_온프레미스_이슈_전략 "+ 연결_아이디 +" 이슈링크_가져오기");
+
+        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+        RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+
+        레드마인_매니저.setObjectsPerPage(지라API_정보.getParameter().getMaxResults());
+        List<지라이슈_데이터> 이슈_목록 = new ArrayList<>();
+
+        try {
+            Issue 부모이슈 = 레드마인_매니저.getIssueManager().getIssueById(Integer.parseInt(이슈_키_또는_아이디), Include.relations);
+            if (부모이슈.getRelations().isEmpty()) {
+                로그.info(이슈_키_또는_아이디 + "에 연관된 이슈가 없습니다.");
+                return null;
+            }
+            for (IssueRelation 연관이슈 : 부모이슈.getRelations()) {
+                //System.out.println("연관이슈: " + 연관이슈);
+                이슈_목록.add(이슈_상세정보_가져오기(연결_아이디, String.valueOf(연관이슈.getIssueId())));
+            }
+        }
+        catch (Exception e) {
+            로그.error("레드마인 온프레미스 이슈 링크 가져오기에 실패하였습니다." +e.getMessage());
+            throw new IllegalArgumentException(에러코드.이슈_조회_오류.getErrorMsg());
+        }
+
+        return 이슈_목록;
     }
 
     @Override
     public List<지라이슈_데이터> 서브테스크_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) throws URISyntaxException, IOException, ExecutionException, InterruptedException {
-        return null;
+
+        로그.info("레드마인_온프레미스_이슈_전략 "+ 연결_아이디 +" 서브테스크_가져오기");
+
+        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+        RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+
+        레드마인_매니저.setObjectsPerPage(지라API_정보.getParameter().getMaxResults());
+        List<지라이슈_데이터> 이슈_목록 = new ArrayList<>();
+
+        try {
+            Issue 부모이슈 = 레드마인_매니저.getIssueManager().getIssueById(Integer.parseInt(이슈_키_또는_아이디), Include.children);
+            if (부모이슈.getChildren().isEmpty()) {
+                로그.info(이슈_키_또는_아이디 + "의 하위 이슈가 없습니다.");
+                return null;
+            }
+            for (Issue 하위이슈 : 부모이슈.getChildren()) {
+                //System.out.println("하위이슈: " + 하위이슈);
+                이슈_목록.add(이슈_상세정보_가져오기(연결_아이디, String.valueOf(하위이슈.getId())));
+            }
+        }
+        catch (Exception e) {
+            로그.error("레드마인 온프레미스 이슈 서브테스크 가져오기에 실패하였습니다." +e.getMessage());
+            throw new IllegalArgumentException(에러코드.이슈_조회_오류.getErrorMsg());
+        }
+
+        return 이슈_목록;
     }
 
     @Override
@@ -143,12 +212,14 @@ public class 레드마인_온프레미스_이슈_전략 implements 지라이슈_
         return null;
     }
 
-    private 지라이슈_데이터 지라이슈_데이터형_변환(Issue 이슈) {
+    private 지라이슈_데이터 지라이슈_데이터형_변환(Issue 이슈, String 서버정보경로) {
 
         지라이슈_데이터 지라이슈_데이터 = new 지라이슈_데이터();
         지라이슈필드_데이터 지라이슈필드_데이터 = new 지라이슈필드_데이터();
 
         지라이슈_데이터.setId(String.valueOf(이슈.getId()));
+        String 경로 = 서버정보경로.endsWith("/") ? 서버정보경로 + "issues/" : 서버정보경로 + "/issues/";
+        지라이슈_데이터.setSelf(경로 + 이슈.getId() + ".json");
 
         지라이슈필드_데이터.setProject(new 지라프로젝트_데이터(String.valueOf(이슈.getProjectId()), 이슈.getProjectName()));
         지라이슈필드_데이터.setIssuetype(new 지라이슈유형_데이터(String.valueOf(이슈.getTracker().getId()), 이슈.getTracker().getName()));
