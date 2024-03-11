@@ -1,6 +1,7 @@
 package com.arms.api.jira.jiraissuetype.strategy;
 
 import com.arms.api.jira.jiraissuetype.model.지라이슈유형_데이터;
+import com.arms.api.jira.utils.에러로그_유틸;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.service.서버정보_서비스;
 import com.arms.errors.codes.에러코드;
@@ -43,8 +44,7 @@ public class 레드마인_온프레미스_이슈유형_전략 implements 지라�
         try {
             우선순위_목록 = 레드마인_매니저.getIssueManager().getTrackers();
         } catch (RedmineException e) {
-            로그.error(this.getClass().getName() + " :: "
-                    + 에러코드.이슈유형_조회_오류.getErrorMsg() + " :: " +e.getMessage());
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "이슈유형_목록_가져오기");
             throw new IllegalArgumentException(this.getClass().getName() + " :: "
                     + 에러코드.이슈유형_조회_오류.getErrorMsg() + " :: " +e.getMessage());
         }
@@ -72,8 +72,7 @@ public class 레드마인_온프레미스_이슈유형_전략 implements 지라�
         try {
             프로젝트 = 레드마인_매니저.getProjectManager().getProjectById(Integer.parseInt(프로젝트_아이디));
         } catch (RedmineException e) {
-            로그.error(this.getClass().getName() + " :: "
-                    + 에러코드.이슈유형_조회_오류.getErrorMsg() + " :: " +e.getMessage());
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "프로젝트별_이슈유형_목록_가져오기");
             throw new IllegalArgumentException(this.getClass().getName() + " :: "
                     + 에러코드.이슈유형_조회_오류.getErrorMsg() + " :: " +e.getMessage());
         }
@@ -94,7 +93,7 @@ public class 레드마인_온프레미스_이슈유형_전략 implements 지라�
         지라이슈유형_데이터.setId(String.valueOf(이슈유형.getId()));
         지라이슈유형_데이터.setName(이슈유형.getName());
         지라이슈유형_데이터.setSubtask(false);
-        지라이슈유형_데이터.setSelf(서버정보경로 + "/trackers/"+이슈유형.getId()+".json");
+        지라이슈유형_데이터.setSelf(지라유틸.서버정보경로_체크(서버정보경로) + "/trackers/"+이슈유형.getId()+".json");
 
         return 지라이슈유형_데이터;
     }
