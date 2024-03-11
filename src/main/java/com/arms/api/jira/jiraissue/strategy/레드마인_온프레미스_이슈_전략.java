@@ -11,7 +11,9 @@ import com.arms.errors.codes.에러코드;
 import com.arms.utils.지라유틸;
 import com.taskadapter.redmineapi.Include;
 import com.taskadapter.redmineapi.RedmineManager;
-import com.taskadapter.redmineapi.bean.*;
+import com.taskadapter.redmineapi.bean.Issue;
+import com.taskadapter.redmineapi.bean.IssueRelation;
+import com.taskadapter.redmineapi.bean.Tracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +21,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 import static java.util.stream.Collectors.toList;
@@ -84,6 +83,9 @@ public class 레드마인_온프레미스_이슈_전략 implements 지라이슈_
         지라이슈우선순위_데이터 우선순위_데이터 = 필드_데이터.getPriority();
 
         try {
+
+            // 3.1.3 버전
+            /*
             Issue 생성할_이슈 = IssueFactory.create(Integer.parseInt(프로젝트_데이터.getId()), 필드_데이터.getSummary());
             Tracker 이슈타입 = TrackerFactory.create(Integer.parseInt(이슈유형_데이터.getId()), 이슈유형_데이터.getName());
             생성할_이슈.setTracker(이슈타입);
@@ -92,6 +94,20 @@ public class 레드마인_온프레미스_이슈_전략 implements 지라이슈_
 
             Issue 생성된_이슈 = 레드마인_매니저.getIssueManager().createIssue(생성할_이슈);
             이슈_데이터 = 지라이슈_데이터형_변환(생성된_이슈, 서버정보.getUri());
+            */
+
+            Tracker 이슈타입 = new Tracker()
+                    .setId(Integer.parseInt(이슈유형_데이터.getId()))
+                    .setName(이슈유형_데이터.getName());
+
+            Issue 생성이슈 = new Issue(레드마인_매니저.getTransport(), Integer.parseInt(프로젝트_데이터.getId()))
+                    .setSubject(필드_데이터.getSummary())
+                    .setTracker(이슈타입)
+                    .setDescription(필드_데이터.getDescription())
+                    .setPriorityId(Integer.parseInt(우선순위_데이터.getId()))
+                    .create();
+
+            이슈_데이터 = 지라이슈_데이터형_변환(생성이슈, 서버정보.getUri());
         }
         catch (Exception e) {
             로그.error("레드마인 온프레미스 이슈 생성하기에 실패하였습니다." +e.getMessage());
@@ -103,7 +119,40 @@ public class 레드마인_온프레미스_이슈_전략 implements 지라이슈_
 
     @Override
     public Map<String, Object> 이슈_수정하기(Long 연결_아이디, String 이슈_키_또는_아이디, 지라이슈생성_데이터 지라이슈생성_데이터) throws Exception {
-        return null;
+
+        로그.info("레드마인_온프레미스_이슈_전략 "+ 연결_아이디 +" 이슈_수정하기");
+
+        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+        RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+
+        Map<String, Object> 결과 = new HashMap<>();
+        지라이슈생성필드_데이터 필드_데이터 = 지라이슈생성_데이터.getFields();
+        String 제목 = 필드_데이터.getSummary();
+        String 내용 = 필드_데이터.getDescription();
+
+        try {
+            Issue 수정이슈 = 레드마인_매니저.getIssueManager().getIssueById(Integer.parseInt(이슈_키_또는_아이디));
+
+            if (제목 != null && !제목.isEmpty()) {
+                수정이슈.setSubject(제목);
+            }
+            if (내용 != null) {
+                수정이슈.setDescription(내용);
+            }
+
+            수정이슈.update();
+
+            결과.put("success", true);
+            결과.put("message", "이슈 수정 성공");
+
+        } catch (Exception e) {
+            로그.error("레드마인 온프레미스 이슈 수정하기에 실패하였습니다." +e.getMessage());
+            결과.put("success", false);
+            결과.put("message", "이슈 수정 실패");
+            //throw new IllegalArgumentException(에러코드.이슈수정_오류.getErrorMsg());
+        }
+
+        return 결과;
     }
 
     @Override
@@ -122,12 +171,8 @@ public class 레드마인_온프레미스_이슈_전략 implements 지라이슈_
         지라이슈_데이터 이슈_데이터 = null;
 
         try {
-            Issue 조회할_이슈 = 레드마인_매니저.getIssueManager().getIssueById(Integer.parseInt(이슈_키_또는_아이디));
-            if (조회할_이슈 == null) {
-                로그.info(이슈_키_또는_아이디 + "는 존재하지 않는 이슈입니다.");
-                return null;
-            }
-            이슈_데이터 = 지라이슈_데이터형_변환(조회할_이슈, 서버정보.getUri());
+            Issue 조회이슈 = 레드마인_매니저.getIssueManager().getIssueById(Integer.parseInt(이슈_키_또는_아이디));
+            이슈_데이터 = 지라이슈_데이터형_변환(조회이슈, 서버정보.getUri());
         }
         catch (Exception e) {
             로그.error("레드마인 온프레미스 이슈 상세정보 가져오기에 실패하였습니다." +e.getMessage());
@@ -218,8 +263,7 @@ public class 레드마인_온프레미스_이슈_전략 implements 지라이슈_
         지라이슈필드_데이터 지라이슈필드_데이터 = new 지라이슈필드_데이터();
 
         지라이슈_데이터.setId(String.valueOf(이슈.getId()));
-        String 경로 = 서버정보경로.endsWith("/") ? 서버정보경로 + "issues/" : 서버정보경로 + "/issues/";
-        지라이슈_데이터.setSelf(경로 + 이슈.getId() + ".json");
+        지라이슈_데이터.setSelf(지라유틸.서버정보경로_체크(서버정보경로) + "/issues/" + 이슈.getId() + ".json");
 
         지라이슈필드_데이터.setProject(new 지라프로젝트_데이터(String.valueOf(이슈.getProjectId()), 이슈.getProjectName()));
         지라이슈필드_데이터.setIssuetype(new 지라이슈유형_데이터(String.valueOf(이슈.getTracker().getId()), 이슈.getTracker().getName()));

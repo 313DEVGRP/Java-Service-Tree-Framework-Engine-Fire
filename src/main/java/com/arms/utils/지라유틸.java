@@ -147,4 +147,8 @@ public class 지라유틸 {
         return dateTime.plusMinutes(remainder >= 30 ? 30 - remainder : -remainder);//30분 단위 리턴 시간
     }
 
+    public static String 서버정보경로_체크(String 서버정보경로) {
+        return 서버정보경로.endsWith("/") ? 서버정보경로.substring(0, 서버정보경로.length() - 1) : 서버정보경로;
+    }
+
 }
