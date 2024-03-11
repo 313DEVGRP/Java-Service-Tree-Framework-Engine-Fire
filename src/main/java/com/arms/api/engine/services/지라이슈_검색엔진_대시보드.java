@@ -853,8 +853,8 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         }
 
         EsQuery esQuery = new EsQueryBuilder()
-                .rangeQueryBuilder(new RangeQueryFilter("@timestamp", start_date, end_date,"fromto"))
-                .queryString(new QueryString(검색어_날짜포함_검색_요청.get검색어()))
+                .bool(new RangeQueryFilter("@timestamp", start_date, end_date,"fromto"),
+                        new QueryStringMust(검색어_날짜포함_검색_요청.get검색어()))
                 .sort(new SortBy(
                         List.of(
                                 정렬_요청.builder().필드("_score").정렬기준("desc").build()

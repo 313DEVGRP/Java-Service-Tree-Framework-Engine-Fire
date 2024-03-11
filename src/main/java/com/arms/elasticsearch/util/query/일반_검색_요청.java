@@ -41,6 +41,7 @@ public class 일반_검색_요청 implements 쿼리_추상_팩토리 {
 
 		HighlightBuilder highlightBuilder = new HighlightBuilder();
 		highlightBuilder.field("*").preTags("<em>").postTags("</em>");
+		nativeSearchQueryBuilder.withHighlightBuilder(highlightBuilder);
 
 		Optional.ofNullable(크기)
 				.ifPresent(크기->{
@@ -61,6 +62,8 @@ public class 일반_검색_요청 implements 쿼리_추상_팩토리 {
 				.ifPresent(sorts -> {
 					sorts.forEach(nativeSearchQueryBuilder::withSort);
 				});
+
+
 
 
 		return nativeSearchQueryBuilder.build();

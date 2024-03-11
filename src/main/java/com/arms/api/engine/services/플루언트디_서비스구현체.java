@@ -7,6 +7,7 @@ import com.arms.api.engine.models.플루언트디;
 import com.arms.api.engine.repositories.플루언트디_저장소;
 import com.arms.elasticsearch.util.query.EsQuery;
 import com.arms.elasticsearch.util.query.EsQueryBuilder;
+import com.arms.elasticsearch.util.query.bool.QueryStringMust;
 import com.arms.elasticsearch.util.query.bool.RangeQueryFilter;
 import com.arms.elasticsearch.util.query.query_string.QueryString;
 import com.arms.elasticsearch.util.query.sort.SortBy;
@@ -47,7 +48,7 @@ public class 플루언트디_서비스구현체 implements 플루언트디_서�
                     ,정렬_요청.builder().필드("@timestamp").정렬기준("desc").build()
                 )
             ))
-            .queryString(new QueryString(검색어_기본_검색_요청.get검색어()));
+            .bool(new QueryStringMust(검색어_기본_검색_요청.get검색어()));
         SearchHits<플루언트디> 플루언트디_검색결과 = 플루언트디_저장소.search(일반_검색_요청.of(검색어_기본_검색_요청, esQuery).생성());
         검색어_검색결과<SearchHit<플루언트디>> 검색결과_목록 = new 검색어_검색결과<>();
         검색결과_목록.set검색결과_목록(플루언트디_검색결과.getSearchHits());
@@ -67,14 +68,14 @@ public class 플루언트디_서비스구현체 implements 플루언트디_서�
         }
 
         EsQuery esQuery = new EsQueryBuilder()
-                .rangeQueryBuilder(new RangeQueryFilter("@timestamp", start_date, end_date,"fromto"))
+                .bool(new RangeQueryFilter("@timestamp", start_date, end_date,"fromto"),
+                        new QueryStringMust(검색어_날짜포함_검색_요청.get검색어()))
                 .sort(new SortBy(
                     List.of(
                              정렬_요청.builder().필드("_score").정렬기준("desc").build()
                             ,정렬_요청.builder().필드("@timestamp").정렬기준("desc").build()
                     )
-                ))
-                .queryString(new QueryString(검색어_날짜포함_검색_요청.get검색어()));
+                ));
         SearchHits<플루언트디> 플루언트디_검색결과 = 플루언트디_저장소.search(일반_검색_요청.of(검색어_날짜포함_검색_요청, esQuery).생성());
         검색어_검색결과<SearchHit<플루언트디>> 검색결과_목록 = new 검색어_검색결과<>();
         검색결과_목록.set검색결과_목록(플루언트디_검색결과.getSearchHits());
