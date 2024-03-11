@@ -69,7 +69,7 @@ public class 레드마인_온프레미스_이슈상태_전략 implements 지라�
 
         지라이슈상태_데이터.setId(String.valueOf(이슈상태.getId()));
         지라이슈상태_데이터.setName(이슈상태.getName());
-        지라이슈상태_데이터.setSelf(지라유틸.서버정보경로_체크(서버정보경로) + "/issue_statuses/"+이슈상태.getId()+".json");
+        지라이슈상태_데이터.setSelf(지라유틸.서버정보경로_체크(서버정보경로) + "/issue_statuses.json?status_id="+이슈상태.getId());
 
         return 지라이슈상태_데이터;
     }

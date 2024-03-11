@@ -62,7 +62,7 @@ public class 레드마인_온프레미스_지라이슈우선순위_전략 implem
         지라이슈우선순위_데이터.setId(String.valueOf(우선순위.getId()));
         지라이슈우선순위_데이터.setName(우선순위.getName());
         지라이슈우선순위_데이터.setDefault(우선순위.isDefault());
-        지라이슈우선순위_데이터.setSelf(지라유틸.서버정보경로_체크(서버정보경로) + "/enumerations/issue_priorities/"+우선순위.getId()+".json");
+        지라이슈우선순위_데이터.setSelf(지라유틸.서버정보경로_체크(서버정보경로) + "/enumerations/issue_priorities.json?=priority_id=" + +우선순위.getId());
 
         return 지라이슈우선순위_데이터;
     }

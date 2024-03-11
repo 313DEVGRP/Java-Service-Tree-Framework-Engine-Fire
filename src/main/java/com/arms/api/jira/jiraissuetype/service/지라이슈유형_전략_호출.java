@@ -85,6 +85,9 @@ public class 지라이슈유형_전략_호출 {
         if (지라_유형 == 서버유형_정보.클라우드) {
             throw new IllegalArgumentException("클라우드 타입은 이슈 유형 목록 가져오기를 사용할 수 없습니다.");
         }
+        else if (지라_유형 == 서버유형_정보.레드마인_온프레미스) {
+            throw new IllegalArgumentException("레드마인 온프레미스 타입은 이슈 유형 목록 가져오기를 사용할 수 없습니다.");
+        }
 
         지라이슈유형_전략_등록_및_실행 = 지라이슈유형_전략_확인(서버정보);
 
