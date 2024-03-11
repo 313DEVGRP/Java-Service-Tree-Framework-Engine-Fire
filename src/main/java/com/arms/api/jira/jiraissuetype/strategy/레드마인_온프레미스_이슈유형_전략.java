@@ -50,7 +50,7 @@ public class 레드마인_온프레미스_이슈유형_전략 implements 지라�
         }
 
         지라이슈유형_목록 = 우선순위_목록.stream().map(이슈유형 -> {
-                        지라이슈유형_데이터 지라이슈유형_데이터 = 지라이슈유형_데이터형_변환(이슈유형, 서버정보.getUri());
+                        지라이슈유형_데이터 지라이슈유형_데이터 = 지라이슈유형_데이터형_변환(이슈유형, 서버정보.getUri(), null);
                         return 지라이슈유형_데이터;
                     })
                     .filter(Objects::nonNull)
@@ -78,7 +78,7 @@ public class 레드마인_온프레미스_이슈유형_전략 implements 지라�
         }
 
         지라이슈유형_목록 =  프로젝트.getTrackers().stream().map(이슈유형 -> {
-                지라이슈유형_데이터 지라이슈유형_데이터 = 지라이슈유형_데이터형_변환(이슈유형, 서버정보.getUri());
+                지라이슈유형_데이터 지라이슈유형_데이터 = 지라이슈유형_데이터형_변환(이슈유형, 서버정보.getUri(), 프로젝트_아이디);
                 return 지라이슈유형_데이터;
             })
             .filter(Objects::nonNull)
@@ -87,13 +87,19 @@ public class 레드마인_온프레미스_이슈유형_전략 implements 지라�
         return 지라이슈유형_목록;
     }
 
-    private 지라이슈유형_데이터 지라이슈유형_데이터형_변환(Tracker 이슈유형, String 서버정보경로) {
+    private 지라이슈유형_데이터 지라이슈유형_데이터형_변환(Tracker 이슈유형, String 서버정보경로, String 프로젝트_아이디) {
         지라이슈유형_데이터 지라이슈유형_데이터 = new 지라이슈유형_데이터();
 
         지라이슈유형_데이터.setId(String.valueOf(이슈유형.getId()));
         지라이슈유형_데이터.setName(이슈유형.getName());
         지라이슈유형_데이터.setSubtask(false);
-        지라이슈유형_데이터.setSelf(지라유틸.서버정보경로_체크(서버정보경로) + "/trackers/"+이슈유형.getId()+".json");
+
+        if (!프로젝트_아이디.isEmpty()) {
+            지라이슈유형_데이터.setSelf(지라유틸.서버정보경로_체크(서버정보경로) + "/trackers.json?tracker_id=" + 이슈유형.getId() +"&project_id=" + 프로젝트_아이디);
+        }
+        else {
+            지라이슈유형_데이터.setSelf(지라유틸.서버정보경로_체크(서버정보경로) + "/trackers.json?tracker_id=" + 이슈유형.getId());
+        }
 
         return 지라이슈유형_데이터;
     }
