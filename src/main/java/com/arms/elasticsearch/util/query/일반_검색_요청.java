@@ -1,10 +1,9 @@
 package com.arms.elasticsearch.util.query;
 
 import com.arms.elasticsearch.util.base.기본_검색_요청;
-import com.arms.elasticsearch.util.query.bool.RangeQueryFilter;
 import lombok.Getter;
 import lombok.Setter;
-import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.springframework.core.ParameterizedTypeReference;
@@ -36,8 +35,6 @@ public class 일반_검색_요청 implements 쿼리_추상_팩토리 {
 	@Override
 	public NativeSearchQuery 생성() {
 		BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
-		QueryStringQueryBuilder queryStringQueryBuilder = esQuery.getQuery(new ParameterizedTypeReference<>(){});
-		RangeQueryFilter rangeQueryFilter = esQuery.getQuery(new ParameterizedTypeReference<>(){});
 		List<FieldSortBuilder> fieldSortBuilders = esQuery.getQuery(new ParameterizedTypeReference<>(){});
 
 		NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
@@ -46,33 +43,24 @@ public class 일반_검색_요청 implements 쿼리_추상_팩토리 {
 		highlightBuilder.field("*").preTags("<em>").postTags("</em>");
 
 		Optional.ofNullable(크기)
-						.ifPresent(크기->{
-							nativeSearchQueryBuilder
-									.withMaxResults(크기);
-							Optional.ofNullable(페이지)
-									.ifPresent(페이지->{
-										nativeSearchQueryBuilder
-												.withPageable(PageRequest.of(페이지,크기));
-									});
-						});
+				.ifPresent(크기->{
+					nativeSearchQueryBuilder
+							.withMaxResults(크기);
+					Optional.ofNullable(페이지)
+							.ifPresent(페이지->{
+								nativeSearchQueryBuilder
+										.withPageable(PageRequest.of(페이지,크기));
+							});
+				});
 
 		Optional.ofNullable(boolQuery)
 				.ifPresent(nativeSearchQueryBuilder::withQuery);
 
-		Optional.ofNullable(queryStringQueryBuilder)
-				.ifPresent(query->{
-					nativeSearchQueryBuilder.withQuery(queryStringQueryBuilder);
-					nativeSearchQueryBuilder.withHighlightBuilder(highlightBuilder);
-				});
-		Optional.ofNullable(rangeQueryFilter)
-				.ifPresent(filter -> {
-					nativeSearchQueryBuilder.withFilter(rangeQueryFilter.abstractQueryBuilder());
-				});
 
 		Optional.ofNullable(fieldSortBuilders)
-			.ifPresent(sorts -> {
-				sorts.forEach(nativeSearchQueryBuilder::withSort);
-			});
+				.ifPresent(sorts -> {
+					sorts.forEach(nativeSearchQueryBuilder::withSort);
+				});
 
 
 		return nativeSearchQueryBuilder.build();
