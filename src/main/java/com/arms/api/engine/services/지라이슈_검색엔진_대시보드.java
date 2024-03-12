@@ -863,8 +863,10 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 ));
         SearchHits<지라이슈> 지라이슈_검색결과= 지라이슈저장소.search(일반_검색_요청.of(검색어_날짜포함_검색_요청, esQuery).생성());
         검색어_검색결과<SearchHit<지라이슈>> 검색결과_목록 = new 검색어_검색결과<>();
-        검색결과_목록.set검색결과_목록(지라이슈_검색결과.getSearchHits());
-        검색결과_목록.set결과_총수(지라이슈_검색결과.getTotalHits());
+        if(지라이슈_검색결과 != null && !지라이슈_검색결과.isEmpty()) {
+            검색결과_목록.set검색결과_목록(지라이슈_검색결과.getSearchHits());
+            검색결과_목록.set결과_총수(지라이슈_검색결과.getTotalHits());
+        }
         return 검색결과_목록;
     }
 }
