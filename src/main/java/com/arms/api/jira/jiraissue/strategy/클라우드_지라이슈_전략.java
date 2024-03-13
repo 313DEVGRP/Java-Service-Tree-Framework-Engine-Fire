@@ -1,19 +1,11 @@
 package com.arms.api.jira.jiraissue.strategy;
 
-import com.arms.api.jira.jiraissue.model.지라사용자_데이터;
-import com.arms.api.jira.jiraissue.model.지라이슈워크로그_데이터;
-import com.arms.api.jira.jiraissue.model.클라우드_지라이슈필드_데이터;
-import com.arms.api.jira.jiraissue.model.지라이슈_데이터;
-import com.arms.api.jira.jiraissue.model.지라이슈생성_데이터;
-import com.arms.api.jira.jiraissue.model.지라이슈생성필드_데이터;
-import com.arms.api.jira.jiraissue.model.지라이슈전체워크로그_데이터;
-import com.arms.api.jira.jiraissue.model.지라이슈조회_데이터;
-import com.arms.api.jira.jiraissue.model.클라우드_지라이슈생성_데이터;
-import com.arms.api.jira.utils.지라API_정보;
+import com.arms.api.jira.jiraissue.model.*;
 import com.arms.api.jira.utils.에러로그_유틸;
+import com.arms.api.jira.utils.지라API_정보;
 import com.arms.api.serverinfo.model.서버정보_데이터;
-import com.arms.errors.codes.에러코드;
 import com.arms.api.serverinfo.service.서버정보_서비스;
+import com.arms.errors.codes.에러코드;
 import com.arms.utils.지라유틸;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,6 +19,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
@@ -311,6 +304,174 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
 
     }
 
+    public 지라이슈_데이터 이슈_생성하기2(Long 연결_아이디, 지라이슈생성_데이터 지라이슈생성_데이터) {
+
+        로그.info("클라우드 지라 이슈 생성하기2");
+
+        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+        WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
+
+        지라이슈생성필드_데이터 필드_데이터 = 지라이슈생성_데이터.getFields();
+
+        if (필드_데이터 == null) {
+            throw new IllegalArgumentException(에러코드.요청본문_오류체크.getErrorMsg());
+        }
+
+        String 프로젝트_아이디 = "";
+        String 이슈유형_아이디 = "";
+
+        if (지라이슈생성_데이터.getFields().getProject().getId() != null
+                && !지라이슈생성_데이터.getFields().getProject().getId().isEmpty()) {
+            프로젝트_아이디 = 지라이슈생성_데이터.getFields().getProject().getId();
+        }
+
+        if (지라이슈생성_데이터.getFields().getIssuetype().getId() != null
+                && !지라이슈생성_데이터.getFields().getIssuetype().getId().isEmpty()) {
+            이슈유형_아이디 = 지라이슈생성_데이터.getFields().getIssuetype().getId();
+        }
+
+        if (프로젝트_아이디.isEmpty() || 이슈유형_아이디.isEmpty()) {
+            throw new IllegalArgumentException("이슈 생성 필드 확인에 필요한 프로젝트 아이디, 이슈유형 아이디가 존재 하지 않습니다.");
+        }
+
+        /* ***
+         * 프로젝트 와 이슈 유형에 따라 이슈 생성 시 들어가는 fields의 내용을 확인하는 부분(현재 priority만 적용)
+         *** */
+        Map<String, 클라우드_이슈생성필드_메타데이터.필드_메타데이터> 필드_메타데이터_목록 = 필드_메타데이터_확인하기(webClient, 프로젝트_아이디, 이슈유형_아이디);
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            로그.info(objectMapper.writeValueAsString(필드_메타데이터_목록));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        클라우드_지라이슈생성_데이터 입력_데이터 = new 클라우드_지라이슈생성_데이터();
+        클라우드_지라이슈필드_데이터 클라우드_필드_데이터;
+
+        클라우드_필드_데이터 = 필수필드_확인_및_추가하기(필드_메타데이터_목록, webClient, 필드_데이터);
+        입력_데이터.setFields(클라우드_필드_데이터);
+
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        try {
+//            로그.info(objectMapper.writeValueAsString(입력_데이터));
+//        } catch (JsonProcessingException e) {
+//            throw new RuntimeException(e);
+//        }
+
+        로그.info(입력_데이터.toString());
+        String endpoint = "/rest/api/3/issue";
+        지라이슈_데이터 반환할_지라이슈_데이터 = null;
+        try {
+            반환할_지라이슈_데이터 = 지라유틸.post(webClient, endpoint, 입력_데이터, 지라이슈_데이터.class).block();
+        } catch (Exception e) {
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "이슈 생성하기");
+        }
+
+        if (반환할_지라이슈_데이터 == null) {
+            로그.error("이슈 생성에 실패하였습니다.");
+            return null;
+        }
+
+        return 반환할_지라이슈_데이터;
+    }
+
+    public Map<String, 클라우드_이슈생성필드_메타데이터.필드_메타데이터> 필드_메타데이터_확인하기(WebClient webClient, String 프로젝트_아이디, String 이슈유형_아이디) {
+        String 필드확인endpoint = "/rest/api/3/issue/createmeta/{projectIdOrKey}/issuetypes/{issueTypeIdOrKey}";
+        필드확인endpoint = 필드확인endpoint.replace("{projectIdOrKey}", 프로젝트_아이디);
+        필드확인endpoint = 필드확인endpoint.replace("{issueTypeIdOrKey}", 이슈유형_아이디);
+
+        int 검색_시작_지점 = 0;
+        int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
+        boolean isLast = false;
+
+        List<클라우드_이슈생성필드_메타데이터.필드_메타데이터> 메타데이터_목록 = new ArrayList<>(); // 이슈 저장
+
+        클라우드_이슈생성필드_메타데이터 클라우드_이슈생성필드_메타데이터;
+        try {
+            while (!isLast) {
+                String endpoint = 필드확인endpoint +
+                        "?startAt=" + 검색_시작_지점 + "&maxResults=" + 최대_검색수;
+
+                클라우드_이슈생성필드_메타데이터
+                        = 지라유틸.get(webClient, endpoint, 클라우드_이슈생성필드_메타데이터.class).block();
+
+                if (클라우드_이슈생성필드_메타데이터 == null) {
+                    로그.info("클라우드 지라 서브테스크 이슈 목록이 Null입니다.");
+                    return null;
+                }
+                else if (클라우드_이슈생성필드_메타데이터.getFields() == null || 클라우드_이슈생성필드_메타데이터.getFields().size() == 0) {
+                    로그.info("클라우드 지라 서브테스크 이슈 목록이 없습니다.");
+                    return null;
+                }
+
+                메타데이터_목록.addAll(클라우드_이슈생성필드_메타데이터.getFields());
+
+                if (클라우드_이슈생성필드_메타데이터.getTotal() == 메타데이터_목록.size()) {
+                    isLast = true;
+                } else {
+                    검색_시작_지점 += 최대_검색수;
+                }
+            }
+
+        }
+        catch (Exception e) {
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "필드_메타데이터 확인하기");
+            throw new IllegalArgumentException(e.getMessage() + " :: 필드 메타데이터 조회 중 오류가 발생하였습니다.");
+        }
+
+        Map<String, 클라우드_이슈생성필드_메타데이터.필드_메타데이터> 필드맵 = 메타데이터_목록.stream()
+                .collect(Collectors.toMap(com.arms.api.jira.jiraissue.model.클라우드_이슈생성필드_메타데이터.필드_메타데이터::getFieldId, field -> field));
+
+        return 필드맵;
+    }
+
+    public 클라우드_지라이슈필드_데이터 필수필드_확인_및_추가하기(Map<String, 클라우드_이슈생성필드_메타데이터.필드_메타데이터> 필드_메타데이터_목록,
+                                  WebClient webClient,
+                                  지라이슈생성필드_데이터 지라이슈생성필드_데이터) {
+
+        if (필드_메타데이터_목록 == null) {
+            로그.error("필드 메타데이터 목록이 null입니다.");
+            throw new IllegalArgumentException("필드 메타데이터 목록이 null입니다.");
+        }
+
+        클라우드_지라이슈필드_데이터 클라우드_지라이슈필드_데이터 = new 클라우드_지라이슈필드_데이터();
+
+        if (지라이슈생성필드_데이터.getProject() != null) {
+            클라우드_지라이슈필드_데이터.setProject(지라이슈생성필드_데이터.getProject());
+        }
+
+        if (지라이슈생성필드_데이터.getIssuetype() != null) {
+            클라우드_지라이슈필드_데이터.setIssuetype(지라이슈생성필드_데이터.getIssuetype());
+        }
+
+        if (지라이슈생성필드_데이터.getSummary() != null) {
+            클라우드_지라이슈필드_데이터.setSummary(지라이슈생성필드_데이터.getSummary());
+        }
+
+        if (지라이슈생성필드_데이터.getDescription() != null) {
+            클라우드_지라이슈필드_데이터.setDescription(내용_변환(지라이슈생성필드_데이터.getDescription()));
+        }
+
+        if (필드_메타데이터_목록.containsKey("reporter") && 필드_메타데이터_목록.get("reporter") != null) {
+            클라우드_이슈생성필드_메타데이터.필드_메타데이터 reporter = 필드_메타데이터_목록.get("reporter");
+            if (reporter.isRequired() && 지라이슈생성필드_데이터.getReporter() != null) {
+                지라사용자_데이터 사용자 = 사용자_정보_조회(webClient);
+                if (사용자 == null) {
+                    로그.info("이슈 생성 필드 확인에 필요한 사용자 데이터가 Null입니다.");
+                } else {
+                    클라우드_지라이슈필드_데이터.setReporter(사용자);
+                }
+
+            }
+        }
+
+        if (필드_메타데이터_목록.containsKey("priority") && 필드_메타데이터_목록.get("priority") != null) {
+            클라우드_지라이슈필드_데이터.setPriority(지라이슈생성필드_데이터.getPriority());
+        }
+
+        return 클라우드_지라이슈필드_데이터;
+    }
+
     @Override
     public Map<String, Object> 이슈_삭제_라벨_처리하기(Long 연결_아이디, String 이슈_키_또는_아이디) {
 
@@ -397,7 +558,6 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
                 .displayName(사용자_정보.getDisplayName())
                 .build();
     }
-
 
     @Override
     public 지라이슈_데이터 이슈_상세정보_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) {

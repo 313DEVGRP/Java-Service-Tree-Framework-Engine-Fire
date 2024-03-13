@@ -34,10 +34,6 @@ public class 클라우드_지라이슈필드_데이터 {
 
     private 지라이슈우선순위_데이터 priority;
 
-    private 지라이슈상태_데이터 status;
-
-    private 지라이슈해결책_데이터 resolution;
-
     @Getter
     @Setter
     @Builder
