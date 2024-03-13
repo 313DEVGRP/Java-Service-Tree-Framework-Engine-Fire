@@ -17,6 +17,8 @@ import com.arms.api.serverinfo.service.서버정보_서비스;
 import com.arms.utils.지라유틸;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,32 +125,9 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
         클라우드_지라이슈생성_데이터 입력_데이터 = new 클라우드_지라이슈생성_데이터();
         클라우드_지라이슈필드_데이터 클라우드_필드_데이터 = new 클라우드_지라이슈필드_데이터();
 
-        if (필드_데이터.getProject() != null) {
-            클라우드_필드_데이터.setProject(필드_데이터.getProject());
-        }
-        if (필드_데이터.getIssuetype() != null) {
-            클라우드_필드_데이터.setIssuetype(필드_데이터.getIssuetype());
-        }
-        if (필드_데이터.getSummary() != null) {
-            클라우드_필드_데이터.setSummary(필드_데이터.getSummary());
-        }
-
-        if (필드_데이터.getDescription() != null) {
-            클라우드_필드_데이터.setDescription(내용_변환((String) 필드_데이터.getDescription()));
-        }
-
-        지라사용자_데이터 사용자 = 사용자_정보_조회(webClient);
-
-        if (사용자 == null) {
-            로그.info("이슈 생성 필드 확인에 필요한 사용자 데이터가 Null입니다.");
-        }
-        else {
-            클라우드_필드_데이터.setReporter(사용자);
-        }
-
         /* ***
-        * 프로젝트 와 이슈 유형에 따라 이슈 생성 시 들어가는 fields의 내용을 확인하는 부분(현재 priority만 적용)
-        *** */
+         * 프로젝트 와 이슈 유형에 따라 이슈 생성 시 들어가는 fields의 내용을 확인 후 이슈 생성
+         *** */
         String 프로젝트_아이디 = "";
         String 이슈유형_아이디 = "";
 
@@ -166,7 +145,34 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
             throw new IllegalArgumentException("이슈 생성 필드 확인에 필요한 프로젝트 아이디, 이슈유형 아이디가 존재 하지 않습니다.");
         }
 
-        String 이슈생성_필드확인_지점 = "/rest/api/3/issue/createmeta?expand=projects.issuetypes.fields&projectIds="+ 프로젝트_아이디 +"&issuetypeIds=" +이슈유형_아이디;
+        Set<String> 확인된_이슈생성_필드 = 이슈필드_체크(연결_아이디, 프로젝트_아이디, 이슈유형_아이디);
+
+        if (필드_데이터.getProject() != null && 확인된_이슈생성_필드.contains("project")) {
+            클라우드_필드_데이터.setProject(필드_데이터.getProject());
+        }
+        if (필드_데이터.getIssuetype() != null && 확인된_이슈생성_필드.contains("issuetype")) {
+            클라우드_필드_데이터.setIssuetype(필드_데이터.getIssuetype());
+        }
+        if (필드_데이터.getSummary() != null && 확인된_이슈생성_필드.contains("summary")) {
+            클라우드_필드_데이터.setSummary(필드_데이터.getSummary());
+        }
+        if (필드_데이터.getDescription() != null && 확인된_이슈생성_필드.contains("description")) {
+            클라우드_필드_데이터.setDescription(내용_변환((String) 필드_데이터.getDescription()));
+        }
+        if (필드_데이터.getPriority() != null && 확인된_이슈생성_필드.contains("priority")) {
+            클라우드_필드_데이터.setPriority(필드_데이터.getPriority());
+        }
+
+        지라사용자_데이터 사용자 = 사용자_정보_조회(webClient);
+
+        if (사용자 == null) {
+            로그.info("이슈 생성 필드 확인에 필요한 사용자 데이터가 Null입니다.");
+        }
+        else if (확인된_이슈생성_필드.contains("reporter")) {
+            클라우드_필드_데이터.setReporter(사용자);
+        }
+
+        /*String 이슈생성_필드확인_지점 = "/rest/api/3/issue/createmeta?expand=projects.issuetypes.fields&projectIds="+ 프로젝트_아이디 +"&issuetypeIds=" +이슈유형_아이디;
 
         Map<String, Object> 반환할_이슈생성_필드 = 지라유틸.get(webClient, 이슈생성_필드확인_지점, Map.class).block();
         List<Map<String, Object>> 프로젝트_목록 = null;
@@ -211,7 +217,7 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
 
         if (우선순위_유무 && 필드_데이터.getPriority() != null) {
             클라우드_필드_데이터.setPriority(필드_데이터.getPriority());
-        }
+        }*/
 
         입력_데이터.setFields(클라우드_필드_데이터);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -709,4 +715,65 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
             return null;
         }
     }
+
+    public Set<String> 이슈필드_체크(Long 연결_아이디, String 프로젝트_아이디, String 이슈유형_아이디) {
+
+        로그.info("이슈필드_체크");
+
+        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+        WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
+
+        String 필드확인 = "/rest/api/3/issue/createmeta?expand=projects.issuetypes.fields&projectIds="+ 프로젝트_아이디 +"&issuetypeIds=" + 이슈유형_아이디;
+
+        String 가능한_이슈_필드 = 지라유틸.get(webClient, 필드확인, String.class).block();
+        로그.info("가능한 이슈 필드: " + 가능한_이슈_필드);
+
+        Set<String> 확인된_필드 = new HashSet<>();
+
+        // JSON 문자열을 JSONObject로 변환
+        JSONObject json = new JSONObject(가능한_이슈_필드);
+
+        // "projects" 배열 가져오기
+        JSONArray projects = json.getJSONArray("projects");
+
+        // 각 프로젝트의 "fields" 요소 출력
+        for (int i = 0; i < projects.length(); i++) {
+            JSONObject project = projects.getJSONObject(i);
+            JSONArray issuetypes = project.getJSONArray("issuetypes");
+
+            for (int j = 0; j < issuetypes.length(); j++) {
+                JSONObject issueType = issuetypes.getJSONObject(j);
+                JSONObject fields = issueType.getJSONObject("fields");
+
+                // 필드 확인
+                if (fields.has("project")) {
+                    //System.out.println("project");
+                    확인된_필드.add("project");
+                }
+                if (fields.has("issuetype")) {
+                    //System.out.println("issuetype");
+                    확인된_필드.add("issuetype");
+                }
+                if (fields.has("summary")) {
+                    //System.out.println("summary");
+                    확인된_필드.add("summary");
+                }
+                if (fields.has("description")) {
+                    //System.out.println("description");
+                    확인된_필드.add("description");
+                }
+                if (fields.has("priority")) {
+                    //System.out.println("priority");
+                    확인된_필드.add("priority");
+                }
+                if (fields.has("reporter")) {
+                    //System.out.println("reporter");
+                    확인된_필드.add("reporter");
+                }
+            }
+        }
+
+        return 확인된_필드;
+    }
+
 }
