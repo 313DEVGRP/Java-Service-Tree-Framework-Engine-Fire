@@ -27,6 +27,13 @@ spring:
 
 jira:
   api:
+    fields:
+      project: project
+      issuetype: issuetype
+      summary: summary
+      description: description
+      reporter: reporter
+      priority: priority
     parameter:
       maxResults: 50
       fields: fields=project,issuetype,creator,reporter,assignee,labels,priority,status,resolution,resolutiondate,created,updated,worklogs,timespent,summary
@@ -36,6 +43,7 @@ jira:
         subtask: issue in linkedIssues({이슈키})
         linkedIssue: parent={이슈키}
     endpoint:
+      createmeta: /rest/api/3/issue/createmeta/{프로젝트아이디_또는_키}/issuetypes/{이슈유형아이디_또는_키}
       search: /rest/api/3/search
       issue:
         full:

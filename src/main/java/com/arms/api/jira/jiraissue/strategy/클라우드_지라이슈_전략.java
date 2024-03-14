@@ -441,26 +441,30 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
 
         if (필드_메타데이터_목록.containsKey(지라API_정보.getFields().getProject())
                                     && 지라이슈생성필드_데이터.getProject() != null) {
+
             클라우드_지라이슈필드_데이터.setProject(지라이슈생성필드_데이터.getProject());
             필드_메타데이터_목록.remove(지라API_정보.getFields().getProject());
         }
 
         if (필드_메타데이터_목록.containsKey(지라API_정보.getFields().getIssuetype())
                                     && 지라이슈생성필드_데이터.getIssuetype() != null) {
+
             클라우드_지라이슈필드_데이터.setIssuetype(지라이슈생성필드_데이터.getIssuetype());
             필드_메타데이터_목록.remove(지라API_정보.getFields().getIssuetype());
         }
 
         if (필드_메타데이터_목록.containsKey(지라API_정보.getFields().getSummary())
                                     && 지라이슈생성필드_데이터.getSummary() != null) {
+
             클라우드_지라이슈필드_데이터.setSummary(지라이슈생성필드_데이터.getSummary());
-            필드_메타데이터_목록.remove(지라API_정보.getFields().getIssuetype());
+            필드_메타데이터_목록.remove(지라API_정보.getFields().getSummary());
         }
 
         if (필드_메타데이터_목록.containsKey(지라API_정보.getFields().getDescription())
                                     && 지라이슈생성필드_데이터.getDescription() != null) {
+
             클라우드_지라이슈필드_데이터.setDescription(내용_변환(지라이슈생성필드_데이터.getDescription()));
-            필드_메타데이터_목록.remove(지라API_정보.getFields().getIssuetype());
+            필드_메타데이터_목록.remove(지라API_정보.getFields().getDescription());
         }
 
         if (필드_메타데이터_목록.containsKey(지라API_정보.getFields().getReporter())) {
@@ -482,8 +486,9 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
 
         if (필드_메타데이터_목록.containsKey(지라API_정보.getFields().getPriority())
                                      && 지라이슈생성필드_데이터.getPriority() != null) {
+
             클라우드_지라이슈필드_데이터.setPriority(지라이슈생성필드_데이터.getPriority());
-            필드_메타데이터_목록.remove(지라API_정보.getFields().getIssuetype());
+            필드_메타데이터_목록.remove(지라API_정보.getFields().getPriority());
         }
 
         /***
