@@ -82,8 +82,8 @@ public class 클라우드_지라프로젝트_전략 implements 지라프로젝�
                     throw new IllegalArgumentException(에러코드.프로젝트_조회_오류.getErrorMsg());
                 }
                 else if (클라우드_지라프로젝트_전체_데이터.getValues() == null || 클라우드_지라프로젝트_전체_데이터.getValues().size() == 0) {
-                    로그.error("클라우드 프로젝트 목록이 없습니다.");
-                    throw new IllegalArgumentException(에러코드.프로젝트_조회_오류.getErrorMsg());
+                    로그.info("클라우드 프로젝트 목록이 없습니다.");
+                    return 반환할_프로젝트_데이터_목록;
                 }
 
                 반환할_프로젝트_데이터_목록.addAll(클라우드_지라프로젝트_전체_데이터.getValues());
