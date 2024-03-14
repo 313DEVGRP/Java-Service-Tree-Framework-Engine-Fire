@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 
 import com.arms.api.engine.services.지라이슈_대시보드_서비스;
 import com.arms.api.engine.services.플루언트디_서비스;
-import com.arms.api.engine.repositories.플루언트디_저장소;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
 
 import lombok.extern.slf4j.Slf4j;
@@ -137,7 +136,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     }
 
     @GetMapping("/normal-version-only/{pdServiceId}")
-    public ResponseEntity<검색결과_목록_메인> 일반_버전필터_작업자별_검색(@PathVariable Long pdServiceId,
+    public ResponseEntity<검색결과_목록_메인> 일반_버전필터_집계(@PathVariable Long pdServiceId,
                                                  @RequestParam List<Long> pdServiceVersionLinks,
                                                     지라이슈_단순_집계_요청 지라이슈_단순_검색_요청) {
         EsQuery esQuery
@@ -202,17 +201,6 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
                 .bool(new TermQueryMust("pdServiceId",pdServiceId));
 
         검색결과_목록_메인 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(지라이슈_일반_집계_요청, esQuery));
-        return ResponseEntity.ok(집계결과_가져오기);
-    }
-
-    @GetMapping("/isreq-normal/{pdServiceId}")
-    public ResponseEntity<검색결과_목록_메인> 요구사항_일반_검색(@PathVariable Long pdServiceId, 지라이슈_일반_집계_요청 지라이슈_일반_집계_요청) {
-
-        EsQuery esQuery
-            = new EsQueryBuilder()
-                .bool(new TermQueryMust("pdServiceId",pdServiceId));
-
-        검색결과_목록_메인 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(크기별_집계_요청.of(지라이슈_일반_집계_요청, esQuery));
         return ResponseEntity.ok(집계결과_가져오기);
     }
 
