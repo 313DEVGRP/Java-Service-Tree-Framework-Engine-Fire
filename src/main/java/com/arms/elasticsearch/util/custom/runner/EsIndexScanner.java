@@ -38,7 +38,7 @@ public class EsIndexScanner implements CommandLineRunner {
 	public void run(String... args) throws Exception {
 
 		Set<String> annotatedClasses
-			= this.findAnnotatedClasses(ElasticSearchIndex.class, "com.*");
+			= this.findAnnotatedClasses(ElasticSearchIndex.class, "com.arms.*");
 
 		annotatedClasses.stream().map(clazz -> {
 				try {
