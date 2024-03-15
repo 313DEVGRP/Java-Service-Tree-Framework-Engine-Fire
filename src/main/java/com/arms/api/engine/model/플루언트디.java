@@ -1,4 +1,4 @@
-package com.arms.api.engine.models;
+package com.arms.api.engine.model;
 
 
 import com.arms.api.engine.repositories.인덱스자료;
@@ -13,7 +13,6 @@ import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
-import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

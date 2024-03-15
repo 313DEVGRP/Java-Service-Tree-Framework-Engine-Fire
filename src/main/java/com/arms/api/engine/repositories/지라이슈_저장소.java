@@ -1,6 +1,6 @@
 package com.arms.api.engine.repositories;
 
-import com.arms.api.engine.models.지라이슈;
+import com.arms.api.engine.model.지라이슈;
 import com.arms.elasticsearch.util.query.EsQuery;
 import com.arms.elasticsearch.util.query.EsQueryBuilder;
 import com.arms.elasticsearch.util.query.bool.TermQueryMust;

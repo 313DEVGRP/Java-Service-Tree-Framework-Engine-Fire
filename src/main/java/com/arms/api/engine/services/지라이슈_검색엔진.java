@@ -1,7 +1,7 @@
 package com.arms.api.engine.services;
 
-import com.arms.api.engine.models.지라이슈;
-import com.arms.api.engine.models.지라이슈_생성;
+import com.arms.api.engine.model.지라이슈;
+import com.arms.api.engine.model.지라이슈_생성;
 import com.arms.api.engine.repositories.인덱스자료;
 import com.arms.api.engine.repositories.지라이슈_저장소;
 import com.arms.api.engine.vo.히트맵날짜데이터;

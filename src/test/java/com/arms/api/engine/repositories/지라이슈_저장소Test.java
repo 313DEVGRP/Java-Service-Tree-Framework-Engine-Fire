@@ -1,18 +1,11 @@
 package com.arms.api.engine.repositories;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.arms.api.engine.models.지라이슈;
+import com.arms.api.engine.model.지라이슈;
 
 @ActiveProfiles("dev")
 @SpringBootTest

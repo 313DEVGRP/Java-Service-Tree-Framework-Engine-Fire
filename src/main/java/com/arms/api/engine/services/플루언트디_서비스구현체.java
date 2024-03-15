@@ -1,15 +1,14 @@
 package com.arms.api.engine.services;
 
-import com.arms.api.engine.dtos.검색어_검색결과;
-import com.arms.api.engine.dtos.검색어_기본_검색_요청;
-import com.arms.api.engine.dtos.검색어_날짜포함_검색_요청;
-import com.arms.api.engine.models.플루언트디;
+import com.arms.api.engine.dto.검색어_검색결과;
+import com.arms.api.engine.dto.검색어_기본_검색_요청;
+import com.arms.api.engine.dto.검색어_날짜포함_검색_요청;
+import com.arms.api.engine.model.플루언트디;
 import com.arms.api.engine.repositories.플루언트디_저장소;
 import com.arms.elasticsearch.util.query.EsQuery;
 import com.arms.elasticsearch.util.query.EsQueryBuilder;
 import com.arms.elasticsearch.util.query.bool.QueryStringMust;
 import com.arms.elasticsearch.util.query.bool.RangeQueryFilter;
-import com.arms.elasticsearch.util.query.query_string.QueryString;
 import com.arms.elasticsearch.util.query.sort.SortBy;
 import com.arms.elasticsearch.util.query.일반_검색_요청;
 import com.arms.elasticsearch.util.query.정렬_요청;
@@ -17,18 +16,12 @@ import com.arms.elasticsearch.util.query.정렬_요청;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.search.sort.FieldSortBuilder;
-import org.elasticsearch.search.sort.SortBuilders;
-import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 @Slf4j

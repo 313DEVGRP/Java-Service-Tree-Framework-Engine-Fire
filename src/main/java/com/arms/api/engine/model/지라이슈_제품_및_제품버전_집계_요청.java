@@ -1,10 +1,8 @@
-package com.arms.api.engine.models;
+package com.arms.api.engine.model;
 
 import com.arms.elasticsearch.util.base.기본_집계_요청;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
 
 @Getter
 @Setter

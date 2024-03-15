@@ -1,9 +1,6 @@
-package com.arms.api.engine.dtos;
+package com.arms.api.engine.dto;
 
-import com.arms.api.engine.models.지라이슈;
 import lombok.*;
-
-import java.util.Objects;
 
 @Getter
 @Setter

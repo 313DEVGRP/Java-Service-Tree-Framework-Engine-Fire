@@ -3,14 +3,12 @@ package com.arms.elasticsearch.repositories;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.arms.api.engine.models.지라이슈;
 import com.arms.api.engine.repositories.지라이슈_저장소;
 
 @SpringBootTest

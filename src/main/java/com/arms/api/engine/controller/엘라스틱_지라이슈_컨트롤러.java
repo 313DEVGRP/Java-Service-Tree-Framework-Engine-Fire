@@ -1,11 +1,9 @@
-package com.arms.api.engine.controllers;
+package com.arms.api.engine.controller;
 
-import com.arms.api.engine.models.지라이슈;
+import com.arms.api.engine.model.지라이슈;
 import com.arms.api.engine.services.지라이슈_서비스;
 import com.arms.api.engine.vo.히트맵데이터;
 import com.arms.api.jira.jiraissue.service.지라이슈_전략_호출;
-import com.arms.api.engine.repositories.인덱스자료;
-import com.arms.elasticsearch.util.검색결과_목록_메인;
 import com.arms.elasticsearch.util.검색조건;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;

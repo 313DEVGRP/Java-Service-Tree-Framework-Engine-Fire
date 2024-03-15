@@ -1,6 +1,6 @@
 package com.arms.api.engine.repositories;
 
-import com.arms.api.engine.models.플루언트디;
+import com.arms.api.engine.model.플루언트디;
 import com.arms.elasticsearch.util.repository.공통저장소;
 import org.springframework.stereotype.Repository;
 

@@ -1,4 +1,4 @@
-package com.arms.api.engine.models;
+package com.arms.api.engine.model;
 
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.arms.api.engine.models;
+package com.arms.api.engine.model;
 
 import com.arms.api.jira.jiraissue.model.지라이슈_데이터;
 
