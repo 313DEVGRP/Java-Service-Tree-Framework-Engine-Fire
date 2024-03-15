@@ -1,32 +1,21 @@
 package com.arms.api.jira.jiraissue.strategy;
 
-import com.arms.api.jira.jiraissue.model.지라사용자_데이터;
-import com.arms.api.jira.jiraissue.model.지라이슈워크로그_데이터;
-import com.arms.api.jira.jiraissue.model.클라우드_지라이슈필드_데이터;
-import com.arms.api.jira.jiraissue.model.지라이슈_데이터;
-import com.arms.api.jira.jiraissue.model.지라이슈생성_데이터;
-import com.arms.api.jira.jiraissue.model.지라이슈생성필드_데이터;
-import com.arms.api.jira.jiraissue.model.지라이슈전체워크로그_데이터;
-import com.arms.api.jira.jiraissue.model.지라이슈조회_데이터;
-import com.arms.api.jira.jiraissue.model.클라우드_지라이슈생성_데이터;
-import com.arms.api.jira.utils.지라API_정보;
+import com.arms.api.jira.jiraissue.model.*;
 import com.arms.api.jira.utils.에러로그_유틸;
+import com.arms.api.jira.utils.지라API_정보;
 import com.arms.api.serverinfo.model.서버정보_데이터;
-import com.arms.errors.codes.에러코드;
 import com.arms.api.serverinfo.service.서버정보_서비스;
+import com.arms.errors.codes.에러코드;
 import com.arms.utils.지라유틸;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
@@ -102,11 +91,10 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
         }
     }
 
-    /* ***
-     * 수정사항: null 체크하여 에러 처리 필요
-     *** */
-    @Override
-    public 지라이슈_데이터 이슈_생성하기(Long 연결_아이디, 지라이슈생성_데이터 지라이슈생성_데이터) throws JsonProcessingException {
+    /****
+     * 기존 이슈 생성하기  이슈_생성하기 2024-03-15로 백업
+     ****/
+ /*   public 지라이슈_데이터 이슈_생성하기_기존버전(Long 연결_아이디, 지라이슈생성_데이터 지라이슈생성_데이터) throws JsonProcessingException {
 
         로그.info("클라우드 지라 이슈 생성하기");
 
@@ -146,9 +134,6 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
             클라우드_필드_데이터.setReporter(사용자);
         }
 
-        /* ***
-        * 프로젝트 와 이슈 유형에 따라 이슈 생성 시 들어가는 fields의 내용을 확인하는 부분(현재 priority만 적용)
-        *** */
         String 프로젝트_아이디 = "";
         String 이슈유형_아이디 = "";
 
@@ -243,6 +228,7 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
 
         return 반환할_지라이슈_데이터;
     }
+*/
 
     @Override
     public Map<String, Object> 이슈_수정하기(Long 연결_아이디, String 이슈_키_또는_아이디, 지라이슈생성_데이터 지라이슈생성_데이터) {
@@ -397,7 +383,6 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
                 .displayName(사용자_정보.getDisplayName())
                 .build();
     }
-
 
     @Override
     public 지라이슈_데이터 이슈_상세정보_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) {
@@ -708,5 +693,202 @@ public class 클라우드_지라이슈_전략 implements 지라이슈_전략 {
             에러로그_유틸.예외로그출력(e, this.getClass().getName(), "증분서브테스크_가져오기");
             return null;
         }
+    }
+
+    @Override
+    public 지라이슈_데이터 이슈_생성하기(Long 연결_아이디, 지라이슈생성_데이터 지라이슈생성_데이터) {
+
+        로그.info("클라우드 지라 이슈 생성하기2");
+
+        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+        WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
+
+        지라이슈생성필드_데이터 이슈생성필드_데이터 = 지라이슈생성_데이터.getFields();
+
+        if (이슈생성필드_데이터 == null) {
+            throw new IllegalArgumentException(에러코드.요청본문_오류체크.getErrorMsg());
+        }
+
+        String 프로젝트_아이디 = "";
+        String 이슈유형_아이디 = "";
+
+        if (지라이슈생성_데이터.getFields().getProject() != null &&
+                지라이슈생성_데이터.getFields().getProject().getId() != null &&
+                !지라이슈생성_데이터.getFields().getProject().getId().isEmpty()) {
+            프로젝트_아이디 = 지라이슈생성_데이터.getFields().getProject().getId();
+        }
+
+        if (지라이슈생성_데이터.getFields().getIssuetype() != null &&
+                지라이슈생성_데이터.getFields().getIssuetype().getId() != null
+                && !지라이슈생성_데이터.getFields().getIssuetype().getId().isEmpty()) {
+            이슈유형_아이디 = 지라이슈생성_데이터.getFields().getIssuetype().getId();
+        }
+
+        if (프로젝트_아이디.isEmpty() || 이슈유형_아이디.isEmpty()) {
+            throw new IllegalArgumentException("이슈 생성 필드 확인에 필요한 프로젝트 아이디, 이슈유형 아이디가 존재 하지 않습니다.");
+        }
+
+        /* ***
+         * 프로젝트 와 이슈 유형에 따라 이슈 생성 시 들어가는 fields의 내용을 확인하는 부분(현재 priority만 적용)
+         *** */
+        클라우드_지라이슈생성_데이터 입력_데이터 = new 클라우드_지라이슈생성_데이터();
+        클라우드_지라이슈필드_데이터 클라우드_필드_데이터;
+
+        Map<String, 클라우드_이슈생성필드_메타데이터.필드_메타데이터> 필드_메타데이터_목록
+                = 필드_메타데이터_확인하기(webClient, 프로젝트_아이디, 이슈유형_아이디);
+        클라우드_필드_데이터 = 필드검증_및_추가하기(webClient, 이슈생성필드_데이터, 필드_메타데이터_목록);
+
+        입력_데이터.setFields(클라우드_필드_데이터);
+
+        String endpoint = "/rest/api/3/issue";
+        지라이슈_데이터 반환할_지라이슈_데이터;
+        try {
+            반환할_지라이슈_데이터 = 지라유틸.post(webClient, endpoint, 입력_데이터, 지라이슈_데이터.class).block();
+            로그.info("클라우드 지라 프로젝트 : {}, 이슈유형 : {}, 생성 필드 : {}, 이슈 생성하기"
+                    , 프로젝트_아이디, 이슈유형_아이디, 입력_데이터.toString());
+        }
+        catch (Exception e) {
+            로그.error("클라우드 지라 프로젝트 : {}, 이슈유형 : {}, 생성 필드 : {}, 이슈 생성하기 중 오류"
+                    , 프로젝트_아이디, 이슈유형_아이디, 입력_데이터.toString());
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(), "이슈 생성하기");
+            throw new IllegalArgumentException("이슈 생성 중 오류 :: " + 에러로그);
+        }
+
+        if (반환할_지라이슈_데이터 == null) {
+            로그.error("이슈 생성에 실패하였습니다.");
+            return null;
+        }
+
+        return 반환할_지라이슈_데이터;
+    }
+
+    public Map<String, 클라우드_이슈생성필드_메타데이터.필드_메타데이터> 필드_메타데이터_확인하기(WebClient webClient, String 프로젝트_아이디, String 이슈유형_아이디) {
+        String 필드확인endpoint = 지라API_정보.프로젝트키_대체하기(
+                지라API_정보.getEndpoint().getCreatemeta(), 프로젝트_아이디);
+        필드확인endpoint = 지라API_정보.이슈유형키_대체하기(필드확인endpoint, 이슈유형_아이디);
+
+        int 검색_시작_지점 = 0;
+        int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
+        boolean isLast = false;
+
+        List<클라우드_이슈생성필드_메타데이터.필드_메타데이터> 메타데이터_목록 = new ArrayList<>(); // 이슈 저장
+
+        클라우드_이슈생성필드_메타데이터 클라우드_이슈생성필드_메타데이터;
+        try {
+            while (!isLast) {
+                String endpoint = 필드확인endpoint +
+                        "?startAt=" + 검색_시작_지점 + "&maxResults=" + 최대_검색수;
+
+                클라우드_이슈생성필드_메타데이터
+                        = 지라유틸.get(webClient, endpoint, 클라우드_이슈생성필드_메타데이터.class).block();
+
+                if (클라우드_이슈생성필드_메타데이터 == null) {
+                    로그.info("클라우드 지라 클라우드 프로젝트 : {}, 이슈유형 : {}, 이슈생성필드_메타데이터 목록이 없습니다."
+                            , 프로젝트_아이디, 이슈유형_아이디);
+                    return null;
+                }
+                else if (클라우드_이슈생성필드_메타데이터.getFields() == null || 클라우드_이슈생성필드_메타데이터.getFields().size() == 0) {
+                    로그.info("클라우드 지라 클라우드 프로젝트 : {}, 이슈유형 : {}, 이슈생성필드_메타데이터 목록이 없습니다."
+                            , 프로젝트_아이디, 이슈유형_아이디);
+                    return null;
+                }
+
+                메타데이터_목록.addAll(클라우드_이슈생성필드_메타데이터.getFields());
+
+                if (클라우드_이슈생성필드_메타데이터.getTotal() == 메타데이터_목록.size()) {
+                    isLast = true;
+                } else {
+                    검색_시작_지점 += 최대_검색수;
+                }
+            }
+        }
+        catch (Exception e) {
+            로그.error("클라우드 지라 프로젝트 : {}, 이슈유형 : {}, 이슈생성필드_메타데이터 확인하기 중 오류"
+                    , 프로젝트_아이디, 이슈유형_아이디);
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(), "필드_메타데이터 확인하기");
+            throw new IllegalArgumentException("필드 메타데이터 조회 중 오류 :: " + 에러로그);
+        }
+
+        Map<String, 클라우드_이슈생성필드_메타데이터.필드_메타데이터> 필드맵 = 메타데이터_목록.stream()
+                .collect(Collectors.toMap(com.arms.api.jira.jiraissue.model.클라우드_이슈생성필드_메타데이터.필드_메타데이터::getFieldId, field -> field));
+
+        return 필드맵;
+    }
+
+    public 클라우드_지라이슈필드_데이터 필드검증_및_추가하기(WebClient webClient,
+                                       지라이슈생성필드_데이터 지라이슈생성필드_데이터,
+                                       Map<String, 클라우드_이슈생성필드_메타데이터.필드_메타데이터> 필드_메타데이터_목록) {
+
+        if (필드_메타데이터_목록 == null) {
+            로그.error("필드 메타데이터 목록이 null입니다.");
+            throw new IllegalArgumentException("필수필드 확인 및 추가 중 오류 :: 필드 메타데이터 목록이 null입니다.");
+        }
+
+        클라우드_지라이슈필드_데이터 클라우드_지라이슈필드_데이터 = new 클라우드_지라이슈필드_데이터();
+
+        if (필드_메타데이터_목록.containsKey(지라API_정보.getFields().getProject())
+                && 지라이슈생성필드_데이터.getProject() != null) {
+
+            클라우드_지라이슈필드_데이터.setProject(지라이슈생성필드_데이터.getProject());
+            필드_메타데이터_목록.remove(지라API_정보.getFields().getProject());
+        }
+
+        if (필드_메타데이터_목록.containsKey(지라API_정보.getFields().getIssuetype())
+                && 지라이슈생성필드_데이터.getIssuetype() != null) {
+
+            클라우드_지라이슈필드_데이터.setIssuetype(지라이슈생성필드_데이터.getIssuetype());
+            필드_메타데이터_목록.remove(지라API_정보.getFields().getIssuetype());
+        }
+
+        if (필드_메타데이터_목록.containsKey(지라API_정보.getFields().getSummary())
+                && 지라이슈생성필드_데이터.getSummary() != null) {
+
+            클라우드_지라이슈필드_데이터.setSummary(지라이슈생성필드_데이터.getSummary());
+            필드_메타데이터_목록.remove(지라API_정보.getFields().getSummary());
+        }
+
+        if (필드_메타데이터_목록.containsKey(지라API_정보.getFields().getDescription())
+                && 지라이슈생성필드_데이터.getDescription() != null) {
+
+            클라우드_지라이슈필드_데이터.setDescription(내용_변환(지라이슈생성필드_데이터.getDescription()));
+            필드_메타데이터_목록.remove(지라API_정보.getFields().getDescription());
+        }
+
+        if (필드_메타데이터_목록.containsKey(지라API_정보.getFields().getReporter())) {
+            /***
+             * reporter 필드는 필수 여부와 상관없이 추가하지 않아도 API를 요청한 사용자로 자동으로 추가된다.
+             ***/
+//            클라우드_이슈생성필드_메타데이터.필드_메타데이터 reporter
+//                                = 필드_메타데이터_목록.get(지라API_정보.getFields().getReporter());
+//            if (reporter.isRequired() && 지라이슈생성필드_데이터.getReporter() != null) {
+//                지라사용자_데이터 사용자 = 사용자_정보_조회(webClient);
+//                if (사용자 == null) {
+//                    로그.info("이슈 생성 필드 확인에 필요한 사용자 데이터가 Null입니다.");
+//                } else {
+//                    클라우드_지라이슈필드_데이터.setReporter(사용자);
+//                }
+//            }
+            필드_메타데이터_목록.remove(지라API_정보.getFields().getReporter());
+        }
+
+        if (필드_메타데이터_목록.containsKey(지라API_정보.getFields().getPriority())
+                && 지라이슈생성필드_데이터.getPriority() != null) {
+
+            클라우드_지라이슈필드_데이터.setPriority(지라이슈생성필드_데이터.getPriority());
+            필드_메타데이터_목록.remove(지라API_정보.getFields().getPriority());
+        }
+
+        /***
+         * A-RMS에서 지원하는 필드 메타데이터 목록을 모두 remove 시킨 후 필수로 지정된 필드가 있을 경우 오류 반환
+         ***/
+        필드_메타데이터_목록.forEach((key, 필드_메타) -> {
+            if (필드_메타.isRequired()) {
+                로그.error("필드 메타데이터 목록 중 오류 :: {} 필드가 필수로 지정되어있습니다. A-RMS에서 지원하지 않는 필드입니다.", key);
+                throw new IllegalArgumentException("필수필드 확인 및 추가 중 오류 :: " + key +
+                        " 필드가 필수로 지정되어있습니다. A-RMS에서 지원하지 않는 필드입니다.");
+            }
+        });
+
+        return 클라우드_지라이슈필드_데이터;
     }
 }
