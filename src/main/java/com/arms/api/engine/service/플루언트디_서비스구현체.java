@@ -1,4 +1,4 @@
-package com.arms.api.engine.services;
+package com.arms.api.engine.service;
 
 import com.arms.api.engine.dto.검색어_검색결과;
 import com.arms.api.engine.dto.검색어_기본_검색_요청;

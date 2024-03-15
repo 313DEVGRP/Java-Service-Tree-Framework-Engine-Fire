@@ -1,4 +1,4 @@
-package com.arms.api.engine.services;
+package com.arms.api.engine.service;
 
 import com.arms.api.engine.model.지라이슈;
 import com.arms.api.engine.model.지라이슈_생성;

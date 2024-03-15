@@ -1,4 +1,4 @@
-package com.arms.api.engine.services;
+package com.arms.api.engine.service;
 
 import java.util.List;
 import java.util.Map;

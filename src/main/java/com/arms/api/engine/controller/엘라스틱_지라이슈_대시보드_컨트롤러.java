@@ -15,8 +15,8 @@ import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.arms.api.engine.services.지라이슈_대시보드_서비스;
-import com.arms.api.engine.services.플루언트디_서비스;
+import com.arms.api.engine.service.지라이슈_대시보드_서비스;
+import com.arms.api.engine.service.플루언트디_서비스;
 import com.arms.elasticsearch.util.검색결과_목록_메인;
 
 import lombok.extern.slf4j.Slf4j;
