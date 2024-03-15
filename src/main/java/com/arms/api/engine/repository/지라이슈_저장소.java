@@ -1,4 +1,4 @@
-package com.arms.api.engine.repositories;
+package com.arms.api.engine.repository;
 
 import com.arms.api.engine.model.지라이슈;
 import com.arms.elasticsearch.util.query.EsQuery;

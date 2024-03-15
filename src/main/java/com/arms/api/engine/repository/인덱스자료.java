@@ -1,4 +1,4 @@
-package com.arms.api.engine.repositories;
+package com.arms.api.engine.repository;
 
 public final  class 인덱스자료 {
 

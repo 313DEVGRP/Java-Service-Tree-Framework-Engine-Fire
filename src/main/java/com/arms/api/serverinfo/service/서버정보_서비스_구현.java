@@ -1,6 +1,6 @@
 package com.arms.api.serverinfo.service;
 
-import com.arms.api.engine.repositories.지라이슈_저장소;
+import com.arms.api.engine.repository.지라이슈_저장소;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.model.서버정보_엔티티;
 import com.arms.errors.codes.에러코드;
@@ -20,7 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import com.arms.api.serverinfo.repositories.서버정보_저장소;
+import com.arms.api.serverinfo.repository.서버정보_저장소;
 import com.arms.utils.external_communicate.백엔드통신기;
 
 @Slf4j

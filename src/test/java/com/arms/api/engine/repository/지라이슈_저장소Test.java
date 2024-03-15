@@ -1,4 +1,4 @@
-package com.arms.api.engine.repositories;
+package com.arms.api.engine.repository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

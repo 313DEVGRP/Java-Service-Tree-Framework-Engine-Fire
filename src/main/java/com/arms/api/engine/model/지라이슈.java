@@ -1,6 +1,6 @@
 package com.arms.api.engine.model;
 
-import com.arms.api.engine.repositories.인덱스자료;
+import com.arms.api.engine.repository.인덱스자료;
 import com.arms.elasticsearch.util.custom.index.ElasticSearchIndex;
 import com.arms.elasticsearch.util.custom.index.Recent;
 import com.arms.elasticsearch.util.custom.index.RollingIndexName;

@@ -4,7 +4,7 @@ import com.arms.api.engine.dto.검색어_검색결과;
 import com.arms.api.engine.dto.검색어_기본_검색_요청;
 import com.arms.api.engine.dto.검색어_날짜포함_검색_요청;
 import com.arms.api.engine.model.플루언트디;
-import com.arms.api.engine.repositories.플루언트디_저장소;
+import com.arms.api.engine.repository.플루언트디_저장소;
 import com.arms.elasticsearch.util.query.EsQuery;
 import com.arms.elasticsearch.util.query.EsQueryBuilder;
 import com.arms.elasticsearch.util.query.bool.QueryStringMust;
