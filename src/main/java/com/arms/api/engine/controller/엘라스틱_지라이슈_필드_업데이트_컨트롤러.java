@@ -29,21 +29,19 @@ public class 엘라스틱_지라이슈_필드_업데이트_컨트롤러 {
 
 	@PostMapping("/c_req_link")
 	public ResponseEntity<ApiResult<String>> cReqLink_수정(
-			@RequestBody List<UpdateReqLinkDTO> updateReqLinkDTOs
+			@RequestBody UpdateReqLinkDTO updateReqLinkDTOs
 	) {
 
-		for (UpdateReqLinkDTO updateReqLinkDTO : updateReqLinkDTOs) {
 			SearchHits<지라이슈> 지라이슈들 = 지라이슈_저장소.search(
 				new NativeSearchQueryBuilder()
-					.withQuery(QueryBuilders.termQuery("id", updateReqLinkDTO.getConnectInfo()))
+					.withQuery(QueryBuilders.termQuery("id", updateReqLinkDTOs.getConnectInfo()))
 					.build());
 
 			for (SearchHit<지라이슈> 지라이슈 : 지라이슈들) {
 				지라이슈 content = 지라이슈.getContent();
-				content.setCReqLink(updateReqLinkDTO.getReqLink());
+				content.setCReqLink(updateReqLinkDTOs.getReqLink());
 				지라이슈_저장소.updateSave(content,지라이슈.getIndex());
 			}
-		}
 
 
 		return ResponseEntity.ok(success("OK"));
