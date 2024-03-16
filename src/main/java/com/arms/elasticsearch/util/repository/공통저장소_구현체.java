@@ -1,5 +1,6 @@
 package com.arms.elasticsearch.util.repository;
 
+import com.arms.api.engine.model.지라이슈;
 import com.arms.elasticsearch.util.custom.index.ElasticSearchIndex;
 import com.arms.elasticsearch.util.custom.index.Recent;
 import com.arms.elasticsearch.util.custom.index.RollingIndexName;
@@ -31,14 +32,11 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.lang.reflect.Field;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.*;
-import static org.apache.commons.lang3.StringUtils.*;
 
 @Slf4j
 public class 공통저장소_구현체<T,ID extends Serializable> extends SimpleElasticsearchRepository<T,ID> implements com.arms.elasticsearch.util.repository.공통저장소<T,ID> {
@@ -71,7 +69,6 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         }
 
         SearchHits<T> search = operations.search(query, entityClass, IndexCoordinates.of(newIndex));
-        System.out.println(search);
         return new 검색결과_목록_메인(operations.search(query,entityClass, IndexCoordinates.of(newIndex)));
     }
 
@@ -378,7 +375,10 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         throw new IllegalArgumentException("인덱스명을 확인해주시길 바랍니다.");
     }
 
-
+    @Override
+    public <S extends T> S updateSave(S entity, String indexName)  {
+        return operations.save(entity,IndexCoordinates.of(indexName));
+    }
 
     ///////////////////증분 저장 모음//////////////////////
     @Override
@@ -390,7 +390,8 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
         Iterable<S> s = this.saveAll(List.of(entity));
         return StreamSupport.stream(s.spliterator() ,false).findFirst().orElseThrow(()->new RuntimeException("저장할 데이터가 없습니다."));
-    };
+    }
+
 
     @Override
     public <S extends T> Iterable<S> saveAll(Iterable<S> entities) {

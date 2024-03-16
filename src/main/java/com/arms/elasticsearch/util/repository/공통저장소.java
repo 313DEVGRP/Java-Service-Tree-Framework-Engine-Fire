@@ -31,6 +31,8 @@ public interface 공통저장소<T,ID extends Serializable> extends Elasticsearc
 
 	List<T> normalSearch(Query query, String newIndex);
 
+	<S extends T> S updateSave(S entity, String indexName) ;
+
 	SearchHits<T> search(Query query);
 
 	List<T>  getAllCreatedSince(Date date, Class<T> clazz);

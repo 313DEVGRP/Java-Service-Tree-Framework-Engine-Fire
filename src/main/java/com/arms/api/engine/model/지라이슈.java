@@ -121,6 +121,9 @@ public class 지라이슈 {
     @Field(type = FieldType.Text, name = "pdServiceId", fielddata = true)
     private Long pdServiceId;
 
+    @Field(type = FieldType.Long, name = "cReqLink")
+    private Long cReqLink ;
+
     @Field(type = FieldType.Long, name = "pdServiceVersions")
     private Long[] pdServiceVersions;
 
