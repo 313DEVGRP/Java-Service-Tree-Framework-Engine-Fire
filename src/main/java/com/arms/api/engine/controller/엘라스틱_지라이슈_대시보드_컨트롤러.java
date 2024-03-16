@@ -350,4 +350,24 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         검색어_검색결과<SearchHit<플루언트디>> 검색결과_목록 = 플루언트디_서비스.플루언트디_날짜포함_검색(검색어_날짜포함_검색_요청);
         return ResponseEntity.ok(검색결과_목록);
     }
+
+
+    @GetMapping("/search/log-aggs-top5/with-date")
+    public ResponseEntity<검색결과_목록_메인> 검색엔진_플루언트디_로그네임_집계_top5(@RequestParam("search_string") String 검색어,
+                                                      @RequestParam(value = "from",required = false) String 시작_날짜,
+                                                      @RequestParam(value = "to",  required = false) String 끝_날짜) {
+        log.info("[엘라스틱_지라이슈_대시보드_컨트롤러 :: 검색엔진_플루언트디_로그네임_집계_top5]");
+        검색어_집계_요청 집계_요청 = new 검색어_집계_요청();
+        집계_요청.set검색어(검색어);
+        집계_요청.set시작_날짜(시작_날짜);
+        집계_요청.set끝_날짜(끝_날짜);
+        집계_요청.set컨텐츠보기여부(false);
+        집계_요청.set페이지(0);
+        집계_요청.set크기(5);
+        집계_요청.set메인그룹필드("@log_name");
+
+        검색결과_목록_메인 집계_결과 = 플루언트디_서비스.플루언트디_로그네임_집계(집계_요청);
+
+        return ResponseEntity.ok(집계_결과);
+    }
 }

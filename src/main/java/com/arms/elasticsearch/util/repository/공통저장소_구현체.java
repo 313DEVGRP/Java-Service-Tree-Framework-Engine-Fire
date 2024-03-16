@@ -138,6 +138,31 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         }
     }
 
+    // 전 범위 (Including incremental data)
+    @Override
+    public 검색결과_목록_메인 aggregationSearchAll(Query query) {
+        NativeSearchQuery nativeSearchQuery = queryMerge((NativeSearchQuery)query);
+        return new 검색결과_목록_메인(operations.search(nativeSearchQuery,entityClass));
+    }
+
+    // 전 범위 Query Merge (증분 데이터 포함, Including incremental data)
+    private NativeSearchQuery queryMerge(NativeSearchQuery query) {
+
+        QueryBuilder combinedQuery = QueryBuilders.boolQuery()
+                .filter(query.getQuery());
+
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+                .withQuery(combinedQuery);
+
+
+        Optional.ofNullable(query.getAggregations()).ifPresent(aggs->{
+            aggs.forEach(nativeSearchQueryBuilder::addAggregation);
+        });
+
+        return nativeSearchQueryBuilder.build();
+
+    }
+
     private NativeSearchQuery recentQueryMerge(NativeSearchQuery query) {
         String recentFieldName = fieldInfo(entityClass, Recent.class).getName();
 

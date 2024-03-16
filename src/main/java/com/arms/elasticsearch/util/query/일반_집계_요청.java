@@ -44,7 +44,7 @@ public class 일반_집계_요청 implements 쿼리_추상_팩토리 {
 	@Override
 	public NativeSearchQuery 생성() {
 		BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
-		FieldSortBuilder sort = esQuery.getQuery(new ParameterizedTypeReference<>(){});
+		List<FieldSortBuilder> fieldSortBuilders = esQuery.getQuery(new ParameterizedTypeReference<>(){});
 
 		서브_집계_요청 서브_집계_요청 = new 서브_집계_요청(하위그룹필드들, 크기);
 
@@ -57,9 +57,10 @@ public class 일반_집계_요청 implements 쿼리_추상_팩토리 {
 				nativeSearchQueryBuilder.withQuery(boolQuery);
 			});
 
-		if(sort!=null){
-			nativeSearchQueryBuilder.withSort(sort);
-		}
+		Optional.ofNullable(fieldSortBuilders)
+				.ifPresent(sorts -> {
+					sorts.forEach(nativeSearchQueryBuilder::withSort);
+				});
 
 		Optional.ofNullable(메인그룹필드)
 			.ifPresent(그룹_필드 -> {
