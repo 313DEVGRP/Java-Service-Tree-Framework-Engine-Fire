@@ -53,6 +53,9 @@ public class 엘라스틱_지라이슈_컨트롤러 {
     }
 
 
+    /**
+     * 2024-03-17 사용 여부 체크 필요
+     */
     @ResponseBody
     @RequestMapping(
             value = {"/loadToES/{issueKey}"},
@@ -62,10 +65,11 @@ public class 엘라스틱_지라이슈_컨트롤러 {
                                @PathVariable("issueKey") String 이슈_키,
                                @RequestParam("pdServiceId") Long 제품서비스_아이디,
                                @RequestParam("pdServiceVersions") Long[] 제품서비스_버전_아이디들,
-                                        ModelMap model, HttpServletRequest request) throws Exception {
+                               @RequestParam("cReqLink") Long cReqLink,
+                           ModelMap model, HttpServletRequest request) throws Exception {
         로그.info("지라 이슈_검색엔진_저장");
 
-        return 지라이슈_검색엔진.이슈_검색엔진_저장(지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디들);
+        return 지라이슈_검색엔진.이슈_검색엔진_저장(지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디들, cReqLink);
     }
 
     @ResponseBody
@@ -99,13 +103,14 @@ public class 엘라스틱_지라이슈_컨트롤러 {
                                        @PathVariable("issueKey") String 이슈_키,
                                        @RequestParam("pdServiceId") Long 제품서비스_아이디,
                                        @RequestParam("pdServiceVersions") Long[] 제품서비스_버전_아이디들,
+                                       @RequestParam("cReqLink") Long cReqLink,
                                        ModelMap model, HttpServletRequest request) throws Exception {
 
         // 로그.info(" [ " + this.getClass().getName() + " :: 이슈_검색엔진_벌크_저장 ]" );
         로그.info("지라서버 아이디 : {}\n이슈 키 : {}\n제품서비스 아이디 : {}\n제품서비스 버전 목록 : {}"
                 , 지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디들);
 
-        return 지라이슈_검색엔진.이슈_링크드이슈_서브테스크_벌크로_추가하기(지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디들);
+        return 지라이슈_검색엔진.이슈_링크드이슈_서브테스크_벌크로_추가하기(지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디들, cReqLink);
     }
 
     @ResponseBody
@@ -117,12 +122,13 @@ public class 엘라스틱_지라이슈_컨트롤러 {
                              @PathVariable("issueKey") String 이슈_키,
                              @RequestParam("pdServiceId") Long 제품서비스_아이디,
                              @RequestParam("pdServiceVersions") Long[] 제품서비스_버전_아이디들,
+                             @RequestParam("cReqLink") Long cReqLink,
                              ModelMap model, HttpServletRequest request) throws Exception {
 
         로그.info("지라서버 아이디 : {},\t이슈 키 : {},\t제품서비스 아이디 : {},\t제품서비스 버전 목록 : {}"
                             , 지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디들);
 
-        return 지라이슈_검색엔진.증분이슈_링크드이슈_서브테스크_벌크추가(지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디들);
+        return 지라이슈_검색엔진.증분이슈_링크드이슈_서브테스크_벌크추가(지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디들, cReqLink);
     }
 
     @ResponseBody
