@@ -10,9 +10,12 @@ import static java.util.stream.Collectors.toList;
 
 public class 지라이슈_생성 {
 
-    public static 지라이슈 ELK_데이터로_변환(Long 지라서버_아이디, 지라이슈_데이터 지라이슈_데이터,
-                             boolean 요구사항유형_여부, String 부모_요구사항_키,
-                             Long 제품서비스_아이디, Long[] 제품서비스_버전들) {
+    public static 지라이슈 ELK_데이터로_변환(
+            Long 지라서버_아이디, 지라이슈_데이터 지라이슈_데이터,
+            boolean 요구사항유형_여부, String 부모_요구사항_키,
+            Long 제품서비스_아이디, Long[] 제품서비스_버전들,
+            Long cReqLink
+    ) {
 
         지라이슈.프로젝트 프로젝트 = Optional.ofNullable(지라이슈_데이터.getFields().getProject())
                 .map(project -> 지라이슈.프로젝트.builder()
@@ -142,6 +145,7 @@ public class 지라이슈_생성 {
                 .summary(지라이슈_데이터.getFields().getSummary())
                 .pdServiceId(제품서비스_아이디)
                 .pdServiceVersions(제품서비스_버전들)
+                .cReqLink(cReqLink)
                 .build();
 
         이슈.generateId();
