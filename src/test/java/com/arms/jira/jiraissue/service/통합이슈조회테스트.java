@@ -12,7 +12,7 @@ import com.arms.api.jira.jiraissuestatus.model.지라이슈상태_데이터;
 import com.arms.api.jira.jiraissuestatus.model.클라우드_지라이슈상태_데이터;
 import com.arms.api.jira.jiraissuetype.model.지라이슈유형_데이터;
 import com.arms.api.jira.jirapriority.model.지라이슈우선순위_데이터;
-import com.arms.utils.지라유틸;
+import com.arms.api.jira.utils.지라유틸;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.api.domain.BasicUser;
 import com.atlassian.jira.rest.client.api.domain.Issue;

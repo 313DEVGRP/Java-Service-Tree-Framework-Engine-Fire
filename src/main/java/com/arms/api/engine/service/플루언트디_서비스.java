@@ -5,9 +5,8 @@ import com.arms.api.engine.dto.검색어_기본_검색_요청;
 import com.arms.api.engine.dto.검색어_날짜포함_검색_요청;
 import com.arms.api.engine.dto.검색어_집계_요청;
 import com.arms.api.engine.model.플루언트디;
-import com.arms.elasticsearch.util.query.쿼리_추상_팩토리;
-import com.arms.elasticsearch.util.검색결과_목록;
-import com.arms.elasticsearch.util.검색결과_목록_메인;
+import com.arms.elasticsearch.query.쿼리_추상_팩토리;
+import com.arms.elasticsearch.검색결과_목록_메인;
 import org.springframework.data.elasticsearch.core.SearchHit;
 
 public interface 플루언트디_서비스 {

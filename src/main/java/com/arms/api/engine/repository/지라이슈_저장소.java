@@ -1,11 +1,11 @@
 package com.arms.api.engine.repository;
 
 import com.arms.api.engine.model.지라이슈;
-import com.arms.elasticsearch.util.query.EsQuery;
-import com.arms.elasticsearch.util.query.EsQueryBuilder;
-import com.arms.elasticsearch.util.query.bool.TermQueryMust;
-import com.arms.elasticsearch.util.query.bool.TermsQueryFilter;
-import com.arms.elasticsearch.util.repository.공통저장소;
+import com.arms.elasticsearch.query.EsQuery;
+import com.arms.elasticsearch.query.EsQueryBuilder;
+import com.arms.elasticsearch.query.bool.TermQueryMust;
+import com.arms.elasticsearch.query.bool.TermsQueryFilter;
+import com.arms.elasticsearch.repository.공통저장소;
 
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.springframework.core.ParameterizedTypeReference;

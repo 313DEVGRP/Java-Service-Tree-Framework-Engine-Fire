@@ -3,7 +3,7 @@
  */
 package com.arms.config;
 
-import com.arms.elasticsearch.util.repository.공통저장소_구현체;
+import com.arms.elasticsearch.repository.공통저장소_구현체;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

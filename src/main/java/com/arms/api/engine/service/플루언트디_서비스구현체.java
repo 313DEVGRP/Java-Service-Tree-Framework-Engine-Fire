@@ -6,13 +6,13 @@ import com.arms.api.engine.dto.검색어_날짜포함_검색_요청;
 import com.arms.api.engine.dto.검색어_집계_요청;
 import com.arms.api.engine.model.플루언트디;
 import com.arms.api.engine.repository.플루언트디_저장소;
-import com.arms.elasticsearch.util.query.*;
-import com.arms.elasticsearch.util.query.bool.QueryStringFilter;
-import com.arms.elasticsearch.util.query.bool.QueryStringMust;
-import com.arms.elasticsearch.util.query.bool.RangeQueryFilter;
-import com.arms.elasticsearch.util.query.sort.SortBy;
+import com.arms.elasticsearch.query.*;
+import com.arms.elasticsearch.query.bool.QueryStringFilter;
+import com.arms.elasticsearch.query.bool.QueryStringMust;
+import com.arms.elasticsearch.query.bool.RangeQueryFilter;
+import com.arms.elasticsearch.query.sort.SortBy;
 
-import com.arms.elasticsearch.util.검색결과_목록_메인;
+import com.arms.elasticsearch.검색결과_목록_메인;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

@@ -9,9 +9,9 @@ import com.arms.api.engine.model.지라이슈_일자별_제품_및_제품버전_
 import com.arms.api.engine.model.지라이슈_제품_및_제품버전_집계_요청;
 import com.arms.api.engine.model.트리맵_검색요청;
 import com.arms.api.engine.vo.제품_서비스_버전;
-import com.arms.elasticsearch.util.query.쿼리_추상_팩토리;
-import com.arms.elasticsearch.util.검색결과;
-import com.arms.elasticsearch.util.검색결과_목록_메인;
+import com.arms.elasticsearch.query.쿼리_추상_팩토리;
+import com.arms.elasticsearch.검색결과;
+import com.arms.elasticsearch.검색결과_목록_메인;
 import org.springframework.data.elasticsearch.core.SearchHit;
 
 public interface 지라이슈_대시보드_서비스 {

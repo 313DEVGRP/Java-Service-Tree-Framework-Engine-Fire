@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import com.arms.api.serverinfo.repository.서버정보_저장소;
-import com.arms.utils.external_communicate.백엔드통신기;
+import com.arms.api.msa_communicate.백엔드통신기;
 
 @Slf4j
 @Service("서버정보_서비스")

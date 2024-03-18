@@ -2,7 +2,7 @@ package com.arms.api.engine.service;
 
 import com.arms.api.engine.model.지라이슈;
 import com.arms.api.engine.vo.히트맵데이터;
-import com.arms.elasticsearch.util.검색조건;
+import com.arms.elasticsearch.검색조건;
 
 import java.io.IOException;
 import java.util.List;

@@ -2,7 +2,7 @@ package com.arms.api.engine.vo;
 
 import java.util.List;
 
-import com.arms.elasticsearch.util.검색결과;
+import com.arms.elasticsearch.검색결과;
 
 import lombok.Getter;
 

@@ -2,8 +2,8 @@ package com.arms.api.engine.model;
 
 
 import com.arms.api.engine.repository.인덱스자료;
-import com.arms.elasticsearch.util.annotation.ElasticSearchIndex;
-import com.arms.elasticsearch.util.annotation.RollingIndexName;
+import com.arms.elasticsearch.annotation.ElasticSearchIndex;
+import com.arms.elasticsearch.annotation.RollingIndexName;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;

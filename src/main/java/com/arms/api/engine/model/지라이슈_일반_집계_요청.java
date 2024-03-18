@@ -1,6 +1,6 @@
 package com.arms.api.engine.model;
 
-import com.arms.elasticsearch.util.base.기본_집계_요청;
+import com.arms.elasticsearch.base.기본_집계_요청;
 
 import lombok.Getter;
 import lombok.Setter;

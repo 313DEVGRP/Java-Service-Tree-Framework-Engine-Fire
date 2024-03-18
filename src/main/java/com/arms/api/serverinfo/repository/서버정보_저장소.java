@@ -1,7 +1,7 @@
 package com.arms.api.serverinfo.repository;
 
 import com.arms.api.serverinfo.model.서버정보_엔티티;
-import com.arms.elasticsearch.util.repository.공통저장소;
+import com.arms.elasticsearch.repository.공통저장소;
 import org.springframework.stereotype.Repository;
 
 @Repository

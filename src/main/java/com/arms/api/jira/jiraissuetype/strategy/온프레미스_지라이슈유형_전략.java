@@ -1,6 +1,6 @@
 package com.arms.api.jira.jiraissuetype.strategy;
 
-import com.arms.utils.지라유틸;
+import com.arms.api.jira.utils.지라유틸;
 import com.arms.errors.codes.에러코드;
 import com.arms.api.jira.jiraissuetype.model.지라이슈유형_데이터;
 import com.arms.api.serverinfo.model.서버정보_데이터;

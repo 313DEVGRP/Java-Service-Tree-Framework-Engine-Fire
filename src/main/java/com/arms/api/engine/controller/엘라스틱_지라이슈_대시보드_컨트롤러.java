@@ -7,9 +7,9 @@ import com.arms.api.engine.dto.*;
 import com.arms.api.engine.model.*;
 import com.arms.api.engine.dto.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.api.engine.vo.제품_서비스_버전;
-import com.arms.elasticsearch.util.query.*;
-import com.arms.elasticsearch.util.query.bool.*;
-import com.arms.elasticsearch.util.검색결과;
+import com.arms.elasticsearch.query.*;
+import com.arms.elasticsearch.query.bool.*;
+import com.arms.elasticsearch.검색결과;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.arms.api.engine.service.지라이슈_대시보드_서비스;
 import com.arms.api.engine.service.플루언트디_서비스;
-import com.arms.elasticsearch.util.검색결과_목록_메인;
+import com.arms.elasticsearch.검색결과_목록_메인;
 
 import lombok.extern.slf4j.Slf4j;
 

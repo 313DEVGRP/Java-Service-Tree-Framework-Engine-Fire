@@ -13,13 +13,13 @@ import com.arms.api.engine.model.지라이슈_일반_집계_요청;
 import com.arms.api.engine.vo.제품_서비스_버전;
 import com.arms.api.engine.vo.하위_이슈_사항;
 import com.arms.api.engine.vo.하위_이슈_사항들;
-import com.arms.elasticsearch.util.query.EsQuery;
-import com.arms.elasticsearch.util.query.EsQueryBuilder;
-import com.arms.elasticsearch.util.query.bool.TermQueryMust;
-import com.arms.elasticsearch.util.query.bool.TermsQueryFilter;
-import com.arms.elasticsearch.util.query.일반_집계_요청;
-import com.arms.elasticsearch.util.검색결과;
-import com.arms.elasticsearch.util.검색결과_목록_메인;
+import com.arms.elasticsearch.query.EsQuery;
+import com.arms.elasticsearch.query.EsQueryBuilder;
+import com.arms.elasticsearch.query.bool.TermQueryMust;
+import com.arms.elasticsearch.query.bool.TermsQueryFilter;
+import com.arms.elasticsearch.query.일반_집계_요청;
+import com.arms.elasticsearch.검색결과;
+import com.arms.elasticsearch.검색결과_목록_메인;
 
 @SpringBootTest
 @ActiveProfiles("dev")

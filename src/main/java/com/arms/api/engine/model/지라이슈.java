@@ -1,9 +1,9 @@
 package com.arms.api.engine.model;
 
 import com.arms.api.engine.repository.인덱스자료;
-import com.arms.elasticsearch.util.annotation.ElasticSearchIndex;
-import com.arms.elasticsearch.util.annotation.Recent;
-import com.arms.elasticsearch.util.annotation.RollingIndexName;
+import com.arms.elasticsearch.annotation.ElasticSearchIndex;
+import com.arms.elasticsearch.annotation.Recent;
+import com.arms.elasticsearch.annotation.RollingIndexName;
 import com.fasterxml.jackson.annotation.*;
 import lombok.*;
 import org.springframework.data.elasticsearch.annotations.*;

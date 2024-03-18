@@ -4,7 +4,7 @@ import static java.util.stream.Collectors.*;
 
 import java.util.List;
 
-import com.arms.elasticsearch.util.검색결과;
+import com.arms.elasticsearch.검색결과;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
