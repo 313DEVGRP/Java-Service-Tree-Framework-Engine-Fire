@@ -23,6 +23,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -250,7 +252,7 @@ public class 레드마인_온프레미스_이슈_전략 implements 지라이슈_
             에러로그_유틸.예외로그출력(e, this.getClass().getName(), "서브테스크_가져오기");
         }
 
-        if (조회된_하위이슈_목록 == null) {
+        if (조회된_하위이슈_목록 == null || 조회된_하위이슈_목록.isEmpty()) {
             로그.info(이슈_키_또는_아이디 + "에 하위 이슈가 없습니다.");
             return null;
         }
@@ -276,8 +278,46 @@ public class 레드마인_온프레미스_이슈_전략 implements 지라이슈_
     }
 
     @Override
-    public List<지라이슈_데이터> 증분서브테스크_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) throws URISyntaxException, IOException, ExecutionException, InterruptedException {
-        return null;
+    public List<지라이슈_데이터> 증분서브테스크_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) {
+
+        로그.info("레드마인_온프레미스_이슈_전략 :: "+ 연결_아이디 + " :: "
+                + 이슈_키_또는_아이디 + " :: 증분서브테스크_가져오기");
+
+        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+        RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+
+        // 어제 날짜 포맷팅
+        LocalDate 어제 = LocalDate.now().minusDays(1);
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+        String 어제_날짜 = 어제.format(formatter);
+
+        Params params = new Params()
+                .add("parent_id", 이슈_키_또는_아이디)
+                .add("status_id", "*")
+                .add("updated_on", "><" + 어제_날짜 + "|" + 어제_날짜);
+
+        List<지라이슈_데이터> 하위이슈_목록;
+        List<Issue> 조회된_하위이슈_목록 = null;
+        try {
+            조회된_하위이슈_목록 = 레드마인_매니저.getIssueManager().getIssues(params).getResults();
+        }
+        catch (RedmineException e) {
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "증분서브테스크_가져오기");
+        }
+
+        if (조회된_하위이슈_목록 == null || 조회된_하위이슈_목록.isEmpty()) {
+            로그.info(이슈_키_또는_아이디 + "에 업데이트된 하위 이슈가 없습니다.");
+            return null;
+        }
+
+        하위이슈_목록 = 조회된_하위이슈_목록.stream().map(이슈 -> {
+                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터형_변환(이슈, 서버정보.getUri());
+                    return 지라이슈_데이터;
+                })
+                .filter(Objects::nonNull)
+                .collect(toList());
+
+        return 하위이슈_목록;
     }
 
     private 지라이슈_데이터 지라이슈_데이터형_변환(Issue 이슈, String 서버정보경로) {
