@@ -13,7 +13,7 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import java.util.List;
 import java.util.Optional;
 
-import com.arms.elasticsearch.base.기본_집계_요청;
+import com.arms.elasticsearch.query.base.기본_집계_요청;
 
 @Setter
 @Getter

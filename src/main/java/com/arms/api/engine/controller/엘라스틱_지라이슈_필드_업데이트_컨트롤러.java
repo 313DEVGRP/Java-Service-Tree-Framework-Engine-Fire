@@ -1,6 +1,6 @@
 package com.arms.api.engine.controller;
 
-import static com.arms.errors.response.에러응답처리.*;
+import static com.arms.utils.errors.response.에러응답처리.*;
 
 import java.util.List;
 

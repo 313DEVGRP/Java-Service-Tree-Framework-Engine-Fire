@@ -11,7 +11,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 
-import com.arms.elasticsearch.base.기본_집계_요청;
+import com.arms.elasticsearch.query.base.기본_집계_요청;
 
 import lombok.Getter;
 import lombok.Setter;

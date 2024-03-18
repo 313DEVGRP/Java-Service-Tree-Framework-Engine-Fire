@@ -19,7 +19,7 @@ import com.arms.elasticsearch.검색결과;
 import com.arms.elasticsearch.검색결과_목록_메인;
 import com.arms.elasticsearch.검색엔진_유틸;
 import com.arms.elasticsearch.검색조건;
-import com.arms.errors.codes.에러코드;
+import com.arms.utils.errors.codes.에러코드;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;

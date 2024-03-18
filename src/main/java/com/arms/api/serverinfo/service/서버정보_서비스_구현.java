@@ -3,7 +3,7 @@ package com.arms.api.serverinfo.service;
 import com.arms.api.engine.repository.지라이슈_저장소;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.model.서버정보_엔티티;
-import com.arms.errors.codes.에러코드;
+import com.arms.utils.errors.codes.에러코드;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

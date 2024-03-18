@@ -1,8 +1,8 @@
-package com.arms.errors.exception;
+package com.arms.utils.errors.exception;
 
 
-import com.arms.errors.codes.에러코드;
-import com.arms.errors.response.에러응답처리;
+import com.arms.utils.errors.codes.에러코드;
+import com.arms.utils.errors.response.에러응답처리;
 import com.arms.utils.slack.SlackNotificationService;
 import com.arms.utils.slack.SlackProperty;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.arms.elasticsearch.base;
+package com.arms.elasticsearch.query.base;
 
 import java.util.List;
 

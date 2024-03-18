@@ -1,4 +1,4 @@
-package com.arms.errors.codes;
+package com.arms.utils.errors.codes;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

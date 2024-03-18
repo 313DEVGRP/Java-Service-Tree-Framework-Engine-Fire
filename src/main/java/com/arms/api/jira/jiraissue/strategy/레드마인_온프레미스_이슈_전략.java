@@ -7,7 +7,7 @@ import com.arms.api.jira.jirapriority.model.지라이슈우선순위_데이터;
 import com.arms.api.jira.utils.에러로그_유틸;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.service.서버정보_서비스;
-import com.arms.errors.codes.에러코드;
+import com.arms.utils.errors.codes.에러코드;
 import com.arms.api.jira.utils.지라유틸;
 import com.taskadapter.redmineapi.Include;
 import com.taskadapter.redmineapi.Params;

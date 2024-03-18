@@ -1,4 +1,4 @@
-package com.arms.elasticsearch.base;
+package com.arms.elasticsearch.query.base;
 
 import lombok.Getter;
 import lombok.Setter;
