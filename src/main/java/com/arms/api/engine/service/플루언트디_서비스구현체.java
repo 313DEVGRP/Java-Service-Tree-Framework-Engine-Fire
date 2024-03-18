@@ -7,6 +7,7 @@ import com.arms.api.engine.dto.검색어_집계_요청;
 import com.arms.api.engine.model.플루언트디;
 import com.arms.api.engine.repository.플루언트디_저장소;
 import com.arms.elasticsearch.util.query.*;
+import com.arms.elasticsearch.util.query.bool.QueryStringFilter;
 import com.arms.elasticsearch.util.query.bool.QueryStringMust;
 import com.arms.elasticsearch.util.query.bool.RangeQueryFilter;
 import com.arms.elasticsearch.util.query.sort.SortBy;
@@ -105,7 +106,7 @@ public class 플루언트디_서비스구현체 implements 플루언트디_서�
 
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new RangeQueryFilter("@timestamp", start_date, end_date,"fromto"),
-                        new QueryStringMust(검색어_집계_요청.get검색어()));
+                        new QueryStringFilter(검색어_집계_요청.get검색어()));
 
         검색결과_목록_메인 집계_결과 = this.전체_집계결과_가져오기(일반_집계_요청.of(검색어_집계_요청, esQuery));
         return 집계_결과;
