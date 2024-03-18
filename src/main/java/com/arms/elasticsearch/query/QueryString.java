@@ -1,4 +1,4 @@
-package com.arms.elasticsearch.query.query_string;
+package com.arms.elasticsearch.query;
 
 import com.arms.elasticsearch.query.EsQuery;
 import org.elasticsearch.index.query.QueryBuilders;

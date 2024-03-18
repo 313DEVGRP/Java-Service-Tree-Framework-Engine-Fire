@@ -1,4 +1,4 @@
-package com.arms.utils.errors.response;
+package com.arms.utils.response;
 
 import com.arms.utils.errors.codes.에러코드;
 import lombok.Getter;
@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @NoArgsConstructor
-public class 에러응답처리 {
+public class 응답처리 {
 
     public static <T> ApiResult<T> success(T response) {
         return new ApiResult<>(true, response, null);

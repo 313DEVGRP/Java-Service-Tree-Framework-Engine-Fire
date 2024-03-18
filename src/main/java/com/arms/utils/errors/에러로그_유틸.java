@@ -1,4 +1,4 @@
-package com.arms.api.jira.utils;
+package com.arms.utils.errors;
 
 import com.mysql.cj.util.LogUtils;
 import org.slf4j.Logger;

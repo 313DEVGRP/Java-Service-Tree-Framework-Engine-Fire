@@ -3,12 +3,13 @@ package com.arms.api.engine.service;
 import java.util.List;
 import java.util.Map;
 
-import com.arms.api.engine.dto.*;
+import com.arms.api.engine.model.dto.*;
+import com.arms.api.engine.model.dto.*;
 import com.arms.api.engine.model.지라이슈;
 import com.arms.api.engine.model.지라이슈_일자별_제품_및_제품버전_집계_요청;
 import com.arms.api.engine.model.지라이슈_제품_및_제품버전_집계_요청;
 import com.arms.api.engine.model.트리맵_검색요청;
-import com.arms.api.engine.vo.제품_서비스_버전;
+import com.arms.api.engine.model.vo.제품_서비스_버전;
 import com.arms.elasticsearch.query.쿼리_추상_팩토리;
 import com.arms.elasticsearch.검색결과;
 import com.arms.elasticsearch.검색결과_목록_메인;

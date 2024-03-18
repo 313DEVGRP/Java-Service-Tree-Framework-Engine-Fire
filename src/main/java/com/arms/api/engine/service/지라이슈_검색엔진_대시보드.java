@@ -1,7 +1,8 @@
 package com.arms.api.engine.service;
 
-import com.arms.api.engine.dto.*;
+import com.arms.api.engine.model.dto.*;
 import com.arms.api.engine.model.IsReqType;
+import com.arms.api.engine.model.dto.*;
 import com.arms.api.engine.model.제품버전목록;
 import com.arms.api.engine.model.지라이슈;
 import com.arms.api.engine.model.지라이슈_일자별_제품_및_제품버전_집계_요청;
@@ -9,12 +10,12 @@ import com.arms.api.engine.model.지라이슈_제품_및_제품버전_집계_요
 import com.arms.api.engine.model.트리맵_검색요청;
 import com.arms.api.engine.repository.인덱스자료;
 import com.arms.api.engine.repository.지라이슈_저장소;
-import com.arms.api.engine.vo.제품_서비스_버전;
-import com.arms.api.engine.vo.하위_이슈_사항;
-import com.arms.api.engine.vo.하위_이슈_사항들;
+import com.arms.api.engine.model.vo.제품_서비스_버전;
+import com.arms.api.engine.model.vo.하위_이슈_사항;
+import com.arms.api.engine.model.vo.하위_이슈_사항들;
 import com.arms.elasticsearch.query.*;
 import com.arms.elasticsearch.query.bool.*;
-import com.arms.elasticsearch.query.query_string.QueryString;
+import com.arms.elasticsearch.query.QueryString;
 import com.arms.elasticsearch.query.bool.RangeQueryFilter;
 import com.arms.elasticsearch.query.sort.SortBy;
 import com.arms.elasticsearch.검색결과;

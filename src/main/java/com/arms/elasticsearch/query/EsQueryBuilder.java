@@ -2,7 +2,6 @@ package com.arms.elasticsearch.query;
 
 import com.arms.elasticsearch.query.bool.EsBoolQuery;
 import com.arms.elasticsearch.query.bool.RangeQueryFilter;
-import com.arms.elasticsearch.query.query_string.QueryString;
 import com.arms.elasticsearch.query.sort.SortBy;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;

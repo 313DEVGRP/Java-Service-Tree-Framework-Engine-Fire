@@ -1,7 +1,7 @@
 package com.arms.api.jira.jiraissue.strategy;
 
 import com.arms.api.jira.jiraissue.model.*;
-import com.arms.api.jira.utils.에러로그_유틸;
+import com.arms.utils.errors.에러로그_유틸;
 import com.arms.api.jira.utils.지라API_정보;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.service.서버정보_서비스;

@@ -4,7 +4,7 @@ import com.arms.api.jira.jiraissue.model.*;
 import com.arms.api.jira.jiraissuestatus.model.지라이슈상태_데이터;
 import com.arms.api.jira.jiraissuetype.model.지라이슈유형_데이터;
 import com.arms.api.jira.jirapriority.model.지라이슈우선순위_데이터;
-import com.arms.api.jira.utils.에러로그_유틸;
+import com.arms.utils.errors.에러로그_유틸;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.service.서버정보_서비스;
 import com.arms.utils.errors.codes.에러코드;

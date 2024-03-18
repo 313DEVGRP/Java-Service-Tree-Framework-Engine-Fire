@@ -1,8 +1,6 @@
 package com.arms.api.engine.controller;
 
-import static com.arms.utils.errors.response.에러응답처리.*;
-
-import java.util.List;
+import static com.arms.utils.response.응답처리.*;
 
 import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.data.elasticsearch.core.SearchHit;
@@ -14,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.arms.api.engine.dto.UpdateReqLinkDTO;
+import com.arms.api.engine.model.dto.UpdateReqLinkDTO;
 import com.arms.api.engine.model.지라이슈;
 import com.arms.api.engine.repository.지라이슈_저장소;
 

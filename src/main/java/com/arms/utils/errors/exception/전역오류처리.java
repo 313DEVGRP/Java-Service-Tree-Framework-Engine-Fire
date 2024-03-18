@@ -2,7 +2,7 @@ package com.arms.utils.errors.exception;
 
 
 import com.arms.utils.errors.codes.에러코드;
-import com.arms.utils.errors.response.에러응답처리;
+import com.arms.utils.response.응답처리;
 import com.arms.utils.slack.SlackNotificationService;
 import com.arms.utils.slack.SlackProperty;
 import lombok.RequiredArgsConstructor;
@@ -29,9 +29,9 @@ public class 전역오류처리 {
 
     private final SlackNotificationService slackNotificationService;
 
-    private ResponseEntity<에러응답처리.ApiResult<?>> newResponse(String message, HttpStatus status) {
+    private ResponseEntity<응답처리.ApiResult<?>> newResponse(String message, HttpStatus status) {
         HttpHeaders headers = getHttpHeaders();
-        return new ResponseEntity<>(에러응답처리.error(message, status), headers, status);
+        return new ResponseEntity<>(응답처리.error(message, status), headers, status);
     }
 
     private HttpHeaders getHttpHeaders() {

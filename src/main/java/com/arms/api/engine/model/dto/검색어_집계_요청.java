@@ -1,4 +1,4 @@
-package com.arms.api.engine.dto;
+package com.arms.api.engine.model.dto;
 
 import com.arms.elasticsearch.query.base.기본_집계_요청;
 import lombok.Getter;

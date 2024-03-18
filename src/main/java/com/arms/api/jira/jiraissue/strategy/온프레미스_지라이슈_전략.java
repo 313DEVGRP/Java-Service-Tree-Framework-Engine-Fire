@@ -10,7 +10,7 @@ import com.arms.api.jira.jiraissue.model.지라이슈생성_데이터;
 import com.arms.api.jira.jiraissue.model.지라이슈생성필드_데이터;
 import com.arms.api.jira.jiraissue.model.지라이슈필드_데이터;
 import com.arms.api.jira.jiraissue.model.지라프로젝트_데이터;
-import com.arms.api.jira.utils.에러로그_유틸;
+import com.arms.utils.errors.에러로그_유틸;
 import com.arms.api.jira.utils.지라API_정보;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.utils.errors.codes.에러코드;

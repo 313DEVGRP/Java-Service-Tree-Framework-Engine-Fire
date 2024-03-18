@@ -1,4 +1,4 @@
-package com.arms.api.engine.vo;
+package com.arms.api.engine.model.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
