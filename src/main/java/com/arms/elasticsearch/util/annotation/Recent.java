@@ -1,4 +1,4 @@
-package com.arms.elasticsearch.util.custom.index;
+package com.arms.elasticsearch.util.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

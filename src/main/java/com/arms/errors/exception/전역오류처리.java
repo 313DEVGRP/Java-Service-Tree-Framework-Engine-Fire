@@ -3,8 +3,8 @@ package com.arms.errors.exception;
 
 import com.arms.errors.codes.에러코드;
 import com.arms.errors.response.에러응답처리;
-import com.arms.notification.slack.SlackNotificationService;
-import com.arms.notification.slack.SlackProperty;
+import com.arms.utils.slack.SlackNotificationService;
+import com.arms.utils.slack.SlackProperty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;

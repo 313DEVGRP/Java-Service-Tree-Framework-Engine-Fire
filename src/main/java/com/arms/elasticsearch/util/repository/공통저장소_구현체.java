@@ -1,9 +1,8 @@
 package com.arms.elasticsearch.util.repository;
 
-import com.arms.api.engine.model.지라이슈;
-import com.arms.elasticsearch.util.custom.index.ElasticSearchIndex;
-import com.arms.elasticsearch.util.custom.index.Recent;
-import com.arms.elasticsearch.util.custom.index.RollingIndexName;
+import com.arms.elasticsearch.util.annotation.ElasticSearchIndex;
+import com.arms.elasticsearch.util.annotation.Recent;
+import com.arms.elasticsearch.util.annotation.RollingIndexName;
 import com.arms.elasticsearch.util.query.EsQuery;
 import com.arms.elasticsearch.util.query.EsQueryBuilder;
 import com.arms.elasticsearch.util.query.bool.TermsQueryFilter;

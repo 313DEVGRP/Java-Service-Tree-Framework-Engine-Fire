@@ -1,4 +1,4 @@
-package com.arms.notification.slack;
+package com.arms.utils.slack;
 
 
 import com.slack.api.model.Attachment;

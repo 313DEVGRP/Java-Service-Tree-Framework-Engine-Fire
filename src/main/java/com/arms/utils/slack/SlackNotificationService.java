@@ -1,16 +1,14 @@
-package com.arms.notification.slack;
+package com.arms.utils.slack;
 
 import com.slack.api.Slack;
 import com.slack.api.model.Attachment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 @Slf4j

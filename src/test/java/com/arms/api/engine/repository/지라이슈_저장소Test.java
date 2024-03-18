@@ -1,23 +1,15 @@
 package com.arms.api.engine.repository;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.arms.api.engine.model.지라이슈;
-import com.arms.elasticsearch.util.custom.index.ElasticSearchIndex;
 
 @ActiveProfiles("dev")
 @SpringBootTest

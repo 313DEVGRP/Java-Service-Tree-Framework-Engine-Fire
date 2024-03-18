@@ -1,13 +1,8 @@
-package com.arms.elasticsearch.util.custom.runner;
+package com.arms.elasticsearch.util.annotation;
 
 import java.lang.annotation.Annotation;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.CommandLineRunner;
@@ -16,14 +11,13 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.index.AliasAction;
 import org.springframework.data.elasticsearch.core.index.AliasActionParameters;
 import org.springframework.data.elasticsearch.core.index.AliasActions;
 import org.springframework.data.elasticsearch.core.index.PutTemplateRequest;
 import org.springframework.stereotype.Component;
 
-import com.arms.elasticsearch.util.custom.index.ElasticSearchIndex;
+import com.arms.elasticsearch.util.annotation.ElasticSearchIndex;
 
 @Component
 public class EsIndexScanner implements CommandLineRunner {
