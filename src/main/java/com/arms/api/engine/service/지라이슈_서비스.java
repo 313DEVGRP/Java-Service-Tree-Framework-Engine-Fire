@@ -1,6 +1,6 @@
 package com.arms.api.engine.service;
 
-import com.arms.api.engine.model.지라이슈;
+import com.arms.api.engine.model.entity.지라이슈;
 import com.arms.api.engine.model.vo.히트맵데이터;
 import com.arms.elasticsearch.검색조건;
 

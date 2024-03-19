@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.arms.api.engine.model.dto.UpdateReqLinkDTO;
-import com.arms.api.engine.model.지라이슈;
+import com.arms.api.engine.model.entity.지라이슈;
 import com.arms.api.engine.repository.지라이슈_저장소;
 
 import lombok.AllArgsConstructor;

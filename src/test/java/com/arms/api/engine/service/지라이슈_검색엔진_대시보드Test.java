@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.arms.api.engine.model.지라이슈_일반_집계_요청;
+import com.arms.api.engine.model.dto.지라이슈_일반_집계_요청;
 import com.arms.api.engine.model.vo.제품_서비스_버전;
 import com.arms.api.engine.model.vo.하위_이슈_사항;
 import com.arms.api.engine.model.vo.하위_이슈_사항들;

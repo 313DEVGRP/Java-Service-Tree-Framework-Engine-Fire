@@ -1,7 +1,7 @@
 package com.arms.elasticsearch.services;
 
 import com.arms.api.engine.model.dto.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
-import com.arms.api.engine.model.지라이슈;
+import com.arms.api.engine.model.entity.지라이슈;
 import com.arms.api.engine.repository.인덱스자료;
 import com.arms.api.engine.repository.지라이슈_저장소;
 import com.arms.api.engine.service.지라이슈_서비스;

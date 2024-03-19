@@ -1,4 +1,4 @@
-package com.arms.api.engine.model;
+package com.arms.api.engine.model.entity;
 
 import com.arms.api.engine.repository.인덱스자료;
 import com.arms.elasticsearch.annotation.ElasticSearchIndex;

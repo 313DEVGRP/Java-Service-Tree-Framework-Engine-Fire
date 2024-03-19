@@ -1,6 +1,6 @@
 package com.arms.api.engine.controller;
 
-import com.arms.api.engine.model.지라이슈;
+import com.arms.api.engine.model.entity.지라이슈;
 import com.arms.api.engine.service.지라이슈_서비스;
 import com.arms.api.engine.model.vo.히트맵데이터;
 import com.arms.api.jira.jiraissue.service.지라이슈_전략_호출;

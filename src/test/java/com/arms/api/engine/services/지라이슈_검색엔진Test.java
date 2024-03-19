@@ -1,17 +1,14 @@
 package com.arms.api.engine.services;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.arms.api.engine.model.지라이슈;
+import com.arms.api.engine.model.entity.지라이슈;
 import com.arms.api.engine.repository.지라이슈_저장소;
 
 @SpringBootTest

@@ -1,5 +1,6 @@
-package com.arms.api.engine.model;
+package com.arms.api.engine.model.dto;
 
+import com.arms.api.engine.model.dto.지라이슈_제품_및_제품버전_집계_요청;
 import lombok.Getter;
 import lombok.Setter;
 

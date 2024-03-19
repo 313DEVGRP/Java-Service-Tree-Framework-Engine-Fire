@@ -1,8 +1,10 @@
-package com.arms.api.engine.model;
+package com.arms.api.engine.model.dto;
 
 
 import java.util.List;
 
+import com.arms.api.engine.model.IsReqType;
+import com.arms.api.engine.model.제품버전목록;
 import com.arms.elasticsearch.query.base.기본_집계_요청;
 
 import lombok.AllArgsConstructor;
@@ -18,6 +20,6 @@ import lombok.Setter;
 public class 트리맵_검색요청 extends 기본_집계_요청 {
     private Long pdServiceLink;
     private Long[] pdServiceVersionLinks;
-    private List<제품버전목록> 제품버전목록;
+    private List<com.arms.api.engine.model.제품버전목록> 제품버전목록;
     private IsReqType isReqType;
 }

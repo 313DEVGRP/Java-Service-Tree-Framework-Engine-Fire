@@ -1,6 +1,6 @@
 package com.arms.api.engine.service;
 
-import com.arms.api.engine.model.지라이슈;
+import com.arms.api.engine.model.entity.지라이슈;
 import com.arms.api.engine.model.지라이슈_생성;
 import com.arms.api.engine.repository.인덱스자료;
 import com.arms.api.engine.repository.지라이슈_저장소;
