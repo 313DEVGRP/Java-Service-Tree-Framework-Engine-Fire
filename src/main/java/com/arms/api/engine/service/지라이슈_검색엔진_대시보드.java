@@ -1,7 +1,7 @@
 package com.arms.api.engine.service;
 
 import com.arms.api.engine.model.dto.*;
-import com.arms.api.engine.model.IsReqType;
+import com.arms.api.engine.model.enums.IsReqType;
 import com.arms.api.engine.model.vo.*;
 import com.arms.api.engine.model.제품버전목록;
 import com.arms.api.engine.model.entity.지라이슈;

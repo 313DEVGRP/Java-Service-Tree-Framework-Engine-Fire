@@ -4,9 +4,9 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import com.arms.api.engine.model.dto.*;
-import com.arms.api.engine.model.*;
 import com.arms.api.engine.model.entity.지라이슈;
 import com.arms.api.engine.model.entity.플루언트디;
+import com.arms.api.engine.model.enums.IsReqType;
 import com.arms.api.engine.model.vo.Worker;
 import com.arms.api.engine.model.vo.검색어_검색결과;
 import com.arms.api.engine.model.vo.제품_서비스_버전;

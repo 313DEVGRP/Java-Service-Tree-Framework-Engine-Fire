@@ -1,4 +1,4 @@
-package com.arms.api.engine.model;
+package com.arms.api.engine.model.enums;
 
 public enum IsReqType {
     ALL,

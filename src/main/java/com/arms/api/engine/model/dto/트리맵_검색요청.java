@@ -3,8 +3,7 @@ package com.arms.api.engine.model.dto;
 
 import java.util.List;
 
-import com.arms.api.engine.model.IsReqType;
-import com.arms.api.engine.model.제품버전목록;
+import com.arms.api.engine.model.enums.IsReqType;
 import com.arms.elasticsearch.query.base.기본_집계_요청;
 
 import lombok.AllArgsConstructor;
