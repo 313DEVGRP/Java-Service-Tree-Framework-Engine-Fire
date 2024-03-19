@@ -8,7 +8,7 @@ import com.arms.api.jira.jiraproject.strategy.온프레미스_지라프로젝트
 import com.arms.api.jira.jiraproject.strategy.지라프로젝트_전략_등록_및_실행;
 import com.arms.api.jira.jiraproject.strategy.클라우드_지라프로젝트_전략;
 import com.arms.api.jira.jiraproject.strategy.레드마인_온프레미스_프로젝트_전략;
-import com.arms.api.serverinfo.helper.서버유형_정보;
+import com.arms.api.serverinfo.model.enums.서버유형_정보;
 
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;

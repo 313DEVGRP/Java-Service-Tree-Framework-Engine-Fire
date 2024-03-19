@@ -1,4 +1,4 @@
-package com.arms.api.serverinfo.helper;
+package com.arms.api.serverinfo.model.enums;
 
 public enum 서버유형_정보 {
 

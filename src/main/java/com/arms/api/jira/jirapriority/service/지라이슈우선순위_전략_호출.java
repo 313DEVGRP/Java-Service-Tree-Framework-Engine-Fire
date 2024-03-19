@@ -2,7 +2,7 @@ package com.arms.api.jira.jirapriority.service;
 
 import com.arms.api.jira.jirapriority.model.지라이슈우선순위_데이터;
 import com.arms.api.jira.jirapriority.strategy.레드마인_온프레미스_지라이슈우선순위_전략;
-import com.arms.api.serverinfo.helper.서버유형_정보;
+import com.arms.api.serverinfo.model.enums.서버유형_정보;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.service.서버정보_서비스;
 import com.arms.utils.errors.codes.에러코드;

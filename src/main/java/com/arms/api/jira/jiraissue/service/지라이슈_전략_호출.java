@@ -1,7 +1,7 @@
 package com.arms.api.jira.jiraissue.service;
 
 import com.arms.api.jira.jiraissue.strategy.레드마인_온프레미스_이슈_전략;
-import com.arms.api.serverinfo.helper.서버유형_정보;
+import com.arms.api.serverinfo.model.enums.서버유형_정보;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.service.서버정보_서비스;
 import com.arms.utils.errors.codes.에러코드;
