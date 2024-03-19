@@ -1,4 +1,4 @@
-package com.arms.api.serverinfo.model;
+package com.arms.api.serverinfo.model.entity;
 
 import com.arms.api.engine.repository.인덱스자료;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -17,7 +17,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @Setter
 @Document(indexName = 인덱스자료.서버정보_인덱스명)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "_class")
-@JsonTypeName("com.arms.api.serverinfo.model.서버정보_엔티티")
+@JsonTypeName("com.arms.api.serverinfo.model.entity.서버정보_엔티티")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class 서버정보_엔티티 {
 

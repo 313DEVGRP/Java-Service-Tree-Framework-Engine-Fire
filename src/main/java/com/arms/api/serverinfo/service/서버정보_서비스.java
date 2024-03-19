@@ -1,7 +1,7 @@
 package com.arms.api.serverinfo.service;
 
 import com.arms.api.serverinfo.model.서버정보_데이터;
-import com.arms.api.serverinfo.model.서버정보_엔티티;
+import com.arms.api.serverinfo.model.entity.서버정보_엔티티;
 
 public interface 서버정보_서비스 {
 
