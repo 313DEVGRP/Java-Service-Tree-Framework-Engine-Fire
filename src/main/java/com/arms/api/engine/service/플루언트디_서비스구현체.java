@@ -8,10 +8,13 @@ import com.arms.api.engine.model.entity.플루언트디;
 import com.arms.api.engine.repository.플루언트디_저장소;
 import com.arms.elasticsearch.query.*;
 import com.arms.elasticsearch.query.base.기본_정렬_요청;
-import com.arms.elasticsearch.query.bool.QueryStringFilter;
-import com.arms.elasticsearch.query.bool.QueryStringMust;
-import com.arms.elasticsearch.query.bool.RangeQueryFilter;
-import com.arms.elasticsearch.query.sort.SortBy;
+import com.arms.elasticsearch.query.filter.QueryStringFilter;
+import com.arms.elasticsearch.query.esquery.esboolquery.must.MustQueryString;
+import com.arms.elasticsearch.query.filter.RangeQueryFilter;
+import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
+import com.arms.elasticsearch.query.factory.일반_검색_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.일반_집계_쿼리_생성기;
+import com.arms.elasticsearch.query.esquery.EsSortQuery;
 
 import com.arms.elasticsearch.검색결과_목록_메인;
 import lombok.AllArgsConstructor;
@@ -52,13 +55,13 @@ public class 플루언트디_서비스구현체 implements 플루언트디_서�
 
     public 검색어_검색결과<SearchHit<플루언트디>> 플루언트디_검색(검색어_기본_검색_요청 검색어_기본_검색_요청){
         EsQuery esQuery = new EsQueryBuilder()
-            .sort(new SortBy(
+            .sort(new EsSortQuery(
                 List.of(
                     기본_정렬_요청.builder().필드("@timestamp").정렬기준("desc").build()
                 )
             ))
-            .bool(new QueryStringMust(검색어_기본_검색_요청.get검색어()));
-        SearchHits<플루언트디> 플루언트디_검색결과 = 플루언트디_저장소.search(일반_검색_요청.of(검색어_기본_검색_요청, esQuery).생성());
+            .bool(new MustQueryString(검색어_기본_검색_요청.get검색어()));
+        SearchHits<플루언트디> 플루언트디_검색결과 = 플루언트디_저장소.search(일반_검색_쿼리_생성기.of(검색어_기본_검색_요청, esQuery).생성());
         검색어_검색결과<SearchHit<플루언트디>> 검색결과_목록 = new 검색어_검색결과<>();
         검색결과_목록.set검색결과_목록(플루언트디_검색결과.getSearchHits());
         검색결과_목록.set결과_총수(플루언트디_검색결과.getTotalHits());
@@ -78,13 +81,13 @@ public class 플루언트디_서비스구현체 implements 플루언트디_서�
 
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new RangeQueryFilter("@timestamp", start_date, end_date,"fromto"),
-                        new QueryStringMust(검색어_날짜포함_검색_요청.get검색어()))
-                .sort(new SortBy(
+                        new MustQueryString(검색어_날짜포함_검색_요청.get검색어()))
+                .sort(new EsSortQuery(
                     List.of(
                             기본_정렬_요청.builder().필드("@timestamp").정렬기준("desc").build()
                     )
                 ));
-        SearchHits<플루언트디> 플루언트디_검색결과 = 플루언트디_저장소.search(일반_검색_요청.of(검색어_날짜포함_검색_요청, esQuery).생성());
+        SearchHits<플루언트디> 플루언트디_검색결과 = 플루언트디_저장소.search(일반_검색_쿼리_생성기.of(검색어_날짜포함_검색_요청, esQuery).생성());
         검색어_검색결과<SearchHit<플루언트디>> 검색결과_목록 = new 검색어_검색결과<>();
         if(플루언트디_검색결과 != null && !플루언트디_검색결과.isEmpty() ) {
             검색결과_목록.set검색결과_목록(플루언트디_검색결과.getSearchHits());
@@ -109,7 +112,7 @@ public class 플루언트디_서비스구현체 implements 플루언트디_서�
                 .bool(new RangeQueryFilter("@timestamp", start_date, end_date,"fromto"),
                         new QueryStringFilter(검색어_집계_요청.get검색어()));
 
-        검색결과_목록_메인 집계_결과 = this.전체_집계결과_가져오기(일반_집계_요청.of(검색어_집계_요청, esQuery));
+        검색결과_목록_메인 집계_결과 = this.전체_집계결과_가져오기(일반_집계_쿼리_생성기.of(검색어_집계_요청, esQuery));
         return 집계_결과;
     }
 }

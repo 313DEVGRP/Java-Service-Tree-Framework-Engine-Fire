@@ -1,16 +1,16 @@
-package com.arms.elasticsearch.query;
+package com.arms.elasticsearch.query.builder;
 
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 
 import java.util.List;
 
-public class 서브_집계_요청 {
+public class 하위_집계_빌더_생성기 {
 
     private List<String> 하위그룹필드;
     private int size;
 
-    public 서브_집계_요청(List<String> 하위그룹필드, int size){
+    public 하위_집계_빌더_생성기(List<String> 하위그룹필드, int size){
         this.하위그룹필드 = 하위그룹필드;
     }
 

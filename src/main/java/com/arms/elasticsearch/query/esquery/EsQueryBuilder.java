@@ -1,8 +1,7 @@
-package com.arms.elasticsearch.query;
+package com.arms.elasticsearch.query.esquery;
 
-import com.arms.elasticsearch.query.bool.EsBoolQuery;
-import com.arms.elasticsearch.query.bool.RangeQueryFilter;
-import com.arms.elasticsearch.query.sort.SortBy;
+import com.arms.elasticsearch.query.EsQuery;
+import com.arms.elasticsearch.query.filter.RangeQueryFilter;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.core.ParameterizedTypeReference;
@@ -18,13 +17,13 @@ public class EsQueryBuilder extends EsQuery {
 		return this;
 	}
 
-	public EsQueryBuilder sort(SortBy sortBy){
-		setQuery(new ParameterizedTypeReference<>() {},sortBy.sortBy());
+	public EsQueryBuilder sort(EsSortQuery esSortQuery){
+		setQuery(new ParameterizedTypeReference<>() {}, esSortQuery.sortBy());
 		return this;
 	}
 
-	public EsQueryBuilder queryString(QueryString queryString){
-		setQuery(new ParameterizedTypeReference<>() {},queryString.queryString());
+	public EsQueryBuilder queryString(EsQueryString esQueryString){
+		setQuery(new ParameterizedTypeReference<>() {}, esQueryString.queryString());
 		return this;
 	}
 

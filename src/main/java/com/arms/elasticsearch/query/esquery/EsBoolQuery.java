@@ -1,4 +1,4 @@
-package com.arms.elasticsearch.query.bool;
+package com.arms.elasticsearch.query.esquery;
 
 import com.arms.elasticsearch.query.EsQuery;
 import org.elasticsearch.index.query.BoolQueryBuilder;

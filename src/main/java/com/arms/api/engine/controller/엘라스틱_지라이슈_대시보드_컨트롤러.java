@@ -11,7 +11,15 @@ import com.arms.api.engine.model.vo.Worker;
 import com.arms.api.engine.model.vo.검색어_검색결과;
 import com.arms.api.engine.model.vo.제품_서비스_버전;
 import com.arms.elasticsearch.query.*;
-import com.arms.elasticsearch.query.bool.*;
+import com.arms.elasticsearch.query.esquery.EsBoolQuery;
+import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
+import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
+import com.arms.elasticsearch.query.factory.일반_검색_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.일반_집계_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.서브_집계_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.일자별_집계_쿼리_생성기;
+import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
+import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.검색결과;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.SearchHit;
@@ -40,15 +48,15 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
             지라이슈_제품_및_제품버전_집계_요청 검색요청
     ) {
         EsBoolQuery[] esBoolQueries = Stream.of(
-                new TermQueryMust("pdServiceId", 검색요청.getPdServiceLink()),
+                new MustTermQuery("pdServiceId", 검색요청.getPdServiceLink()),
                 new TermsQueryFilter("pdServiceVersions", 검색요청.getPdServiceVersionLinks()),
-                검색요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
-                검색요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null
+                검색요청.getIsReqType() == IsReqType.REQUIREMENT ? new MustTermQuery("isReq", true) : null,
+                검색요청.getIsReqType() == IsReqType.ISSUE ? new MustTermQuery("isReq", false) : null
         ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
 
         EsQuery esQuery = new EsQueryBuilder().bool(esBoolQueries);
 
-        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(검색요청, esQuery)));
+        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_쿼리_생성기.of(검색요청, esQuery)));
     }
 
     @GetMapping("/aggregation/flat")
@@ -56,15 +64,15 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
             지라이슈_제품_및_제품버전_집계_요청 검색요청
     ) {
         EsBoolQuery[] esBoolQueries = Stream.of(
-                new TermQueryMust("pdServiceId", 검색요청.getPdServiceLink()),
+                new MustTermQuery("pdServiceId", 검색요청.getPdServiceLink()),
                 new TermsQueryFilter("pdServiceVersions", 검색요청.getPdServiceVersionLinks()),
-                검색요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
-                검색요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null
+                검색요청.getIsReqType() == IsReqType.REQUIREMENT ? new MustTermQuery("isReq", true) : null,
+                검색요청.getIsReqType() == IsReqType.ISSUE ? new MustTermQuery("isReq", false) : null
         ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
 
         EsQuery esQuery = new EsQueryBuilder().bool(esBoolQueries);
 
-        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청_서브집계.of(검색요청, esQuery)));
+        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(서브_집계_쿼리_생성기.of(검색요청, esQuery)));
     }
 
     @GetMapping("/requirements-jira-issue-statuses")
@@ -101,9 +109,9 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
             = new EsQueryBuilder()
                 .bool(
                       new TermsQueryFilter(지라이슈_일자별_집계_요청.get필터필드(), 지라이슈_일자별_집계_요청.get필터필드검색어()),
-                      new TermQueryMust("pdServiceId",pdServiceId));
+                      new MustTermQuery("pdServiceId",pdServiceId));
 
-        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일자별_집계_요청.of(지라이슈_일자별_집계_요청, esQuery)));
+        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일자별_집계_쿼리_생성기.of(지라이슈_일자별_집계_요청, esQuery)));
     }
 
     @GetMapping("/normal/{pdServiceId}")
@@ -112,11 +120,11 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         EsQuery esQuery
             = new EsQueryBuilder()
                 .bool(
-                         new TermQueryMust("pdServiceId",pdServiceId)
-                        ,new TermQueryMust("isReq", 지라이슈_일반_집계_요청.getIsReq())
+                         new MustTermQuery("pdServiceId",pdServiceId)
+                        ,new MustTermQuery("isReq", 지라이슈_일반_집계_요청.getIsReq())
                 );
 
-        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(지라이슈_일반_집계_요청, esQuery)));
+        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery)));
     }
 
     @GetMapping("/normal-version/{pdServiceId}")
@@ -126,12 +134,12 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         EsQuery esQuery
             = new EsQueryBuilder()
                 .bool(
-                        new TermQueryMust("pdServiceId",pdServiceId)
-                        ,new TermQueryMust("isReq", 지라이슈_일반_집계_요청.getIsReq())
+                        new MustTermQuery("pdServiceId",pdServiceId)
+                        ,new MustTermQuery("isReq", 지라이슈_일반_집계_요청.getIsReq())
                         ,new TermsQueryFilter("pdServiceVersions",pdServiceVersionLinks)
                 );
 
-        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(지라이슈_일반_집계_요청, esQuery)));
+        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery)));
     }
 
     @GetMapping("/normal-version-only/{pdServiceId}")
@@ -141,11 +149,11 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         EsQuery esQuery
             = new EsQueryBuilder()
                 .bool(
-                        new TermQueryMust("pdServiceId",pdServiceId)
+                        new MustTermQuery("pdServiceId",pdServiceId)
                         ,new TermsQueryFilter("pdServiceVersions",pdServiceVersionLinks)
                 );
 
-        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(지라이슈_단순_검색_요청, esQuery)));
+        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_쿼리_생성기.of(지라이슈_단순_검색_요청, esQuery)));
     }
 
     @GetMapping("/normal-versionAndMail-filter/{pdServiceId}")
@@ -157,10 +165,10 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
                 = new EsQueryBuilder()
                 .bool(  new TermsQueryFilter("assignee.assignee_emailAddress.keyword", mailAddressList),
                         new TermsQueryFilter("pdServiceVersions",pdServiceVersionLinks),
-                        new TermQueryMust("pdServiceId",pdServiceId)
+                        new MustTermQuery("pdServiceId",pdServiceId)
                 );
 
-        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(지라이슈_단순_검색_요청, esQuery)));
+        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_쿼리_생성기.of(지라이슈_단순_검색_요청, esQuery)));
     }
 
     @PostMapping("/assignees-requirements-involvements")
@@ -176,10 +184,10 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
 
         log.info("[엘라스틱_지라이슈_대시보드_컨트롤러 :: 요구사항_별_상태_및_관여_작업자_수 ] :: 병합_요청_사항_요청값_생성 -> {}", 병합집계요청.get요구_사항());
         검색결과_목록_메인 요구사항
-            =  지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(병합집계요청.get요구_사항(), 병합_요청_사항_요청값_생성(병합집계요청.get요구_사항())));
+            =  지라이슈_검색엔진.집계결과_가져오기(일반_집계_쿼리_생성기.of(병합집계요청.get요구_사항(), 병합_요청_사항_요청값_생성(병합집계요청.get요구_사항())));
 
         검색결과_목록_메인 하위_이슈_사항
-            =  지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(병합집계요청.get요구_사항(), 병합_요청_사항_요청값_생성(병합집계요청.get하위_이슈_사항())));
+            =  지라이슈_검색엔진.집계결과_가져오기(일반_집계_쿼리_생성기.of(병합집계요청.get요구_사항(), 병합_요청_사항_요청값_생성(병합집계요청.get하위_이슈_사항())));
 
         return ResponseEntity.ok(지라이슈_검색엔진.요구사항_별_상태_및_관여_작업자수_내용(요구사항,하위_이슈_사항));
     }
@@ -197,9 +205,9 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
 
         EsQuery esQuery
             = new EsQueryBuilder()
-                .bool(new TermQueryMust("pdServiceId",pdServiceId));
+                .bool(new MustTermQuery("pdServiceId",pdServiceId));
 
-        검색결과_목록_메인 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(지라이슈_일반_집계_요청, esQuery));
+        검색결과_목록_메인 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(일반_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery));
         return ResponseEntity.ok(집계결과_가져오기);
     }
 
@@ -239,13 +247,13 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         EsQuery esQuery
                 = new EsQueryBuilder()
                 .bool(
-                        new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink())
-                        , new TermQueryMust("isReq", isReq)
+                        new MustTermQuery("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink())
+                        , new MustTermQuery("isReq", isReq)
                         , new TermsQueryFilter("pdServiceVersions", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks())
                         , new ExistsQueryFilter(resolution)
                 );
 
-        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_요청.of(지라이슈_제품_및_제품버전_집계_요청, esQuery)));
+        return ResponseEntity.ok(지라이슈_검색엔진.집계결과_가져오기(일반_집계_쿼리_생성기.of(지라이슈_제품_및_제품버전_집계_요청, esQuery)));
     }
 
 
@@ -255,19 +263,19 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         EsQuery esQuery
                 = new EsQueryBuilder()
                 .bool(
-                        new TermQueryMust("pdServiceId",pdServiceId),
+                        new MustTermQuery("pdServiceId",pdServiceId),
                         new TermsQueryFilter("pdServiceVersions",지라이슈_일반_검색_요청.getPdServiceVersionLinks())
                 );
 
-        return ResponseEntity.ok(지라이슈_검색엔진.지라이슈_조회(일반_검색_요청.of(지라이슈_일반_검색_요청, esQuery)));
+        return ResponseEntity.ok(지라이슈_검색엔진.지라이슈_조회(일반_검색_쿼리_생성기.of(지라이슈_일반_검색_요청, esQuery)));
     }
 
     private EsQuery 병합_요청_사항_요청값_생성(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청){
         EsQuery esQuery
                 = new EsQueryBuilder()
                 .bool( new TermsQueryFilter("pdServiceVersions",지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
-                        new TermQueryMust("pdServiceId",지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
-                        new TermQueryMust("isReq",지라이슈_제품_및_제품버전_집계_요청.getIsReqType().isNotAllAndIsReq())
+                        new MustTermQuery("pdServiceId",지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
+                        new MustTermQuery("isReq",지라이슈_제품_및_제품버전_집계_요청.getIsReqType().isNotAllAndIsReq())
                 );
 
         return esQuery;

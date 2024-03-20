@@ -1,14 +1,14 @@
-package com.arms.elasticsearch.query;
+package com.arms.elasticsearch.query.esquery;
 
 import com.arms.elasticsearch.query.EsQuery;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 
-public class QueryString extends EsQuery {
+public class EsQueryString extends EsQuery {
 
 	private QueryStringQueryBuilder queryBuilder;
 
-	public QueryString(String queryString ){
+	public EsQueryString(String queryString ){
 		if(queryString!=null){
 			this.queryBuilder = QueryBuilders.queryStringQuery(queryString);
 		}

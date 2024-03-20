@@ -1,5 +1,6 @@
-package com.arms.elasticsearch.query.bool;
+package com.arms.elasticsearch.query.filter;
 
+import com.arms.elasticsearch.query.Filter;
 import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermsQueryBuilder;

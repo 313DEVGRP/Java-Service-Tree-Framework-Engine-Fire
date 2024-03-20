@@ -6,9 +6,9 @@ import com.arms.api.engine.repository.인덱스자료;
 import com.arms.api.engine.repository.지라이슈_저장소;
 import com.arms.api.engine.service.지라이슈_서비스;
 import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.EsQueryBuilder;
-import com.arms.elasticsearch.query.bool.TermQueryMust;
-import com.arms.elasticsearch.query.bool.TermsQueryFilter;
+import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
+import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
+import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.검색결과;
 import com.arms.elasticsearch.검색결과_목록_메인;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -450,7 +450,7 @@ public class 인덱스Test {
         pdServiceVersionLinks.add(36L);
 
         EsQuery esQuery = new EsQueryBuilder()
-                .bool(new TermQueryMust("pdServiceId", pdServiceLink),
+                .bool(new MustTermQuery("pdServiceId", pdServiceLink),
                         new TermsQueryFilter("pdServiceVersion", pdServiceVersionLinks)
                 );
 

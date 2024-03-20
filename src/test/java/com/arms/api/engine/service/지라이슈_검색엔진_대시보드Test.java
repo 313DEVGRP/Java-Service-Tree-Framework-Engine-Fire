@@ -14,10 +14,10 @@ import com.arms.api.engine.model.vo.제품_서비스_버전;
 import com.arms.api.engine.model.vo.하위_이슈_사항;
 import com.arms.api.engine.model.vo.하위_이슈_사항들;
 import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.EsQueryBuilder;
-import com.arms.elasticsearch.query.bool.TermQueryMust;
-import com.arms.elasticsearch.query.bool.TermsQueryFilter;
-import com.arms.elasticsearch.query.일반_집계_요청;
+import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
+import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
+import com.arms.elasticsearch.query.filter.TermsQueryFilter;
+import com.arms.elasticsearch.query.factory.일반_집계_쿼리_생성기;
 import com.arms.elasticsearch.검색결과;
 import com.arms.elasticsearch.검색결과_목록_메인;
 
@@ -58,11 +58,11 @@ public class 지라이슈_검색엔진_대시보드Test {
         EsQuery esQuery
                 = new EsQueryBuilder()
                 .bool( new TermsQueryFilter("pdServiceVersion",List.of(16,17)),
-                        new TermQueryMust("pdServiceId",13L),
-                        new TermQueryMust("isReq",true)
+                        new MustTermQuery("pdServiceId",13L),
+                        new MustTermQuery("isReq",true)
                 );
 
-        return 지라이슈_대시보드_서비스.집계결과_가져오기(일반_집계_요청.of(지라이슈_일반_집계_요청, esQuery));
+        return 지라이슈_대시보드_서비스.집계결과_가져오기(일반_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery));
     }
 
     private 검색결과_목록_메인 하위이슈(){
@@ -75,11 +75,11 @@ public class 지라이슈_검색엔진_대시보드Test {
         EsQuery esQuery
                 = new EsQueryBuilder()
                 .bool( new TermsQueryFilter("pdServiceVersion",List.of(16,17)),
-                        new TermQueryMust("pdServiceId",13L),
-                        new TermQueryMust("isReq",false)
+                        new MustTermQuery("pdServiceId",13L),
+                        new MustTermQuery("isReq",false)
                 );
 
-        return 지라이슈_대시보드_서비스.집계결과_가져오기(일반_집계_요청.of(지라이슈_일반_집계_요청, esQuery));
+        return 지라이슈_대시보드_서비스.집계결과_가져오기(일반_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery));
     }
 
 

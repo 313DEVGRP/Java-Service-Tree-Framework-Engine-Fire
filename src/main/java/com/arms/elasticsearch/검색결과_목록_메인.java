@@ -37,7 +37,7 @@ public class 검색결과_목록_메인 {
 	public 검색결과_목록_메인(Map<String, Aggregation> bucketsAggregationMap) {
 
 		this.검색결과 = bucketsAggregationMap.entrySet().stream()
-			.collect(groupingBy(a->new 그룹이름(a.getKey()).get()
+			.collect(groupingBy(a->new 검색결과_그룹(a.getKey()).get()
 				,flatMapping(buckets-> 버킷종류별_분기(buckets)
 							,toList())));
 	}

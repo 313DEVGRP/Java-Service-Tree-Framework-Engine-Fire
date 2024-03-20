@@ -1,8 +1,11 @@
-package com.arms.elasticsearch.query;
+package com.arms.elasticsearch.query.factory;
 
 import java.util.List;
 import java.util.Optional;
 
+import com.arms.elasticsearch.query.EsQuery;
+import com.arms.elasticsearch.query.builder.하위_집계_빌더_생성기;
+import com.arms.elasticsearch.query.쿼리_추상_팩토리;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
@@ -18,7 +21,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class 일반_집계_요청 implements 쿼리_추상_팩토리 {
+public class 일반_집계_쿼리_생성기 implements 쿼리_추상_팩토리 {
 
 	private final List<String> 하위그룹필드들;
 	private final String 메인그룹필드;
@@ -27,7 +30,7 @@ public class 일반_집계_요청 implements 쿼리_추상_팩토리 {
 	private final boolean 컨텐츠보기여부;
 	private final EsQuery esQuery;
 
-	private 일반_집계_요청(기본_집계_요청 기본_집계_요청, EsQuery esQuery){
+	private 일반_집계_쿼리_생성기(기본_집계_요청 기본_집계_요청, EsQuery esQuery){
 		this.하위그룹필드들 = 기본_집계_요청.get하위그룹필드들();
 		this.메인그룹필드 = 기본_집계_요청.get메인그룹필드();
 		this.크기 = 기본_집계_요청.get크기();
@@ -37,7 +40,7 @@ public class 일반_집계_요청 implements 쿼리_추상_팩토리 {
 	}
 
 	public static 쿼리_추상_팩토리 of(기본_집계_요청 기본_집계_요청, EsQuery esQuery){
-		return new 일반_집계_요청(기본_집계_요청, esQuery);
+		return new 일반_집계_쿼리_생성기(기본_집계_요청, esQuery);
 	}
 
 	@Override
@@ -45,7 +48,7 @@ public class 일반_집계_요청 implements 쿼리_추상_팩토리 {
 		BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
 		List<FieldSortBuilder> fieldSortBuilders = esQuery.getQuery(new ParameterizedTypeReference<>(){});
 
-		서브_집계_요청 서브_집계_요청 = new 서브_집계_요청(하위그룹필드들, 크기);
+		하위_집계_빌더_생성기 하위_집계_빌더_생성기 = new 하위_집계_빌더_생성기(하위그룹필드들, 크기);
 
 		NativeSearchQueryBuilder nativeSearchQueryBuilder
 			= new NativeSearchQueryBuilder()
@@ -75,7 +78,7 @@ public class 일반_집계_요청 implements 쿼리_추상_팩토리 {
 						if(!하위그룹필드들.isEmpty()){
 							termsAggregationBuilder
 								.subAggregation(
-										서브_집계_요청.createNestedAggregation(하위그룹필드들, 하위크기)
+										하위_집계_빌더_생성기.createNestedAggregation(하위그룹필드들, 하위크기)
 								);
 						}
 					});

@@ -12,10 +12,16 @@ import com.arms.api.engine.repository.인덱스자료;
 import com.arms.api.engine.repository.지라이슈_저장소;
 import com.arms.elasticsearch.query.*;
 import com.arms.elasticsearch.query.base.기본_정렬_요청;
-import com.arms.elasticsearch.query.bool.*;
-import com.arms.elasticsearch.query.QueryString;
-import com.arms.elasticsearch.query.bool.RangeQueryFilter;
-import com.arms.elasticsearch.query.sort.SortBy;
+import com.arms.elasticsearch.query.esquery.EsBoolQuery;
+import com.arms.elasticsearch.query.esquery.EsQueryString;
+import com.arms.elasticsearch.query.esquery.esboolquery.must.MustQueryString;
+import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
+import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
+import com.arms.elasticsearch.query.filter.RangeQueryFilter;
+import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
+import com.arms.elasticsearch.query.factory.일반_검색_쿼리_생성기;
+import com.arms.elasticsearch.query.filter.TermsQueryFilter;
+import com.arms.elasticsearch.query.esquery.EsSortQuery;
 import com.arms.elasticsearch.검색결과;
 import com.arms.elasticsearch.검색결과_목록_메인;
 import lombok.AllArgsConstructor;
@@ -165,8 +171,8 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     @Override
     public List<검색결과> 제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
         EsQuery esQuery = new EsQueryBuilder()
-                .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
-                        new TermQueryMust("isReq", 지라이슈_제품_및_제품버전_집계_요청.getIsReqType().isNotAllAndIsReq()),
+                .bool(new MustTermQuery("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
+                        new MustTermQuery("isReq", 지라이슈_제품_및_제품버전_집계_요청.getIsReqType().isNotAllAndIsReq()),
                         new TermsQueryFilter("pdServiceVersions", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
                         new ExistsQueryFilter("assignee")
                 );
@@ -341,7 +347,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         // 2. 검색 범위 내의 데이터를 가져온다. 현재 검색 범위는 차트 UI를 고려하여, 4~5주 정도로 적용
         EsQuery esQuery = new EsQueryBuilder()
-                .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
+                .bool(new MustTermQuery("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
                         new TermsQueryFilter("pdServiceVersions", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
                         new RangeQueryFilter("created", monthAgo, now, "fromto")
                 );
@@ -392,7 +398,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     public 요구사항_지라이슈상태_주별_집계 누적데이터조회(Long pdServiceLink, Long[] pdServiceVersionLinks, LocalDate monthAgo) {
         // 총 이슈 개수를 구하기 위한 쿼리
         EsQuery issueEsQuery = new EsQueryBuilder()
-                .bool(new TermQueryMust("pdServiceId", pdServiceLink),
+                .bool(new MustTermQuery("pdServiceId", pdServiceLink),
                         new TermsQueryFilter("pdServiceVersions", pdServiceVersionLinks),
                         new RangeQueryFilter("created", null, monthAgo, "lt")
                 );
@@ -400,8 +406,8 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         // 총 요구사항 개수를 구하기 위한 쿼리
         EsQuery reqEsQuery = new EsQueryBuilder()
-                .bool(new TermQueryMust("pdServiceId", pdServiceLink),
-                        new TermQueryMust("isReq", true),
+                .bool(new MustTermQuery("pdServiceId", pdServiceLink),
+                        new MustTermQuery("isReq", true),
                         new RangeQueryFilter("created", null, monthAgo, "lt")
                 );
         BoolQueryBuilder boolQueryForTotalRequirements = reqEsQuery.getQuery(new ParameterizedTypeReference<>() {});
@@ -474,10 +480,10 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
          String to = 종료일;
 
          EsBoolQuery[] esBoolQueries = Stream.of(
-                new TermQueryMust("pdServiceId", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceLink()),
+                new MustTermQuery("pdServiceId", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceLink()),
                 new TermsQueryFilter("pdServiceVersions", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
-                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
-                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null,
+                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT ? new MustTermQuery("isReq", true) : null,
+                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ? new MustTermQuery("isReq", false) : null,
                 new RangeQueryFilter(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준(), from, to, "fromto")
          ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
 
@@ -532,10 +538,10 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         String to = 종료일;
 
         EsBoolQuery[] esBoolQueries = Stream.of(
-                new TermQueryMust("pdServiceId", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceLink()),
+                new MustTermQuery("pdServiceId", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceLink()),
                 new TermsQueryFilter("pdServiceVersions", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
-                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
-                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null,
+                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT ? new MustTermQuery("isReq", true) : null,
+                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ? new MustTermQuery("isReq", false) : null,
                 new RangeQueryFilter(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준(), from, to, "fromto")
         ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
 
@@ -587,10 +593,10 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         String to = 종료일;
 
         EsBoolQuery[] esBoolQueries = Stream.of(
-                new TermQueryMust("pdServiceId", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceLink()),
+                new MustTermQuery("pdServiceId", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceLink()),
                 new TermsQueryFilter("pdServiceVersions", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
-                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
-                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null,
+                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT ? new MustTermQuery("isReq", true) : null,
+                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ? new MustTermQuery("isReq", false) : null,
                 new RangeQueryFilter(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준(), from, to, "fromto")
         ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
 
@@ -691,8 +697,8 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         }
 
         EsQuery esQuery = new EsQueryBuilder()
-                .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
-                        new TermQueryMust("isReq", 요구사항여부),
+                .bool(new MustTermQuery("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
+                        new MustTermQuery("isReq", 요구사항여부),
                         new TermsQueryFilter("pdServiceVersions", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
                         new ExistsQueryFilter("assignee")
                 );
@@ -815,8 +821,8 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
     @Override
     public 검색어_검색결과<SearchHit<지라이슈>> 지라이슈_검색(검색어_기본_검색_요청 검색어_기본_검색_요청) {
-        EsQuery esQuery = new EsQueryBuilder().queryString(new QueryString(검색어_기본_검색_요청.get검색어()));
-        SearchHits<지라이슈> 지라이슈_검색결과= 지라이슈저장소.search(일반_검색_요청.of(검색어_기본_검색_요청, esQuery).생성());
+        EsQuery esQuery = new EsQueryBuilder().queryString(new EsQueryString(검색어_기본_검색_요청.get검색어()));
+        SearchHits<지라이슈> 지라이슈_검색결과= 지라이슈저장소.search(일반_검색_쿼리_생성기.of(검색어_기본_검색_요청, esQuery).생성());
         검색어_검색결과<SearchHit<지라이슈>> 검색결과_목록 = new 검색어_검색결과<>();
         검색결과_목록.set검색결과_목록(지라이슈_검색결과.getSearchHits());
         검색결과_목록.set결과_총수(지라이슈_검색결과.getTotalHits());
@@ -836,14 +842,14 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new RangeQueryFilter("@timestamp", start_date, end_date,"fromto"),
-                        new QueryStringMust(검색어_날짜포함_검색_요청.get검색어()))
-                .sort(new SortBy(
+                        new MustQueryString(검색어_날짜포함_검색_요청.get검색어()))
+                .sort(new EsSortQuery(
                         List.of(
                                 기본_정렬_요청.builder().필드("_score").정렬기준("desc").build()
                                 , 기본_정렬_요청.builder().필드("@timestamp").정렬기준("desc").build()
                         )
                 ));
-        SearchHits<지라이슈> 지라이슈_검색결과= 지라이슈저장소.search(일반_검색_요청.of(검색어_날짜포함_검색_요청, esQuery).생성());
+        SearchHits<지라이슈> 지라이슈_검색결과= 지라이슈저장소.search(일반_검색_쿼리_생성기.of(검색어_날짜포함_검색_요청, esQuery).생성());
         검색어_검색결과<SearchHit<지라이슈>> 검색결과_목록 = new 검색어_검색결과<>();
         if(지라이슈_검색결과 != null && !지라이슈_검색결과.isEmpty()) {
             검색결과_목록.set검색결과_목록(지라이슈_검색결과.getSearchHits());
