@@ -38,7 +38,8 @@ import java.util.stream.StreamSupport;
 import static java.util.stream.Collectors.*;
 
 @Slf4j
-public class 공통저장소_구현체<T,ID extends Serializable> extends SimpleElasticsearchRepository<T,ID> implements com.arms.elasticsearch.repository.공통저장소<T,ID> {
+public class 공통저장소_구현체<T,ID extends Serializable> extends SimpleElasticsearchRepository<T,ID>
+        implements 공통저장소<T,ID> {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
