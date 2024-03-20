@@ -1,7 +1,7 @@
 package com.arms.elasticsearch.query.factory;
 
 import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.builder.하위_집계_빌더_생성기;
+import com.arms.elasticsearch.query.builder.하위_집계_빌더;
 import com.arms.elasticsearch.query.쿼리_추상_팩토리;
 import lombok.Getter;
 import lombok.Setter;
@@ -47,7 +47,7 @@ public class 일자별_집계_쿼리_생성기 implements 쿼리_추상_팩토�
 
 		FieldSortBuilder sort = esQuery.getQuery(new ParameterizedTypeReference<>(){});
 
-		하위_집계_빌더_생성기 하위_집계_빌더_생성기 = new 하위_집계_빌더_생성기(하위그룹필드들, 크기);
+		하위_집계_빌더 하위_집계_빌더 = new 하위_집계_빌더(하위그룹필드들, 크기);
 
 		NativeSearchQueryBuilder nativeSearchQueryBuilder
 			= new NativeSearchQueryBuilder()
@@ -75,7 +75,7 @@ public class 일자별_집계_쿼리_생성기 implements 쿼리_추상_팩토�
 				Optional.ofNullable(하위그룹필드들)
 					.ifPresent(하위그룹필드들->{
 						if(!하위그룹필드들.isEmpty()){
-							dateHistogramAggregationBuilder.subAggregation(하위_집계_빌더_생성기.createNestedAggregation(하위그룹필드들, 크기));
+							dateHistogramAggregationBuilder.subAggregation(하위_집계_빌더.createNestedAggregation(하위그룹필드들, 크기));
 						}
 					});
 			});

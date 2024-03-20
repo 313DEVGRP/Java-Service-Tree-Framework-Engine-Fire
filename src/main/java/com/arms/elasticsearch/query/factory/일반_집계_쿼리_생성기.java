@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.builder.하위_집계_빌더_생성기;
+import com.arms.elasticsearch.query.builder.하위_집계_빌더;
 import com.arms.elasticsearch.query.쿼리_추상_팩토리;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -48,7 +48,7 @@ public class 일반_집계_쿼리_생성기 implements 쿼리_추상_팩토리 {
 		BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
 		List<FieldSortBuilder> fieldSortBuilders = esQuery.getQuery(new ParameterizedTypeReference<>(){});
 
-		하위_집계_빌더_생성기 하위_집계_빌더_생성기 = new 하위_집계_빌더_생성기(하위그룹필드들, 크기);
+		하위_집계_빌더 하위_집계_빌더 = new 하위_집계_빌더(하위그룹필드들, 크기);
 
 		NativeSearchQueryBuilder nativeSearchQueryBuilder
 			= new NativeSearchQueryBuilder()
@@ -78,7 +78,7 @@ public class 일반_집계_쿼리_생성기 implements 쿼리_추상_팩토리 {
 						if(!하위그룹필드들.isEmpty()){
 							termsAggregationBuilder
 								.subAggregation(
-										하위_집계_빌더_생성기.createNestedAggregation(하위그룹필드들, 하위크기)
+										하위_집계_빌더.createNestedAggregation(하위그룹필드들, 하위크기)
 								);
 						}
 					});

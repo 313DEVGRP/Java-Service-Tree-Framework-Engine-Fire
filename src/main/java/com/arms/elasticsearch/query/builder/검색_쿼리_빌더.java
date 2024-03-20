@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-public final class 검색_쿼리_빌더_생성기 {
+public final class 검색_쿼리_빌더 {
 
     public static NativeSearchQueryBuilder buildSearchQuery(final 검색조건 dto) {
         try {

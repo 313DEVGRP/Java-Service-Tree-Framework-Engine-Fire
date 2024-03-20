@@ -7,7 +7,7 @@ import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.검색결과_목록_메인;
-import com.arms.elasticsearch.query.builder.검색_쿼리_빌더_생성기;
+import com.arms.elasticsearch.query.builder.검색_쿼리_빌더;
 import com.arms.elasticsearch.검색조건;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -215,7 +215,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
     @Override
     public List<T>  getAllCreatedSince(final Date date, Class<T> clazz) {
 
-        NativeSearchQueryBuilder query = 검색_쿼리_빌더_생성기.buildSearchQuery(
+        NativeSearchQueryBuilder query = 검색_쿼리_빌더.buildSearchQuery(
                 "created",
                 date
         );
@@ -227,7 +227,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
     @Override
     public List<T>  searchCreatedSince(final 검색조건 dto, final Date date, Class<T> clazz) {
 
-        NativeSearchQueryBuilder query = 검색_쿼리_빌더_생성기.buildSearchQuery(
+        NativeSearchQueryBuilder query = 검색_쿼리_빌더.buildSearchQuery(
                 dto,
                 date
         );

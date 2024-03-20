@@ -17,7 +17,7 @@ import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.검색결과;
 import com.arms.elasticsearch.검색결과_목록_메인;
-import com.arms.elasticsearch.query.builder.검색_쿼리_빌더_생성기;
+import com.arms.elasticsearch.query.builder.검색_쿼리_빌더;
 import com.arms.elasticsearch.검색조건;
 import com.arms.utils.errors.codes.에러코드;
 import lombok.AllArgsConstructor;
@@ -113,7 +113,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     @Override
     public List<지라이슈> 이슈_검색하기(검색조건 검색조건) {
         Query query
-            = 검색_쿼리_빌더_생성기.buildSearchQuery(검색조건).build();
+            = 검색_쿼리_빌더.buildSearchQuery(검색조건).build();
         return 지라이슈저장소.normalSearch(query);
     }
 
@@ -469,7 +469,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         검색조건.setPage(페이지_번호);
         검색조건.setSize(페이지_사이즈);
 
-        Query query = 검색_쿼리_빌더_생성기.buildSearchQuery(검색조건,서버_아이디).build();
+        Query query = 검색_쿼리_빌더.buildSearchQuery(검색조건,서버_아이디).build();
 
         return 지라이슈저장소.normalSearch(query);
     }
