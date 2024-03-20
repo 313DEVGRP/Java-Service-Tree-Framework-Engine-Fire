@@ -11,6 +11,7 @@ import com.arms.api.engine.model.dto.트리맵_검색요청;
 import com.arms.api.engine.repository.인덱스자료;
 import com.arms.api.engine.repository.지라이슈_저장소;
 import com.arms.elasticsearch.query.*;
+import com.arms.elasticsearch.query.base.기본_정렬_요청;
 import com.arms.elasticsearch.query.bool.*;
 import com.arms.elasticsearch.query.QueryString;
 import com.arms.elasticsearch.query.bool.RangeQueryFilter;
@@ -603,23 +604,6 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         List<지라이슈> 전체결과 = new ArrayList<>();
 
-       /* DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String 지라인덱스 = 인덱스자료.지라이슈_인덱스명;
-
-        LocalDate start = LocalDate.parse(from);
-        LocalDate end = LocalDate.parse(to);
-
-        for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
-            String 호출할_지라인덱스 = 지라인덱스 + "-" + date.format(formatter);
-            if (!인덱스_유틸.인덱스_존재_확인(호출할_지라인덱스)) {
-                continue;
-            }
-
-            List<지라이슈> 결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 호출할_지라인덱스);
-            if (결과 != null && 결과.size() > 0) {
-                전체결과.addAll(결과);
-            }
-        }*/
         boolean 인덱스존재시까지  = true;
         LocalDate today = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -855,8 +839,8 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                         new QueryStringMust(검색어_날짜포함_검색_요청.get검색어()))
                 .sort(new SortBy(
                         List.of(
-                                정렬_요청.builder().필드("_score").정렬기준("desc").build()
-                                ,정렬_요청.builder().필드("@timestamp").정렬기준("desc").build()
+                                기본_정렬_요청.builder().필드("_score").정렬기준("desc").build()
+                                , 기본_정렬_요청.builder().필드("@timestamp").정렬기준("desc").build()
                         )
                 ));
         SearchHits<지라이슈> 지라이슈_검색결과= 지라이슈저장소.search(일반_검색_요청.of(검색어_날짜포함_검색_요청, esQuery).생성());

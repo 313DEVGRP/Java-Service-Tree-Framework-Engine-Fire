@@ -8,15 +8,15 @@ import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 
 import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.정렬_요청;
+import com.arms.elasticsearch.query.base.기본_정렬_요청;
 
 public class SortBy extends EsQuery {
 
 	public List<FieldSortBuilder> fieldSortBuilderList;
 
-	public SortBy(List<정렬_요청> 정렬_요청들){
-		this.fieldSortBuilderList = 정렬_요청들.stream()
-			.map(정렬_요청 -> SortBuilders.fieldSort(정렬_요청.get필드()).order(SortOrder.fromString(정렬_요청.get정렬기준())))
+	public SortBy(List<기본_정렬_요청> 기본정렬_요청들){
+		this.fieldSortBuilderList = 기본정렬_요청들.stream()
+			.map(기본_정렬_요청 -> SortBuilders.fieldSort(기본_정렬_요청.get필드()).order(SortOrder.fromString(기본_정렬_요청.get정렬기준())))
 			.collect(Collectors.toList());
 	};
 

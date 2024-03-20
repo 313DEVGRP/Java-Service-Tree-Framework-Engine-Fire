@@ -12,7 +12,7 @@ import lombok.*;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class 지라사용자_데이터 {
 
-    private String accountId; ///////
+    private String accountId;
 
     private String emailAddress;
 

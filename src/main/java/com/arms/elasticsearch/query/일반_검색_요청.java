@@ -63,9 +63,6 @@ public class 일반_검색_요청 implements 쿼리_추상_팩토리 {
 					sorts.forEach(nativeSearchQueryBuilder::withSort);
 				});
 
-
-
-
 		return nativeSearchQueryBuilder.build();
 	}
 }
