@@ -3,7 +3,7 @@ package com.arms.api.engine.service;
 import com.arms.api.engine.model.dto.*;
 import com.arms.api.engine.model.enums.IsReqType;
 import com.arms.api.engine.model.vo.*;
-import com.arms.api.engine.model.제품버전목록;
+import com.arms.api.engine.model.dto.제품버전목록;
 import com.arms.api.engine.model.entity.지라이슈;
 import com.arms.api.engine.model.dto.지라이슈_일자별_제품_및_제품버전_집계_요청;
 import com.arms.api.engine.model.dto.지라이슈_제품_및_제품버전_집계_요청;
