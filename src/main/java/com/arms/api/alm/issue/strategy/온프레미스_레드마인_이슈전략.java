@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -266,8 +267,38 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
     }
 
     @Override
-    public 지라이슈_데이터 증분이슈_상세정보_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) throws Exception {
-        return null;
+    public 지라이슈_데이터 증분이슈_상세정보_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) {
+
+        로그.info("레드마인_온프레미스_이슈_전략 :: "+ 연결_아이디 + " :: "
+                + 이슈_키_또는_아이디 +" :: 증분이슈_상세정보_가져오기");
+
+        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+        RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+
+        지라이슈_데이터 이슈_데이터;
+        Issue 조회할_이슈 = null;
+
+        try {
+            조회할_이슈 = 레드마인_매니저.getIssueManager().getIssueById(Integer.parseInt(이슈_키_또는_아이디));
+        } catch (RedmineException e) {
+            return null;
+        }
+
+        // 이슈 업데이트 날짜 확인
+        LocalDate 업데이트_날짜 = 조회할_이슈.getUpdatedOn().toInstant()
+                .atZone(ZoneId.systemDefault()).toLocalDate();
+
+        LocalDate 어제_날짜 = LocalDate.now().minusDays(1);
+
+        // 업데이트 날짜와 어제 날짜 비교
+        if (업데이트_날짜.equals(어제_날짜)) {
+            이슈_데이터 = 지라이슈_데이터형_변환(조회할_이슈, 서버정보.getUri());
+        } else {
+            로그.info(이슈_키_또는_아이디 + "는 업데이트 되지 않았습니다.");
+            return null;
+        }
+
+        return 이슈_데이터;
     }
 
     @Override
