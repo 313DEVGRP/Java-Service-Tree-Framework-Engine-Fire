@@ -86,39 +86,37 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         지라프로젝트_데이터 프로젝트_데이터 = 필드_데이터.getProject();
         지라이슈유형_데이터 이슈유형_데이터 = 필드_데이터.getIssuetype();
         지라이슈우선순위_데이터 우선순위_데이터 = 필드_데이터.getPriority();
-/*
-        try {
 
-            // 3.1.3 버전
-
-            Issue 생성할_이슈 = IssueFactory.create(Integer.parseInt(프로젝트_데이터.getId()), 필드_데이터.getSummary());
-            Tracker 이슈타입 = TrackerFactory.create(Integer.parseInt(이슈유형_데이터.getId()), 이슈유형_데이터.getName());
-            생성할_이슈.setTracker(이슈타입);
-            생성할_이슈.setDescription(필드_데이터.getDescription());
-            생성할_이슈.setPriorityId(Integer.parseInt(우선순위_데이터.getId()));
-
-            Issue 생성된_이슈 = 레드마인_매니저.getIssueManager().createIssue(생성할_이슈);
-            이슈_데이터 = 지라이슈_데이터형_변환(생성된_이슈, 서버정보.getUri());
-
+        if (필드_데이터 == null) {
+            로그.error(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: 필드_데이터 값이 Null 입니다.");
+            throw new IllegalArgumentException(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: 필드_데이터 값이 Null 입니다.");
         }
-        catch (Exception e) {
-            로그.error("레드마인 온프레미스 이슈 생성하기에 실패하였습니다." +e.getMessage());
-            throw new IllegalArgumentException(에러코드.이슈생성_오류.getErrorMsg());
+
+        if (프로젝트_데이터 == null) {
+            로그.error(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: 프로젝트_데이터 값이 Null 입니다.");
+            throw new IllegalArgumentException(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: 프로젝트_데이터 값이 Null 입니다.");
         }
-*/
+
+        if (이슈유형_데이터 == null) {
+            로그.error(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: 이슈유형_데이터 값이 Null 입니다.");
+            throw new IllegalArgumentException(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: 이슈유형_데이터 값이 Null 입니다.");
+        }
 
         Tracker 이슈타입 = new Tracker()
                 .setId(Integer.parseInt(이슈유형_데이터.getId()))
                 .setName(이슈유형_데이터.getName());
 
-        Issue 생성이슈;
+        Issue 생성이슈 = new Issue(레드마인_매니저.getTransport(), Integer.parseInt(프로젝트_데이터.getId()))
+                .setSubject(필드_데이터.getSummary())
+                .setTracker(이슈타입)
+                .setDescription(필드_데이터.getDescription());
+
+        if (우선순위_데이터 != null && !우선순위_데이터.getId().isEmpty()) {
+            생성이슈.setPriorityId(Integer.parseInt(필드_데이터.getPriority().getId()));
+        }
+
         try {
-            생성이슈 = new Issue(레드마인_매니저.getTransport(), Integer.parseInt(프로젝트_데이터.getId()))
-                    .setSubject(필드_데이터.getSummary())
-                    .setTracker(이슈타입)
-                    .setDescription(필드_데이터.getDescription())
-                    .setPriorityId(Integer.parseInt(우선순위_데이터.getId()))
-                    .create();
+            생성이슈 = 생성이슈.create();
         }
         catch (RedmineException e) {
             에러로그_유틸.예외로그출력(e, this.getClass().getName(), "이슈_생성하기");
@@ -326,6 +324,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         지라이슈필드_데이터 지라이슈필드_데이터 = new 지라이슈필드_데이터();
 
         지라이슈_데이터.setId(String.valueOf(이슈.getId()));
+        지라이슈_데이터.setKey(String.valueOf(이슈.getId()));
         지라이슈_데이터.setSelf(지라유틸.서버정보경로_체크(서버정보경로) + "/issues/" + 이슈.getId() + ".json");
 
         지라이슈필드_데이터.setProject(new 지라프로젝트_데이터(String.valueOf(이슈.getProjectId()), 이슈.getProjectName()));
