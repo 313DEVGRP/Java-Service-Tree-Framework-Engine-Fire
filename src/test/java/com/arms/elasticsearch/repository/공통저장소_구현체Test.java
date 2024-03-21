@@ -1,6 +1,6 @@
 package com.arms.elasticsearch.repository;
 
-import com.arms.api.jira.utils.지라유틸;
+import com.arms.api.alm.utils.지라유틸;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;

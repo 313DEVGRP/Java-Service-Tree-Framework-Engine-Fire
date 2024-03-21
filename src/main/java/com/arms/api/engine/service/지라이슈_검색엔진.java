@@ -6,11 +6,11 @@ import com.arms.api.engine.repository.인덱스자료;
 import com.arms.api.engine.repository.지라이슈_저장소;
 import com.arms.api.engine.model.vo.히트맵날짜데이터;
 import com.arms.api.engine.model.vo.히트맵데이터;
-import com.arms.api.jira.jiraissue.model.지라이슈_데이터;
-import com.arms.api.jira.jiraissue.model.지라이슈필드_데이터;
-import com.arms.api.jira.jiraissue.model.지라프로젝트_데이터;
-import com.arms.api.jira.jiraissue.service.지라이슈_전략_호출;
-import com.arms.api.jira.jiraissuestatus.model.지라이슈상태_데이터;
+import com.arms.api.alm.issue.model.지라이슈_데이터;
+import com.arms.api.alm.issue.model.지라이슈필드_데이터;
+import com.arms.api.alm.issue.model.지라프로젝트_데이터;
+import com.arms.api.alm.issue.service.이슈전략_호출;
+import com.arms.api.alm.issuestatus.model.지라이슈상태_데이터;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
@@ -61,7 +61,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
     private 지라이슈_저장소 지라이슈저장소;
 
-    private 지라이슈_전략_호출 지라이슈_전략_호출;
+    private 이슈전략_호출 이슈전략_호출;
 
     @Override
     public 지라이슈 이슈_추가하기(지라이슈 지라이슈) {
@@ -140,7 +140,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
             throw new IllegalArgumentException("이슈_검색엔진_저장 Error cReqLink " + 에러코드.파라미터_NULL_오류.getErrorMsg());
         }
 
-        지라이슈_데이터 반환된_이슈 = Optional.ofNullable(지라이슈_전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키))
+        지라이슈_데이터 반환된_이슈 = Optional.ofNullable(이슈전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키))
                                         .orElse(null);
 
         if (반환된_이슈 == null) {
@@ -209,7 +209,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
         List<지라이슈> 벌크_저장_목록 = new ArrayList<지라이슈>();
 
-        지라이슈_데이터 반환된_이슈 = Optional.ofNullable(지라이슈_전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키))
+        지라이슈_데이터 반환된_이슈 = Optional.ofNullable(이슈전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키))
                 .map(이슈 -> {
                     벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink));
                     return 이슈;
@@ -264,10 +264,10 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         else {
             List<지라이슈_데이터> 이슈링크_또는_서브테스크_목록 = new ArrayList<지라이슈_데이터>();
 
-            Optional.ofNullable(지라이슈_전략_호출.이슈링크_가져오기(지라서버_아이디, 이슈_키))
+            Optional.ofNullable(이슈전략_호출.이슈링크_가져오기(지라서버_아이디, 이슈_키))
                     .ifPresent(이슈링크_목록 -> 이슈링크_또는_서브테스크_목록.addAll(이슈링크_목록));
 
-            Optional.ofNullable(지라이슈_전략_호출.서브테스크_가져오기(지라서버_아이디, 이슈_키))
+            Optional.ofNullable(이슈전략_호출.서브테스크_가져오기(지라서버_아이디, 이슈_키))
                     .ifPresent(서브테스크_목록 -> 이슈링크_또는_서브테스크_목록.addAll(서브테스크_목록));
 
             if (이슈링크_또는_서브테스크_목록 != null && 이슈링크_또는_서브테스크_목록.size() >= 1) {
@@ -314,8 +314,8 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         * 스케줄러 작동 시 암스에서 생성한 요구사항 자체가 전날 업데이트가 일어났는지 확인 시 업데이트가 없을 시 null 반환(삭제된 이슈를 조회할 때 또한)
         * 따라서 암스 생성 요구사항 상세정보를 JIRA에서 조회 후 어플리케이션 단에서 updated 항목을 검증 후 증분 데이터 판단 후 저장시키는 방법
         **/
-        // 지라이슈_데이터 반환된_증분_이슈 = Optional.ofNullable(지라이슈_전략_호출.증분이슈_상세정보_가져오기(지라서버_아이디, 이슈_키))
-        지라이슈_데이터 반환된_이슈 = Optional.ofNullable(지라이슈_전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키))
+        // 지라이슈_데이터 반환된_증분_이슈 = Optional.ofNullable(이슈전략_호출.증분이슈_상세정보_가져오기(지라서버_아이디, 이슈_키))
+        지라이슈_데이터 반환된_이슈 = Optional.ofNullable(이슈전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키))
                 .map(이슈 -> {
                     if (전일_업데이트여부(이슈.getFields().getUpdated())) {
                         증분벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink));
@@ -382,10 +382,10 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         else {
             List<지라이슈_데이터> 이슈링크_또는_서브테스크_목록 = new ArrayList<>();
 
-            Optional.ofNullable(지라이슈_전략_호출.증분이슈링크_가져오기(지라서버_아이디, 이슈_키))
+            Optional.ofNullable(이슈전략_호출.증분이슈링크_가져오기(지라서버_아이디, 이슈_키))
                     .ifPresent(이슈링크_목록 -> 이슈링크_또는_서브테스크_목록.addAll(이슈링크_목록));
 
-            Optional.ofNullable(지라이슈_전략_호출.증분서브테스크_가져오기(지라서버_아이디, 이슈_키))
+            Optional.ofNullable(이슈전략_호출.증분서브테스크_가져오기(지라서버_아이디, 이슈_키))
                     .ifPresent(서브테스크_목록 -> 이슈링크_또는_서브테스크_목록.addAll(서브테스크_목록));
 
             if (이슈링크_또는_서브테스크_목록 != null && 이슈링크_또는_서브테스크_목록.size() >= 1) {

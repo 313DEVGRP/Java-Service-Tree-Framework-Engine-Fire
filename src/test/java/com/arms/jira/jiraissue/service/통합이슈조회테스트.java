@@ -1,18 +1,19 @@
 package com.arms.jira.jiraissue.service;
 
-import com.arms.api.jira.jiraissue.model.지라사용자_데이터;
-import com.arms.api.jira.jiraissue.model.지라이슈_데이터;
-import com.arms.api.jira.jiraissue.model.지라이슈워크로그_데이터;
-import com.arms.api.jira.jiraissue.model.지라이슈전체워크로그_데이터;
-import com.arms.api.jira.jiraissue.model.지라이슈조회_데이터;
-import com.arms.api.jira.jiraissue.model.지라이슈필드_데이터;
-import com.arms.api.jira.jiraissue.model.지라프로젝트_데이터;
-import com.arms.api.jira.jiraissueresolution.model.지라이슈해결책_데이터;
-import com.arms.api.jira.jiraissuestatus.model.지라이슈상태_데이터;
-import com.arms.api.jira.jiraissuestatus.model.클라우드_지라이슈상태_데이터;
-import com.arms.api.jira.jiraissuetype.model.지라이슈유형_데이터;
-import com.arms.api.jira.jirapriority.model.지라이슈우선순위_데이터;
-import com.arms.api.jira.utils.지라유틸;
+import com.arms.api.alm.issue.model.지라사용자_데이터;
+import com.arms.api.alm.issue.model.지라이슈_데이터;
+import com.arms.api.alm.issue.model.지라이슈워크로그_데이터;
+import com.arms.api.alm.issue.model.지라이슈전체워크로그_데이터;
+import com.arms.api.alm.issue.model.지라이슈조회_데이터;
+import com.arms.api.alm.issue.model.지라이슈필드_데이터;
+import com.arms.api.alm.issue.model.지라프로젝트_데이터;
+import com.arms.api.alm.issue.service.이슈전략_호출;
+import com.arms.api.alm.issueresolution.model.지라이슈해결책_데이터;
+import com.arms.api.alm.issuestatus.model.지라이슈상태_데이터;
+import com.arms.api.alm.issuestatus.model.클라우드_지라이슈상태_데이터;
+import com.arms.api.alm.issuetype.model.지라이슈유형_데이터;
+import com.arms.api.alm.priority.model.지라이슈우선순위_데이터;
+import com.arms.api.alm.utils.지라유틸;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.api.domain.BasicUser;
 import com.atlassian.jira.rest.client.api.domain.Issue;
@@ -46,7 +47,7 @@ class 통합이슈조회테스트 {
     ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
-    com.arms.api.jira.jiraissue.service.지라이슈_전략_호출 지라이슈_전략_호출;
+    이슈전략_호출 이슈전략_호출;
 
     String fieldsParam = "project,issuetype,creator,reporter,assignee,labels,priority,status,resolution,resolutiondate,created,worklogs,timespent,fixVersions";
 
@@ -486,9 +487,9 @@ class 통합이슈조회테스트 {
 
         List<지라이슈_데이터> 연관된_지라이슈_목록 = new ArrayList<>();
 
-        지라이슈_데이터 이슈 = 지라이슈_전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키);
-        List<지라이슈_데이터> 이슈링크_목록 = 지라이슈_전략_호출.이슈링크_가져오기(지라서버_아이디, 이슈_키);
-        List<지라이슈_데이터> 서브테스크_목록 = 지라이슈_전략_호출.서브테스크_가져오기(지라서버_아이디, 이슈_키);
+        지라이슈_데이터 이슈 = 이슈전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키);
+        List<지라이슈_데이터> 이슈링크_목록 = 이슈전략_호출.이슈링크_가져오기(지라서버_아이디, 이슈_키);
+        List<지라이슈_데이터> 서브테스크_목록 = 이슈전략_호출.서브테스크_가져오기(지라서버_아이디, 이슈_키);
 
         연관된_지라이슈_목록.add(이슈);
         연관된_지라이슈_목록.addAll(이슈링크_목록);
