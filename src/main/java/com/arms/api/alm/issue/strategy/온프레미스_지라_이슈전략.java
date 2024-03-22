@@ -2,7 +2,7 @@ package com.arms.api.alm.issue.strategy;
 
 import com.arms.api.alm.issue.model.지라사용자_데이터;
 import com.arms.api.alm.issue.model.지라이슈워크로그_데이터;
-import com.arms.api.alm.issueresolution.model.지라이슈해결책_데이터;
+import com.arms.api.alm.issueresolution.model.이슈해결책_데이터;
 import com.arms.api.alm.issuetype.model.지라이슈유형_데이터;
 import com.arms.api.alm.priority.model.지라이슈우선순위_데이터;
 import com.arms.api.alm.issue.model.지라이슈_데이터;
@@ -367,7 +367,7 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
             String 이슈해결책_이름 = 지라이슈.getResolution().getName();
             String 이슈해결책_설명 = 지라이슈.getResolution().getDescription();
 
-            지라이슈해결책_데이터 이슈해결책 = new 지라이슈해결책_데이터();
+            이슈해결책_데이터 이슈해결책 = new 이슈해결책_데이터();
             이슈해결책.setSelf(이슈해결책_주소);
             이슈해결책.setId(이슈해결책_아이디);
             이슈해결책.setName(이슈해결책_이름);

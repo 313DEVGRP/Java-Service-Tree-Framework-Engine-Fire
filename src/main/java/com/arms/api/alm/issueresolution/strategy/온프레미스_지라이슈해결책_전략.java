@@ -1,6 +1,6 @@
 package com.arms.api.alm.issueresolution.strategy;
 
-import com.arms.api.alm.issueresolution.model.지라이슈해결책_데이터;
+import com.arms.api.alm.issueresolution.model.이슈해결책_데이터;
 import com.arms.api.alm.utils.지라유틸;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.utils.errors.codes.에러코드;
@@ -26,7 +26,7 @@ public class 온프레미스_지라이슈해결책_전략 implements 지라이�
     private 서버정보_서비스 서버정보_서비스;
 
     @Override
-    public List<지라이슈해결책_데이터> 이슈해결책_목록_가져오기(Long 연결_아이디) throws URISyntaxException, IOException {
+    public List<이슈해결책_데이터> 이슈해결책_목록_가져오기(Long 연결_아이디) throws URISyntaxException, IOException {
 
         로그.info("온프레미스 지라 이슈해결책_목록_가져오기");
         try {
@@ -39,10 +39,10 @@ public class 온프레미스_지라이슈해결책_전략 implements 지라이�
                                                                     .getResolutions()
                                                                     .claim();
 
-            List<지라이슈해결책_데이터> 반환할_이슈_해결책_목록 = new ArrayList<>();
+            List<이슈해결책_데이터> 반환할_이슈_해결책_목록 = new ArrayList<>();
 
             for (Resolution 온프레미스_이슈_해결책 : 온프레미스_이슈_해결책_목록) {
-                지라이슈해결책_데이터 반환할_이슈_해결책 = new 지라이슈해결책_데이터();
+                이슈해결책_데이터 반환할_이슈_해결책 = new 이슈해결책_데이터();
 
                 반환할_이슈_해결책.setSelf(온프레미스_이슈_해결책.getSelf().toString());
                 반환할_이슈_해결책.setId(온프레미스_이슈_해결책.getId().toString());

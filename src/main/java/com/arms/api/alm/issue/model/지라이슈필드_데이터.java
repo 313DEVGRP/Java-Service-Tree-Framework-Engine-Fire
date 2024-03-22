@@ -1,6 +1,6 @@
 package com.arms.api.alm.issue.model;
 
-import com.arms.api.alm.issueresolution.model.지라이슈해결책_데이터;
+import com.arms.api.alm.issueresolution.model.이슈해결책_데이터;
 import com.arms.api.alm.issuetype.model.지라이슈유형_데이터;
 import com.arms.api.alm.priority.model.지라이슈우선순위_데이터;
 import com.arms.api.alm.issuestatus.model.지라이슈상태_데이터;
@@ -34,7 +34,7 @@ public class 지라이슈필드_데이터 {
 
     private 지라이슈상태_데이터 status;
 
-    private 지라이슈해결책_데이터 resolution;
+    private 이슈해결책_데이터 resolution;
 
     private String resolutiondate;
 
