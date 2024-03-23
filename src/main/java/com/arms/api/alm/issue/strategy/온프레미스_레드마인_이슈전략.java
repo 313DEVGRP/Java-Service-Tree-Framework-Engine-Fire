@@ -228,8 +228,18 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         }
 
         for (IssueRelation 연관이슈 : 부모이슈.getRelations()) {
-            //System.out.println("연관이슈: " + 연관이슈);
-            이슈_목록.add(이슈_상세정보_가져오기(연결_아이디, String.valueOf(연관이슈.getIssueToId())));
+
+            String 연관이슈_아이디;
+
+            if (이슈_키_또는_아이디.equals(String.valueOf(연관이슈.getIssueId()))) {
+                연관이슈_아이디 = String.valueOf(연관이슈.getIssueToId());
+            } else {
+                연관이슈_아이디 = String.valueOf(연관이슈.getIssueId());
+            }
+
+            Optional.ofNullable(연관이슈_아이디)
+                    .map(이슈_아이디 -> 이슈_상세정보_가져오기(연결_아이디, 이슈_아이디))
+                    .ifPresent(이슈_목록::add);
         }
 
         return 이슈_목록;
@@ -281,11 +291,12 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
         지라이슈_데이터 이슈_데이터;
-        Issue 조회할_이슈 = null;
+        Issue 조회할_이슈;
 
         try {
             조회할_이슈 = 레드마인_매니저.getIssueManager().getIssueById(Integer.parseInt(이슈_키_또는_아이디));
         } catch (RedmineException e) {
+            로그.error(이슈_키_또는_아이디 + "는 존재하지 않는 이슈입니다.");
             return null;
         }
 
@@ -293,10 +304,8 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         LocalDate 업데이트_날짜 = 조회할_이슈.getUpdatedOn().toInstant()
                 .atZone(ZoneId.systemDefault()).toLocalDate();
 
-        LocalDate 어제_날짜 = LocalDate.now().minusDays(1);
-
         // 업데이트 날짜와 어제 날짜 비교
-        if (업데이트_날짜.equals(어제_날짜)) {
+        if (업데이트_날짜.equals(어제날짜_얻기())) {
             이슈_데이터 = 지라이슈_데이터형_변환(조회할_이슈, 서버정보.getUri());
         } else {
             로그.info(이슈_키_또는_아이디 + "는 업데이트 되지 않았습니다.");
@@ -307,8 +316,44 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
     }
 
     @Override
-    public List<지라이슈_데이터> 증분이슈링크_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) throws URISyntaxException, IOException, ExecutionException, InterruptedException {
-        return null;
+    public List<지라이슈_데이터> 증분이슈링크_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) {
+
+        로그.info("레드마인_온프레미스_이슈_전략 :: "+ 연결_아이디 + " :: "
+                + 이슈_키_또는_아이디 + " :: 증분이슈링크_가져오기");
+
+        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+        RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+
+        List<지라이슈_데이터> 이슈_목록 = new ArrayList<>();
+        Issue 부모이슈 = null;
+
+        try {
+            부모이슈 = 레드마인_매니저.getIssueManager().getIssueById(Integer.parseInt(이슈_키_또는_아이디), Include.relations);
+        } catch (RedmineException e) {
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "증분이슈링크_가져오기");
+        }
+
+        if (부모이슈 == null || 부모이슈.getRelations().isEmpty()) {
+            로그.info(이슈_키_또는_아이디 + "에 연관된 이슈가 없습니다.");
+            return null;
+        }
+
+        for (IssueRelation 연관이슈 : 부모이슈.getRelations()) {
+
+            String 연관이슈_아이디;
+
+            if (이슈_키_또는_아이디.equals(String.valueOf(연관이슈.getIssueId()))) {
+                연관이슈_아이디 = String.valueOf(연관이슈.getIssueToId());
+            } else {
+                연관이슈_아이디 = String.valueOf(연관이슈.getIssueId());
+            }
+
+            Optional.ofNullable(연관이슈_아이디)
+                    .map(이슈_아이디 -> 증분이슈_상세정보_가져오기(연결_아이디, 이슈_아이디))
+                    .ifPresent(이슈_목록::add);
+        }
+
+        return 이슈_목록;
     }
 
     @Override
@@ -320,15 +365,10 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
         RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
-        // 어제 날짜 포맷팅
-        LocalDate 어제 = LocalDate.now().minusDays(1);
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
-        String 어제_날짜 = 어제.format(formatter);
-
         Params params = new Params()
                 .add("parent_id", 이슈_키_또는_아이디)
                 .add("status_id", "*")
-                .add("updated_on", "><" + 어제_날짜 + "|" + 어제_날짜);
+                .add("updated_on", "><" + 어제날짜_얻기() + "|" + 어제날짜_얻기());
 
         List<지라이슈_데이터> 하위이슈_목록;
         List<Issue> 조회된_하위이슈_목록 = null;
@@ -380,5 +420,9 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         지라이슈_데이터.setFields(지라이슈필드_데이터);
 
         return 지라이슈_데이터;
+    }
+
+    private LocalDate 어제날짜_얻기() {
+        return LocalDate.now().minusDays(1);
     }
 }
