@@ -223,8 +223,18 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         }
 
         for (IssueRelation 연관이슈 : 부모이슈.getRelations()) {
-            //System.out.println("연관이슈: " + 연관이슈);
-            이슈_목록.add(이슈_상세정보_가져오기(연결_아이디, String.valueOf(연관이슈.getIssueToId())));
+
+            String 연관이슈_아이디;
+
+            if (이슈_키_또는_아이디.equals(String.valueOf(연관이슈.getIssueId()))) {
+                연관이슈_아이디 = String.valueOf(연관이슈.getIssueToId());
+            } else {
+                연관이슈_아이디 = String.valueOf(연관이슈.getIssueId());
+            }
+
+            if (연관이슈_아이디 != null) {
+                이슈_목록.add(이슈_상세정보_가져오기(연결_아이디, 연관이슈_아이디));
+            }
         }
 
         return 이슈_목록;
