@@ -77,21 +77,26 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
     @Override
     public 지라이슈_데이터 이슈_생성하기(Long 연결_아이디, 지라이슈생성_데이터 지라이슈생성_데이터) {
 
-        로그.info("레드마인_온프레미스_이슈_전략 "+ 연결_아이디 +" 이슈_생성하기");
+        로그.info("온프레미스 레드마인 이슈 생성 :: {} :: {}", 연결_아이디, 지라이슈생성_데이터.toString());
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
         RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
-        지라이슈_데이터 이슈_데이터 = null;
+        if (지라이슈생성_데이터 == null) {
+            로그.error(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: 지라이슈생성_데이터 값이 Null 입니다.");
+            throw new IllegalArgumentException(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: 지라이슈생성_데이터 값이 Null 입니다.");
+        }
+
         지라이슈생성필드_데이터 필드_데이터 = 지라이슈생성_데이터.getFields();
-        지라프로젝트_데이터 프로젝트_데이터 = 필드_데이터.getProject();
-        지라이슈유형_데이터 이슈유형_데이터 = 필드_데이터.getIssuetype();
-        지라이슈우선순위_데이터 우선순위_데이터 = 필드_데이터.getPriority();
 
         if (필드_데이터 == null) {
             로그.error(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: 필드_데이터 값이 Null 입니다.");
             throw new IllegalArgumentException(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: 필드_데이터 값이 Null 입니다.");
         }
+
+        지라프로젝트_데이터 프로젝트_데이터 = 필드_데이터.getProject();
+        지라이슈유형_데이터 이슈유형_데이터 = 필드_데이터.getIssuetype();
+        지라이슈우선순위_데이터 우선순위_데이터 = 필드_데이터.getPriority();
 
         if (프로젝트_데이터 == null) {
             로그.error(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: 프로젝트_데이터 값이 Null 입니다.");
@@ -124,7 +129,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
             throw new IllegalArgumentException(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: " + e.getMessage());
         }
 
-        이슈_데이터 = 지라이슈_데이터형_변환(생성이슈, 서버정보.getUri());
+        지라이슈_데이터 이슈_데이터 = 지라이슈_데이터형_변환(생성이슈, 서버정보.getUri());
         return 이슈_데이터;
     }
 

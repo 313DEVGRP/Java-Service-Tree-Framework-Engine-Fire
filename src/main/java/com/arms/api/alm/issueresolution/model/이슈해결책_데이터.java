@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class 지라이슈해결책_데이터 {
+public class 이슈해결책_데이터 {
     private String self;
     private String id;
     private String name;
