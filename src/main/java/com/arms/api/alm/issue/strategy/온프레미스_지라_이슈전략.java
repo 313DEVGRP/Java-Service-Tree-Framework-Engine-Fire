@@ -100,7 +100,7 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
     @Override
     public 지라이슈_데이터 이슈_생성하기(Long 연결_아이디, 지라이슈생성_데이터 지라이슈생성_데이터) throws Exception {
 
-        로그.info("온프레미스 지라 이슈 생성하기");
+        로그.info("온프레미스 지라 이슈 생성 :: {} :: {}", 연결_아이디, 지라이슈생성_데이터.toString());
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
         JiraRestClient restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(),
