@@ -139,18 +139,15 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
     @Override
     public 검색결과_목록_메인 aggregationSearchAll(Query query) {
         NativeSearchQuery nativeSearchQuery = queryMerge((NativeSearchQuery)query);
+        nativeSearchQuery.setMaxResults(0); // 검색 사이즈 0으로 조정
         return new 검색결과_목록_메인(operations.search(nativeSearchQuery,entityClass));
     }
 
     // 전 범위 Query Merge (증분 데이터 포함, Including incremental data)
     private NativeSearchQuery queryMerge(NativeSearchQuery query) {
 
-        QueryBuilder combinedQuery = QueryBuilders.boolQuery()
-                .filter(query.getQuery());
-
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
-                .withQuery(combinedQuery);
-
+                .withQuery(query.getQuery());
 
         Optional.ofNullable(query.getAggregations()).ifPresent(aggs->{
             aggs.forEach(nativeSearchQueryBuilder::addAggregation);

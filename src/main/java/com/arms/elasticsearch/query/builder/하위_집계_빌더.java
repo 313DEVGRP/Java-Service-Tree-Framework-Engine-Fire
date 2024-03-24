@@ -11,6 +11,7 @@ public class 하위_집계_빌더 {
     private int size;
 
     public 하위_집계_빌더(List<String> 하위그룹필드, int size){
+        this.size = size;
         this.하위그룹필드 = 하위그룹필드;
     }
 
