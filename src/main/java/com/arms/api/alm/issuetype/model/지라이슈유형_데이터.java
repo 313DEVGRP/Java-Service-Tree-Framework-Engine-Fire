@@ -22,7 +22,8 @@ public class 지라이슈유형_데이터 {
     private String untranslatedName;
     private Integer hierarchyLevel;
 
-    public 지라이슈유형_데이터(String id, String name) {
+    public 지라이슈유형_데이터(String self, String id, String name) {
+        this.self = self;
         this.id = id;
         this.name = name;
     }

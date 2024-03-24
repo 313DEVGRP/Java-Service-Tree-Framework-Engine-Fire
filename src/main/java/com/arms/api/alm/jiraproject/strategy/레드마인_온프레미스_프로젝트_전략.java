@@ -1,6 +1,7 @@
 package com.arms.api.alm.jiraproject.strategy;
 
 import com.arms.api.alm.jiraproject.model.지라프로젝트_데이터;
+import com.arms.api.alm.utils.레드마인API_정보;
 import com.arms.utils.errors.에러로그_유틸;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.service.서버정보_서비스;
@@ -28,6 +29,9 @@ public class 레드마인_온프레미스_프로젝트_전략 implements 지라�
 
     @Autowired
     private 지라유틸 지라유틸;
+
+    @Autowired
+    private 레드마인API_정보 레드마인API_정보;
 
     @Override
     public 지라프로젝트_데이터 프로젝트_상세정보_가져오기(Long 연결_아이디, String 프로젝트_키_또는_아이디) {
@@ -85,7 +89,7 @@ public class 레드마인_온프레미스_프로젝트_전략 implements 지라�
         지라프로젝트_데이터.setId(String.valueOf(프로젝트.getId()));
         지라프로젝트_데이터.setName(프로젝트.getName());
         지라프로젝트_데이터.setKey(프로젝트.getIdentifier());
-        지라프로젝트_데이터.setSelf(지라유틸.서버정보경로_체크(서버정보경로) + "/projects/"+프로젝트.getId()+".json");
+        지라프로젝트_데이터.setSelf(지라유틸.서버정보경로_체크(서버정보경로) + 레드마인API_정보.아이디_대체하기(레드마인API_정보.getEndpoint().getProject(), String.valueOf(프로젝트.getId())));
 
         return 지라프로젝트_데이터;
     }

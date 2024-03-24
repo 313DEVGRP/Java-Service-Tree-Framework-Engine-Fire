@@ -20,7 +20,8 @@ public class 지라이슈상태_데이터 {
 
     private String description;
 
-    public 지라이슈상태_데이터(String id, String name) {
+    public 지라이슈상태_데이터(String self, String id, String name) {
+        this.self = self;
         this.id = id;
         this.name = name;
     }
