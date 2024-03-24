@@ -59,17 +59,10 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         return new 검색결과_목록_메인(operations.search(nativeSearchQuery,entityClass));
     }
 
-
-
+    // 전 범위 대상
     @Override
-    public 검색결과_목록_메인 aggregationSearch(Query query, String newIndex) {
-        if(newIndex == null || newIndex.isEmpty()) {
-            log.error("Failed to parameter newIndex is empty");
-            return null;
-        }
-
-        SearchHits<T> search = operations.search(query, entityClass, IndexCoordinates.of(newIndex));
-        return new 검색결과_목록_메인(operations.search(query,entityClass, IndexCoordinates.of(newIndex)));
+    public 검색결과_목록_메인 aggregationSearchAll(Query query) {
+        return new 검색결과_목록_메인(operations.search(query,entityClass));
     }
 
     //현재 디펜던시 없음
@@ -135,27 +128,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         }
     }
 
-    // 전 범위 (Including incremental data)
-    @Override
-    public 검색결과_목록_메인 aggregationSearchAll(Query query) {
-        NativeSearchQuery nativeSearchQuery = queryMerge((NativeSearchQuery)query);
-        nativeSearchQuery.setMaxResults(0); // 검색 사이즈 0으로 조정
-        return new 검색결과_목록_메인(operations.search(nativeSearchQuery,entityClass));
-    }
 
-    // 전 범위 Query Merge (증분 데이터 포함, Including incremental data)
-    private NativeSearchQuery queryMerge(NativeSearchQuery query) {
-
-        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
-                .withQuery(query.getQuery());
-
-        Optional.ofNullable(query.getAggregations()).ifPresent(aggs->{
-            aggs.forEach(nativeSearchQueryBuilder::addAggregation);
-        });
-
-        return nativeSearchQueryBuilder.build();
-
-    }
 
     private NativeSearchQuery recentQueryMerge(NativeSearchQuery query) {
         String recentFieldName = fieldInfo(entityClass, Recent.class).getName();
