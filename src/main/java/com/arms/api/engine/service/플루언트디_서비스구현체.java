@@ -81,7 +81,7 @@ public class 플루언트디_서비스구현체 implements 플루언트디_서�
 
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new RangeQueryFilter("@timestamp", start_date, end_date,"fromto"),
-                        new MustQueryString(검색어_날짜포함_검색_요청.get검색어()))
+                        new QueryStringFilter(검색어_날짜포함_검색_요청.get검색어()))
                 .sort(new EsSortQuery(
                     List.of(
                             기본_정렬_요청.builder().필드("@timestamp").정렬기준("desc").build()
@@ -110,7 +110,7 @@ public class 플루언트디_서비스구현체 implements 플루언트디_서�
 
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new RangeQueryFilter("@timestamp", start_date, end_date,"fromto"),
-                        new QueryStringFilter(검색어_집계_요청.get검색어()));
+                      new QueryStringFilter(검색어_집계_요청.get검색어()));
 
         검색결과_목록_메인 집계_결과 = this.전체_집계결과_가져오기(일반_집계_쿼리_생성기.of(검색어_집계_요청, esQuery));
         return 집계_결과;
