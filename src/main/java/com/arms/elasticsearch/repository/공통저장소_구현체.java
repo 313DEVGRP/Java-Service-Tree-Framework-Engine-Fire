@@ -169,7 +169,6 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
         });
 
-
         QueryBuilder combinedQuery = QueryBuilders.boolQuery()
                 .filter(query.getQuery())
                 .filter(boolQuery);

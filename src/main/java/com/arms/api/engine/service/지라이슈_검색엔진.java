@@ -1,5 +1,6 @@
 package com.arms.api.engine.service;
 
+import com.arms.api.engine.model.dto.지라이슈_일반_집계_요청;
 import com.arms.api.engine.model.entity.지라이슈;
 import com.arms.api.engine.util.지라이슈_생성;
 import com.arms.api.engine.repository.인덱스자료;
@@ -12,8 +13,10 @@ import com.arms.api.alm.issue.model.지라프로젝트_데이터;
 import com.arms.api.alm.issue.service.이슈전략_호출;
 import com.arms.api.alm.issuestatus.model.지라이슈상태_데이터;
 import com.arms.elasticsearch.query.EsQuery;
+import com.arms.elasticsearch.query.esquery.EsBoolQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
+import com.arms.elasticsearch.query.factory.일반_집계_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.검색결과;
 import com.arms.elasticsearch.검색결과_목록_메인;
@@ -480,28 +483,18 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
 
         nativeSearchQueryBuilder.withQuery(QueryBuilders.matchAllQuery());
 
-        if ( 제품서비스_아이디 != null && 제품서비스_아이디 > 9L) {
-            MatchQueryBuilder 제품서비스_조회 = QueryBuilders.matchQuery("pdServiceId", 제품서비스_아이디);
-            nativeSearchQueryBuilder.withQuery(제품서비스_조회);
-        }
+        EsQuery esQuery
+            = new EsQueryBuilder()
+                .bool(
+                     new TermsQueryFilter("pdServiceId",Optional.ofNullable(제품서비스_아이디).filter(a->a!=null&&a>9L).map(a->List.of(a)).orElse(null))
+                    ,new TermsQueryFilter("pdServiceVersions", Arrays.stream(버전_아이디들).filter(a->a!=null&&a>9L).collect(toList()))
+                );
+        지라이슈_일반_집계_요청 지라이슈_일반_집계_요청 = new 지라이슈_일반_집계_요청();
+        지라이슈_일반_집계_요청.set메인그룹필드("status.status_name.keyword");
+        지라이슈_일반_집계_요청.set컨텐츠보기여부(false);
+        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(일반_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery).생성());
 
-        if ( 버전_아이디들 != null) {
-            Arrays.stream(버전_아이디들).filter(버전아이디->버전아이디>9L).findAny().ifPresent(b->{
-                MatchQueryBuilder 제품서비스_버전_조회 = QueryBuilders.matchQuery("pdServiceVersions", 버전_아이디들);
-                nativeSearchQueryBuilder.withQuery(제품서비스_버전_조회);
-            });
-        }
-
-        nativeSearchQueryBuilder.addAggregation(
-                AggregationBuilders.terms("status_name_agg").field("status.status_name.keyword")
-        );
-
-        // Execute the search
-        // Extract the Terms aggregation results
-        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
-        List<검색결과> 상태값통계 = 검색결과_목록_메인.get검색결과().get("status_name_agg");
-
-        // Iterate through the aggregation buckets
+        List<검색결과> 상태값통계 = 검색결과_목록_메인.get검색결과().get("group_by_status.status_name.keyword");
 
         Map<String, Long> 제품서비스_버전별_집계 = new HashMap<>();
         for (검색결과 상태값 : 상태값통계) {
