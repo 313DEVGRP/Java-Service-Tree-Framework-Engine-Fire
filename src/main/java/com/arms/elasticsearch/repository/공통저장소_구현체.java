@@ -135,9 +135,9 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
         EsQuery esQuery
                 = new EsQueryBuilder()
-                .bool(
-                        new TermsQueryFilter(recentFieldName, true)
-                );
+                    .bool(
+                            new TermsQueryFilter(recentFieldName, true)
+                    );
 
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
         });
@@ -147,7 +147,8 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
                 .filter(boolQuery);
 
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
-                .withQuery(combinedQuery);
+                .withQuery(combinedQuery)
+                .withMaxResults(query.getMaxResults());
 
 
         Optional.ofNullable(query.getAggregations()).ifPresent(aggs->{
