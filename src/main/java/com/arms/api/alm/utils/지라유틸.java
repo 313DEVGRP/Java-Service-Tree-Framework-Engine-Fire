@@ -205,7 +205,7 @@ public class 지라유틸 {
             로그.error("클라우드 지라 프로젝트 : {}, 이슈유형 : {}, 이슈생성필드_메타데이터 확인하기 중 오류"
                     , 프로젝트_아이디, 이슈유형_아이디);
             String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(), "필드_메타데이터 확인하기");
-            throw new IllegalArgumentException("필드 메타데이터 조회 중 오류 :: " + 에러로그);
+            throw new IllegalArgumentException(에러로그 + "\n필드 메타데이터 조회 중 오류 :: 프로젝트 :: " + 프로젝트_아이디 + " :: 이슈 유형 :: " + 이슈유형_아이디);
         }
 
         Map<String, 클라우드_이슈생성필드_메타데이터.필드_메타데이터> 필드맵 = 메타데이터_목록.stream()

@@ -828,9 +828,10 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
          ***/
         필드_메타데이터_목록.forEach((key, 필드_메타) -> {
             if (필드_메타.isRequired()) {
-                로그.error("필드 메타데이터 목록 중 오류 :: {} 필드가 필수로 지정되어있습니다. A-RMS에서 지원하지 않는 필드입니다.", key);
-                throw new IllegalArgumentException("필수필드 확인 및 추가 중 오류 :: " + key +
-                        " 필드가 필수로 지정되어있습니다. A-RMS에서 지원하지 않는 필드입니다.");
+                로그.error("필드 메타데이터 목록 중 오류 :: {} :: {} 필드가 필수로 지정되어있습니다. A-RMS에서 지원하지 않는 필드입니다.",
+                                지라이슈생성필드_데이터.toString(), key);
+                throw new IllegalArgumentException("필수 필드 확인 및 추가 중 오류 :: " + key +
+                        " 필드가 필수로 지정되어있습니다. A-RMS에서 지원하지 않는 필드입니다. :: \n" + 지라이슈생성필드_데이터.toString());
             }
         });
 
