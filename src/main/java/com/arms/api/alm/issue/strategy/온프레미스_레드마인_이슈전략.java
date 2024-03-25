@@ -17,6 +17,7 @@ import com.taskadapter.redmineapi.RedmineManager;
 import com.taskadapter.redmineapi.bean.Issue;
 import com.taskadapter.redmineapi.bean.IssueRelation;
 import com.taskadapter.redmineapi.bean.Tracker;
+import com.taskadapter.redmineapi.bean.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +75,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         }
 
         반환이슈목록 = 이슈목록.stream().map(이슈 -> {
-                        지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터형_변환(이슈, 서버정보.getUri());
+                        지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터형_변환(레드마인_매니저, 이슈, 서버정보.getUri());
                         return 지라이슈_데이터;
                     })
                     .filter(Objects::nonNull)
@@ -138,7 +139,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
             throw new IllegalArgumentException(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: " + e.getMessage());
         }
 
-        지라이슈_데이터 이슈_데이터 = 지라이슈_데이터형_변환(생성이슈, 서버정보.getUri());
+        지라이슈_데이터 이슈_데이터 = 지라이슈_데이터형_변환(레드마인_매니저, 생성이슈, 서버정보.getUri());
         return 이슈_데이터;
     }
 
@@ -209,7 +210,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
             return null;
         }
 
-        이슈_데이터 = 지라이슈_데이터형_변환(조회할_이슈, 서버정보.getUri());
+        이슈_데이터 = 지라이슈_데이터형_변환(레드마인_매니저, 조회할_이슈, 서버정보.getUri());
         return 이슈_데이터;
     }
 
@@ -281,7 +282,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         }
 
         하위이슈_목록 = 조회된_하위이슈_목록.stream().map(이슈 -> {
-                        지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터형_변환(이슈, 서버정보.getUri());
+                        지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터형_변환(레드마인_매니저, 이슈, 서버정보.getUri());
                         return 지라이슈_데이터;
                     })
                     .filter(Objects::nonNull)
@@ -315,7 +316,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
 
         // 업데이트 날짜와 어제 날짜 비교
         if (업데이트_날짜.equals(어제날짜_얻기())) {
-            이슈_데이터 = 지라이슈_데이터형_변환(조회할_이슈, 서버정보.getUri());
+            이슈_데이터 = 지라이슈_데이터형_변환(레드마인_매니저, 조회할_이슈, 서버정보.getUri());
         } else {
             로그.info(이슈_키_또는_아이디 + "는 업데이트 되지 않았습니다.");
             return null;
@@ -394,7 +395,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         }
 
         하위이슈_목록 = 조회된_하위이슈_목록.stream().map(이슈 -> {
-                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터형_변환(이슈, 서버정보.getUri());
+                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터형_변환(레드마인_매니저, 이슈, 서버정보.getUri());
                     return 지라이슈_데이터;
                 })
                 .filter(Objects::nonNull)
@@ -403,7 +404,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         return 하위이슈_목록;
     }
 
-    private 지라이슈_데이터 지라이슈_데이터형_변환(Issue 이슈, String 서버정보경로) {
+    private 지라이슈_데이터 지라이슈_데이터형_변환(RedmineManager 레드마인_매니저, Issue 이슈, String 서버정보경로) {
 
         지라이슈_데이터 지라이슈_데이터 = new 지라이슈_데이터();
         지라이슈필드_데이터 지라이슈필드_데이터 = new 지라이슈필드_데이터();
@@ -456,7 +457,20 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         Optional.ofNullable(이슈.getAssigneeId())
                 .map(아이디 -> String.valueOf(아이디))
                 .ifPresent(아이디 -> {
-                    지라이슈필드_데이터.setAssignee(new 지라사용자_데이터(아이디, 이슈.getAssigneeName()));
+                    User 사용자정보 = null;
+                    try {
+                        사용자정보 = 레드마인_매니저.getUserManager().getUserById(Integer.valueOf(아이디));
+                    } catch (RedmineException e) {
+                        에러로그_유틸.예외로그출력(e, this.getClass().getName(), "지라이슈_데이터형_변환 사용자정보 가져오기");
+                    }
+
+                    if (사용자정보 != null && !사용자정보.getMail().isEmpty()) {
+                        지라이슈필드_데이터.setAssignee(
+                                new 지라사용자_데이터(아이디, 사용자정보.getMail(), 이슈.getAssigneeName()));
+                    }
+                    else {
+                        지라이슈필드_데이터.setAssignee(new 지라사용자_데이터(아이디, 이슈.getAssigneeName()));
+                    }
                 });
 
         Optional.ofNullable(이슈.getCreatedOn())
