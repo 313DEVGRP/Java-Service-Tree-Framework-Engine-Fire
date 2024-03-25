@@ -1,6 +1,7 @@
 package com.arms.api.alm.issuetype.strategy;
 
 import com.arms.api.alm.issuetype.model.지라이슈유형_데이터;
+import com.arms.api.alm.utils.레드마인API_정보;
 import com.arms.utils.errors.에러로그_유틸;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.service.서버정보_서비스;
@@ -30,6 +31,9 @@ public class 레드마인_온프레미스_이슈유형_전략 implements 지라�
 
     @Autowired
     private 지라유틸 지라유틸;
+
+    @Autowired
+    private 레드마인API_정보 레드마인API_정보;
 
     @Override
     public List<지라이슈유형_데이터> 이슈유형_목록_가져오기(Long 연결_아이디) {
@@ -94,11 +98,12 @@ public class 레드마인_온프레미스_이슈유형_전략 implements 지라�
         지라이슈유형_데이터.setName(이슈유형.getName());
         지라이슈유형_데이터.setSubtask(false);
 
+        String 이슈유형_경로 = 지라유틸.서버정보경로_체크(서버정보경로) + 레드마인API_정보.아이디_대체하기(레드마인API_정보.getEndpoint().getIssuetype(), String.valueOf(이슈유형.getId()));
         if (!프로젝트_아이디.isEmpty()) {
-            지라이슈유형_데이터.setSelf(지라유틸.서버정보경로_체크(서버정보경로) + "/trackers.json?tracker_id=" + 이슈유형.getId() +"&project_id=" + 프로젝트_아이디);
+            지라이슈유형_데이터.setSelf(이슈유형_경로 + "&project_id=" + 프로젝트_아이디);
         }
         else {
-            지라이슈유형_데이터.setSelf(지라유틸.서버정보경로_체크(서버정보경로) + "/trackers.json?tracker_id=" + 이슈유형.getId());
+            지라이슈유형_데이터.setSelf(이슈유형_경로);
         }
 
         return 지라이슈유형_데이터;

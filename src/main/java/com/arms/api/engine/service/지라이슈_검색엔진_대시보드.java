@@ -17,6 +17,7 @@ import com.arms.elasticsearch.query.esquery.EsQueryString;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustQueryString;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
 import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
+import com.arms.elasticsearch.query.filter.QueryStringFilter;
 import com.arms.elasticsearch.query.filter.RangeQueryFilter;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.factory.일반_검색_쿼리_생성기;
@@ -842,11 +843,10 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new RangeQueryFilter("@timestamp", start_date, end_date,"fromto"),
-                        new MustQueryString(검색어_날짜포함_검색_요청.get검색어()))
+                        new QueryStringFilter(검색어_날짜포함_검색_요청.get검색어()))
                 .sort(new EsSortQuery(
                         List.of(
-                                기본_정렬_요청.builder().필드("_score").정렬기준("desc").build()
-                                , 기본_정렬_요청.builder().필드("@timestamp").정렬기준("desc").build()
+                                기본_정렬_요청.builder().필드("@timestamp").정렬기준("desc").build()
                         )
                 ));
         SearchHits<지라이슈> 지라이슈_검색결과= 지라이슈저장소.search(일반_검색_쿼리_생성기.of(검색어_날짜포함_검색_요청, esQuery).생성());

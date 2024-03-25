@@ -4,11 +4,12 @@ import com.arms.api.alm.issue.model.*;
 import com.arms.api.alm.issuestatus.model.지라이슈상태_데이터;
 import com.arms.api.alm.issuetype.model.지라이슈유형_데이터;
 import com.arms.api.alm.priority.model.지라이슈우선순위_데이터;
-import com.arms.utils.errors.에러로그_유틸;
+import com.arms.api.alm.utils.레드마인API_정보;
+import com.arms.api.alm.utils.지라유틸;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.service.서버정보_서비스;
 import com.arms.utils.errors.codes.에러코드;
-import com.arms.api.alm.utils.지라유틸;
+import com.arms.utils.errors.에러로그_유틸;
 import com.taskadapter.redmineapi.Include;
 import com.taskadapter.redmineapi.Params;
 import com.taskadapter.redmineapi.RedmineException;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -36,11 +38,18 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
-    private 서버정보_서비스 서버정보_서비스;
+    private final 서버정보_서비스 서버정보_서비스;
+
+    private final 지라유틸 지라유틸;
+
+    private final 레드마인API_정보 레드마인API_정보;
 
     @Autowired
-    private 지라유틸 지라유틸;
+    public 온프레미스_레드마인_이슈전략(서버정보_서비스 서버정보_서비스, 지라유틸 지라유틸, 레드마인API_정보 레드마인API_정보) {
+        this.서버정보_서비스 = 서버정보_서비스;
+        this.지라유틸 = 지라유틸;
+        this.레드마인API_정보 = 레드마인API_정보;
+    }
 
     @Override
     public List<지라이슈_데이터> 이슈_목록_가져오기(Long 연결_아이디, String 프로젝트_키_또는_아이디) {
@@ -77,21 +86,26 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
     @Override
     public 지라이슈_데이터 이슈_생성하기(Long 연결_아이디, 지라이슈생성_데이터 지라이슈생성_데이터) {
 
-        로그.info("레드마인_온프레미스_이슈_전략 "+ 연결_아이디 +" 이슈_생성하기");
+        로그.info("온프레미스 레드마인 이슈 생성 :: {} :: {}", 연결_아이디, 지라이슈생성_데이터.toString());
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
         RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
-        지라이슈_데이터 이슈_데이터 = null;
+        if (지라이슈생성_데이터 == null) {
+            로그.error(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: 지라이슈생성_데이터 값이 Null 입니다.");
+            throw new IllegalArgumentException(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: 지라이슈생성_데이터 값이 Null 입니다.");
+        }
+
         지라이슈생성필드_데이터 필드_데이터 = 지라이슈생성_데이터.getFields();
-        지라프로젝트_데이터 프로젝트_데이터 = 필드_데이터.getProject();
-        지라이슈유형_데이터 이슈유형_데이터 = 필드_데이터.getIssuetype();
-        지라이슈우선순위_데이터 우선순위_데이터 = 필드_데이터.getPriority();
 
         if (필드_데이터 == null) {
             로그.error(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: 필드_데이터 값이 Null 입니다.");
             throw new IllegalArgumentException(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: 필드_데이터 값이 Null 입니다.");
         }
+
+        지라프로젝트_데이터 프로젝트_데이터 = 필드_데이터.getProject();
+        지라이슈유형_데이터 이슈유형_데이터 = 필드_데이터.getIssuetype();
+        지라이슈우선순위_데이터 우선순위_데이터 = 필드_데이터.getPriority();
 
         if (프로젝트_데이터 == null) {
             로그.error(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: 프로젝트_데이터 값이 Null 입니다.");
@@ -124,7 +138,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
             throw new IllegalArgumentException(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: " + e.getMessage());
         }
 
-        이슈_데이터 = 지라이슈_데이터형_변환(생성이슈, 서버정보.getUri());
+        지라이슈_데이터 이슈_데이터 = 지라이슈_데이터형_변환(생성이슈, 서버정보.getUri());
         return 이슈_데이터;
     }
 
@@ -223,8 +237,18 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         }
 
         for (IssueRelation 연관이슈 : 부모이슈.getRelations()) {
-            //System.out.println("연관이슈: " + 연관이슈);
-            이슈_목록.add(이슈_상세정보_가져오기(연결_아이디, String.valueOf(연관이슈.getIssueToId())));
+
+            String 연관이슈_아이디;
+
+            if (이슈_키_또는_아이디.equals(String.valueOf(연관이슈.getIssueId()))) {
+                연관이슈_아이디 = String.valueOf(연관이슈.getIssueToId());
+            } else {
+                연관이슈_아이디 = String.valueOf(연관이슈.getIssueId());
+            }
+
+            Optional.ofNullable(연관이슈_아이디)
+                    .map(이슈_아이디 -> 이슈_상세정보_가져오기(연결_아이디, 이슈_아이디))
+                    .ifPresent(이슈_목록::add);
         }
 
         return 이슈_목록;
@@ -276,11 +300,12 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
         지라이슈_데이터 이슈_데이터;
-        Issue 조회할_이슈 = null;
+        Issue 조회할_이슈;
 
         try {
             조회할_이슈 = 레드마인_매니저.getIssueManager().getIssueById(Integer.parseInt(이슈_키_또는_아이디));
         } catch (RedmineException e) {
+            로그.error(이슈_키_또는_아이디 + "는 존재하지 않는 이슈입니다.");
             return null;
         }
 
@@ -288,10 +313,8 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         LocalDate 업데이트_날짜 = 조회할_이슈.getUpdatedOn().toInstant()
                 .atZone(ZoneId.systemDefault()).toLocalDate();
 
-        LocalDate 어제_날짜 = LocalDate.now().minusDays(1);
-
         // 업데이트 날짜와 어제 날짜 비교
-        if (업데이트_날짜.equals(어제_날짜)) {
+        if (업데이트_날짜.equals(어제날짜_얻기())) {
             이슈_데이터 = 지라이슈_데이터형_변환(조회할_이슈, 서버정보.getUri());
         } else {
             로그.info(이슈_키_또는_아이디 + "는 업데이트 되지 않았습니다.");
@@ -302,8 +325,44 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
     }
 
     @Override
-    public List<지라이슈_데이터> 증분이슈링크_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) throws URISyntaxException, IOException, ExecutionException, InterruptedException {
-        return null;
+    public List<지라이슈_데이터> 증분이슈링크_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) {
+
+        로그.info("레드마인_온프레미스_이슈_전략 :: "+ 연결_아이디 + " :: "
+                + 이슈_키_또는_아이디 + " :: 증분이슈링크_가져오기");
+
+        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+        RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+
+        List<지라이슈_데이터> 이슈_목록 = new ArrayList<>();
+        Issue 부모이슈 = null;
+
+        try {
+            부모이슈 = 레드마인_매니저.getIssueManager().getIssueById(Integer.parseInt(이슈_키_또는_아이디), Include.relations);
+        } catch (RedmineException e) {
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "증분이슈링크_가져오기");
+        }
+
+        if (부모이슈 == null || 부모이슈.getRelations().isEmpty()) {
+            로그.info(이슈_키_또는_아이디 + "에 연관된 이슈가 없습니다.");
+            return null;
+        }
+
+        for (IssueRelation 연관이슈 : 부모이슈.getRelations()) {
+
+            String 연관이슈_아이디;
+
+            if (이슈_키_또는_아이디.equals(String.valueOf(연관이슈.getIssueId()))) {
+                연관이슈_아이디 = String.valueOf(연관이슈.getIssueToId());
+            } else {
+                연관이슈_아이디 = String.valueOf(연관이슈.getIssueId());
+            }
+
+            Optional.ofNullable(연관이슈_아이디)
+                    .map(이슈_아이디 -> 증분이슈_상세정보_가져오기(연결_아이디, 이슈_아이디))
+                    .ifPresent(이슈_목록::add);
+        }
+
+        return 이슈_목록;
     }
 
     @Override
@@ -315,15 +374,10 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
         RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
-        // 어제 날짜 포맷팅
-        LocalDate 어제 = LocalDate.now().minusDays(1);
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
-        String 어제_날짜 = 어제.format(formatter);
-
         Params params = new Params()
                 .add("parent_id", 이슈_키_또는_아이디)
                 .add("status_id", "*")
-                .add("updated_on", "><" + 어제_날짜 + "|" + 어제_날짜);
+                .add("updated_on", "><" + 어제날짜_얻기() + "|" + 어제날짜_얻기());
 
         List<지라이슈_데이터> 하위이슈_목록;
         List<Issue> 조회된_하위이슈_목록 = null;
@@ -353,27 +407,92 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
 
         지라이슈_데이터 지라이슈_데이터 = new 지라이슈_데이터();
         지라이슈필드_데이터 지라이슈필드_데이터 = new 지라이슈필드_데이터();
+        String 기본경로 = 지라유틸.서버정보경로_체크(서버정보경로);
 
-        지라이슈_데이터.setId(String.valueOf(이슈.getId()));
-        지라이슈_데이터.setKey(String.valueOf(이슈.getId()));
-        지라이슈_데이터.setSelf(지라유틸.서버정보경로_체크(서버정보경로) + "/issues/" + 이슈.getId() + ".json");
+        Optional.ofNullable(이슈.getId())
+                .map(아이디 -> String.valueOf(아이디))
+                .ifPresent(아이디 -> {
+                    지라이슈_데이터.setId(아이디);
+                    지라이슈_데이터.setKey(아이디);
+                    지라이슈_데이터.setSelf(기본경로 + 레드마인API_정보.아이디_대체하기(레드마인API_정보.getEndpoint().getIssue(), 아이디));
+                });
 
-        지라이슈필드_데이터.setProject(new 지라프로젝트_데이터(String.valueOf(이슈.getProjectId()), 이슈.getProjectName()));
-        지라이슈필드_데이터.setIssuetype(new 지라이슈유형_데이터(String.valueOf(이슈.getTracker().getId()), 이슈.getTracker().getName()));
-        지라이슈필드_데이터.setPriority(new 지라이슈우선순위_데이터(String.valueOf(이슈.getPriorityId()), 이슈.getPriorityText()));
-        지라이슈필드_데이터.setStatus(new 지라이슈상태_데이터(String.valueOf(이슈.getStatusId()), 이슈.getStatusName()));
+        Optional.ofNullable(이슈.getProjectId())
+                .map(아이디 -> String.valueOf(아이디))
+                .ifPresent(아이디 -> {
+                    String 프로젝트_경로 = 기본경로 + 레드마인API_정보.아이디_대체하기(레드마인API_정보.getEndpoint().getProject(), 아이디);
+                    지라이슈필드_데이터.setProject(new 지라프로젝트_데이터(프로젝트_경로, 아이디, 이슈.getProjectName()));
+                });
 
-        지라이슈필드_데이터.setCreator(new 지라사용자_데이터(String.valueOf(이슈.getAuthorId()), 이슈.getAuthorName()));
-        지라이슈필드_데이터.setAssignee(new 지라사용자_데이터(String.valueOf(이슈.getAssigneeId()), 이슈.getAssigneeName()));
+        Optional.ofNullable(이슈.getTracker().getId())
+                .map(아이디 -> String.valueOf(아이디))
+                .ifPresent(아이디 -> {
+                    String 이슈유형_경로 = 기본경로 + 레드마인API_정보.아이디_대체하기(레드마인API_정보.getEndpoint().getIssuetype(), 아이디);
+                    지라이슈필드_데이터.setIssuetype(new 지라이슈유형_데이터(이슈유형_경로, 아이디, 이슈.getTracker().getName()));
+                });
 
-        지라이슈필드_데이터.setCreated(String.valueOf(이슈.getCreatedOn()));
-        지라이슈필드_데이터.setUpdated(String.valueOf(이슈.getUpdatedOn()));
-        지라이슈필드_데이터.setResolutiondate(String.valueOf(이슈.getClosedOn()));
+        Optional.ofNullable(이슈.getPriorityId())
+                .map(아이디 -> String.valueOf(아이디))
+                .ifPresent(아이디 -> {
+                    String 우선순위_경로 = 기본경로 + 레드마인API_정보.아이디_대체하기(레드마인API_정보.getEndpoint().getPriority(), 아이디);
+                    지라이슈필드_데이터.setPriority(new 지라이슈우선순위_데이터(우선순위_경로, 아이디, 이슈.getPriorityText()));
+                });
+
+        Optional.ofNullable(이슈.getStatusId())
+                .map(아이디 -> String.valueOf(아이디))
+                .ifPresent(아이디 -> {
+                    String 이슈상태_경로 = 기본경로 + 레드마인API_정보.아이디_대체하기(레드마인API_정보.getEndpoint().getIssuestatus(), 아이디);
+                    지라이슈필드_데이터.setStatus(new 지라이슈상태_데이터(이슈상태_경로, 아이디, 이슈.getStatusName()));
+                });
+
+        Optional.ofNullable(이슈.getAuthorId())
+                .map(아이디 -> String.valueOf(아이디))
+                .ifPresent(아이디 -> {
+                    지라사용자_데이터 사용자_데이터 = new 지라사용자_데이터(아이디, 이슈.getAuthorName());
+                    지라이슈필드_데이터.setCreator(사용자_데이터);
+                    지라이슈필드_데이터.setReporter(사용자_데이터);
+                });
+
+        Optional.ofNullable(이슈.getAssigneeId())
+                .map(아이디 -> String.valueOf(아이디))
+                .ifPresent(아이디 -> {
+                    지라이슈필드_데이터.setAssignee(new 지라사용자_데이터(아이디, 이슈.getAssigneeName()));
+                });
+
+        Optional.ofNullable(이슈.getCreatedOn())
+                .map(생성일 -> 날짜변환(생성일))
+                .ifPresent(지라이슈필드_데이터::setCreated);
+
+        Optional.ofNullable(이슈.getUpdatedOn())
+                .map(업데이트일 -> 날짜변환(업데이트일))
+                .ifPresent(지라이슈필드_데이터::setUpdated);
+
+        Optional.ofNullable(이슈.getClosedOn())
+                .map(해결책 -> 날짜변환(해결책))
+                .ifPresent(지라이슈필드_데이터::setResolutiondate);
 
         지라이슈필드_데이터.setSummary(이슈.getSubject());
 
         지라이슈_데이터.setFields(지라이슈필드_데이터);
 
         return 지라이슈_데이터;
+    }
+
+    private String 날짜변환(Date 원본_날짜) {
+
+        // 원본 형식
+        DateTimeFormatter originalFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
+
+        // ZonedDateTime 객체로 파싱
+        ZonedDateTime 날짜시간 = ZonedDateTime.parse(String.valueOf(원본_날짜), originalFormatter);
+
+        // ISO 8601 형식으로 변환
+        String 변환된_날짜시간 = 날짜시간.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+
+        return 변환된_날짜시간;
+    }
+
+    private LocalDate 어제날짜_얻기() {
+        return LocalDate.now().minusDays(1);
     }
 }

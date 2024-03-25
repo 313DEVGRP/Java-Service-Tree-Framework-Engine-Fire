@@ -8,7 +8,7 @@ import com.arms.api.alm.issue.model.지라이슈조회_데이터;
 import com.arms.api.alm.issue.model.지라이슈필드_데이터;
 import com.arms.api.alm.issue.model.지라프로젝트_데이터;
 import com.arms.api.alm.issue.service.이슈전략_호출;
-import com.arms.api.alm.issueresolution.model.지라이슈해결책_데이터;
+import com.arms.api.alm.issueresolution.model.이슈해결책_데이터;
 import com.arms.api.alm.issuestatus.model.지라이슈상태_데이터;
 import com.arms.api.alm.issuestatus.model.클라우드_지라이슈상태_데이터;
 import com.arms.api.alm.issuetype.model.지라이슈유형_데이터;
@@ -349,7 +349,7 @@ class 통합이슈조회테스트 {
             String 이슈해결책_이름 = 이슈.getResolution().getName();
             String 이슈해결책_설명 = 이슈.getResolution().getDescription();
 
-            지라이슈해결책_데이터 이슈해결책 = new 지라이슈해결책_데이터();
+            이슈해결책_데이터 이슈해결책 = new 이슈해결책_데이터();
             이슈해결책.setSelf(이슈해결책_주소);
             이슈해결책.setId(이슈해결책_아이디);
             이슈해결책.setName(이슈해결책_이름);

@@ -1,6 +1,6 @@
 package com.arms.api.alm.issueresolution.strategy;
 
-import com.arms.api.alm.issueresolution.model.지라이슈해결책_데이터;
+import com.arms.api.alm.issueresolution.model.이슈해결책_데이터;
 import com.arms.api.alm.issueresolution.model.클라우드_지라이슈해결책_데이터;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.utils.errors.codes.에러코드;
@@ -28,7 +28,7 @@ public class 클라우드_지라이슈해결책_전략 implements 지라이슈�
     private 지라유틸 지라유틸;
 
     @Override
-    public List<지라이슈해결책_데이터> 이슈해결책_목록_가져오기(Long 연결_아이디) {
+    public List<이슈해결책_데이터> 이슈해결책_목록_가져오기(Long 연결_아이디) {
 
         로그.info("클라우드 지라 이슈해결책_목록_가져오기");
 
@@ -40,7 +40,7 @@ public class 클라우드_지라이슈해결책_전략 implements 지라이슈�
             int 최대_검색수 = 지라유틸.최대_검색수_가져오기();
             boolean checkLast = false;
 
-            List<지라이슈해결책_데이터> 반환할_지라이슈해결책_데이터_목록 = new ArrayList<지라이슈해결책_데이터>();
+            List<이슈해결책_데이터> 반환할_이슈해결책_데이터_목록 = new ArrayList<이슈해결책_데이터>();
 
             while(!checkLast) {
                 String endpoint = "/rest/api/3/resolution/search?maxResults="+ 최대_검색수 + "&startAt=" + startAt;
@@ -56,9 +56,9 @@ public class 클라우드_지라이슈해결책_전략 implements 지라이슈�
                     throw new IllegalArgumentException(에러코드.이슈해결책_조회_오류.getErrorMsg());
                 }
 
-                반환할_지라이슈해결책_데이터_목록.addAll(지라이슈해결책_조회_결과.getValues());
+                반환할_이슈해결책_데이터_목록.addAll(지라이슈해결책_조회_결과.getValues());
 
-                if (지라이슈해결책_조회_결과.getTotal() == 반환할_지라이슈해결책_데이터_목록.size()) {
+                if (지라이슈해결책_조회_결과.getTotal() == 반환할_이슈해결책_데이터_목록.size()) {
                     checkLast = true;
                 }
                 else {
@@ -66,7 +66,7 @@ public class 클라우드_지라이슈해결책_전략 implements 지라이슈�
                 }
             }
 
-            return 반환할_지라이슈해결책_데이터_목록;
+            return 반환할_이슈해결책_데이터_목록;
 
         } catch (Exception e) {
             로그.error("클라우드 지라 이슈 해결책 목록 조회에 실패하였습니다."+e.getMessage());

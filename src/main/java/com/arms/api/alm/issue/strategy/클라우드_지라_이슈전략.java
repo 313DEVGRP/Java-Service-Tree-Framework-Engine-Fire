@@ -1,12 +1,12 @@
 package com.arms.api.alm.issue.strategy;
 
 import com.arms.api.alm.issue.model.*;
-import com.arms.utils.errors.에러로그_유틸;
 import com.arms.api.alm.utils.지라API_정보;
+import com.arms.api.alm.utils.지라유틸;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.service.서버정보_서비스;
 import com.arms.utils.errors.codes.에러코드;
-import com.arms.api.alm.utils.지라유틸;
+import com.arms.utils.errors.에러로그_유틸;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,11 +15,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class 클라우드_지라_이슈전략 implements 이슈전략 {
-
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     private final 서버정보_서비스 서버정보_서비스;
@@ -56,8 +54,8 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
 
             while (!isLast) {
                 String endpoint = "/rest/api/3/search?jql=project=" + 프로젝트_키_또는_아이디
-                                + "&startAt=" + 검색_시작_지점 + "&maxResults=" + 최대_검색수
-                                + "&" + 지라유틸.조회할_필드_목록_가져오기();
+                        + "&startAt=" + 검색_시작_지점 + "&maxResults=" + 최대_검색수
+                        + "&" + 지라유틸.조회할_필드_목록_가져오기();
 
                 지라이슈조회_데이터 프로젝트_이슈_검색결과 = 지라유틸.get(webClient, endpoint, 지라이슈조회_데이터.class).block();
 
@@ -698,7 +696,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
     @Override
     public 지라이슈_데이터 이슈_생성하기(Long 연결_아이디, 지라이슈생성_데이터 지라이슈생성_데이터) {
 
-        로그.info("클라우드 지라 이슈 생성하기2");
+        로그.info("클라우드 지라 이슈 생성 :: {} :: {}", 연결_아이디, 지라이슈생성_데이터.toString());
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
         WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
@@ -735,7 +733,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
         클라우드_지라이슈필드_데이터 클라우드_필드_데이터;
 
         Map<String, 클라우드_이슈생성필드_메타데이터.필드_메타데이터> 필드_메타데이터_목록
-                = 필드_메타데이터_확인하기(webClient, 프로젝트_아이디, 이슈유형_아이디);
+                = 지라유틸.필드_메타데이터_확인하기(webClient, 프로젝트_아이디, 이슈유형_아이디);
         클라우드_필드_데이터 = 필드검증_및_추가하기(webClient, 이슈생성필드_데이터, 필드_메타데이터_목록);
 
         입력_데이터.setFields(클라우드_필드_데이터);
@@ -760,59 +758,6 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
         }
 
         return 반환할_지라이슈_데이터;
-    }
-
-    public Map<String, 클라우드_이슈생성필드_메타데이터.필드_메타데이터> 필드_메타데이터_확인하기(WebClient webClient, String 프로젝트_아이디, String 이슈유형_아이디) {
-        String 필드확인endpoint = 지라API_정보.프로젝트키_대체하기(
-                지라API_정보.getEndpoint().getCreatemeta(), 프로젝트_아이디);
-        필드확인endpoint = 지라API_정보.이슈유형키_대체하기(필드확인endpoint, 이슈유형_아이디);
-
-        int 검색_시작_지점 = 0;
-        int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
-        boolean isLast = false;
-
-        List<클라우드_이슈생성필드_메타데이터.필드_메타데이터> 메타데이터_목록 = new ArrayList<>(); // 이슈 저장
-
-        클라우드_이슈생성필드_메타데이터 클라우드_이슈생성필드_메타데이터;
-        try {
-            while (!isLast) {
-                String endpoint = 필드확인endpoint +
-                        "?startAt=" + 검색_시작_지점 + "&maxResults=" + 최대_검색수;
-
-                클라우드_이슈생성필드_메타데이터
-                        = 지라유틸.get(webClient, endpoint, 클라우드_이슈생성필드_메타데이터.class).block();
-
-                if (클라우드_이슈생성필드_메타데이터 == null) {
-                    로그.info("클라우드 지라 클라우드 프로젝트 : {}, 이슈유형 : {}, 이슈생성필드_메타데이터 목록이 없습니다."
-                            , 프로젝트_아이디, 이슈유형_아이디);
-                    return null;
-                }
-                else if (클라우드_이슈생성필드_메타데이터.getFields() == null || 클라우드_이슈생성필드_메타데이터.getFields().size() == 0) {
-                    로그.info("클라우드 지라 클라우드 프로젝트 : {}, 이슈유형 : {}, 이슈생성필드_메타데이터 목록이 없습니다."
-                            , 프로젝트_아이디, 이슈유형_아이디);
-                    return null;
-                }
-
-                메타데이터_목록.addAll(클라우드_이슈생성필드_메타데이터.getFields());
-
-                if (클라우드_이슈생성필드_메타데이터.getTotal() == 메타데이터_목록.size()) {
-                    isLast = true;
-                } else {
-                    검색_시작_지점 += 최대_검색수;
-                }
-            }
-        }
-        catch (Exception e) {
-            로그.error("클라우드 지라 프로젝트 : {}, 이슈유형 : {}, 이슈생성필드_메타데이터 확인하기 중 오류"
-                    , 프로젝트_아이디, 이슈유형_아이디);
-            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(), "필드_메타데이터 확인하기");
-            throw new IllegalArgumentException("필드 메타데이터 조회 중 오류 :: " + 에러로그);
-        }
-
-        Map<String, 클라우드_이슈생성필드_메타데이터.필드_메타데이터> 필드맵 = 메타데이터_목록.stream()
-                .collect(Collectors.toMap(com.arms.api.alm.issue.model.클라우드_이슈생성필드_메타데이터.필드_메타데이터::getFieldId, field -> field));
-
-        return 필드맵;
     }
 
     public 클라우드_지라이슈필드_데이터 필드검증_및_추가하기(WebClient webClient,

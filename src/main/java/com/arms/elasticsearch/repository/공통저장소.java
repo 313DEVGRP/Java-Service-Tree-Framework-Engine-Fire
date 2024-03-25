@@ -17,7 +17,6 @@ import java.util.List;
 public interface 공통저장소<T,ID extends Serializable> extends ElasticsearchRepository<T,ID> {
 
 	검색결과_목록_메인 aggregationSearch(Query query) ;
-	검색결과_목록_메인 aggregationSearch(Query query, String newIndex) ;
 	검색결과_목록_메인 aggregationSearchAll(Query query);
 
 	List<IndexedObjectInformation> bulkIndex(List<IndexQuery> indexQueryList);
