@@ -70,10 +70,6 @@ public class 지라유틸 {
         return new String(Base64.getEncoder().encode(credentials.getBytes()));
     }
 
-    public static RedmineManager 레드마인_온프레미스_통신기_생성(String uri,  String apiKey) {
-        return RedmineManagerFactory.createWithApiKey(uri, apiKey);
-    }
-
     public static <T> Mono<T> get(WebClient webClient, String uri, Class<T> responseType) {
 
         return webClient.get()
@@ -157,9 +153,7 @@ public class 지라유틸 {
         return dateTime.plusMinutes(remainder >= 30 ? 30 - remainder : -remainder);//30분 단위 리턴 시간
     }
 
-    public static String 서버정보경로_체크(String 서버정보경로) {
-        return 서버정보경로.endsWith("/") ? 서버정보경로.substring(0, 서버정보경로.length() - 1) : 서버정보경로;
-    }
+
 
     public Map<String, 클라우드_이슈생성필드_메타데이터.필드_메타데이터> 필드_메타데이터_확인하기(WebClient webClient, String 프로젝트_아이디, String 이슈유형_아이디) {
         String 필드확인endpoint = 지라API_정보.프로젝트키_대체하기(

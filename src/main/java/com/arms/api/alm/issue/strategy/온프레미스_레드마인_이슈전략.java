@@ -5,7 +5,7 @@ import com.arms.api.alm.issuestatus.model.지라이슈상태_데이터;
 import com.arms.api.alm.issuetype.model.지라이슈유형_데이터;
 import com.arms.api.alm.priority.model.지라이슈우선순위_데이터;
 import com.arms.api.alm.utils.레드마인API_정보;
-import com.arms.api.alm.utils.지라유틸;
+import com.arms.api.alm.utils.레드마인유틸;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.service.서버정보_서비스;
 import com.arms.utils.errors.codes.에러코드;
@@ -41,14 +41,14 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
 
     private final 서버정보_서비스 서버정보_서비스;
 
-    private final 지라유틸 지라유틸;
+    private final 레드마인유틸 레드마인유틸;
 
     private final 레드마인API_정보 레드마인API_정보;
 
     @Autowired
-    public 온프레미스_레드마인_이슈전략(서버정보_서비스 서버정보_서비스, 지라유틸 지라유틸, 레드마인API_정보 레드마인API_정보) {
+    public 온프레미스_레드마인_이슈전략(서버정보_서비스 서버정보_서비스, 레드마인유틸 레드마인유틸, 레드마인API_정보 레드마인API_정보) {
         this.서버정보_서비스 = 서버정보_서비스;
-        this.지라유틸 = 지라유틸;
+        this.레드마인유틸 = 레드마인유틸;
         this.레드마인API_정보 = 레드마인API_정보;
     }
 
@@ -58,7 +58,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         로그.info("레드마인_온프레미스_이슈_전략 "+ 연결_아이디 +" 이슈_목록_가져오기");
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
-        RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+        RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
         List<지라이슈_데이터> 반환이슈목록;
 
@@ -75,11 +75,11 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         }
 
         반환이슈목록 = 이슈목록.stream().map(이슈 -> {
-                        지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터형_변환(레드마인_매니저, 이슈, 서버정보.getUri());
-                        return 지라이슈_데이터;
-                    })
-                    .filter(Objects::nonNull)
-                    .collect(toList());
+                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터형_변환(레드마인_매니저, 이슈, 서버정보.getUri());
+                    return 지라이슈_데이터;
+                })
+                .filter(Objects::nonNull)
+                .collect(toList());
 
         return 반환이슈목록;
     }
@@ -90,7 +90,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         로그.info("온프레미스 레드마인 이슈 생성 :: {} :: {}", 연결_아이디, 지라이슈생성_데이터.toString());
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
-        RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+        RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
         if (지라이슈생성_데이터 == null) {
             로그.error(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: 지라이슈생성_데이터 값이 Null 입니다.");
@@ -150,7 +150,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
                 + 이슈_키_또는_아이디 +" :: 이슈_수정하기");
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
-        RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+        RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
         Map<String, Object> 결과 = new HashMap<>();
         지라이슈생성필드_데이터 필드_데이터 = 지라이슈생성_데이터.getFields();
@@ -194,7 +194,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
                 + 이슈_키_또는_아이디 +" :: 이슈_상세정보_가져오기");
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
-        RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+        RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
         지라이슈_데이터 이슈_데이터;
         Issue 조회할_이슈 = null;
@@ -221,7 +221,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
                 + 이슈_키_또는_아이디 +" :: 이슈링크_가져오기");
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
-        RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+        RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
         List<지라이슈_데이터> 이슈_목록 = new ArrayList<>();
         Issue 부모이슈 = null;
@@ -261,7 +261,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
                 + 이슈_키_또는_아이디 + " :: 서브테스크_가져오기");
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
-        RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+        RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
         Params params = new Params()
                 .add("parent_id", 이슈_키_또는_아이디)
@@ -282,11 +282,11 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         }
 
         하위이슈_목록 = 조회된_하위이슈_목록.stream().map(이슈 -> {
-                        지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터형_변환(레드마인_매니저, 이슈, 서버정보.getUri());
-                        return 지라이슈_데이터;
-                    })
-                    .filter(Objects::nonNull)
-                    .collect(toList());
+                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터형_변환(레드마인_매니저, 이슈, 서버정보.getUri());
+                    return 지라이슈_데이터;
+                })
+                .filter(Objects::nonNull)
+                .collect(toList());
 
         return 하위이슈_목록;
     }
@@ -298,7 +298,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
                 + 이슈_키_또는_아이디 +" :: 증분이슈_상세정보_가져오기");
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
-        RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+        RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
         지라이슈_데이터 이슈_데이터;
         Issue 조회할_이슈;
@@ -332,7 +332,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
                 + 이슈_키_또는_아이디 + " :: 증분이슈링크_가져오기");
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
-        RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+        RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
         List<지라이슈_데이터> 이슈_목록 = new ArrayList<>();
         Issue 부모이슈 = null;
@@ -373,7 +373,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
                 + 이슈_키_또는_아이디 + " :: 증분서브테스크_가져오기");
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
-        RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+        RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
         Params params = new Params()
                 .add("parent_id", 이슈_키_또는_아이디)
@@ -408,7 +408,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
 
         지라이슈_데이터 지라이슈_데이터 = new 지라이슈_데이터();
         지라이슈필드_데이터 지라이슈필드_데이터 = new 지라이슈필드_데이터();
-        String 기본경로 = 지라유틸.서버정보경로_체크(서버정보경로);
+        String 기본경로 = 레드마인유틸.서버정보경로_체크(서버정보경로);
 
         Optional.ofNullable(이슈.getId())
                 .map(아이디 -> String.valueOf(아이디))
@@ -457,12 +457,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         Optional.ofNullable(이슈.getAssigneeId())
                 .map(아이디 -> String.valueOf(아이디))
                 .ifPresent(아이디 -> {
-                    User 사용자정보 = null;
-                    try {
-                        사용자정보 = 레드마인_매니저.getUserManager().getUserById(Integer.valueOf(아이디));
-                    } catch (RedmineException e) {
-                        에러로그_유틸.예외로그출력(e, this.getClass().getName(), "지라이슈_데이터형_변환 사용자정보 가져오기");
-                    }
+                    User 사용자정보 = 레드마인유틸.사용자정보_조회(레드마인_매니저, 아이디);
 
                     if (사용자정보 != null && !사용자정보.getMail().isEmpty()) {
                         지라이슈필드_데이터.setAssignee(

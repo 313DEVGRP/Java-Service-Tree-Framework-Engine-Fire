@@ -2,11 +2,11 @@ package com.arms.api.alm.priority.strategy;
 
 import com.arms.api.alm.priority.model.지라이슈우선순위_데이터;
 import com.arms.api.alm.utils.레드마인API_정보;
+import com.arms.api.alm.utils.레드마인유틸;
 import com.arms.utils.errors.에러로그_유틸;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.service.서버정보_서비스;
 import com.arms.utils.errors.codes.에러코드;
-import com.arms.api.alm.utils.지라유틸;
 import com.taskadapter.redmineapi.RedmineException;
 import com.taskadapter.redmineapi.RedmineManager;
 import com.taskadapter.redmineapi.bean.IssuePriority;
@@ -28,7 +28,7 @@ public class 레드마인_온프레미스_지라이슈우선순위_전략 implem
     private 서버정보_서비스 서버정보_서비스;
 
     @Autowired
-    private 지라유틸 지라유틸;
+    private 레드마인유틸 레드마인유틸;
 
     @Autowired
     private 레드마인API_정보 레드마인API_정보;
@@ -38,7 +38,7 @@ public class 레드마인_온프레미스_지라이슈우선순위_전략 implem
         로그.info("레드마인_온프레미스_지라이슈우선순위_전략 "+ 연결_아이디 +" 우선순위_목록_가져오기");
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
-        RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+        RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
         List<지라이슈우선순위_데이터> 지라이슈우선순위_목록;
         List<IssuePriority> 우선순위_목록;
@@ -66,7 +66,7 @@ public class 레드마인_온프레미스_지라이슈우선순위_전략 implem
         지라이슈우선순위_데이터.setId(String.valueOf(우선순위.getId()));
         지라이슈우선순위_데이터.setName(우선순위.getName());
         지라이슈우선순위_데이터.setDefault(우선순위.isDefault());
-        지라이슈우선순위_데이터.setSelf(지라유틸.서버정보경로_체크(서버정보경로) + 레드마인API_정보.아이디_대체하기(레드마인API_정보.getEndpoint().getPriority(), String.valueOf(우선순위.getId())));
+        지라이슈우선순위_데이터.setSelf(레드마인유틸.서버정보경로_체크(서버정보경로) + 레드마인API_정보.아이디_대체하기(레드마인API_정보.getEndpoint().getPriority(), String.valueOf(우선순위.getId())));
 
         return 지라이슈우선순위_데이터;
     }
