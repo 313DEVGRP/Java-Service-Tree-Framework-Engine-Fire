@@ -2,11 +2,11 @@ package com.arms.api.alm.issuetype.strategy;
 
 import com.arms.api.alm.issuetype.model.지라이슈유형_데이터;
 import com.arms.api.alm.utils.레드마인API_정보;
-import com.arms.utils.errors.에러로그_유틸;
+import com.arms.api.alm.utils.레드마인유틸;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.service.서버정보_서비스;
 import com.arms.utils.errors.codes.에러코드;
-import com.arms.api.alm.utils.지라유틸;
+import com.arms.utils.errors.에러로그_유틸;
 import com.taskadapter.redmineapi.RedmineException;
 import com.taskadapter.redmineapi.RedmineManager;
 import com.taskadapter.redmineapi.bean.Project;
@@ -30,7 +30,7 @@ public class 레드마인_온프레미스_이슈유형_전략 implements 지라�
     private 서버정보_서비스 서버정보_서비스;
 
     @Autowired
-    private 지라유틸 지라유틸;
+    private 레드마인유틸 레드마인유틸;
 
     @Autowired
     private 레드마인API_정보 레드마인API_정보;
@@ -40,7 +40,7 @@ public class 레드마인_온프레미스_이슈유형_전략 implements 지라�
         로그.info("레드마인_온프레미스_이슈유형_전략 "+ 연결_아이디 +" 이슈유형_목록_가져오기");
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
-        RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+        RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
         List<지라이슈유형_데이터> 지라이슈유형_목록;
         List<Tracker> 우선순위_목록;
@@ -68,7 +68,7 @@ public class 레드마인_온프레미스_이슈유형_전략 implements 지라�
         로그.info("레드마인_온프레미스_이슈유형_전략 "+ 연결_아이디 +" 프로젝트별_이슈유형_목록_가져오기");
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
-        RedmineManager 레드마인_매니저 = 지라유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+        RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
         List<지라이슈유형_데이터> 지라이슈유형_목록;
         Project 프로젝트;
@@ -98,7 +98,7 @@ public class 레드마인_온프레미스_이슈유형_전략 implements 지라�
         지라이슈유형_데이터.setName(이슈유형.getName());
         지라이슈유형_데이터.setSubtask(false);
 
-        String 이슈유형_경로 = 지라유틸.서버정보경로_체크(서버정보경로) + 레드마인API_정보.아이디_대체하기(레드마인API_정보.getEndpoint().getIssuetype(), String.valueOf(이슈유형.getId()));
+        String 이슈유형_경로 = 레드마인유틸.서버정보경로_체크(서버정보경로) + 레드마인API_정보.아이디_대체하기(레드마인API_정보.getEndpoint().getIssuetype(), String.valueOf(이슈유형.getId()));
         if (!프로젝트_아이디.isEmpty()) {
             지라이슈유형_데이터.setSelf(이슈유형_경로 + "&project_id=" + 프로젝트_아이디);
         }
