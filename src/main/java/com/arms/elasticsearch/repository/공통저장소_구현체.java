@@ -6,7 +6,7 @@ import com.arms.elasticsearch.annotation.RollingIndexName;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
-import com.arms.elasticsearch.검색결과_목록_메인;
+import com.arms.elasticsearch.검색결과_목록_합계;
 import com.arms.elasticsearch.query.builder.검색_쿼리_빌더;
 import com.arms.elasticsearch.검색조건;
 import lombok.extern.slf4j.Slf4j;
@@ -54,15 +54,15 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
     }
 
     @Override
-    public 검색결과_목록_메인 aggregationSearch(Query query) {
+    public 검색결과_목록_합계 aggregationSearch(Query query) {
         NativeSearchQuery nativeSearchQuery = recentQueryMerge((NativeSearchQuery)query);
-        return new 검색결과_목록_메인(operations.search(nativeSearchQuery,entityClass));
+        return new 검색결과_목록_합계(operations.search(nativeSearchQuery,entityClass));
     }
 
     // 전 범위 대상
     @Override
-    public 검색결과_목록_메인 aggregationSearchAll(Query query) {
-        return new 검색결과_목록_메인(operations.search(query,entityClass));
+    public 검색결과_목록_합계 aggregationSearchAll(Query query) {
+        return new 검색결과_목록_합계(operations.search(query,entityClass));
     }
 
     //현재 디펜던시 없음

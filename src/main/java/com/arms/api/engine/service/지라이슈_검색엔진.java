@@ -13,13 +13,12 @@ import com.arms.api.alm.issue.model.지라프로젝트_데이터;
 import com.arms.api.alm.issue.service.이슈전략_호출;
 import com.arms.api.alm.issuestatus.model.지라이슈상태_데이터;
 import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.esquery.EsBoolQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
 import com.arms.elasticsearch.query.factory.일반_집계_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.검색결과;
-import com.arms.elasticsearch.검색결과_목록_메인;
+import com.arms.elasticsearch.검색결과_목록_합계;
 import com.arms.elasticsearch.query.builder.검색_쿼리_빌더;
 import com.arms.elasticsearch.검색조건;
 import com.arms.utils.errors.codes.에러코드;
@@ -492,9 +491,9 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         지라이슈_일반_집계_요청 지라이슈_일반_집계_요청 = new 지라이슈_일반_집계_요청();
         지라이슈_일반_집계_요청.set메인그룹필드("status.status_name.keyword");
         지라이슈_일반_집계_요청.set컨텐츠보기여부(false);
-        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(일반_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery).생성());
+        검색결과_목록_합계 검색결과_목록_합계 = 지라이슈저장소.aggregationSearch(일반_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery).생성());
 
-        List<검색결과> 상태값통계 = 검색결과_목록_메인.get검색결과().get("group_by_status.status_name.keyword");
+        List<검색결과> 상태값통계 = 검색결과_목록_합계.get검색결과().get("group_by_status.status_name.keyword");
 
         Map<String, Long> 제품서비스_버전별_집계 = new HashMap<>();
         for (검색결과 상태값 : 상태값통계) {
@@ -552,13 +551,13 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                 .addAggregation(AggregationBuilders.terms("상태값_집계").field("status.status_name.keyword"))
                 .withMaxResults(10000);
 
-        검색결과_목록_메인 검색결과_목록_메인_집계 = 지라이슈저장소.aggregationSearch(aggregationQuery.build());
-        long 할당된_요구사항_개수 = 검색결과_목록_메인_집계.get전체합계();
+        검색결과_목록_합계 검색결과_목록_합계_집계 = 지라이슈저장소.aggregationSearch(aggregationQuery.build());
+        long 할당된_요구사항_개수 = 검색결과_목록_합계_집계.get전체합계();
 
         로그.info("요구사항 개수: " + 요구사항_개수);
         로그.info("할당된 요구사항 개수: " + 할당된_요구사항_개수);
 
-        List<검색결과> 상태값_집계 = 검색결과_목록_메인_집계.get검색결과().get("상태값_집계");
+        List<검색결과> 상태값_집계 = 검색결과_목록_합계_집계.get검색결과().get("상태값_집계");
 
         Map<String, Long> 제품서비스별_담당자_요구사항_통계 = new HashMap<>();
         제품서비스별_담당자_요구사항_통계.put("allReq", 요구사항_개수);
@@ -622,13 +621,13 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
                 .addAggregation(AggregationBuilders.terms("상태값_집계").field("status.status_name.keyword"))
                 .withMaxResults(10000);
 
-        검색결과_목록_메인 검색결과_목록_메인_집계 = 지라이슈저장소.aggregationSearch(aggregationQuery.build());
-        long 할당된_요구사항_개수 = 검색결과_목록_메인_집계.get전체합계();
+        검색결과_목록_합계 검색결과_목록_합계_집계 = 지라이슈저장소.aggregationSearch(aggregationQuery.build());
+        long 할당된_요구사항_개수 = 검색결과_목록_합계_집계.get전체합계();
 
         로그.info("연관된 요구사항 개수: " + 연관된_요구사항_개수);
         로그.info("할당된 요구사항 개수: " + 할당된_요구사항_개수);
 
-        List<검색결과> 상태값_집계 = 검색결과_목록_메인_집계.get검색결과().get("상태값_집계");
+        List<검색결과> 상태값_집계 = 검색결과_목록_합계_집계.get검색결과().get("상태값_집계");
 
         Map<String, Long> 제품서비스별_담당자_연관된_요구사항_통계 = new HashMap<>();
         제품서비스별_담당자_연관된_요구사항_통계.put("allReq", 연관된_요구사항_개수);

@@ -1,6 +1,6 @@
 package com.arms.elasticsearch.repository;
 
-import com.arms.elasticsearch.검색결과_목록_메인;
+import com.arms.elasticsearch.검색결과_목록_합계;
 import com.arms.elasticsearch.검색조건;
 import org.springframework.data.elasticsearch.core.IndexedObjectInformation;
 import org.springframework.data.elasticsearch.core.SearchHits;
@@ -16,8 +16,8 @@ import java.util.List;
 @NoRepositoryBean
 public interface 공통저장소<T,ID extends Serializable> extends ElasticsearchRepository<T,ID> {
 
-	검색결과_목록_메인 aggregationSearch(Query query) ;
-	검색결과_목록_메인 aggregationSearchAll(Query query);
+	검색결과_목록_합계 aggregationSearch(Query query) ;
+	검색결과_목록_합계 aggregationSearchAll(Query query);
 
 	List<IndexedObjectInformation> bulkIndex(List<IndexQuery> indexQueryList);
 
