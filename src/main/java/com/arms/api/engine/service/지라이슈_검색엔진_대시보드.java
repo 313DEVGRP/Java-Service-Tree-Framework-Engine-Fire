@@ -14,7 +14,6 @@ import com.arms.elasticsearch.query.*;
 import com.arms.elasticsearch.query.base.기본_정렬_요청;
 import com.arms.elasticsearch.query.esquery.EsBoolQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryString;
-import com.arms.elasticsearch.query.esquery.esboolquery.must.MustQueryString;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
 import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
 import com.arms.elasticsearch.query.filter.QueryStringFilter;
@@ -24,7 +23,7 @@ import com.arms.elasticsearch.query.factory.일반_검색_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.query.esquery.EsSortQuery;
 import com.arms.elasticsearch.검색결과;
-import com.arms.elasticsearch.검색결과_목록_메인;
+import com.arms.elasticsearch.검색결과_목록_합계;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -80,11 +79,11 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 ).withMaxResults(0);
 
         // 요구사항 vs 연결된이슈&서브테스크 구분안하고 한번에
-        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
-        Long 결과 = 검색결과_목록_메인.get전체합계();
+        검색결과_목록_합계 검색결과_목록_합계 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
+        Long 결과 = 검색결과_목록_합계.get전체합계();
         로그.info("검색결과 개수: " + 결과);
 
-        List<검색결과> 담당자별_집계 = 검색결과_목록_메인.get검색결과().get("담당자별_집계");
+        List<검색결과> 담당자별_집계 = 검색결과_목록_합계.get검색결과().get("담당자별_집계");
 
         long 담당자_총합 = 0;
         Map<String, Long> 제품서비스별_하위이슈_담당자_집계 = new HashMap<>();
@@ -118,10 +117,10 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 .addAggregation(담당자별_집계)
                 .withMaxResults(0);
 
-        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
+        검색결과_목록_합계 검색결과_목록_합계 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
 
         Map<String, Map<String, Map<String, Integer>>> 담당자별_요구사항여부별_상태값_집계
-                = 검색결과_목록_메인.get검색결과().get("담당자별_집계")
+                = 검색결과_목록_합계.get검색결과().get("담당자별_집계")
                 .stream()
                 .collect(
                         Collectors.toMap(
@@ -154,7 +153,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
 
     @Override
-    public 검색결과_목록_메인 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) {
+    public 검색결과_목록_합계 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) {
 
         return 지라이슈저장소.aggregationSearch(
                 쿼리추상팩토리.생성()
@@ -194,9 +193,9 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 .addAggregation(versionsAgg)
                 .build();
 
-        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(searchQuery);
+        검색결과_목록_합계 검색결과_목록_합계 = 지라이슈저장소.aggregationSearch(searchQuery);
 
-        List<검색결과> 버전검색결과 = 검색결과_목록_메인.get검색결과().get("versions");
+        List<검색결과> 버전검색결과 = 검색결과_목록_합계.get검색결과().get("versions");
 
         List<String> filteredVersionIds = Arrays.stream(지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks())
                 .map(String::valueOf)
@@ -206,7 +205,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     }
 
     @Override
-    public List<제품_서비스_버전> 요구사항_별_상태_및_관여_작업자수_내용(검색결과_목록_메인 요구사항, 검색결과_목록_메인 하위이슈) {
+    public List<제품_서비스_버전> 요구사항_별_상태_및_관여_작업자수_내용(검색결과_목록_합계 요구사항, 검색결과_목록_합계 하위이슈) {
 
         List<검색결과> pdServiceVersions = 요구사항.get검색결과().entrySet().stream().flatMap(a->a.getValue().stream()).collect(toList());
         List<검색결과> parentReqKeys = 하위이슈.get검색결과().entrySet().stream().flatMap(a->a.getValue().stream()).collect(toList());
@@ -364,9 +363,9 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         NativeSearchQueryBuilder nativeSearchQueryBuilder
                 = new NativeSearchQueryBuilder().withQuery(boolQuery).addAggregation(weeklyAggregationBuilder);
 
-        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
+        검색결과_목록_합계 검색결과_목록_합계 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
 
-        List<검색결과> aggregationByWeek = 검색결과_목록_메인.get검색결과().get("aggregation_by_week");
+        List<검색결과> aggregationByWeek = 검색결과_목록_합계.get검색결과().get("aggregation_by_week");
 
 
         Map<String, 요구사항_지라이슈상태_주별_집계> 검색결과 = aggregationByWeek.stream()
@@ -420,7 +419,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         NativeSearchQueryBuilder nativeSearchQueryBuilderForTotalIssues
                 = new NativeSearchQueryBuilder().withQuery(boolQueryForTotalIssues).addAggregation(totalAggregationBuilder);
 
-        검색결과_목록_메인 searchResponseForTotalIssues
+        검색결과_목록_합계 searchResponseForTotalIssues
                 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilderForTotalIssues.build());
 
         Long totalIssuesCount
@@ -514,9 +513,9 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
          NativeSearchQueryBuilder nativeSearchQueryBuilder
                  = new NativeSearchQueryBuilder().withQuery(boolQuery).addAggregation(dailyAggregationBuilder);
 
-         검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
+         검색결과_목록_합계 검색결과_목록_합계 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
 
-         List<검색결과> aggregationByDay = 검색결과_목록_메인.get검색결과().get("aggregation_by_day");
+         List<검색결과> aggregationByDay = 검색결과_목록_합계.get검색결과().get("aggregation_by_day");
 
          Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> 검색결과 = aggregationByDay.stream()
                  .sorted(Comparator.comparing(bucket -> OffsetDateTime.parse(bucket.get필드명()).toLocalDate()))
@@ -742,9 +741,9 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 .addAggregation(versionsAgg)
                 .build();
 
-        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.aggregationSearch(searchQuery);
+        검색결과_목록_합계 검색결과_목록_합계 = 지라이슈저장소.aggregationSearch(searchQuery);
 
-        return 검색결과_목록_메인.get검색결과().get("versions");
+        return 검색결과_목록_합계.get검색결과().get("versions");
 
     }
 
