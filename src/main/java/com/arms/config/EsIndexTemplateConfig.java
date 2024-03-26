@@ -1,5 +1,6 @@
-package com.arms.elasticsearch.annotation;
+package com.arms.config;
 
+import com.arms.elasticsearch.annotation.ElasticSearchIndex;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
@@ -20,11 +21,11 @@ import java.util.Set;
 
 @Component
 @Slf4j
-public class EsIndexScanner {
+public class EsIndexTemplateConfig {
 
 	private final ElasticsearchOperations operations;
 
-	public EsIndexScanner(ElasticsearchOperations operations) {
+	public EsIndexTemplateConfig(ElasticsearchOperations operations) {
 		this.operations = operations;
 	}
 
