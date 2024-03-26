@@ -26,12 +26,12 @@ public class 검색결과 {
     public 검색결과(Bucket bucket) {
         this.필드명 = bucket.getKeyAsString();
         this.개수 = bucket.getDocCount();
-        this.하위검색결과 = new 검색결과_목록_메인(bucket.getAggregations().asMap()).get검색결과();
+        this.하위검색결과 = new 검색결과_목록_합계(bucket.getAggregations().asMap()).get검색결과();
     }
 
     public 검색결과(ParsedFilter parsedFilter) {
         this.개수 = parsedFilter.getDocCount();
-        this.하위검색결과 = new 검색결과_목록_메인(parsedFilter.getAggregations().asMap()).get검색결과();
+        this.하위검색결과 = new 검색결과_목록_합계(parsedFilter.getAggregations().asMap()).get검색결과();
     }
 
     public Long 필터필드개수(String name){

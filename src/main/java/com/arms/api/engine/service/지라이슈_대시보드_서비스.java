@@ -13,7 +13,7 @@ import com.arms.api.engine.model.dto.트리맵_검색요청;
 import com.arms.api.engine.model.vo.제품_서비스_버전;
 import com.arms.elasticsearch.query.쿼리_추상_팩토리;
 import com.arms.elasticsearch.검색결과;
-import com.arms.elasticsearch.검색결과_목록_메인;
+import com.arms.elasticsearch.검색결과_목록_합계;
 import org.springframework.data.elasticsearch.core.SearchHit;
 
 public interface 지라이슈_대시보드_서비스 {
@@ -23,7 +23,7 @@ public interface 지라이슈_대시보드_서비스 {
 
     Map<String, Long> 제품서비스별_담당자_이름_통계(Long 지라서버_아이디, Long 제품서비스_아이디);
 
-    검색결과_목록_메인 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리);
+    검색결과_목록_합계 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리);
 
     List<지라이슈> 지라이슈_조회(쿼리_추상_팩토리 쿼리추상팩토리);
 
@@ -37,7 +37,7 @@ public interface 지라이슈_대시보드_서비스 {
 
     List<지라이슈> 지라이슈_기준일자별_제품_및_제품버전_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청);
 
-    List<제품_서비스_버전> 요구사항_별_상태_및_관여_작업자수_내용(검색결과_목록_메인 요구사항, 검색결과_목록_메인 하위이슈);
+    List<제품_서비스_버전> 요구사항_별_상태_및_관여_작업자수_내용(검색결과_목록_합계 요구사항, 검색결과_목록_합계 하위이슈);
 
 
     Map<Long, Map<String, Map<String,List<요구사항_별_업데이트_데이터>>>>  요구사항별_업데이트_능선_데이터(지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청);

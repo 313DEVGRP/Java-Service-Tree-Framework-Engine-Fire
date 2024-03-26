@@ -3,8 +3,6 @@ package com.arms.utils.errors.exception;
 
 import com.arms.utils.errors.codes.에러코드;
 import com.arms.utils.response.응답처리;
-import com.arms.utils.slack.SlackNotificationService;
-import com.arms.utils.slack.SlackProperty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -27,8 +25,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class 전역오류처리 {
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
-    private final SlackNotificationService slackNotificationService;
-
     private ResponseEntity<응답처리.ApiResult<?>> newResponse(String message, HttpStatus status) {
         HttpHeaders headers = getHttpHeaders();
         return new ResponseEntity<>(응답처리.error(message, status), headers, status);
@@ -42,7 +38,6 @@ public class 전역오류처리 {
 
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<?> onException(Exception e) {
-        slackNotificationService.sendMessageToChannel(SlackProperty.Channel.engine, e);
         e.printStackTrace();
         System.out.println(e.getMessage());
         return newResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);

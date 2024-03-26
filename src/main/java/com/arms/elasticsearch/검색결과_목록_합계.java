@@ -17,7 +17,7 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import lombok.Getter;
 
 @Getter
-public class 검색결과_목록_메인 {
+public class 검색결과_목록_합계 {
 
 	private Long 전체합계;
 	private Map<String,List<검색결과>> 검색결과;
@@ -26,15 +26,15 @@ public class 검색결과_목록_메인 {
 		return 검색결과.get(name);
 	}
 
-	public 검색결과_목록_메인(SearchHits searchHits) {
+	public 검색결과_목록_합계(SearchHits searchHits) {
 		this.전체합계 = searchHits.getTotalHits();
-		this.검색결과 = new 검색결과_목록_메인(getTerm(searchHits.getAggregations())
+		this.검색결과 = new 검색결과_목록_합계(getTerm(searchHits.getAggregations())
 			.entrySet()
 			.stream()
 			.collect(toMap(aggregation -> aggregation.getKey(), a -> a.getValue()))).get검색결과();
 	}
 
-	public 검색결과_목록_메인(Map<String, Aggregation> bucketsAggregationMap) {
+	public 검색결과_목록_합계(Map<String, Aggregation> bucketsAggregationMap) {
 
 		this.검색결과 = bucketsAggregationMap.entrySet().stream()
 			.collect(groupingBy(a->new 검색결과_그룹(a.getKey()).get()
