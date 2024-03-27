@@ -1,10 +1,9 @@
 package com.arms.api.alm.issuetype.strategy;
 
-import com.arms.api.alm.issue.model.클라우드_이슈생성필드_메타데이터;
 import com.arms.api.alm.utils.지라유틸;
 import com.arms.api.alm.utils.지라API_정보;
 import com.arms.utils.errors.codes.에러코드;
-import com.arms.api.alm.issuetype.model.지라이슈유형_데이터;
+import com.arms.api.alm.issuetype.model.이슈유형_데이터;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.service.서버정보_서비스;
 import com.arms.utils.errors.에러로그_유틸;
@@ -20,7 +19,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import java.util.*;
 
 @Component
-public class 클라우드_지라이슈유형_전략 implements 지라이슈유형_전략 {
+public class 클라우드_지라_이슈유형_전략 implements 이슈유형_전략 {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
@@ -34,7 +33,7 @@ public class 클라우드_지라이슈유형_전략 implements 지라이슈유�
     private 지라API_정보 지라API_정보;
 
     @Override
-    public List<지라이슈유형_데이터> 이슈유형_목록_가져오기(Long 연결_아이디) {
+    public List<이슈유형_데이터> 이슈유형_목록_가져오기(Long 연결_아이디) {
         로그.info("클라우드 지라 이슈유형_목록_가져오기");
         try {
             String endpoint = "/rest/api/3/issuetype";
@@ -42,9 +41,9 @@ public class 클라우드_지라이슈유형_전략 implements 지라이슈유�
             서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
             WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
 
-            List<지라이슈유형_데이터> 반환할_이슈_유형_목록
+            List<이슈유형_데이터> 반환할_이슈_유형_목록
                     = 지라유틸.get(webClient, endpoint,
-                    new ParameterizedTypeReference<List<지라이슈유형_데이터>>() {}).block();
+                    new ParameterizedTypeReference<List<이슈유형_데이터>>() {}).block();
 
             if (반환할_이슈_유형_목록 == null) {
                 로그.error("클라우드 지라 이슈 유형 목록이 Null입니다.");
@@ -74,7 +73,7 @@ public class 클라우드_지라이슈유형_전략 implements 지라이슈유�
     }
 
     @Override
-    public List<지라이슈유형_데이터> 프로젝트별_이슈유형_목록_가져오기(Long 연결_아이디, String 프로젝트_아이디) {
+    public List<이슈유형_데이터> 프로젝트별_이슈유형_목록_가져오기(Long 연결_아이디, String 프로젝트_아이디) {
 
         로그.info("클라우드 지라 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록_가져오기");
 
@@ -88,8 +87,8 @@ public class 클라우드_지라이슈유형_전략 implements 지라이슈유�
             서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
             WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
 
-            List<지라이슈유형_데이터> 이슈_유형_목록 = 지라유틸.get(webClient, endpoint,
-                    new ParameterizedTypeReference<List<지라이슈유형_데이터>>() {}).block();
+            List<이슈유형_데이터> 이슈_유형_목록 = 지라유틸.get(webClient, endpoint,
+                    new ParameterizedTypeReference<List<이슈유형_데이터>>() {}).block();
 
             if (이슈_유형_목록 == null) {
                 로그.error("클라우드 지라 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록이 Null입니다.");
@@ -143,7 +142,7 @@ public class 클라우드_지라이슈유형_전략 implements 지라이슈유�
         }
     }
 
-    public List<지라이슈유형_데이터> 프로젝트별_이슈유형_목록_가져오기2(Long 연결_아이디, String 프로젝트_아이디) {
+    public List<이슈유형_데이터> 프로젝트별_이슈유형_목록_가져오기2(Long 연결_아이디, String 프로젝트_아이디) {
 
         로그.info("클라우드 지라 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록_가져오기");
 
@@ -157,9 +156,9 @@ public class 클라우드_지라이슈유형_전략 implements 지라이슈유�
             서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
             WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
 
-            List<지라이슈유형_데이터> 반환할_이슈_유형_목록
+            List<이슈유형_데이터> 반환할_이슈_유형_목록
                     = 지라유틸.get(webClient, endpoint,
-                    new ParameterizedTypeReference<List<지라이슈유형_데이터>>() {}).block();
+                    new ParameterizedTypeReference<List<이슈유형_데이터>>() {}).block();
 
             if (반환할_이슈_유형_목록 == null) {
                 로그.error("클라우드 지라 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록이 Null입니다.");

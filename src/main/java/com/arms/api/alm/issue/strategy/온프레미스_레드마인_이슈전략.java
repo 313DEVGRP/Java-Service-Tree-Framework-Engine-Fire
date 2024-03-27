@@ -2,7 +2,7 @@ package com.arms.api.alm.issue.strategy;
 
 import com.arms.api.alm.issue.model.*;
 import com.arms.api.alm.issuestatus.model.이슈상태_데이터;
-import com.arms.api.alm.issuetype.model.지라이슈유형_데이터;
+import com.arms.api.alm.issuetype.model.이슈유형_데이터;
 import com.arms.api.alm.priority.model.지라이슈우선순위_데이터;
 import com.arms.api.alm.utils.레드마인API_정보;
 import com.arms.api.alm.utils.레드마인유틸;
@@ -105,7 +105,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         }
 
         지라프로젝트_데이터 프로젝트_데이터 = 필드_데이터.getProject();
-        지라이슈유형_데이터 이슈유형_데이터 = 필드_데이터.getIssuetype();
+        이슈유형_데이터 이슈유형_데이터 = 필드_데이터.getIssuetype();
         지라이슈우선순위_데이터 우선순위_데이터 = 필드_데이터.getPriority();
 
         if (프로젝트_데이터 == null) {
@@ -429,7 +429,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
                 .map(아이디 -> String.valueOf(아이디))
                 .ifPresent(아이디 -> {
                     String 이슈유형_경로 = 기본경로 + 레드마인API_정보.아이디_대체하기(레드마인API_정보.getEndpoint().getIssuetype(), 아이디);
-                    지라이슈필드_데이터.setIssuetype(new 지라이슈유형_데이터(이슈유형_경로, 아이디, 이슈.getTracker().getName()));
+                    지라이슈필드_데이터.setIssuetype(new 이슈유형_데이터(이슈유형_경로, 아이디, 이슈.getTracker().getName()));
                 });
 
         Optional.ofNullable(이슈.getPriorityId())
