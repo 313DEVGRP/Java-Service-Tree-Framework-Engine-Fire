@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class 지라이슈유형_데이터 {
+public class 이슈유형_데이터 {
     // 온프레미스, 클라우드 공통
     private String self;
     private String id;
@@ -22,7 +22,7 @@ public class 지라이슈유형_데이터 {
     private String untranslatedName;
     private Integer hierarchyLevel;
 
-    public 지라이슈유형_데이터(String self, String id, String name) {
+    public 이슈유형_데이터(String self, String id, String name) {
         this.self = self;
         this.id = id;
         this.name = name;

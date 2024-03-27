@@ -1,8 +1,8 @@
 package com.arms.api.alm.issuetype.strategy;
 
+import com.arms.api.alm.issuetype.model.이슈유형_데이터;
 import com.arms.api.alm.utils.지라유틸;
 import com.arms.utils.errors.codes.에러코드;
-import com.arms.api.alm.issuetype.model.지라이슈유형_데이터;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.service.서버정보_서비스;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @Component
-public class 온프레미스_지라이슈유형_전략 implements 지라이슈유형_전략 {
+public class 온프레미스_지라_이슈유형_전략 implements 이슈유형_전략 {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
@@ -28,7 +28,7 @@ public class 온프레미스_지라이슈유형_전략 implements 지라이슈�
     private 서버정보_서비스 서버정보_서비스;
 
     @Override
-    public List<지라이슈유형_데이터> 이슈유형_목록_가져오기(Long 연결_아이디) throws URISyntaxException, IOException, ExecutionException, InterruptedException {
+    public List<이슈유형_데이터> 이슈유형_목록_가져오기(Long 연결_아이디) throws URISyntaxException, IOException, ExecutionException, InterruptedException {
 
         로그.info("온프레미스 지라 이슈유형_목록_가져오기");
 
@@ -39,18 +39,18 @@ public class 온프레미스_지라이슈유형_전략 implements 지라이슈�
                     서버정보.getPasswordOrToken());
 
             Iterable<IssueType> 온프레미스_이슈_유형_목록 = restClient.getMetadataClient().getIssueTypes().get();
-            List<지라이슈유형_데이터> 반환할_이슈_유형_목록 = new ArrayList<>();
+            List<이슈유형_데이터> 반환할_이슈_유형_목록 = new ArrayList<>();
 
             for (IssueType 온프레미스_이슈_유형 : 온프레미스_이슈_유형_목록) {
-                지라이슈유형_데이터 지라이슈유형_데이터 = new 지라이슈유형_데이터();
+                이슈유형_데이터 이슈유형_데이터 = new 이슈유형_데이터();
 
-                지라이슈유형_데이터.setId(온프레미스_이슈_유형.getId().toString());
-                지라이슈유형_데이터.setName(온프레미스_이슈_유형.getName());
-                지라이슈유형_데이터.setSelf(온프레미스_이슈_유형.getName());
-                지라이슈유형_데이터.setSubtask(온프레미스_이슈_유형.isSubtask());
-                지라이슈유형_데이터.setDescription(온프레미스_이슈_유형.getDescription());
+                이슈유형_데이터.setId(온프레미스_이슈_유형.getId().toString());
+                이슈유형_데이터.setName(온프레미스_이슈_유형.getName());
+                이슈유형_데이터.setSelf(온프레미스_이슈_유형.getName());
+                이슈유형_데이터.setSubtask(온프레미스_이슈_유형.isSubtask());
+                이슈유형_데이터.setDescription(온프레미스_이슈_유형.getDescription());
 
-                반환할_이슈_유형_목록.add(지라이슈유형_데이터);
+                반환할_이슈_유형_목록.add(이슈유형_데이터);
             }
 
             로그.info(반환할_이슈_유형_목록.toString());
@@ -76,7 +76,7 @@ public class 온프레미스_지라이슈유형_전략 implements 지라이슈�
     }
 
     @Override
-    public List<지라이슈유형_데이터> 프로젝트별_이슈유형_목록_가져오기(Long 연결_아이디, String 프로젝트_아이디) throws URISyntaxException, IOException, ExecutionException, InterruptedException {
+    public List<이슈유형_데이터> 프로젝트별_이슈유형_목록_가져오기(Long 연결_아이디, String 프로젝트_아이디) throws URISyntaxException, IOException, ExecutionException, InterruptedException {
 
         로그.info("온프레미스는 전역 지라 이슈유형_목록_가져오기");
 
@@ -91,18 +91,18 @@ public class 온프레미스_지라이슈유형_전략 implements 지라이슈�
                                                                             서버정보.getPasswordOrToken());
 
             Iterable<IssueType> 온프레미스_이슈_유형_목록 = restClient.getMetadataClient().getIssueTypes().get();
-            List<지라이슈유형_데이터> 반환할_이슈_유형_목록 = new ArrayList<>();
+            List<이슈유형_데이터> 반환할_이슈_유형_목록 = new ArrayList<>();
 
             for (IssueType 온프레미스_이슈_유형 : 온프레미스_이슈_유형_목록) {
-                지라이슈유형_데이터 지라이슈유형_데이터 = new 지라이슈유형_데이터();
+                이슈유형_데이터 이슈유형_데이터 = new 이슈유형_데이터();
 
-                지라이슈유형_데이터.setId(온프레미스_이슈_유형.getId().toString());
-                지라이슈유형_데이터.setName(온프레미스_이슈_유형.getName());
-                지라이슈유형_데이터.setSelf(온프레미스_이슈_유형.getName());
-                지라이슈유형_데이터.setSubtask(온프레미스_이슈_유형.isSubtask());
-                지라이슈유형_데이터.setDescription(온프레미스_이슈_유형.getDescription());
+                이슈유형_데이터.setId(온프레미스_이슈_유형.getId().toString());
+                이슈유형_데이터.setName(온프레미스_이슈_유형.getName());
+                이슈유형_데이터.setSelf(온프레미스_이슈_유형.getName());
+                이슈유형_데이터.setSubtask(온프레미스_이슈_유형.isSubtask());
+                이슈유형_데이터.setDescription(온프레미스_이슈_유형.getDescription());
 
-                반환할_이슈_유형_목록.add(지라이슈유형_데이터);
+                반환할_이슈_유형_목록.add(이슈유형_데이터);
             }
 
             로그.info(반환할_이슈_유형_목록.toString());

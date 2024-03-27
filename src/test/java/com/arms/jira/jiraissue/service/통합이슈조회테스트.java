@@ -11,7 +11,7 @@ import com.arms.api.alm.issue.service.이슈전략_호출;
 import com.arms.api.alm.issueresolution.model.이슈해결책_데이터;
 import com.arms.api.alm.issuestatus.model.이슈상태_데이터;
 import com.arms.api.alm.issuestatus.model.클라우드_지라이슈상태_데이터;
-import com.arms.api.alm.issuetype.model.지라이슈유형_데이터;
+import com.arms.api.alm.issuetype.model.이슈유형_데이터;
 import com.arms.api.alm.priority.model.지라이슈우선순위_데이터;
 import com.arms.api.alm.utils.지라유틸;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
@@ -271,7 +271,7 @@ class 통합이슈조회테스트 {
             String 이슈유형_이름 = 이슈.getIssueType().getName();
             String 이슈유형_내용 = 이슈.getIssueType().getDescription();
 
-            지라이슈유형_데이터 이슈유형 = new 지라이슈유형_데이터();
+            이슈유형_데이터 이슈유형 = new 이슈유형_데이터();
             이슈유형.setSelf(이슈유형_주소);
             이슈유형.setId(이슈유형_아이디);
             이슈유형.setName(이슈유형_이름);
