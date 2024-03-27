@@ -3,6 +3,7 @@ package com.arms.api.alm.issue.strategy;
 import com.arms.api.alm.issue.model.지라사용자_데이터;
 import com.arms.api.alm.issue.model.지라이슈워크로그_데이터;
 import com.arms.api.alm.issueresolution.model.이슈해결책_데이터;
+import com.arms.api.alm.issuestatus.model.이슈상태_데이터;
 import com.arms.api.alm.issuetype.model.지라이슈유형_데이터;
 import com.arms.api.alm.priority.model.지라이슈우선순위_데이터;
 import com.arms.api.alm.issue.model.지라이슈_데이터;
@@ -14,7 +15,6 @@ import com.arms.utils.errors.에러로그_유틸;
 import com.arms.api.alm.utils.지라API_정보;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.utils.errors.codes.에러코드;
-import com.arms.api.alm.issuestatus.model.지라이슈상태_데이터;
 import com.arms.api.serverinfo.service.서버정보_서비스;
 import com.arms.api.alm.utils.지라유틸;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
@@ -350,7 +350,7 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
             String 이슈상태_이름 = 지라이슈.getStatus().getName();
             String 이슈상태_설명 =  지라이슈.getStatus().getDescription();
 
-            지라이슈상태_데이터 이슈상태 = new 지라이슈상태_데이터();
+            이슈상태_데이터 이슈상태 = new 이슈상태_데이터();
             이슈상태.setSelf(이슈상태_주소);
             이슈상태.setId(이슈상태_아이디);
             이슈상태.setName(이슈상태_이름);

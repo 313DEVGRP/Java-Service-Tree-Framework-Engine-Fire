@@ -1,5 +1,6 @@
 package com.arms.api.engine.service;
 
+import com.arms.api.alm.issuestatus.model.이슈상태_데이터;
 import com.arms.api.engine.model.dto.지라이슈_일반_집계_요청;
 import com.arms.api.engine.model.entity.지라이슈;
 import com.arms.api.engine.util.지라이슈_생성;
@@ -11,7 +12,6 @@ import com.arms.api.alm.issue.model.지라이슈_데이터;
 import com.arms.api.alm.issue.model.지라이슈필드_데이터;
 import com.arms.api.alm.issue.model.지라프로젝트_데이터;
 import com.arms.api.alm.issue.service.이슈전략_호출;
-import com.arms.api.alm.issuestatus.model.지라이슈상태_데이터;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
@@ -227,16 +227,16 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
             지라프로젝트_데이터 지라프로젝트_데이터 = new 지라프로젝트_데이터();
             지라프로젝트_데이터.setKey(프로젝트_키);
 
-            지라이슈상태_데이터 지라이슈상태_데이터 = new 지라이슈상태_데이터();
-            지라이슈상태_데이터.setId("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
-            지라이슈상태_데이터.setSelf("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
-            지라이슈상태_데이터.setName("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
-            지라이슈상태_데이터.setDescription("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
+            이슈상태_데이터 이슈상태_데이터 = new 이슈상태_데이터();
+            이슈상태_데이터.setId("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
+            이슈상태_데이터.setSelf("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
+            이슈상태_데이터.setName("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
+            이슈상태_데이터.setDescription("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
 
             지라이슈필드_데이터 지라이슈필드_데이터 = new 지라이슈필드_데이터();
 
             지라이슈필드_데이터.setProject(지라프로젝트_데이터);
-            지라이슈필드_데이터.setStatus(지라이슈상태_데이터);
+            지라이슈필드_데이터.setStatus(이슈상태_데이터);
 
             반환된_이슈.setFields(지라이슈필드_데이터);
 
@@ -345,16 +345,16 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
             지라프로젝트_데이터 지라프로젝트_데이터 = new 지라프로젝트_데이터();
             지라프로젝트_데이터.setKey(프로젝트_키);
 
-            지라이슈상태_데이터 지라이슈상태_데이터 = new 지라이슈상태_데이터();
-            지라이슈상태_데이터.setId("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
-            지라이슈상태_데이터.setSelf("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
-            지라이슈상태_데이터.setName("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
-            지라이슈상태_데이터.setDescription("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
+            이슈상태_데이터 이슈상태_데이터 = new 이슈상태_데이터();
+            이슈상태_데이터.setId("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
+            이슈상태_데이터.setSelf("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
+            이슈상태_데이터.setName("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
+            이슈상태_데이터.setDescription("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
 
             지라이슈필드_데이터 지라이슈필드_데이터 = new 지라이슈필드_데이터();
 
             지라이슈필드_데이터.setProject(지라프로젝트_데이터);
-            지라이슈필드_데이터.setStatus(지라이슈상태_데이터);
+            지라이슈필드_데이터.setStatus(이슈상태_데이터);
 
             반환된_이슈.setFields(지라이슈필드_데이터);
 

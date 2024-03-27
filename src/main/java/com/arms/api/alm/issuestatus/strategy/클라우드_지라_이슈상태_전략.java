@@ -1,9 +1,9 @@
 package com.arms.api.alm.issuestatus.strategy;
 
+import com.arms.api.alm.issuestatus.model.이슈상태_데이터;
 import com.arms.api.alm.issuestatus.model.클라우드_지라이슈상태_데이터;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.utils.errors.codes.에러코드;
-import com.arms.api.alm.issuestatus.model.지라이슈상태_데이터;
 import com.arms.api.serverinfo.service.서버정보_서비스;
 import com.arms.api.alm.utils.지라유틸;
 
@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Component
-public class 클라우드_지라이슈상태_전략 implements 지라이슈상태_전략 {
+public class 클라우드_지라_이슈상태_전략 implements 이슈상태_전략 {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
@@ -32,7 +32,7 @@ public class 클라우드_지라이슈상태_전략 implements 지라이슈상�
     private 지라유틸 지라유틸;
 
     @Override
-    public List<지라이슈상태_데이터> 이슈상태_목록_가져오기(Long 연결_아이디) throws Exception{
+    public List<이슈상태_데이터> 이슈상태_목록_가져오기(Long 연결_아이디) throws Exception{
 
         로그.info("클라우드 이슈 상태 목록 가져오기");
 
@@ -44,7 +44,7 @@ public class 클라우드_지라이슈상태_전략 implements 지라이슈상�
             int 최대_검색수 = 지라유틸.최대_검색수_가져오기();
             boolean checkLast = false;
 
-            List<지라이슈상태_데이터> 반환할_지라이슈상태_데이터_목록 = new ArrayList<지라이슈상태_데이터>();
+            List<이슈상태_데이터> 반환할_이슈상태_데이터_목록 = new ArrayList<이슈상태_데이터>();
 
             while(!checkLast) {
                 String endpoint = "/rest/api/3/statuses/search?maxResults="+ 최대_검색수 + "&startAt=" + startAt;
@@ -59,14 +59,14 @@ public class 클라우드_지라이슈상태_전략 implements 지라이슈상�
                     return Collections.emptyList();
                 }
 
-                반환할_지라이슈상태_데이터_목록.addAll(지라이슈상태_조회_결과.getValues());
+                반환할_이슈상태_데이터_목록.addAll(지라이슈상태_조회_결과.getValues());
 
-                for (지라이슈상태_데이터 이슈_상태 : 반환할_지라이슈상태_데이터_목록) {
+                for (이슈상태_데이터 이슈_상태 : 반환할_이슈상태_데이터_목록) {
                     String self = 서버정보.getUri() + "/rest/api/3/statuses?id=" + 이슈_상태.getId();
                     이슈_상태.setSelf(self);
                 }
 
-                if (지라이슈상태_조회_결과.getTotal() == 반환할_지라이슈상태_데이터_목록.size()) {
+                if (지라이슈상태_조회_결과.getTotal() == 반환할_이슈상태_데이터_목록.size()) {
                     checkLast = true;
                 }
                 else {
@@ -74,7 +74,7 @@ public class 클라우드_지라이슈상태_전략 implements 지라이슈상�
                 }
             }
 
-            return 반환할_지라이슈상태_데이터_목록;
+            return 반환할_이슈상태_데이터_목록;
 
         } catch (Exception e) {
             로그.error("클라우드 이슈 상태 목록 조회에 실패하였습니다");
@@ -94,7 +94,7 @@ public class 클라우드_지라이슈상태_전략 implements 지라이슈상�
 
 
     @Override
-    public List<지라이슈상태_데이터> 프로젝트별_이슈상태_목록_가져오기(Long 연결_아이디, String 프로젝트_아이디) throws Exception{
+    public List<이슈상태_데이터> 프로젝트별_이슈상태_목록_가져오기(Long 연결_아이디, String 프로젝트_아이디) throws Exception{
 
         로그.info("클라우드 프로젝트별_이슈상태_목록_가져오기 실행");
 
@@ -110,7 +110,7 @@ public class 클라우드_지라이슈상태_전략 implements 지라이슈상�
             int 최대_검색수 = 지라유틸.최대_검색수_가져오기();
             boolean checkLast = false;
 
-            List<지라이슈상태_데이터> 반환할_지라이슈상태_데이터_목록 = new ArrayList<지라이슈상태_데이터>();
+            List<이슈상태_데이터> 반환할_이슈상태_데이터_목록 = new ArrayList<이슈상태_데이터>();
 
             while(!checkLast) {
                 String endpoint = "/rest/api/3/statuses/search?maxResults="+ 최대_검색수 + "&startAt=" + startAt + "&projectId="+프로젝트_아이디;
@@ -125,14 +125,14 @@ public class 클라우드_지라이슈상태_전략 implements 지라이슈상�
                     return Collections.emptyList();
                 }
 
-                반환할_지라이슈상태_데이터_목록.addAll(지라이슈상태_조회_결과.getValues());
+                반환할_이슈상태_데이터_목록.addAll(지라이슈상태_조회_결과.getValues());
 
-                for (지라이슈상태_데이터 이슈_상태 : 반환할_지라이슈상태_데이터_목록) {
+                for (이슈상태_데이터 이슈_상태 : 반환할_이슈상태_데이터_목록) {
                     String self = 서버정보.getUri() + "/rest/api/3/statuses?id=" + 이슈_상태.getId();
                     이슈_상태.setSelf(self);
                 }
 
-                if (지라이슈상태_조회_결과.getTotal() == 반환할_지라이슈상태_데이터_목록.size()) {
+                if (지라이슈상태_조회_결과.getTotal() == 반환할_이슈상태_데이터_목록.size()) {
                     checkLast = true;
                 }
                 else {
@@ -140,7 +140,7 @@ public class 클라우드_지라이슈상태_전략 implements 지라이슈상�
                 }
             }
 
-            return 반환할_지라이슈상태_데이터_목록;
+            return 반환할_이슈상태_데이터_목록;
 
         } catch (Exception e) {
             로그.error("클라우드 이슈 상태 목록 조회에 실패하였습니다");

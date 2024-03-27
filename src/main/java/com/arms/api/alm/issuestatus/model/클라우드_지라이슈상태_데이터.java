@@ -17,6 +17,6 @@ public class 클라우드_지라이슈상태_데이터 {
     private Integer startAt;
     private Integer total;
     private boolean isLast;
-    private List<지라이슈상태_데이터> values;
+    private List<이슈상태_데이터> values;
 
 }
