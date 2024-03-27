@@ -9,7 +9,7 @@ import com.arms.api.alm.issue.model.지라이슈필드_데이터;
 import com.arms.api.alm.issue.model.지라프로젝트_데이터;
 import com.arms.api.alm.issue.service.이슈전략_호출;
 import com.arms.api.alm.issueresolution.model.이슈해결책_데이터;
-import com.arms.api.alm.issuestatus.model.지라이슈상태_데이터;
+import com.arms.api.alm.issuestatus.model.이슈상태_데이터;
 import com.arms.api.alm.issuestatus.model.클라우드_지라이슈상태_데이터;
 import com.arms.api.alm.issuetype.model.지라이슈유형_데이터;
 import com.arms.api.alm.priority.model.지라이슈우선순위_데이터;
@@ -332,7 +332,7 @@ class 통합이슈조회테스트 {
             String 이슈상태_이름 = 이슈.getStatus().getName();
             String 이슈상태_설명 =  이슈.getStatus().getDescription();
 
-            지라이슈상태_데이터 이슈상태 = new 지라이슈상태_데이터();
+            이슈상태_데이터 이슈상태 = new 이슈상태_데이터();
             이슈상태.setSelf(이슈상태_주소);
             이슈상태.setId(이슈상태_아이디);
             이슈상태.setName(이슈상태_이름);
@@ -501,7 +501,7 @@ class 통합이슈조회테스트 {
     @Test
     public void 클라우드_지라이슈상태_테스트() throws JsonProcessingException {
 
-        List<지라이슈상태_데이터> 결과 = 지라이슈상태테스트("10004");
+        List<이슈상태_데이터> 결과 = 지라이슈상태테스트("10004");
 
         if (결과.size() != 0) {
             System.out.println(결과.toString());
@@ -513,7 +513,7 @@ class 통합이슈조회테스트 {
         assertNotNull(결과);
     }
 
-    public List<지라이슈상태_데이터> 지라이슈상태테스트(String 프로젝트_아이디) {
+    public List<이슈상태_데이터> 지라이슈상태테스트(String 프로젝트_아이디) {
         int 최대_검색수 = 50;
         int startAt = 0;
 

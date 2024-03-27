@@ -1,7 +1,7 @@
 package com.arms.api.alm.issue.strategy;
 
 import com.arms.api.alm.issue.model.*;
-import com.arms.api.alm.issuestatus.model.지라이슈상태_데이터;
+import com.arms.api.alm.issuestatus.model.이슈상태_데이터;
 import com.arms.api.alm.issuetype.model.지라이슈유형_데이터;
 import com.arms.api.alm.priority.model.지라이슈우선순위_데이터;
 import com.arms.api.alm.utils.레드마인API_정보;
@@ -443,7 +443,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
                 .map(아이디 -> String.valueOf(아이디))
                 .ifPresent(아이디 -> {
                     String 이슈상태_경로 = 기본경로 + 레드마인API_정보.아이디_대체하기(레드마인API_정보.getEndpoint().getIssuestatus(), 아이디);
-                    지라이슈필드_데이터.setStatus(new 지라이슈상태_데이터(이슈상태_경로, 아이디, 이슈.getStatusName()));
+                    지라이슈필드_데이터.setStatus(new 이슈상태_데이터(이슈상태_경로, 아이디, 이슈.getStatusName()));
                 });
 
         Optional.ofNullable(이슈.getAuthorId())
