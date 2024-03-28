@@ -1,4 +1,4 @@
-package com.arms.api.alm.jiraproject.model;
+package com.arms.api.alm.project.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class 지라프로젝트_데이터 {
+public class 프로젝트_데이터 {
     private String self;
     private String id;
     private String key;
