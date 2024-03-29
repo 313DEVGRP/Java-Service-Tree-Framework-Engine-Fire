@@ -1,6 +1,6 @@
 package com.arms.api.alm.issuetype.strategy;
 
-import com.arms.api.alm.issuetype.model.지라이슈유형_데이터;
+import com.arms.api.alm.issuetype.model.이슈유형_데이터;
 import com.arms.api.alm.utils.레드마인API_정보;
 import com.arms.api.alm.utils.레드마인유틸;
 import com.arms.api.serverinfo.model.서버정보_데이터;
@@ -22,7 +22,7 @@ import java.util.Objects;
 import static java.util.stream.Collectors.toList;
 
 @Component
-public class 레드마인_온프레미스_이슈유형_전략 implements 지라이슈유형_전략 {
+public class 온프레미스_레드마인_이슈유형_전략 implements 이슈유형_전략 {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
@@ -36,13 +36,13 @@ public class 레드마인_온프레미스_이슈유형_전략 implements 지라�
     private 레드마인API_정보 레드마인API_정보;
 
     @Override
-    public List<지라이슈유형_데이터> 이슈유형_목록_가져오기(Long 연결_아이디) {
+    public List<이슈유형_데이터> 이슈유형_목록_가져오기(Long 연결_아이디) {
         로그.info("레드마인_온프레미스_이슈유형_전략 "+ 연결_아이디 +" 이슈유형_목록_가져오기");
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
         RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
-        List<지라이슈유형_데이터> 지라이슈유형_목록;
+        List<이슈유형_데이터> 지라이슈유형_목록;
         List<Tracker> 우선순위_목록;
 
         try {
@@ -54,8 +54,8 @@ public class 레드마인_온프레미스_이슈유형_전략 implements 지라�
         }
 
         지라이슈유형_목록 = 우선순위_목록.stream().map(이슈유형 -> {
-                        지라이슈유형_데이터 지라이슈유형_데이터 = 지라이슈유형_데이터형_변환(이슈유형, 서버정보.getUri(), null);
-                        return 지라이슈유형_데이터;
+                        이슈유형_데이터 이슈유형_데이터 = 지라이슈유형_데이터형_변환(이슈유형, 서버정보.getUri(), null);
+                        return 이슈유형_데이터;
                     })
                     .filter(Objects::nonNull)
                     .collect(toList());
@@ -64,13 +64,13 @@ public class 레드마인_온프레미스_이슈유형_전략 implements 지라�
     }
 
     @Override
-    public List<지라이슈유형_데이터> 프로젝트별_이슈유형_목록_가져오기(Long 연결_아이디, String 프로젝트_아이디) {
+    public List<이슈유형_데이터> 프로젝트별_이슈유형_목록_가져오기(Long 연결_아이디, String 프로젝트_아이디) {
         로그.info("레드마인_온프레미스_이슈유형_전략 "+ 연결_아이디 +" 프로젝트별_이슈유형_목록_가져오기");
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
         RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
-        List<지라이슈유형_데이터> 지라이슈유형_목록;
+        List<이슈유형_데이터> 지라이슈유형_목록;
         Project 프로젝트;
 
         try {
@@ -82,8 +82,8 @@ public class 레드마인_온프레미스_이슈유형_전략 implements 지라�
         }
 
         지라이슈유형_목록 =  프로젝트.getTrackers().stream().map(이슈유형 -> {
-                지라이슈유형_데이터 지라이슈유형_데이터 = 지라이슈유형_데이터형_변환(이슈유형, 서버정보.getUri(), 프로젝트_아이디);
-                return 지라이슈유형_데이터;
+                이슈유형_데이터 이슈유형_데이터 = 지라이슈유형_데이터형_변환(이슈유형, 서버정보.getUri(), 프로젝트_아이디);
+                return 이슈유형_데이터;
             })
             .filter(Objects::nonNull)
             .collect(toList());
@@ -91,21 +91,21 @@ public class 레드마인_온프레미스_이슈유형_전략 implements 지라�
         return 지라이슈유형_목록;
     }
 
-    private 지라이슈유형_데이터 지라이슈유형_데이터형_변환(Tracker 이슈유형, String 서버정보경로, String 프로젝트_아이디) {
-        지라이슈유형_데이터 지라이슈유형_데이터 = new 지라이슈유형_데이터();
+    private 이슈유형_데이터 지라이슈유형_데이터형_변환(Tracker 이슈유형, String 서버정보경로, String 프로젝트_아이디) {
+        이슈유형_데이터 이슈유형_데이터 = new 이슈유형_데이터();
 
-        지라이슈유형_데이터.setId(String.valueOf(이슈유형.getId()));
-        지라이슈유형_데이터.setName(이슈유형.getName());
-        지라이슈유형_데이터.setSubtask(false);
+        이슈유형_데이터.setId(String.valueOf(이슈유형.getId()));
+        이슈유형_데이터.setName(이슈유형.getName());
+        이슈유형_데이터.setSubtask(false);
 
         String 이슈유형_경로 = 레드마인유틸.서버정보경로_체크(서버정보경로) + 레드마인API_정보.아이디_대체하기(레드마인API_정보.getEndpoint().getIssuetype(), String.valueOf(이슈유형.getId()));
         if (!프로젝트_아이디.isEmpty()) {
-            지라이슈유형_데이터.setSelf(이슈유형_경로 + "&project_id=" + 프로젝트_아이디);
+            이슈유형_데이터.setSelf(이슈유형_경로 + "&project_id=" + 프로젝트_아이디);
         }
         else {
-            지라이슈유형_데이터.setSelf(이슈유형_경로);
+            이슈유형_데이터.setSelf(이슈유형_경로);
         }
 
-        return 지라이슈유형_데이터;
+        return 이슈유형_데이터;
     }
 }

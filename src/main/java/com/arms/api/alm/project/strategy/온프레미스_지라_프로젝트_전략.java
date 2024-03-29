@@ -1,6 +1,6 @@
-package com.arms.api.alm.jiraproject.strategy;
+package com.arms.api.alm.project.strategy;
 
-import com.arms.api.alm.jiraproject.model.지라프로젝트_데이터;
+import com.arms.api.alm.project.model.프로젝트_데이터;
 import com.arms.utils.errors.codes.에러코드;
 import com.arms.api.alm.utils.지라유틸;
 import com.arms.api.serverinfo.model.서버정보_데이터;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class 온프레미스_지라프로젝트_전략 implements 지라프로젝트_전략 {
+public class 온프레미스_지라_프로젝트_전략 implements 프로젝트_전략 {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
@@ -24,7 +24,7 @@ public class 온프레미스_지라프로젝트_전략 implements 지라프로�
     private 서버정보_서비스 서버정보_서비스;
 
     @Override
-    public 지라프로젝트_데이터 프로젝트_상세정보_가져오기(Long 연결_아이디, String 프로젝트_키_또는_아이디) {
+    public 프로젝트_데이터 프로젝트_상세정보_가져오기(Long 연결_아이디, String 프로젝트_키_또는_아이디) {
 
         로그.info("온프레미스 지라 프로젝트 "+ 프로젝트_키_또는_아이디 +" 상세정보 가져오기");
 
@@ -38,13 +38,13 @@ public class 온프레미스_지라프로젝트_전략 implements 지라프로�
                                                         .getProject(프로젝트_키_또는_아이디)
                                                         .claim();
 
-            지라프로젝트_데이터 반환할_지라프로젝트_데이터 = new 지라프로젝트_데이터();
-            반환할_지라프로젝트_데이터.setSelf(온프레미스_지라프로젝트.getSelf().toString());
-            반환할_지라프로젝트_데이터.setId(온프레미스_지라프로젝트.getId().toString());
-            반환할_지라프로젝트_데이터.setKey(온프레미스_지라프로젝트.getKey());
-            반환할_지라프로젝트_데이터.setName(온프레미스_지라프로젝트.getName());
+            프로젝트_데이터 반환할_프로젝트_데이터 = new 프로젝트_데이터();
+            반환할_프로젝트_데이터.setSelf(온프레미스_지라프로젝트.getSelf().toString());
+            반환할_프로젝트_데이터.setId(온프레미스_지라프로젝트.getId().toString());
+            반환할_프로젝트_데이터.setKey(온프레미스_지라프로젝트.getKey());
+            반환할_프로젝트_데이터.setName(온프레미스_지라프로젝트.getName());
 
-            return 반환할_지라프로젝트_데이터;
+            return 반환할_프로젝트_데이터;
 
         } catch (Exception e) {
             로그.error("온프레미스 프로젝트 정보 가져오기에 실패하였습니다." +e.getMessage());
@@ -54,7 +54,7 @@ public class 온프레미스_지라프로젝트_전략 implements 지라프로�
     }
 
     @Override
-    public List<지라프로젝트_데이터> 프로젝트_목록_가져오기(Long 연결_아이디) {
+    public List<프로젝트_데이터> 프로젝트_목록_가져오기(Long 연결_아이디) {
 
         로그.info("온프레미스 지라 프로젝트 전체목록 가져오기");
 
@@ -68,11 +68,11 @@ public class 온프레미스_지라프로젝트_전략 implements 지라프로�
                                                                     .getAllProjects()
                                                                     .claim();
 
-            List<지라프로젝트_데이터> 반환할_지라프로젝트_목록 = new ArrayList<>();
+            List<프로젝트_데이터> 반환할_지라프로젝트_목록 = new ArrayList<>();
 
             for (BasicProject project : 모든_온프레미스_프로젝트) {
 
-                지라프로젝트_데이터 온프레미스_지라프로젝트 = new 지라프로젝트_데이터();
+                프로젝트_데이터 온프레미스_지라프로젝트 = new 프로젝트_데이터();
                 온프레미스_지라프로젝트.setSelf(project.getSelf().toString());
                 온프레미스_지라프로젝트.setId(project.getId().toString());
                 온프레미스_지라프로젝트.setKey(project.getKey());

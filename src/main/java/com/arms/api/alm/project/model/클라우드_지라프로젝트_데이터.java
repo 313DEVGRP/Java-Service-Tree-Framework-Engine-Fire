@@ -1,4 +1,4 @@
-package com.arms.api.alm.jiraproject.model;
+package com.arms.api.alm.project.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
@@ -12,11 +12,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class 클라우드_지라프로젝트_전체_데이터 {
+public class 클라우드_지라프로젝트_데이터 {
     private String self;
     private Integer maxResults;
     private Integer startAt;
     private Integer total;
     private boolean isLast;
-    private List<지라프로젝트_데이터> values;
+    private List<프로젝트_데이터> values;
 }

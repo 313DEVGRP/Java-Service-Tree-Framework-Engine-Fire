@@ -1,6 +1,6 @@
 package com.arms.api.alm.issue.model;
 
-import com.arms.api.alm.issuetype.model.지라이슈유형_데이터;
+import com.arms.api.alm.issuetype.model.이슈유형_데이터;
 import com.arms.api.alm.priority.model.지라이슈우선순위_데이터;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
@@ -18,7 +18,7 @@ public class 클라우드_지라이슈필드_데이터 {
 
     private 지라프로젝트_데이터 project;
 
-    private 지라이슈유형_데이터 issuetype;
+    private 이슈유형_데이터 issuetype;
 
     private String summary;
 
