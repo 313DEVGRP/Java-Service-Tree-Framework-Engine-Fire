@@ -456,13 +456,12 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
 
     public Method methodInfo(Class<?> entityClass, Class<? extends Annotation> annotation){
-        Method method = Arrays.stream(entityClass.getDeclaredMethods())
+        return Arrays.stream(entityClass.getDeclaredMethods())
                 .filter(m -> m.isAnnotationPresent(annotation))
                 .map(m -> {
                     m.setAccessible(true);
                     return m;
                 }).findAny().orElseThrow(() -> new RuntimeException("해당 어노테이션이 지정 되어있지 않습니다."));
-        return method;
     }
 
 
