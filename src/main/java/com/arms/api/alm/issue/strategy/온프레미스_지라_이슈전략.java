@@ -5,7 +5,7 @@ import com.arms.api.alm.issue.model.지라이슈워크로그_데이터;
 import com.arms.api.alm.issueresolution.model.이슈해결책_데이터;
 import com.arms.api.alm.issuestatus.model.이슈상태_데이터;
 import com.arms.api.alm.issuetype.model.이슈유형_데이터;
-import com.arms.api.alm.priority.model.지라이슈우선순위_데이터;
+import com.arms.api.alm.priority.model.이슈우선순위_데이터;
 import com.arms.api.alm.issue.model.지라이슈_데이터;
 import com.arms.api.alm.issue.model.지라이슈생성_데이터;
 import com.arms.api.alm.issue.model.지라이슈생성필드_데이터;
@@ -333,7 +333,7 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
             String 이슈우선순위_아이디 = String.valueOf(지라이슈.getPriority().getId());
             String 이슈우선순위_이름 = 지라이슈.getPriority().getName();
 
-            지라이슈우선순위_데이터 이슈우선순위 = new 지라이슈우선순위_데이터();
+            이슈우선순위_데이터 이슈우선순위 = new 이슈우선순위_데이터();
             이슈우선순위.setSelf(이슈우선순위_주소);
             이슈우선순위.setId(이슈우선순위_아이디);
             이슈우선순위.setName(이슈우선순위_이름);

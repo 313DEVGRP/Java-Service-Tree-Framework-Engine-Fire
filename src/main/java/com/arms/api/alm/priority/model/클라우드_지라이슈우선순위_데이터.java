@@ -17,5 +17,5 @@ public class 클라우드_지라이슈우선순위_데이터 {
     private Integer startAt;
     private Integer total;
     private boolean isLast;
-    private List<지라이슈우선순위_데이터> values;
+    private List<이슈우선순위_데이터> values;
 }
