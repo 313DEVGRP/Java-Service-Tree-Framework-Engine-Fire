@@ -20,7 +20,7 @@ import com.arms.elasticsearch.query.factory.서브_집계_쿼리_생성기;
 import com.arms.elasticsearch.query.factory.일자별_집계_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
-import com.arms.elasticsearch.검색결과;
+import com.arms.elasticsearch.버킷_집계_결과;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.arms.api.engine.service.지라이슈_대시보드_서비스;
 import com.arms.api.engine.service.플루언트디_서비스;
-import com.arms.elasticsearch.검색결과_목록_합계;
+import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,7 +44,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     private 플루언트디_서비스 플루언트디_서비스;
 
     @GetMapping("/aggregation/nested")
-    public ResponseEntity<검색결과_목록_합계> nestedAggregation(
+    public ResponseEntity<버킷_집계_결과_목록_합계> nestedAggregation(
             지라이슈_제품_및_제품버전_집계_요청 검색요청
     ) {
         EsBoolQuery[] esBoolQueries = Stream.of(
@@ -60,7 +60,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     }
 
     @GetMapping("/aggregation/flat")
-    public ResponseEntity<검색결과_목록_합계> flatAggregation(
+    public ResponseEntity<버킷_집계_결과_목록_합계> flatAggregation(
             지라이슈_제품_및_제품버전_집계_요청 검색요청
     ) {
         EsBoolQuery[] esBoolQueries = Stream.of(
@@ -96,14 +96,14 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     }
 
     @GetMapping("/version-assignees")
-    public ResponseEntity<List<검색결과>> 제품별_버전_및_작업자(
+    public ResponseEntity<List<버킷_집계_결과>> 제품별_버전_및_작업자(
             지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청
     ) {
         return ResponseEntity.ok(지라이슈_검색엔진.제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청));
     }
 
     @GetMapping("/date/{pdServiceId}")
-    public ResponseEntity<검색결과_목록_합계> 일자별_검색(@PathVariable Long pdServiceId, 지라이슈_일자별_집계_요청 지라이슈_일자별_집계_요청) {
+    public ResponseEntity<버킷_집계_결과_목록_합계> 일자별_검색(@PathVariable Long pdServiceId, 지라이슈_일자별_집계_요청 지라이슈_일자별_집계_요청) {
 
         EsQuery esQuery
             = new EsQueryBuilder()
@@ -115,7 +115,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     }
 
     @GetMapping("/normal/{pdServiceId}")
-    public ResponseEntity<검색결과_목록_합계> 일반_검색(@PathVariable Long pdServiceId, 지라이슈_일반_집계_요청 지라이슈_일반_집계_요청) {
+    public ResponseEntity<버킷_집계_결과_목록_합계> 일반_검색(@PathVariable Long pdServiceId, 지라이슈_일반_집계_요청 지라이슈_일반_집계_요청) {
 
         EsQuery esQuery
             = new EsQueryBuilder()
@@ -128,9 +128,9 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     }
 
     @GetMapping("/normal-version/{pdServiceId}")
-    public ResponseEntity<검색결과_목록_합계> 일반_버전필터_검색(@PathVariable Long pdServiceId,
-                                                 @RequestParam List<Long> pdServiceVersionLinks,
-                                                 지라이슈_일반_집계_요청 지라이슈_일반_집계_요청) {
+    public ResponseEntity<버킷_집계_결과_목록_합계> 일반_버전필터_검색(@PathVariable Long pdServiceId,
+                                                     @RequestParam List<Long> pdServiceVersionLinks,
+                                                     지라이슈_일반_집계_요청 지라이슈_일반_집계_요청) {
         EsQuery esQuery
             = new EsQueryBuilder()
                 .bool(
@@ -143,9 +143,9 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     }
 
     @GetMapping("/normal-version-only/{pdServiceId}")
-    public ResponseEntity<검색결과_목록_합계> 일반_버전필터_집계(@PathVariable Long pdServiceId,
-                                                 @RequestParam List<Long> pdServiceVersionLinks,
-                                                 지라이슈_단순_집계_요청 지라이슈_단순_검색_요청) {
+    public ResponseEntity<버킷_집계_결과_목록_합계> 일반_버전필터_집계(@PathVariable Long pdServiceId,
+                                                     @RequestParam List<Long> pdServiceVersionLinks,
+                                                     지라이슈_단순_집계_요청 지라이슈_단순_검색_요청) {
         EsQuery esQuery
             = new EsQueryBuilder()
                 .bool(
@@ -157,10 +157,10 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     }
 
     @GetMapping("/normal-versionAndMail-filter/{pdServiceId}")
-    public ResponseEntity<검색결과_목록_합계> 일반_버전_및_작업자_필터_검색(@PathVariable Long pdServiceId,
-                                                        @RequestParam List<Long> pdServiceVersionLinks,
-                                                        @RequestParam List<String> mailAddressList,
-                                                        지라이슈_단순_집계_요청 지라이슈_단순_검색_요청) {
+    public ResponseEntity<버킷_집계_결과_목록_합계> 일반_버전_및_작업자_필터_검색(@PathVariable Long pdServiceId,
+                                                            @RequestParam List<Long> pdServiceVersionLinks,
+                                                            @RequestParam List<String> mailAddressList,
+                                                            지라이슈_단순_집계_요청 지라이슈_단순_검색_요청) {
         EsQuery esQuery
                 = new EsQueryBuilder()
                 .bool(  new TermsQueryFilter("assignee.assignee_emailAddress.keyword", mailAddressList),
@@ -183,10 +183,10 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         요구사항_별_상태_및_관여_작업자_수(@RequestBody 지라이슈_제품_및_제품버전_병합_집계_요청 병합집계요청) {
 
         log.info("[엘라스틱_지라이슈_대시보드_컨트롤러 :: 요구사항_별_상태_및_관여_작업자_수 ] :: 병합_요청_사항_요청값_생성 -> {}", 병합집계요청.get요구_사항());
-        검색결과_목록_합계 요구사항
+        버킷_집계_결과_목록_합계 요구사항
             =  지라이슈_검색엔진.집계결과_가져오기(일반_집계_쿼리_생성기.of(병합집계요청.get요구_사항(), 병합_요청_사항_요청값_생성(병합집계요청.get요구_사항())));
 
-        검색결과_목록_합계 하위_이슈_사항
+        버킷_집계_결과_목록_합계 하위_이슈_사항
             =  지라이슈_검색엔진.집계결과_가져오기(일반_집계_쿼리_생성기.of(병합집계요청.get요구_사항(), 병합_요청_사항_요청값_생성(병합집계요청.get하위_이슈_사항())));
 
         return ResponseEntity.ok(지라이슈_검색엔진.요구사항_별_상태_및_관여_작업자수_내용(요구사항,하위_이슈_사항));
@@ -201,13 +201,13 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     }
 
     @GetMapping("/exclusion-isreq-normal/{pdServiceId}")
-    public ResponseEntity<검색결과_목록_합계> 요구사항여부제외_일반_검색(@PathVariable Long pdServiceId, 지라이슈_일반_집계_요청 지라이슈_일반_집계_요청) {
+    public ResponseEntity<버킷_집계_결과_목록_합계> 요구사항여부제외_일반_검색(@PathVariable Long pdServiceId, 지라이슈_일반_집계_요청 지라이슈_일반_집계_요청) {
 
         EsQuery esQuery
             = new EsQueryBuilder()
                 .bool(new MustTermQuery("pdServiceId",pdServiceId));
 
-        검색결과_목록_합계 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(일반_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery));
+        버킷_집계_결과_목록_합계 집계결과_가져오기 = 지라이슈_검색엔진.집계결과_가져오기(일반_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery));
         return ResponseEntity.ok(집계결과_가져오기);
     }
 
@@ -234,8 +234,8 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         return 지라이슈_검색엔진.요구사항별_업데이트_능선_데이터(지라이슈_일자별_제품_및_제품버전_집계_요청);
     }
     @GetMapping("/normal-version/resolution")
-    public ResponseEntity<검색결과_목록_합계> 일반_버전필터_해결책유무_검색(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청,
-                                                       @RequestParam(required = false) String resolution) {
+    public ResponseEntity<버킷_집계_결과_목록_합계> 일반_버전필터_해결책유무_검색(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청,
+                                                           @RequestParam(required = false) String resolution) {
 
         Boolean isReq = Optional.ofNullable(지라이슈_제품_및_제품버전_집계_요청.getIsReqType())
                 .map(IsReqType::name)
@@ -282,7 +282,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
     }
 
     @GetMapping("/version-req-assignees")
-    public ResponseEntity<List<검색결과>> 제품별_버전_및_요구사항별_작업자(
+    public ResponseEntity<List<버킷_집계_결과>> 제품별_버전_및_요구사항별_작업자(
             지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청
     ) {
         return ResponseEntity.ok(지라이슈_검색엔진.제품_버전별_요구사항별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청));
@@ -364,9 +364,9 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
 
 
     @GetMapping("/search/log-aggs-top5/with-date")
-    public ResponseEntity<검색결과_목록_합계> 검색엔진_플루언트디_로그네임_집계_top5(@RequestParam("search_string") String 검색어,
-                                                              @RequestParam(value = "from",required = false) String 시작_날짜,
-                                                              @RequestParam(value = "to",  required = false) String 끝_날짜) {
+    public ResponseEntity<버킷_집계_결과_목록_합계> 검색엔진_플루언트디_로그네임_집계_top5(@RequestParam("search_string") String 검색어,
+                                                                  @RequestParam(value = "from",required = false) String 시작_날짜,
+                                                                  @RequestParam(value = "to",  required = false) String 끝_날짜) {
         log.info("[엘라스틱_지라이슈_대시보드_컨트롤러 :: 검색엔진_플루언트디_로그네임_집계_top5]");
         검색어_집계_요청 집계_요청 = new 검색어_집계_요청();
         집계_요청.set검색어(검색어);
@@ -377,7 +377,7 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
         집계_요청.set크기(5);
         집계_요청.set메인그룹필드("@log_name");
 
-        검색결과_목록_합계 집계_결과 = 플루언트디_서비스.플루언트디_로그네임_집계(집계_요청);
+        버킷_집계_결과_목록_합계 집계_결과 = 플루언트디_서비스.플루언트디_로그네임_집계(집계_요청);
 
         return ResponseEntity.ok(집계_결과);
     }

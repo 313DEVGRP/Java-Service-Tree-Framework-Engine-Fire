@@ -13,25 +13,25 @@ import java.util.stream.Collectors;
 @EqualsAndHashCode(exclude = "개수")
 @Getter
 @NoArgsConstructor
-public class 검색결과 {
+public class 버킷_집계_결과 {
 
     private String 필드명;
     private long 개수;
-    private Map<String, List<검색결과>> 하위검색결과;
+    private Map<String, List<버킷_집계_결과>> 하위검색결과;
 
-    public List<검색결과> 하위검색결과(String name){
+    public List<버킷_집계_결과> 하위검색결과(String name){
         return 하위검색결과.get(name);
     }
 
-    public 검색결과(Bucket bucket) {
+    public 버킷_집계_결과(Bucket bucket) {
         this.필드명 = bucket.getKeyAsString();
         this.개수 = bucket.getDocCount();
-        this.하위검색결과 = new 검색결과_목록_합계(bucket.getAggregations().asMap()).get검색결과();
+        this.하위검색결과 = new 버킷_집계_결과_목록_합계(bucket.getAggregations().asMap()).get검색결과();
     }
 
-    public 검색결과(ParsedFilter parsedFilter) {
+    public 버킷_집계_결과(ParsedFilter parsedFilter) {
         this.개수 = parsedFilter.getDocCount();
-        this.하위검색결과 = new 검색결과_목록_합계(parsedFilter.getAggregations().asMap()).get검색결과();
+        this.하위검색결과 = new 버킷_집계_결과_목록_합계(parsedFilter.getAggregations().asMap()).get검색결과();
     }
 
     public Long 필터필드개수(String name){

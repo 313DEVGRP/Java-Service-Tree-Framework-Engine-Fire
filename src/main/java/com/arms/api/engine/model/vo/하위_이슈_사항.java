@@ -4,7 +4,7 @@ import static java.util.stream.Collectors.*;
 
 import java.util.List;
 
-import com.arms.elasticsearch.검색결과;
+import com.arms.elasticsearch.버킷_집계_결과;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -24,9 +24,9 @@ public class 하위_이슈_사항 {
 		return new 하위_이슈_사항(요구_사항_번호,null);
 	}
 
-	public 하위_이슈_사항(검색결과 검색결과){
-		this.요구_사항_번호 = 검색결과.get필드명();
-		this.하위_이슈_사항_담당자 = 검색결과.get하위검색결과()
+	public 하위_이슈_사항(버킷_집계_결과 버킷_집계_결과){
+		this.요구_사항_번호 = 버킷_집계_결과.get필드명();
+		this.하위_이슈_사항_담당자 = 버킷_집계_결과.get하위검색결과()
 			.entrySet()
 			.stream()
 			.flatMap(a -> a.getValue().stream())

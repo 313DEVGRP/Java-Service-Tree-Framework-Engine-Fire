@@ -4,14 +4,14 @@ import com.arms.elasticsearch.annotation.ElasticSearchIndex;
 import com.arms.elasticsearch.annotation.Recent;
 import com.arms.elasticsearch.annotation.RollingIndexName;
 import com.arms.elasticsearch.query.EsQuery;
+import com.arms.elasticsearch.query.builder.검색_쿼리_빌더;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
-import com.arms.elasticsearch.검색결과_목록_합계;
-import com.arms.elasticsearch.query.builder.검색_쿼리_빌더;
 import com.arms.elasticsearch.검색조건;
+import com.arms.elasticsearch.메트릭_집계_결과_목록_합계;
+import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.slf4j.Logger;
@@ -29,8 +29,9 @@ import org.springframework.data.elasticsearch.repository.support.SimpleElasticse
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -38,8 +39,7 @@ import java.util.stream.StreamSupport;
 import static java.util.stream.Collectors.*;
 
 @Slf4j
-public class 공통저장소_구현체<T,ID extends Serializable> extends SimpleElasticsearchRepository<T,ID>
-        implements 공통저장소<T,ID> {
+public class 공통저장소_구현체<T,ID extends Serializable> extends SimpleElasticsearchRepository<T,ID> implements 공통저장소<T,ID> {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
@@ -54,15 +54,19 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
     }
 
     @Override
-    public 검색결과_목록_합계 aggregationSearch(Query query) {
-        NativeSearchQuery nativeSearchQuery = recentQueryMerge((NativeSearchQuery)query);
-        return new 검색결과_목록_합계(operations.search(nativeSearchQuery,entityClass));
+    public 메트릭_집계_결과_목록_합계 전체메트릭집계(Query query) {
+        return new 메트릭_집계_결과_목록_합계(operations.search(query,entityClass));
     }
 
-    // 전 범위 대상
     @Override
-    public 검색결과_목록_합계 aggregationSearchAll(Query query) {
-        return new 검색결과_목록_합계(operations.search(query,entityClass));
+    public 버킷_집계_결과_목록_합계 버킷집계(Query query) {
+        NativeSearchQuery nativeSearchQuery = recentQueryMerge((NativeSearchQuery)query);
+        return new 버킷_집계_결과_목록_합계(operations.search(nativeSearchQuery,entityClass));
+    }
+
+    @Override
+    public 버킷_집계_결과_목록_합계 전체버킷집계(Query query) {
+        return new 버킷_집계_결과_목록_합계(operations.search(query,entityClass));
     }
 
     //현재 디펜던시 없음
@@ -77,14 +81,12 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         return operations.bulkIndex(indexQueryList, indexName());
     }
 
-
     @Override
     public List<T> normalSearchAll() {
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
         return operations.search(nativeSearchQueryBuilder.build(), entityClass).stream()
-                .map(SearchHit::getContent).collect(toList());
+            .map(SearchHit::getContent).collect(toList());
     }
-
 
     @Override
     public List<T> normalRecentTrueAll() {
@@ -114,7 +116,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
             if(annotation==null){
                 return operations.search(query, entityClass).stream()
-                        .map(SearchHit::getContent).collect(toList());
+                    .map(SearchHit::getContent).collect(toList());
             }
 
             NativeSearchQuery searchQuery = recentQueryMerge((NativeSearchQuery)query);
@@ -128,32 +130,27 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         }
     }
 
-
-
     private NativeSearchQuery recentQueryMerge(NativeSearchQuery query) {
+
         String recentFieldName = fieldInfo(entityClass, Recent.class).getName();
 
         EsQuery esQuery
-                = new EsQueryBuilder()
+            = new EsQueryBuilder()
                     .bool(
-                            new TermsQueryFilter(recentFieldName, true)
+                        new TermsQueryFilter(recentFieldName, true)
                     );
-
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
         });
 
-        QueryBuilder combinedQuery = QueryBuilders.boolQuery()
-                .filter(query.getQuery())
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
                 .filter(boolQuery);
+        Optional.ofNullable(query.getQuery()).ifPresent(boolQueryBuilder::filter);
 
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
-                .withQuery(combinedQuery)
-                .withMaxResults(query.getMaxResults());
+                .withQuery(boolQueryBuilder)
+                .withMaxResults(Optional.ofNullable(query.getMaxResults()).orElse(0));
 
-
-        Optional.ofNullable(query.getAggregations()).ifPresent(aggs->{
-            aggs.forEach(nativeSearchQueryBuilder::addAggregation);
-        });
+        Optional.ofNullable(query.getAggregations()).ifPresent(args-> args.forEach(nativeSearchQueryBuilder::addAggregation));
 
         return nativeSearchQueryBuilder.build();
 
@@ -179,6 +176,8 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
             return Collections.emptyList();
         }
     }
+
+
 
 
     //현재 디펜던시 없음
@@ -296,8 +295,8 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
         while (true) {
             NativeSearchQueryBuilder searchQuery = new NativeSearchQueryBuilder()
-                    .withQuery(QueryBuilders.matchAllQuery())
-                    .withPageable(PageRequest.of(페이지, 페이지크기));
+                .withQuery(QueryBuilders.matchAllQuery())
+                .withPageable(PageRequest.of(페이지, 페이지크기));
 
             List<T> 목록 = this.normalSearch(searchQuery.build());
 
@@ -309,8 +308,8 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
             for (T 이슈 : 목록) {
                 IndexQuery indexQuery = new IndexQueryBuilder()
-                        .withObject(이슈)
-                        .build();
+                    .withObject(이슈)
+                    .build();
 
                 indexQueries.add(indexQuery);
             }
@@ -360,8 +359,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
         Iterable<S> s = this.saveAll(List.of(entity));
         return StreamSupport.stream(s.spliterator() ,false).findFirst().orElseThrow(()->new RuntimeException("저장할 데이터가 없습니다."));
-    }
-
+    };
 
     @Override
     public <S extends T> Iterable<S> saveAll(Iterable<S> entities) {
@@ -372,88 +370,88 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         Map<Object, List<SearchHit<T>>> originalEntityMap = this.originalList(entities);
 
         List<S> recentTrueList = StreamSupport.stream(entities.spliterator(), false)
-                .map(newEntity -> {
-                    try {
-                        Object keyObject = fieldInfo(newEntity.getClass(), Id.class).get(newEntity);
+            .map(newEntity -> {
+                try {
+                    Object keyObject = fieldInfo(newEntity.getClass(), Id.class).get(newEntity);
 
-                        if(originalEntityMap!=null&&originalEntityMap.containsKey(keyObject)){
+                    if(originalEntityMap!=null&&originalEntityMap.containsKey(keyObject)){
 
-                            SearchHit<T> searchHit = originalEntityMap.get(keyObject)
-                                    .stream()
-                                    .findFirst()
-                                    .orElseThrow(() -> new RuntimeException("값이 비워 있습니다."));
+                        SearchHit<T> searchHit = originalEntityMap.get(keyObject)
+                            .stream()
+                            .findFirst()
+                            .orElseThrow(() -> new RuntimeException("값이 비워 있습니다."));
 
-                            if(newEntity.equals(searchHit.getContent())){
-                                return null;
-                            }else{
-                                fieldInfo(newEntity.getClass(), Recent.class).setBoolean(newEntity, true);
-                                return newEntity;
-                            }
-
+                        if(newEntity.equals(searchHit.getContent())){
+                            return null;
                         }else{
                             fieldInfo(newEntity.getClass(), Recent.class).setBoolean(newEntity, true);
                             return newEntity;
                         }
 
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e);
+                    }else{
+                        fieldInfo(newEntity.getClass(), Recent.class).setBoolean(newEntity, true);
+                        return newEntity;
                     }
-                })
-                .filter(Objects::nonNull)
-                .collect(toList());
+
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            })
+            .filter(Objects::nonNull)
+            .collect(toList());
 
         Map<String, List<T>> collect = StreamSupport.stream(entities.spliterator(), false)
-                .map(newEntity -> {
-                    try {
-                        Object keyObject = fieldInfo(newEntity.getClass(), Id.class).get(newEntity);
-                        return Optional.ofNullable(originalEntityMap)
-                                .map(map -> map.getOrDefault(keyObject, Collections.emptyList())
-                                        .stream()
-                                        .filter(hit -> !newEntity.equals(hit.getContent()))
-                                        .map(hit -> {
-                                            try {
-                                                fieldInfo(hit.getContent().getClass(), Recent.class).setBoolean(hit.getContent(),
-                                                        false);
-                                                return hit;
-                                            } catch (IllegalAccessException e) {
-                                                throw new RuntimeException(e);
-                                            }
-                                        }).collect(toList()))
-                                .orElseGet(() -> null);
+            .map(newEntity -> {
+                try {
+                    Object keyObject = fieldInfo(newEntity.getClass(), Id.class).get(newEntity);
+                    return Optional.ofNullable(originalEntityMap)
+                        .map(map -> map.getOrDefault(keyObject, Collections.emptyList())
+                            .stream()
+                            .filter(hit -> !newEntity.equals(hit.getContent()))
+                            .map(hit -> {
+                                try {
+                                    fieldInfo(hit.getContent().getClass(), Recent.class).setBoolean(hit.getContent(),
+                                        false);
+                                    return hit;
+                                } catch (IllegalAccessException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }).collect(toList()))
+                        .orElseGet(() -> null);
 
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream)
-                .collect(groupingBy(SearchHit::getIndex, mapping(SearchHit::getContent, toList())));
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            })
+            .filter(Objects::nonNull)
+            .flatMap(Collection::stream)
+            .collect(groupingBy(SearchHit::getIndex, mapping(SearchHit::getContent, toList())));
 
         collect
-                .forEach((key, value) -> operations.save(value, IndexCoordinates.of(key)));
+            .forEach((key, value) -> operations.save(value, IndexCoordinates.of(key)));
         IndexCoordinates indexCoordinates = indexName();
         return operations.save(recentTrueList, indexCoordinates);
     }
 
     private  <S extends T> List<Object> fieldValues(Iterable<S> entities, Class<? extends Annotation> annotation){
         return StreamSupport.stream(entities.spliterator(), false)
-                .collect(toList())
-                .stream().map(a -> {
-                    try {
-                        return fieldInfo(a.getClass(),annotation).get(a);
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e);
-                    }
-                }).collect(toList());
+            .collect(toList())
+            .stream().map(a -> {
+                try {
+                    return fieldInfo(a.getClass(),annotation).get(a);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            }).collect(toList());
     }
 
     public Field fieldInfo(Class<?> entityClass, Class<? extends Annotation> annotation){
         return Arrays.stream(entityClass.getDeclaredFields())
-                .filter(field -> field.isAnnotationPresent(annotation))
-                .map(field -> {
-                    field.setAccessible(true);
-                    return field;
-                }).findAny().orElseThrow(() -> new RuntimeException("해당 어노테이션이 지정 되어있지 않습니다."));
+            .filter(field -> field.isAnnotationPresent(annotation))
+            .map(field -> {
+                field.setAccessible(true);
+                return field;
+            }).findAny().orElseThrow(() -> new RuntimeException("해당 어노테이션이 지정 되어있지 않습니다."));
     }
 
 
@@ -473,30 +471,30 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         String idFieldName = fieldInfo(entityClass,Id.class).getName();
 
         EsQuery esQuery
-                = new EsQueryBuilder()
-                .bool(
-                        new TermsQueryFilter(idFieldName, fieldValues(entities,Id.class)),
-                        new TermsQueryFilter(recentFieldName,true)
-                );
+            = new EsQueryBuilder()
+            .bool(
+                new TermsQueryFilter(idFieldName, fieldValues(entities,Id.class)),
+                new TermsQueryFilter(recentFieldName,true)
+            );
 
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
         });
 
         NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(boolQuery)
-                .build();
+            .withQuery(boolQuery)
+            .build();
 
 
         return Optional.ofNullable(this.search(searchQuery)).map(searchHits ->
-                searchHits.getSearchHits().stream()
-                        .sorted(Comparator.comparing(a->a.getIndex(),Comparator.reverseOrder()))
-                        .collect(groupingBy(a -> {
-                            try {
-                                return fieldInfo(a.getContent().getClass(), Id.class).get(a.getContent());
-                            } catch (IllegalAccessException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }))
+            searchHits.getSearchHits().stream()
+                .sorted(Comparator.comparing(a->a.getIndex(),Comparator.reverseOrder()))
+                .collect(groupingBy(a -> {
+                    try {
+                        return fieldInfo(a.getContent().getClass(), Id.class).get(a.getContent());
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                }))
         ).orElse(null);
     }
 

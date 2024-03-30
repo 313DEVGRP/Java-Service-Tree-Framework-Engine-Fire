@@ -22,8 +22,8 @@ import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.factory.일반_검색_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.query.esquery.EsSortQuery;
-import com.arms.elasticsearch.검색결과;
-import com.arms.elasticsearch.검색결과_목록_합계;
+import com.arms.elasticsearch.버킷_집계_결과;
+import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -79,15 +79,15 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 ).withMaxResults(0);
 
         // 요구사항 vs 연결된이슈&서브테스크 구분안하고 한번에
-        검색결과_목록_합계 검색결과_목록_합계 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
-        Long 결과 = 검색결과_목록_합계.get전체합계();
+        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈저장소.버킷집계(nativeSearchQueryBuilder.build());
+        Long 결과 = 버킷_집계_결과_목록_합계.get전체합계();
         로그.info("검색결과 개수: " + 결과);
 
-        List<검색결과> 담당자별_집계 = 검색결과_목록_합계.get검색결과().get("담당자별_집계");
+        List<버킷_집계_결과> 담당자별_집계 = 버킷_집계_결과_목록_합계.get검색결과().get("담당자별_집계");
 
         long 담당자_총합 = 0;
         Map<String, Long> 제품서비스별_하위이슈_담당자_집계 = new HashMap<>();
-        for (검색결과 담당자 : 담당자별_집계) {
+        for (버킷_집계_결과 담당자 : 담당자별_집계) {
             String 담당자_이메일 = 담당자.get필드명();
             long 개수 = 담당자.get개수();
             log.info("담당자: " + 담당자_이메일 + ", Count: " + 개수);
@@ -117,16 +117,16 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 .addAggregation(담당자별_집계)
                 .withMaxResults(0);
 
-        검색결과_목록_합계 검색결과_목록_합계 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
+        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈저장소.버킷집계(nativeSearchQueryBuilder.build());
 
         Map<String, Map<String, Map<String, Integer>>> 담당자별_요구사항여부별_상태값_집계
-                = 검색결과_목록_합계.get검색결과().get("담당자별_집계")
+                = 버킷_집계_결과_목록_합계.get검색결과().get("담당자별_집계")
                 .stream()
                 .collect(
                         Collectors.toMap(
-                                검색결과::get필드명,
+                                버킷_집계_결과::get필드명,
                                 담당자 -> {
-                                    List<검색결과> 요구사항_여부별_집계 = 담당자.get하위검색결과().get("요구사항_여부별_집계");
+                                    List<버킷_집계_결과> 요구사항_여부별_집계 = 담당자.get하위검색결과().get("요구사항_여부별_집계");
                                     return 요구사항_여부별_집계.stream()
                                             .collect(Collectors.toMap(
                                                     검색결과 -> {
@@ -138,7 +138,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                                                         }
                                                     },
                                                     검색결과 -> {
-                                                        List<검색결과> 상태별_집계 = 검색결과.get하위검색결과().get("상태별_집계");
+                                                        List<버킷_집계_결과> 상태별_집계 = 검색결과.get하위검색결과().get("상태별_집계");
                                                         return 상태별_집계.stream()
                                                                 .collect(Collectors.toMap(
                                                                         a -> a.get필드명(),
@@ -153,9 +153,9 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
 
     @Override
-    public 검색결과_목록_합계 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) {
+    public 버킷_집계_결과_목록_합계 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) {
 
-        return 지라이슈저장소.aggregationSearch(
+        return 지라이슈저장소.버킷집계(
                 쿼리추상팩토리.생성()
         );
     }
@@ -169,7 +169,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
 
     @Override
-    public List<검색결과> 제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
+    public List<버킷_집계_결과> 제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new MustTermQuery("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
                         new MustTermQuery("isReq", 지라이슈_제품_및_제품버전_집계_요청.getIsReqType().isNotAllAndIsReq()),
@@ -193,9 +193,9 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 .addAggregation(versionsAgg)
                 .build();
 
-        검색결과_목록_합계 검색결과_목록_합계 = 지라이슈저장소.aggregationSearch(searchQuery);
+        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈저장소.버킷집계(searchQuery);
 
-        List<검색결과> 버전검색결과 = 검색결과_목록_합계.get검색결과().get("versions");
+        List<버킷_집계_결과> 버전검색결과 = 버킷_집계_결과_목록_합계.get검색결과().get("versions");
 
         List<String> filteredVersionIds = Arrays.stream(지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks())
                 .map(String::valueOf)
@@ -205,10 +205,10 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     }
 
     @Override
-    public List<제품_서비스_버전> 요구사항_별_상태_및_관여_작업자수_내용(검색결과_목록_합계 요구사항, 검색결과_목록_합계 하위이슈) {
+    public List<제품_서비스_버전> 요구사항_별_상태_및_관여_작업자수_내용(버킷_집계_결과_목록_합계 요구사항, 버킷_집계_결과_목록_합계 하위이슈) {
 
-        List<검색결과> pdServiceVersions = 요구사항.get검색결과().entrySet().stream().flatMap(a->a.getValue().stream()).collect(toList());
-        List<검색결과> parentReqKeys = 하위이슈.get검색결과().entrySet().stream().flatMap(a->a.getValue().stream()).collect(toList());
+        List<버킷_집계_결과> pdServiceVersions = 요구사항.get검색결과().entrySet().stream().flatMap(a->a.getValue().stream()).collect(toList());
+        List<버킷_집계_결과> parentReqKeys = 하위이슈.get검색결과().entrySet().stream().flatMap(a->a.getValue().stream()).collect(toList());
 
         List<하위_이슈_사항> 하위_이슈_사항들 = parentReqKeys.stream()
                 .map(issue -> new 하위_이슈_사항(issue)).collect(toList());
@@ -363,9 +363,9 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         NativeSearchQueryBuilder nativeSearchQueryBuilder
                 = new NativeSearchQueryBuilder().withQuery(boolQuery).addAggregation(weeklyAggregationBuilder);
 
-        검색결과_목록_합계 검색결과_목록_합계 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
+        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈저장소.버킷집계(nativeSearchQueryBuilder.build());
 
-        List<검색결과> aggregationByWeek = 검색결과_목록_합계.get검색결과().get("aggregation_by_week");
+        List<버킷_집계_결과> aggregationByWeek = 버킷_집계_결과_목록_합계.get검색결과().get("aggregation_by_week");
 
 
         Map<String, 요구사항_지라이슈상태_주별_집계> 검색결과 = aggregationByWeek.stream()
@@ -419,8 +419,8 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         NativeSearchQueryBuilder nativeSearchQueryBuilderForTotalIssues
                 = new NativeSearchQueryBuilder().withQuery(boolQueryForTotalIssues).addAggregation(totalAggregationBuilder);
 
-        검색결과_목록_합계 searchResponseForTotalIssues
-                = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilderForTotalIssues.build());
+        버킷_집계_결과_목록_합계 searchResponseForTotalIssues
+                = 지라이슈저장소.버킷집계(nativeSearchQueryBuilderForTotalIssues.build());
 
         Long totalIssuesCount
                 = searchResponseForTotalIssues.get전체합계();
@@ -438,9 +438,9 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         Optional.ofNullable(searchResponseForTotalIssues)
                 .map(response -> response.get검색결과().get("total_status"))
                 .ifPresent(totalStatus -> {
-                    for (검색결과 검색결과 : totalStatus) {
-                        String key = 검색결과.get필드명();
-                        long value = 검색결과.get개수();
+                    for (버킷_집계_결과 버킷_집계_결과 : totalStatus) {
+                        String key = 버킷_집계_결과.get필드명();
+                        long value = 버킷_집계_결과.get개수();
                         statusMap.put(key, value);
                     }
                 });
@@ -448,16 +448,16 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
         return new 요구사항_지라이슈상태_주별_집계(totalIssuesCount, statusMap, totalRequirementsCount);
     }
 
-    private 요구사항_지라이슈상태_주별_집계 주별데이터생성(검색결과 검색_결과) {
+    private 요구사항_지라이슈상태_주별_집계 주별데이터생성(버킷_집계_결과 검색_결과) {
 
         Map<String, Long> statuses = (검색_결과.get하위검색결과().get("statuses")).stream()
-                .collect(Collectors.toMap(검색결과::get필드명, 검색결과::get개수));
+                .collect(Collectors.toMap(버킷_집계_결과::get필드명, 버킷_집계_결과::get개수));
 
         long totalReqCount = Optional.ofNullable(검색_결과.get하위검색결과().get("requirements"))
                 .flatMap(reqs -> reqs.stream()
                         .filter(bucket -> "true".equals(bucket.get필드명()))
                         .findFirst())
-                .map(검색결과::get개수)
+                .map(버킷_집계_결과::get개수)
                 .orElse(0L);
 
         return new 요구사항_지라이슈상태_주별_집계(검색_결과.get개수(), statuses, totalReqCount);
@@ -513,9 +513,9 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
          NativeSearchQueryBuilder nativeSearchQueryBuilder
                  = new NativeSearchQueryBuilder().withQuery(boolQuery).addAggregation(dailyAggregationBuilder);
 
-         검색결과_목록_합계 검색결과_목록_합계 = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build());
+         버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈저장소.버킷집계(nativeSearchQueryBuilder.build());
 
-         List<검색결과> aggregationByDay = 검색결과_목록_합계.get검색결과().get("aggregation_by_day");
+         List<버킷_집계_결과> aggregationByDay = 버킷_집계_결과_목록_합계.get검색결과().get("aggregation_by_day");
 
          Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> 검색결과 = aggregationByDay.stream()
                  .sorted(Comparator.comparing(bucket -> OffsetDateTime.parse(bucket.get필드명()).toLocalDate()))
@@ -555,7 +555,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         return 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build());
     }
-    private 일자별_요구사항_연결된이슈_생성개수_및_상태데이터 일별_생성개수_및_상태_데이터생성(검색결과 결과) {
+    private 일자별_요구사항_연결된이슈_생성개수_및_상태데이터 일별_생성개수_및_상태_데이터생성(버킷_집계_결과 결과) {
         Map<String, Long> 요구사항여부결과 = new HashMap<>();
         Map<String, Map<String, Long>> 상태목록결과 = new HashMap<>();
 
@@ -565,10 +565,10 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
             요구사항여부결과.put(필드명, 개수);
 
-            List<검색결과> 상태목록 = Optional.ofNullable(term.get하위검색결과().get("상태목록")).orElse(Collections.emptyList());
+            List<버킷_집계_결과> 상태목록 = Optional.ofNullable(term.get하위검색결과().get("상태목록")).orElse(Collections.emptyList());
 
             Map<String, Long> status = 상태목록.stream()
-                    .collect(Collectors.toMap(검색결과::get필드명, 검색결과::get개수, Long::sum));
+                    .collect(Collectors.toMap(버킷_집계_결과::get필드명, 버킷_집계_결과::get개수, Long::sum));
 
             if(status != null) {
                 상태목록결과.put(필드명, status);
@@ -686,7 +686,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     }
 
     @Override
-    public List<검색결과> 제품_버전별_요구사항별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
+    public List<버킷_집계_결과> 제품_버전별_요구사항별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
 
         boolean 요구사항여부 = false;
         if (지라이슈_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT) {
@@ -741,9 +741,9 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 .addAggregation(versionsAgg)
                 .build();
 
-        검색결과_목록_합계 검색결과_목록_합계 = 지라이슈저장소.aggregationSearch(searchQuery);
+        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈저장소.버킷집계(searchQuery);
 
-        return 검색결과_목록_합계.get검색결과().get("versions");
+        return 버킷_집계_결과_목록_합계.get검색결과().get("versions");
 
     }
 

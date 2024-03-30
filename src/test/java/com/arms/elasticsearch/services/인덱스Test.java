@@ -5,7 +5,7 @@ import com.arms.api.engine.model.entity.지라이슈;
 import com.arms.api.engine.repository.인덱스자료;
 import com.arms.api.engine.repository.지라이슈_저장소;
 import com.arms.api.engine.service.지라이슈_서비스;
-import com.arms.elasticsearch.검색결과;
+import com.arms.elasticsearch.버킷_집계_결과;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -296,7 +296,7 @@ public class 인덱스Test {
                 .format(offsetDateTime);
     }
 
-    private 일자별_요구사항_연결된이슈_생성개수_및_상태데이터 일별_생성개수_및_상태_데이터생성(검색결과 결과) {
+    private 일자별_요구사항_연결된이슈_생성개수_및_상태데이터 일별_생성개수_및_상태_데이터생성(버킷_집계_결과 결과) {
         Map<String, Long> 요구사항여부결과 = new HashMap<>();
         Map<String, Map<String, Long>> 상태목록결과 = new HashMap<>();
 
@@ -306,10 +306,10 @@ public class 인덱스Test {
 
             요구사항여부결과.put(필드명, 개수);
 
-            List<검색결과> 키목록 = Optional.ofNullable(term.get하위검색결과().get("key")).orElse(Collections.emptyList());
+            List<버킷_집계_결과> 키목록 = Optional.ofNullable(term.get하위검색결과().get("key")).orElse(Collections.emptyList());
 
             Map<String, Long> status = 키목록.stream()
-                    .collect(Collectors.toMap(검색결과::get필드명, 검색결과::get개수, Long::sum));
+                    .collect(Collectors.toMap(버킷_집계_결과::get필드명, 버킷_집계_결과::get개수, Long::sum));
 
             if(status != null) {
                 상태목록결과.put(필드명, status);

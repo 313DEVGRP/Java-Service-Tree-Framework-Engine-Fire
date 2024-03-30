@@ -1,11 +1,11 @@
 package com.arms.elasticsearch;
 
 
-public class 검색결과_그룹 {
+public class 집계_결과_그룹 {
 
 	String name ;
 
-	public 검색결과_그룹(String name) {
+	public 집계_결과_그룹(String name) {
 		this.name = name;
 	}
 
