@@ -394,7 +394,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
                     }
 
                 } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
+                    throw new IllegalArgumentException(e);
                 }
             })
             .filter(Objects::nonNull)
@@ -414,13 +414,13 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
                                         false);
                                     return hit;
                                 } catch (IllegalAccessException e) {
-                                    throw new RuntimeException(e);
+                                    throw new IllegalArgumentException(e);
                                 }
                             }).collect(toList()))
                         .orElseGet(() -> null);
 
                 } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
+                    throw new IllegalArgumentException(e);
                 }
             })
             .filter(Objects::nonNull)
@@ -440,7 +440,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
                 try {
                     return fieldInfo(a.getClass(),annotation).get(a);
                 } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
+                    throw new IllegalArgumentException(e);
                 }
             }).collect(toList());
     }
@@ -492,7 +492,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
                     try {
                         return fieldInfo(a.getContent().getClass(), Id.class).get(a.getContent());
                     } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e);
+                        throw new IllegalArgumentException(e);
                     }
                 }))
         ).orElse(null);
