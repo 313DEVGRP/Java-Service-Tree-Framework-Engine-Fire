@@ -1,7 +1,7 @@
 package com.arms.api.alm.issue.model;
 
 import com.arms.api.alm.issuetype.model.이슈유형_데이터;
-import com.arms.api.alm.priority.model.지라이슈우선순위_데이터;
+import com.arms.api.alm.priority.model.이슈우선순위_데이터;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
@@ -30,7 +30,7 @@ public class 클라우드_지라이슈필드_데이터 {
 
     private List<String> labels;
 
-    private 지라이슈우선순위_데이터 priority;
+    private 이슈우선순위_데이터 priority;
 
     @Getter
     @Setter
