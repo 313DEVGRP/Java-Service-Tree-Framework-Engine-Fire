@@ -48,8 +48,15 @@ public class 온프레미스_지라_계정전략 implements 계정전략 {
 
     private 계정정보_데이터 계정정보_조회(서버정보_데이터 서버정보) {
         try {
-            JiraRestClient restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
-            User 계정정보_조회결과 = restClient.getUserClient().getUser(서버정보.getUserId()).claim();
+            String uri = 서버정보.getUri();
+            String serverType = 서버정보.getType();
+            String apiToken = 서버정보.getPasswordOrToken();
+            String userId = 서버정보.getUserId();
+
+            로그.info("온프라미스_지라_계정전략 :: 계정정보_조회, 서버 주소: {}, 서버 타입: {}, apiToken: {}, 유저 아이디: {}",uri,serverType,apiToken,userId);
+
+            JiraRestClient restClient = 지라유틸.온프레미스_통신기_생성(uri, userId, apiToken);
+            User 계정정보_조회결과 = restClient.getUserClient().getUser(userId).claim();
 
             if (계정정보_조회결과 == null) {
                 로그.error("온프라미스 지라 계정 조회 결과가 Null입니다.");
