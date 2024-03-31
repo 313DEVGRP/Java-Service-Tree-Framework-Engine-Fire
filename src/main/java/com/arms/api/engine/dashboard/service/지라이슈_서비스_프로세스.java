@@ -62,7 +62,6 @@ public class 지라이슈_서비스_프로세스 implements 지라이슈_서비�
 
     private 지라이슈_저장소 지라이슈저장소;
 
-    private 지라이슈_요구사항_서비스 지라이슈_요구사항_서비스;
 
     private 이슈전략_호출 이슈전략_호출;
 
@@ -223,7 +222,7 @@ public class 지라이슈_서비스_프로세스 implements 지라이슈_서비�
             벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 반환된_이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink));
 
             try {
-                List<지라이슈> 링크드이슈_서브테스크_목록 = Optional.ofNullable(지라이슈_요구사항_서비스.요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디,
+                List<지라이슈> 링크드이슈_서브테스크_목록 = Optional.ofNullable(요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디,
                                                                                         이슈_키, 0, 0))
                         .orElse(Collections.emptyList())
                         .stream()
@@ -341,7 +340,7 @@ public class 지라이슈_서비스_프로세스 implements 지라이슈_서비�
             증분벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 반환된_이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink));
 
             try {
-                List<지라이슈> 링크드이슈_서브테스크_목록 = Optional.ofNullable(지라이슈_요구사항_서비스.요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디,
+                List<지라이슈> 링크드이슈_서브테스크_목록 = Optional.ofNullable(요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디,
                                 이슈_키, 0, 0))
                         .orElse(Collections.emptyList())
                         .stream()
@@ -569,5 +568,21 @@ public class 지라이슈_서비스_프로세스 implements 지라이슈_서비�
         Color randomColor = new Color(r, g, b);
 
         return "#" + Integer.toHexString(randomColor.getRGB()).substring(2);
+    }
+
+    private List<지라이슈> 요구사항_링크드이슈_서브테스크_검색하기(Long 서버_아이디, String 이슈_키, int 페이지_번호, int 페이지_사이즈) {
+        List<String> 검색_필드 = new ArrayList<>();
+        검색_필드.add("parentReqKey");
+
+        검색조건 검색조건 = new 검색조건();
+        검색조건.setFields(검색_필드);
+        검색조건.setOrder(SortOrder.ASC);
+        검색조건.setSearchTerm(이슈_키);
+        검색조건.setPage(페이지_번호);
+        검색조건.setSize(페이지_사이즈);
+
+        Query query = 검색_쿼리_빌더.buildSearchQuery(검색조건,서버_아이디).build();
+
+        return 지라이슈저장소.normalSearch(query);
     }
 }
