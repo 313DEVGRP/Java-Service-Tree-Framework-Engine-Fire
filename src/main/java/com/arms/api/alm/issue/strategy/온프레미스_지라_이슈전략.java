@@ -53,7 +53,7 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
 
         로그.info("온프레미스 이슈 전체 조회");
 
-        if (프로젝트_키_또는_아이디==null || 프로젝트_키_또는_아이디.isEmpty()) {
+        if (프로젝트_키_또는_아이디 == null || 프로젝트_키_또는_아이디.isEmpty()) {
             throw new IllegalArgumentException(에러코드.파라미터_NULL_오류.getErrorMsg());
         }
 
@@ -89,7 +89,7 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
 
             return 프로젝트_이슈_목록;
         } catch (Exception e) {
-            로그.error("온프레미스 이슈 전체 조회시 오류가 발생하였습니다."+e.getMessage());
+            로그.error("온프레미스 이슈 전체 조회시 오류가 발생하였습니다." + e.getMessage());
             throw new IllegalArgumentException(에러코드.이슈_조회_오류.getErrorMsg());
         }
     }

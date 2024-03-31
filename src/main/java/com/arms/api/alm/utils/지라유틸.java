@@ -57,6 +57,16 @@ public class 지라유틸 {
                 .build();
     }
 
+    public static WebClient 레드마인_통신기_생성(String uri, String apiToken) {
+
+        return WebClient.builder()
+                .baseUrl(uri)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeader("X-Redmine-API-Key", apiToken)
+                .build();
+    }
+
     public static JiraRestClient 온프레미스_통신기_생성(String jiraUrl, String jiraID, String jiraPass) throws URISyntaxException, IOException {
 
         final AsynchronousJiraRestClientFactory factory = new AsynchronousJiraRestClientFactory();
