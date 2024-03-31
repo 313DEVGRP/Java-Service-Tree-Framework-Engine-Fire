@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateReqLinkDTO {
+public class 요구사항_수정_요청 {
 	private String connectInfo;
 	private Long reqLink;
 }
