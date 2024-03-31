@@ -50,9 +50,8 @@ public class 요구사항_컨트롤러 {
     // Requirement - ReqStatus, ReqGantt
     @ResponseBody
     @GetMapping("/getProgress/{pdServiceId}")
-    public Map<String, Long> 제품서비스_버전별_상태값_통계(@PathVariable("connectId") Long 지라서버_아이디,
-                                              @PathVariable("pdServiceId") Long 제품서비스_아이디,
-                                              @RequestParam("pdServiceVersions") Long[] 제품서비스_버전_아이디) throws IOException {
+    public Map<String, Long> 제품서비스_버전별_상태값_통계(@PathVariable("pdServiceId") Long 제품서비스_아이디,
+                                                            @RequestParam("pdServiceVersions") Long[] 제품서비스_버전_아이디) throws IOException {
 
         return 요구사항_서비스.제품서비스_버전별_상태값_통계(제품서비스_아이디,제품서비스_버전_아이디);
     }
