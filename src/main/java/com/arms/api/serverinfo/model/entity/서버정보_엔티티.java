@@ -1,6 +1,6 @@
 package com.arms.api.serverinfo.model.entity;
 
-import com.arms.api.engine.repository.인덱스자료;
+import com.arms.api.engine.common.constrant.index.인덱스자료;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;

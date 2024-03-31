@@ -1,6 +1,6 @@
 package com.arms.api.engine.util;
 
-import com.arms.api.engine.model.entity.지라이슈;
+import com.arms.api.engine.jiraissue.entity.지라이슈;
 import com.arms.api.alm.issue.model.지라이슈_데이터;
 
 import java.util.Collections;

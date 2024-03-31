@@ -1,6 +1,6 @@
 package com.arms.api.serverinfo.service;
 
-import com.arms.api.engine.repository.지라이슈_저장소;
+import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.model.entity.서버정보_엔티티;
 import com.arms.utils.errors.codes.에러코드;
@@ -132,19 +132,19 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
         return 서버정보_저장소.saveAll(result);
     }
 
-//    @Override
-//    public 서버정보_엔티티 서버정보_삭제하기(서버정보_데이터 서버정보_데이터) {
-//
-//        서버정보_데이터 이슈 = 서버정보_검증(서버정보_데이터.getConnectId());
-//        서버정보_엔티티 서버정보 = modelMapper.map(이슈, 서버정보_엔티티.class);
-//
-//        if (이슈 == null) {
-//            return null;
-//        } else {
-//            서버정보_저장소.delete(서버정보);
-//            return 서버정보;
-//        }
-//    }
+    @Override
+    public 서버정보_엔티티 서버정보_삭제하기(서버정보_데이터 서버정보_데이터) {
+
+        서버정보_데이터 이슈 = 서버정보_검증(서버정보_데이터.getConnectId());
+        서버정보_엔티티 서버정보 = modelMapper.map(이슈, 서버정보_엔티티.class);
+
+        if (이슈 == null) {
+            return null;
+        } else {
+            서버정보_저장소.delete(서버정보);
+            return 서버정보;
+        }
+    }
 
 //    @Override
 //    public void 서버정보_전체_삭제하기() {

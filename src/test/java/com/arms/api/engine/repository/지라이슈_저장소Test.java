@@ -9,7 +9,7 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.arms.api.engine.model.entity.지라이슈;
+import com.arms.api.engine.jiraissue.entity.지라이슈;
 
 @ActiveProfiles("dev")
 @SpringBootTest
@@ -17,7 +17,7 @@ public class 지라이슈_저장소Test {
 
 
 	@Autowired
-	private 지라이슈_저장소 지라이슈_저장소;
+	private com.arms.api.engine.jiraissue.repository.지라이슈_저장소 지라이슈_저장소;
 
 	@Test
 	public void test(){
