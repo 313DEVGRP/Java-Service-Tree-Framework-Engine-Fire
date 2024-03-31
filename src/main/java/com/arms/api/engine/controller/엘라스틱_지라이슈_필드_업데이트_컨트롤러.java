@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.arms.api.engine.model.dto.UpdateReqLinkDTO;
+import com.arms.api.engine.model.dto.요구사항_수정_요청;
 import com.arms.api.engine.model.entity.지라이슈;
 import com.arms.api.engine.repository.지라이슈_저장소;
 
@@ -27,7 +27,7 @@ public class 엘라스틱_지라이슈_필드_업데이트_컨트롤러 {
 
 	@PostMapping("/c_req_link")
 	public ResponseEntity<ApiResult<String>> cReqLink_수정(
-			@RequestBody UpdateReqLinkDTO updateReqLinkDTOs
+			@RequestBody 요구사항_수정_요청 updateReqLinkDTOs
 	) {
 
 			SearchHits<지라이슈> 지라이슈들 = 지라이슈_저장소.search(
