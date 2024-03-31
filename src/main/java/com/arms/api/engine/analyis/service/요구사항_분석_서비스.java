@@ -1,4 +1,4 @@
-package com.arms.api.engine.service;
+package com.arms.api.engine.analyis.service;
 
 import java.util.List;
 import java.util.Map;
@@ -32,9 +32,6 @@ public interface 요구사항_분석_서비스 {
 
     List<요구사항_버전_이슈_키_상태_작업자수> 버전별_요구사항_상태_및_관여_작업자수_내용(Long pdServiceLink, Long[] pdServiceVersionLinks);
 
-    버킷_집계_결과_목록_합계 이슈_프로젝트명_집계(검색어_집계_요청 검색어_집계_요청);
-
-    버킷_집계_결과_목록_합계 전체_집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리);
     List<지라이슈> 제품서비스_버전목록으로_조회(Long pdServiceLink, Long[] pdServiceVersionLinks);//
 
     히트맵데이터 히트맵_제품서비스_버전목록으로_조회(Long pdServiceLink, Long[] pdServiceVersionLinks);//
