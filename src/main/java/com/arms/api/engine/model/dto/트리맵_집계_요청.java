@@ -16,7 +16,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class 트리맵_검색요청 extends 기본_집계_요청 {
+public class 트리맵_집계_요청 extends 기본_집계_요청 {
     private Long pdServiceLink;
     private Long[] pdServiceVersionLinks;
     private List<com.arms.api.engine.model.dto.제품버전목록> 제품버전목록;

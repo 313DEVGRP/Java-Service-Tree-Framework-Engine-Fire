@@ -7,7 +7,7 @@ import com.arms.api.engine.model.dto.제품버전목록;
 import com.arms.api.engine.model.entity.지라이슈;
 import com.arms.api.engine.model.dto.지라이슈_일자별_제품_및_제품버전_집계_요청;
 import com.arms.api.engine.model.dto.지라이슈_제품_및_제품버전_집계_요청;
-import com.arms.api.engine.model.dto.트리맵_검색요청;
+import com.arms.api.engine.model.dto.트리맵_집계_요청;
 import com.arms.api.engine.repository.인덱스자료;
 import com.arms.api.engine.repository.지라이슈_저장소;
 import com.arms.elasticsearch.query.*;
@@ -265,12 +265,12 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     }
 
     @Override
-    public List<Worker> 작업자_별_요구사항_별_관여도(트리맵_검색요청 트리맵_검색요청) {
+    public List<Worker> 작업자_별_요구사항_별_관여도(트리맵_집계_요청 트리맵_집계_요청) {
         Map<String, Worker> contributionMap = new HashMap<>();
 
-        List<제품버전목록> 제품버전목록데이터 = 트리맵_검색요청.get제품버전목록();
+        List<제품버전목록> 제품버전목록데이터 = 트리맵_집계_요청.get제품버전목록();
        
-        List<지라이슈> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionsIn(true, 트리맵_검색요청.getPdServiceLink(), 트리맵_검색요청.getPdServiceVersionLinks());
+        List<지라이슈> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionsIn(true, 트리맵_집계_요청.getPdServiceLink(), 트리맵_집계_요청.getPdServiceVersionLinks());
 
         // 요구사항의 키를 모두 추출
         List<String> allReqKeys = requirementIssues.stream().map(지라이슈::getKey).collect(Collectors.toList());
@@ -325,7 +325,7 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
         return contributionMap.values().stream()
                 .sorted((w1, w2) -> w2.getData().get("totalInvolvedCount").compareTo(w1.getData().get("totalInvolvedCount")))
-                .limit(트리맵_검색요청.get크기() > 0 ? 트리맵_검색요청.get크기() : Long.MAX_VALUE)
+                .limit(트리맵_집계_요청.get크기() > 0 ? 트리맵_집계_요청.get크기() : Long.MAX_VALUE)
                 .collect(Collectors.toList());
 
     }

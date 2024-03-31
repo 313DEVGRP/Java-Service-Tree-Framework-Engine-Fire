@@ -17,7 +17,6 @@ import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
 import com.arms.elasticsearch.query.factory.일반_검색_쿼리_생성기;
 import com.arms.elasticsearch.query.factory.일반_집계_쿼리_생성기;
 import com.arms.elasticsearch.query.factory.서브_집계_쿼리_생성기;
-import com.arms.elasticsearch.query.factory.일자별_집계_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.버킷_집계_결과;
@@ -161,9 +160,9 @@ public class 엘라스틱_지라이슈_대시보드_컨트롤러 {
 
     @PostMapping("/assignees-requirements-involvements")
     public ResponseEntity<List<Worker>> 작업자_별_요구사항_별_관여도_apache(
-            @RequestBody 트리맵_검색요청 트리맵_검색요청
+            @RequestBody 트리맵_집계_요청 트리맵_집계_요청
     ) {
-        return ResponseEntity.ok(지라이슈_검색엔진.작업자_별_요구사항_별_관여도(트리맵_검색요청));
+        return ResponseEntity.ok(지라이슈_검색엔진.작업자_별_요구사항_별_관여도(트리맵_집계_요청));
     }
 
     @PostMapping("/req-status-and-reqInvolved-unique-assignees")
