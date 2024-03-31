@@ -48,18 +48,18 @@ public class 서버정보_컨트롤러 {
     /*
     * 삭제 관련 차후 설계 후 개발 진행
     * */
-//    @ResponseBody
-//    @RequestMapping(
-//            value = {""},
-//            method = {RequestMethod.DELETE}
-//    )
-//    public 서버정보_엔티티 서버정보_삭제(@RequestBody 서버정보_데이터 서버정보_데이터,
-//                            ModelMap model, HttpServletRequest request) throws Exception {
-//
-//        로그.info("특정 서버정보 삭제");
-//
-//        return 서버정보_서비스.서버정보_삭제하기(서버정보_데이터);
-//    }
+    @ResponseBody
+    @RequestMapping(
+            value = {""},
+            method = {RequestMethod.DELETE}
+    )
+    public 서버정보_엔티티 서버정보_삭제(@RequestBody 서버정보_데이터 서버정보_데이터,
+                            ModelMap model, HttpServletRequest request) throws Exception {
+
+        로그.info("특정 서버정보 삭제");
+
+        return 서버정보_서비스.서버정보_삭제하기(서버정보_데이터);
+    }
 
     /*
      * 삭제 관련 차후 설계 후 개발 진행
