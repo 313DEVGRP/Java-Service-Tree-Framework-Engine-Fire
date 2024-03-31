@@ -13,8 +13,6 @@ import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
 @ActiveProfiles("dev")
 class 지라이슈_서비스프로세스Test {
 
-	@Autowired
-	private com.arms.api.engine.dashboard.service.지라이슈_서비스 지라이슈_서비스;
 
 	@Autowired
 	private 지라이슈_저장소 지라이슈저장소;

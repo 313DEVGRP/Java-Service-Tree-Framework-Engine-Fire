@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.*;
 
 import java.util.List;
 
+import com.arms.api.engine.analyis.service.요구사항_분석_서비스;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,7 +27,7 @@ import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 public class 지라이슈_서비스프로세스_대시보드Test {
 
     @Autowired
-    com.arms.api.engine.analyis.service.지라이슈_대시보드_서비스 지라이슈_대시보드_서비스;
+    요구사항_분석_서비스 요구사항_분석_서비스;
 
 
 
@@ -62,7 +63,7 @@ public class 지라이슈_서비스프로세스_대시보드Test {
                         new MustTermQuery("isReq",true)
                 );
 
-        return 지라이슈_대시보드_서비스.집계결과_가져오기(일반_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery));
+        return 요구사항_분석_서비스.집계결과_가져오기(일반_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery));
     }
 
     private 버킷_집계_결과_목록_합계 하위이슈(){
@@ -79,7 +80,7 @@ public class 지라이슈_서비스프로세스_대시보드Test {
                         new MustTermQuery("isReq",false)
                 );
 
-        return 지라이슈_대시보드_서비스.집계결과_가져오기(일반_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery));
+        return 요구사항_분석_서비스.집계결과_가져오기(일반_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery));
     }
 
 

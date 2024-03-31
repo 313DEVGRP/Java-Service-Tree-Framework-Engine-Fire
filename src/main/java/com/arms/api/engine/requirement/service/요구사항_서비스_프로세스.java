@@ -1,15 +1,14 @@
 package com.arms.api.engine.requirement.service;
 
+import com.arms.api.engine.common.component.서브테스크_조회;
 import com.arms.api.engine.jiraissue.entity.지라이슈;
 import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
 import com.arms.api.engine.model.dto.지라이슈_일반_집계_요청;
 import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.builder.검색_쿼리_빌더;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.factory.일반_집계_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.query.쿼리_추상_팩토리;
-import com.arms.elasticsearch.검색조건;
 import com.arms.elasticsearch.버킷_집계_결과;
 import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import lombok.AllArgsConstructor;
@@ -18,11 +17,9 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -33,10 +30,11 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 @Service("지라이슈_요구사항_서비스")
 @AllArgsConstructor
-public class 지라이슈_요구사항_서비스_프로세스 implements 지라이슈_요구사항_서비스 {
+public class 요구사항_서비스_프로세스 implements 요구사항_서비스 {
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     private 지라이슈_저장소 지라이슈저장소;
+    private 서브테스크_조회 서브테스크_조회;
 
     @Override
     public Map<String, Long> 제품서비스별_담당자_이름_통계(Long 지라서버_아이디, Long 제품서비스_아이디) {
@@ -84,22 +82,6 @@ public class 지라이슈_요구사항_서비스_프로세스 implements 지라�
         );
     }
 
-    @Override
-    public List<지라이슈> 요구사항_링크드이슈_서브테스크_검색하기(Long 서버_아이디, String 이슈_키, int 페이지_번호, int 페이지_사이즈) {
-        List<String> 검색_필드 = new ArrayList<>();
-        검색_필드.add("parentReqKey");
-
-        검색조건 검색조건 = new 검색조건();
-        검색조건.setFields(검색_필드);
-        검색조건.setOrder(SortOrder.ASC);
-        검색조건.setSearchTerm(이슈_키);
-        검색조건.setPage(페이지_번호);
-        검색조건.setSize(페이지_사이즈);
-
-        Query query = 검색_쿼리_빌더.buildSearchQuery(검색조건,서버_아이디).build();
-
-        return 지라이슈저장소.normalSearch(query);
-    }
 
     @Override
     public Map<String, Long> 제품서비스_버전별_상태값_통계(Long 제품서비스_아이디, Long[] 버전_아이디들) throws IOException {
@@ -133,7 +115,10 @@ public class 지라이슈_요구사항_서비스_프로세스 implements 지라�
 
     }
 
-
+    @Override
+    public List<지라이슈> 요구사항_링크드이슈_서브테스크_검색하기(Long 서버_아이디, String 이슈_키, int 페이지_번호, int 페이지_사이즈) {
+        return 서브테스크_조회.요구사항_링크드이슈_서브테스크_검색하기(서버_아이디, 이슈_키, 페이지_번호, 페이지_사이즈);
+    }
 
 
 }

@@ -1,10 +1,9 @@
 package com.arms.api.engine.dashboard.controller;
 
+import com.arms.api.engine.dashboard.service.지라이슈_대시보드_서비스;
 import com.arms.api.engine.model.dto.지라이슈_일반_집계_요청;
 import com.arms.api.engine.model.dto.트리맵_집계_요청;
 import com.arms.api.engine.model.vo.Worker;
-import com.arms.api.engine.analyis.service.지라이슈_대시보드_서비스;
-import com.arms.api.engine.service.플루언트디_서비스;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
@@ -24,7 +23,6 @@ public class 지라이슈_대시보드_컨트롤러 {
 
     @Autowired
     private 지라이슈_대시보드_서비스 지라이슈_대시보드_서비스;
-
 
 
     // Dashboard

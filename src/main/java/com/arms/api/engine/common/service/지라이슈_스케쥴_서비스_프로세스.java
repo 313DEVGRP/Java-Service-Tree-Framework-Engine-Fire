@@ -1,49 +1,28 @@
-package com.arms.api.engine.dashboard.service;
+package com.arms.api.engine.common.service;
 
-import com.arms.api.alm.issuestatus.model.이슈상태_데이터;
-import com.arms.api.engine.model.dto.지라이슈_일반_집계_요청;
-import com.arms.api.engine.jiraissue.entity.지라이슈;
-import com.arms.api.engine.requirement.service.지라이슈_요구사항_서비스;
-import com.arms.api.engine.util.지라이슈_생성;
-import com.arms.api.engine.common.constrant.index.인덱스자료;
-import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
-import com.arms.api.engine.model.vo.히트맵날짜데이터;
-import com.arms.api.engine.model.vo.히트맵데이터;
 import com.arms.api.alm.issue.model.지라이슈_데이터;
 import com.arms.api.alm.issue.model.지라이슈필드_데이터;
 import com.arms.api.alm.issue.model.지라프로젝트_데이터;
 import com.arms.api.alm.issue.service.이슈전략_호출;
-import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
-import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
-import com.arms.elasticsearch.query.factory.일반_집계_쿼리_생성기;
-import com.arms.elasticsearch.query.filter.TermsQueryFilter;
-import com.arms.elasticsearch.버킷_집계_결과;
-import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
+import com.arms.api.alm.issuestatus.model.이슈상태_데이터;
+import com.arms.api.engine.common.constrant.index.인덱스자료;
+import com.arms.api.engine.common.component.서브테스크_조회;
+import com.arms.api.engine.jiraissue.entity.지라이슈;
+import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
+import com.arms.api.engine.util.지라이슈_생성;
 import com.arms.elasticsearch.query.builder.검색_쿼리_빌더;
 import com.arms.elasticsearch.검색조건;
 import com.arms.utils.errors.codes.에러코드;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
-
-import java.awt.*;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -56,12 +35,13 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 @Service("지라이슈_서비스")
 @AllArgsConstructor
-public class 지라이슈_서비스_프로세스 implements 지라이슈_서비스{
+public class 지라이슈_스케쥴_서비스_프로세스 implements 지라이슈_스케쥴_서비스 {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     private 지라이슈_저장소 지라이슈저장소;
 
+    private 서브테스크_조회 서브테스크_조회;
 
     private 이슈전략_호출 이슈전략_호출;
 
@@ -84,8 +64,8 @@ public class 지라이슈_서비스_프로세스 implements 지라이슈_서비�
     public 지라이슈 이슈_조회하기(String 조회조건_아이디) {
 
         NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
-            .withQuery(QueryBuilders.termQuery("id", 조회조건_아이디))
-            .build();
+                .withQuery(QueryBuilders.termQuery("id", 조회조건_아이디))
+                .build();
 
         return 지라이슈저장소.normalSearch(searchQuery).stream()
                 .findFirst().orElseGet(지라이슈::new);
@@ -94,7 +74,7 @@ public class 지라이슈_서비스_프로세스 implements 지라이슈_서비�
     @Override
     public List<지라이슈> 이슈_검색하기(검색조건 검색조건) {
         Query query
-            = 검색_쿼리_빌더.buildSearchQuery(검색조건).build();
+                = 검색_쿼리_빌더.buildSearchQuery(검색조건).build();
         return 지라이슈저장소.normalSearch(query);
     }
 
@@ -122,7 +102,7 @@ public class 지라이슈_서비스_프로세스 implements 지라이슈_서비�
         }
 
         지라이슈_데이터 반환된_이슈 = Optional.ofNullable(이슈전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키))
-                                        .orElse(null);
+                .orElse(null);
 
         if (반환된_이슈 == null) {
             로그.error("이슈_검색엔진_저장 Error 이슈 키에 해당하는 데이터가 없음" + 에러코드.이슈_조회_오류.getErrorMsg());
@@ -130,7 +110,7 @@ public class 지라이슈_서비스_프로세스 implements 지라이슈_서비�
         }
 
         지라이슈 저장할_지라이슈 = 지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 반환된_이슈, true,
-                                        "", 제품서비스_아이디, 제품서비스_버전들, cReqLink);
+                "", 제품서비스_아이디, 제품서비스_버전들, cReqLink);
 
         return 이슈_추가하기(저장할_지라이슈);
     }
@@ -222,8 +202,8 @@ public class 지라이슈_서비스_프로세스 implements 지라이슈_서비�
             벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 반환된_이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink));
 
             try {
-                List<지라이슈> 링크드이슈_서브테스크_목록 = Optional.ofNullable(요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디,
-                                                                                        이슈_키, 0, 0))
+                List<지라이슈> 링크드이슈_서브테스크_목록 = Optional.ofNullable(서브테스크_조회.요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디,
+                                이슈_키, 0, 0))
                         .orElse(Collections.emptyList())
                         .stream()
                         .map(링크드이슈_서브테스크 -> {
@@ -292,9 +272,9 @@ public class 지라이슈_서비스_프로세스 implements 지라이슈_서비�
         List<지라이슈> 증분벌크_저장_목록 = new ArrayList<지라이슈>();
 
         /**
-        * 스케줄러 작동 시 암스에서 생성한 요구사항 자체가 전날 업데이트가 일어났는지 확인 시 업데이트가 없을 시 null 반환(삭제된 이슈를 조회할 때 또한)
-        * 따라서 암스 생성 요구사항 상세정보를 JIRA에서 조회 후 어플리케이션 단에서 updated 항목을 검증 후 증분 데이터 판단 후 저장시키는 방법
-        **/
+         * 스케줄러 작동 시 암스에서 생성한 요구사항 자체가 전날 업데이트가 일어났는지 확인 시 업데이트가 없을 시 null 반환(삭제된 이슈를 조회할 때 또한)
+         * 따라서 암스 생성 요구사항 상세정보를 JIRA에서 조회 후 어플리케이션 단에서 updated 항목을 검증 후 증분 데이터 판단 후 저장시키는 방법
+         **/
         // 지라이슈_데이터 반환된_증분_이슈 = Optional.ofNullable(이슈전략_호출.증분이슈_상세정보_가져오기(지라서버_아이디, 이슈_키))
         지라이슈_데이터 반환된_이슈 = Optional.ofNullable(이슈전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키))
                 .map(이슈 -> {
@@ -310,10 +290,10 @@ public class 지라이슈_서비스_프로세스 implements 지라이슈_서비�
             List<지라이슈> 조회결과 = ES데이터조회하기(조회조건_아이디);
 
             /**
-            * Jira서버 조회 후 반환된 데이터가 Null -> 1. 삭제되어 조회가 안되는 경우 or 2. 에러가 터진 경우
-            * ES 데이터에 있는지 조회 후 ES에 있는지 확인 후 암스에서 관리하지 않는 요구사항으로 처리하는 로직
-            * jiraissue-* 인덱스 전체에서 조회해야하는 듯한 생각###
-            **/
+             * Jira서버 조회 후 반환된 데이터가 Null -> 1. 삭제되어 조회가 안되는 경우 or 2. 에러가 터진 경우
+             * ES 데이터에 있는지 조회 후 ES에 있는지 확인 후 암스에서 관리하지 않는 요구사항으로 처리하는 로직
+             * jiraissue-* 인덱스 전체에서 조회해야하는 듯한 생각###
+             **/
             if (조회결과 == null || 조회결과.size() == 0) {
                 return 0;
             }
@@ -340,7 +320,7 @@ public class 지라이슈_서비스_프로세스 implements 지라이슈_서비�
             증분벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 반환된_이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink));
 
             try {
-                List<지라이슈> 링크드이슈_서브테스크_목록 = Optional.ofNullable(요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디,
+                List<지라이슈> 링크드이슈_서브테스크_목록 = Optional.ofNullable(서브테스크_조회.요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디,
                                 이슈_키, 0, 0))
                         .orElse(Collections.emptyList())
                         .stream()
@@ -382,8 +362,8 @@ public class 지라이슈_서비스_프로세스 implements 지라이슈_서비�
         }
 
         /*
-        * 대량이슈_추가하기 방어코드
-        * */
+         * 대량이슈_추가하기 방어코드
+         * */
         if (증분벌크_저장_목록.size() == 0) {
             return 0;
         }
@@ -437,152 +417,9 @@ public class 지라이슈_서비스_프로세스 implements 지라이슈_서비�
     }
 
 
-    private static LocalDateTime parseDateTime(String dateTimeStr) {
-
-        try {
-            // 온프레미스 날짜형식
-            return LocalDateTime.parse(dateTimeStr, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        } catch (DateTimeParseException e) {
-            // 클라우드 날짜형식
-            DateTimeFormatter formatterWithoutColonInTimeZone =
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-            return LocalDateTime.parse(dateTimeStr, formatterWithoutColonInTimeZone);
-        }
-    }
 
 
-    @Override
-    public List<지라이슈> 제품서비스_버전목록으로_조회(Long pdServiceLink, Long[] pdServiceVersionLinks) {
-        return 지라이슈저장소.findByPdServiceIdAndPdServiceVersionsIn(pdServiceLink, pdServiceVersionLinks);
-    }
 
-    @Override
-    public 히트맵데이터 히트맵_제품서비스_버전목록으로_조회(Long pdServiceLink, Long[] pdServiceVersionLinks) {
 
-        EsQuery esQuery = new EsQueryBuilder()
-                .bool(new MustTermQuery("pdServiceId", pdServiceLink),
-                        new TermsQueryFilter("pdServiceVersions", pdServiceVersionLinks)
-                );
-        BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
-        });
 
-        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
-                        .withQuery(boolQuery)
-                        .withPageable(PageRequest.of(0, 10000));
-
-        List<지라이슈> 전체결과 = new ArrayList<>();
-        boolean 인덱스존재시까지  = true;
-
-        LocalDate today = LocalDate.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String 지라인덱스 = 인덱스자료.지라이슈_인덱스명;
-
-        while(인덱스존재시까지) {
-            LocalDate 오늘일경우 = LocalDate.now();
-            String 호출할_지라인덱스 = 오늘일경우.format(formatter).equals(today.format(formatter))
-                                            ? 지라인덱스 : 지라인덱스 + "-" + today.format(formatter);
-
-            if (!지라이슈저장소.인덱스_존재_확인(호출할_지라인덱스)) {
-                인덱스존재시까지 = false;
-                break;
-            }
-
-            today = today.minusDays(1);
-
-            List<지라이슈> 결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 호출할_지라인덱스);
-
-            if (결과 != null && 결과.size() > 0) {
-                전체결과.addAll(결과);
-            }
-        }
-
-        히트맵데이터 히트맵데이터 = new 히트맵데이터();
-        Set<String> requirementColors = new HashSet<>();
-        Set<String> relationIssueColors = new HashSet<>();
-
-        전체결과.stream().forEach(지라이슈 -> {
-            if (지라이슈.getIsReq()) {
-                히트맵데이터_파싱(히트맵데이터.getRequirement(), 지라이슈, requirementColors);
-            } else {
-                히트맵데이터_파싱(히트맵데이터.getRelationIssue(), 지라이슈, relationIssueColors);
-            }
-        });
-
-        히트맵데이터.setRequirementColors(assignColors(requirementColors));
-        히트맵데이터.setRelationIssueColors(assignColors(relationIssueColors));
-
-        return 히트맵데이터;
-    }
-
-    private void 히트맵데이터_파싱(Map<String, 히트맵날짜데이터> returnObject, 지라이슈 item, Set<String> returnColors) {
-        if (item.getUpdated() == null || item.getUpdated().isEmpty()) {
-            로그.info(item.getKey());
-            return;
-        }
-
-        String 표시날짜 = formatDate(parseDateTime(item.getUpdated()));
-
-        if (!returnObject.containsKey(표시날짜)) {
-            returnObject.put(표시날짜, new 히트맵날짜데이터());
-        }
-
-        히트맵날짜데이터 히트맵날짜데이터 = returnObject.get(표시날짜);
-        히트맵날짜데이터.getContents().add(item.getSummary());
-        히트맵날짜데이터.setCount(returnObject.get(표시날짜).getContents().size());
-        히트맵날짜데이터.setItems(Collections.singleton(히트맵날짜데이터.getCount() + "개 업데이트"));
-        returnColors.add(item.getSummary());
-    }
-
-    private static String formatDate(LocalDateTime date) {
-        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        return format.format(date);
-    }
-
-    private Map<String, String> assignColors(Set<String> colorsArray) {
-        Map<String, String> colorsObj = new HashMap<>();
-        colorsObj.put("default", "#eeeeee");
-
-        colorsArray.forEach(item -> {
-            if (!"default".equals(item)) {
-                colorsObj.put(item, getRandomColor());
-            }
-        });
-
-        return colorsObj;
-    }
-
-    private String getRandomColor() {
-        SecureRandom random = null;
-
-        try {
-            random = SecureRandom.getInstanceStrong();
-        } catch (NoSuchAlgorithmException e) {
-            로그.error("랜덤컬러 데이터 생성중 오류 : " + e.getMessage());
-            throw new RuntimeException(e);
-        }
-
-        float r = random.nextFloat();
-        float g = random.nextFloat();
-        float b = random.nextFloat();
-
-        Color randomColor = new Color(r, g, b);
-
-        return "#" + Integer.toHexString(randomColor.getRGB()).substring(2);
-    }
-
-    private List<지라이슈> 요구사항_링크드이슈_서브테스크_검색하기(Long 서버_아이디, String 이슈_키, int 페이지_번호, int 페이지_사이즈) {
-        List<String> 검색_필드 = new ArrayList<>();
-        검색_필드.add("parentReqKey");
-
-        검색조건 검색조건 = new 검색조건();
-        검색조건.setFields(검색_필드);
-        검색조건.setOrder(SortOrder.ASC);
-        검색조건.setSearchTerm(이슈_키);
-        검색조건.setPage(페이지_번호);
-        검색조건.setSize(페이지_사이즈);
-
-        Query query = 검색_쿼리_빌더.buildSearchQuery(검색조건,서버_아이디).build();
-
-        return 지라이슈저장소.normalSearch(query);
-    }
 }

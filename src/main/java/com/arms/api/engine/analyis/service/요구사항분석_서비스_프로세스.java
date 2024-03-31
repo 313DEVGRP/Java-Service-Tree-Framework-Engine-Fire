@@ -22,7 +22,6 @@ import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -35,22 +34,29 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
-@Service("지라이슈_대시보드_서비스")
+@Service("요구사항_분석_서비스")
 @AllArgsConstructor
-public class 지라이슈_대시보드_서비스_프로세스 implements 지라이슈_대시보드_서비스 {
+public class 요구사항분석_서비스_프로세스 implements 요구사항_분석_서비스 {
+    private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     private 지라이슈_저장소 지라이슈저장소;
 
@@ -145,71 +151,6 @@ public class 지라이슈_대시보드_서비스_프로세스 implements 지라�
         return 요구사항_버전이슈키상태_작업자수_목록;
     }
 
-    @Override
-    public List<Worker> 작업자_별_요구사항_별_관여도(트리맵_집계_요청 트리맵_집계_요청) {
-        Map<String, Worker> contributionMap = new HashMap<>();
-
-        List<제품버전목록> 제품버전목록데이터 = 트리맵_집계_요청.get제품버전목록();
-       
-        List<지라이슈> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionsIn(true, 트리맵_집계_요청.getPdServiceLink(), 트리맵_집계_요청.getPdServiceVersionLinks());
-
-        // 요구사항의 키를 모두 추출
-        List<String> allReqKeys = requirementIssues.stream().map(지라이슈::getKey).collect(Collectors.toList());
-
-        // 모든 하위 태스크를 한 번에 로드
-        List<지라이슈> allSubTasks = 지라이슈저장소.findByParentReqKeyIn(allReqKeys);
-
-        // 하위 태스크를 부모 키로 그룹화
-        Map<String, List<지라이슈>> subTasksByParent = allSubTasks.stream()
-                .filter(subtask -> subtask.getAssignee() != null)
-                .collect(Collectors.groupingBy(지라이슈::getParentReqKey));
-
-        requirementIssues.stream().forEach(reqIssue -> {
-            String key = reqIssue.getKey();
-            String summary = reqIssue.getSummary() == null ? "해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다." : reqIssue.getSummary();
-            Long[] pdServiceVersions = reqIssue.getPdServiceVersions();
-            String versionNames =  Stream.of(pdServiceVersions)
-                    .map(versionId -> 제품버전목록데이터.stream()
-                            .filter(p -> p.getC_id().equals(versionId.toString()))
-                            .findFirst()
-                            .map(제품버전목록::getC_title)
-                            .orElse(null)
-                    )
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.joining(", "));
-
-            Optional.ofNullable(subTasksByParent.get(key)).orElse(Collections.emptyList()).stream().forEach(subtask -> {
-                String assigneeId = subtask.getAssignee().getAccountId();
-                String displayName = subtask.getAssignee().getDisplayName();
-
-                Worker worker = contributionMap.computeIfAbsent(assigneeId, id -> {
-                    Map<String, Integer> dataMap = new HashMap<>();
-                    dataMap.put("totalInvolvedCount", 0);
-                    return new Worker(assigneeId, displayName, dataMap, new ArrayList<>());
-                });
-
-                TaskList taskList = worker.getChildren().stream()
-                        .filter(task -> task.getId().equals(key))
-                        .findFirst()
-                        .orElseGet(() -> {
-                            Map<String, Integer> dataList = new HashMap<>();
-                            dataList.put("involvedCount", 0);
-                            TaskList newTask = new TaskList(key, "[ " + versionNames + " ] - " + summary, dataList);
-                            worker.getChildren().add(newTask);
-                            return newTask;
-                        });
-
-                taskList.getData().put("involvedCount", taskList.getData().get("involvedCount") + 1);
-                worker.getData().put("totalInvolvedCount", worker.getData().get("totalInvolvedCount") + 1);
-            });
-        });
-
-        return contributionMap.values().stream()
-                .sorted((w1, w2) -> w2.getData().get("totalInvolvedCount").compareTo(w1.getData().get("totalInvolvedCount")))
-                .limit(트리맵_집계_요청.get크기() > 0 ? 트리맵_집계_요청.get크기() : Long.MAX_VALUE)
-                .collect(Collectors.toList());
-
-    }
 
     @Override
     public Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항_지라이슈상태_주별_집계(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
@@ -628,7 +569,6 @@ public class 지라이슈_대시보드_서비스_프로세스 implements 지라�
 
     }
 
-
     @Override
     public Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>> 요구사항_지라이슈키별_업데이트_목록(List<String> 지라키_목록){
 
@@ -692,6 +632,138 @@ public class 지라이슈_대시보드_서비스_프로세스 implements 지라�
                 지라이슈.getIsReq()
         );
 
+    }
+
+    @Override
+    public List<지라이슈> 제품서비스_버전목록으로_조회(Long pdServiceLink, Long[] pdServiceVersionLinks) {
+        return 지라이슈저장소.findByPdServiceIdAndPdServiceVersionsIn(pdServiceLink, pdServiceVersionLinks);
+    }
+
+    @Override
+    public 히트맵데이터 히트맵_제품서비스_버전목록으로_조회(Long pdServiceLink, Long[] pdServiceVersionLinks) {
+
+        EsQuery esQuery = new EsQueryBuilder()
+                .bool(new MustTermQuery("pdServiceId", pdServiceLink),
+                        new TermsQueryFilter("pdServiceVersions", pdServiceVersionLinks)
+                );
+        BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
+        });
+
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
+                .withQuery(boolQuery)
+                .withPageable(PageRequest.of(0, 10000));
+
+        List<지라이슈> 전체결과 = new ArrayList<>();
+        boolean 인덱스존재시까지  = true;
+
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String 지라인덱스 = 인덱스자료.지라이슈_인덱스명;
+
+        while(인덱스존재시까지) {
+            LocalDate 오늘일경우 = LocalDate.now();
+            String 호출할_지라인덱스 = 오늘일경우.format(formatter).equals(today.format(formatter))
+                    ? 지라인덱스 : 지라인덱스 + "-" + today.format(formatter);
+
+            if (!지라이슈저장소.인덱스_존재_확인(호출할_지라인덱스)) {
+                인덱스존재시까지 = false;
+                break;
+            }
+
+            today = today.minusDays(1);
+
+            List<지라이슈> 결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 호출할_지라인덱스);
+
+            if (결과 != null && 결과.size() > 0) {
+                전체결과.addAll(결과);
+            }
+        }
+
+        히트맵데이터 히트맵데이터 = new 히트맵데이터();
+        Set<String> requirementColors = new HashSet<>();
+        Set<String> relationIssueColors = new HashSet<>();
+
+        전체결과.stream().forEach(지라이슈 -> {
+            if (지라이슈.getIsReq()) {
+                히트맵데이터_파싱(히트맵데이터.getRequirement(), 지라이슈, requirementColors);
+            } else {
+                히트맵데이터_파싱(히트맵데이터.getRelationIssue(), 지라이슈, relationIssueColors);
+            }
+        });
+
+        히트맵데이터.setRequirementColors(assignColors(requirementColors));
+        히트맵데이터.setRelationIssueColors(assignColors(relationIssueColors));
+
+        return 히트맵데이터;
+    }
+
+    private void 히트맵데이터_파싱(Map<String, 히트맵날짜데이터> returnObject, 지라이슈 item, Set<String> returnColors) {
+        if (item.getUpdated() == null || item.getUpdated().isEmpty()) {
+            로그.info(item.getKey());
+            return;
+        }
+
+        String 표시날짜 = formatDate(parseDateTime(item.getUpdated()));
+
+        if (!returnObject.containsKey(표시날짜)) {
+            returnObject.put(표시날짜, new 히트맵날짜데이터());
+        }
+
+        히트맵날짜데이터 히트맵날짜데이터 = returnObject.get(표시날짜);
+        히트맵날짜데이터.getContents().add(item.getSummary());
+        히트맵날짜데이터.setCount(returnObject.get(표시날짜).getContents().size());
+        히트맵날짜데이터.setItems(Collections.singleton(히트맵날짜데이터.getCount() + "개 업데이트"));
+        returnColors.add(item.getSummary());
+    }
+
+    private String formatDate(LocalDateTime date) {
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        return format.format(date);
+    }
+
+    private Map<String, String> assignColors(Set<String> colorsArray) {
+        Map<String, String> colorsObj = new HashMap<>();
+        colorsObj.put("default", "#eeeeee");
+
+        colorsArray.forEach(item -> {
+            if (!"default".equals(item)) {
+                colorsObj.put(item, getRandomColor());
+            }
+        });
+
+        return colorsObj;
+    }
+
+    private LocalDateTime parseDateTime(String dateTimeStr) {
+
+        try {
+            // 온프레미스 날짜형식
+            return LocalDateTime.parse(dateTimeStr, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        } catch (DateTimeParseException e) {
+            // 클라우드 날짜형식
+            DateTimeFormatter formatterWithoutColonInTimeZone =
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+            return LocalDateTime.parse(dateTimeStr, formatterWithoutColonInTimeZone);
+        }
+    }
+
+    private String getRandomColor() {
+        SecureRandom random = null;
+
+        try {
+            random = SecureRandom.getInstanceStrong();
+        } catch (NoSuchAlgorithmException e) {
+            로그.error("랜덤컬러 데이터 생성중 오류 : " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+
+        float r = random.nextFloat();
+        float g = random.nextFloat();
+        float b = random.nextFloat();
+
+        Color randomColor = new Color(r, g, b);
+
+        return "#" + Integer.toHexString(randomColor.getRGB()).substring(2);
     }
 
 }

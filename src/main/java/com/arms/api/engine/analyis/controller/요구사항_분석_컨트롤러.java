@@ -4,9 +4,7 @@ import com.arms.api.engine.jiraissue.entity.지라이슈;
 import com.arms.api.engine.model.dto.*;
 import com.arms.api.engine.model.enums.IsReqType;
 import com.arms.api.engine.model.vo.히트맵데이터;
-import com.arms.api.engine.analyis.service.지라이슈_대시보드_서비스;
-import com.arms.api.engine.dashboard.service.지라이슈_서비스;
-import com.arms.api.engine.requirement.service.지라이슈_요구사항_서비스;
+import com.arms.api.engine.analyis.service.요구사항_분석_서비스;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsBoolQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
@@ -35,10 +33,7 @@ import java.util.stream.Stream;
 public class 요구사항_분석_컨트롤러 {
 
     @Autowired
-    private 지라이슈_대시보드_서비스 지라이슈_대시보드_서비스;
-
-    @Autowired
-    private 지라이슈_서비스 지라이슈_서비스;
+    private 요구사항_분석_서비스 요구사항_분석_서비스;
 
     // 대시보드, 디테일_대시보드, 범위분석, 리소스분석,
     @GetMapping("/aggregation/flat")
@@ -54,7 +49,7 @@ public class 요구사항_분석_컨트롤러 {
 
         EsQuery esQuery = new EsQueryBuilder().bool(esBoolQueries);
 
-        return ResponseEntity.ok(지라이슈_대시보드_서비스.집계결과_가져오기(서브_집계_쿼리_생성기.of(검색요청, esQuery)));
+        return ResponseEntity.ok(요구사항_분석_서비스.집계결과_가져오기(서브_집계_쿼리_생성기.of(검색요청, esQuery)));
     }
 
     // 대시보드, 디테일_대시보드, 범위분석
@@ -63,7 +58,7 @@ public class 요구사항_분석_컨트롤러 {
     public ResponseEntity<Map<String, 요구사항_지라이슈상태_주별_집계>> 요구사항이슈월별집계(
             지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청
     ) {
-        return ResponseEntity.ok(지라이슈_대시보드_서비스.요구사항_지라이슈상태_주별_집계(지라이슈_제품_및_제품버전_집계_요청));
+        return ResponseEntity.ok(요구사항_분석_서비스.요구사항_지라이슈상태_주별_집계(지라이슈_제품_및_제품버전_집계_요청));
     }
 
     // Dashboard, Detail_Dashboard, Analysis Resource
@@ -71,7 +66,7 @@ public class 요구사항_분석_컨트롤러 {
     public ResponseEntity<List<버킷_집계_결과>> 제품별_버전_및_작업자(
             지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청
     ) {
-        return ResponseEntity.ok(지라이슈_대시보드_서비스.제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청));
+        return ResponseEntity.ok(요구사항_분석_서비스.제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청));
     }
 
 
@@ -88,7 +83,7 @@ public class 요구사항_분석_컨트롤러 {
                         ,new TermsQueryFilter("pdServiceVersions",pdServiceVersionLinks)
                 );
 
-        return ResponseEntity.ok(지라이슈_대시보드_서비스.집계결과_가져오기(일반_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery)));
+        return ResponseEntity.ok(요구사항_분석_서비스.집계결과_가져오기(일반_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery)));
     }
 
     // Analysis Resource, Analysis Scope
@@ -103,7 +98,7 @@ public class 요구사항_분석_컨트롤러 {
                         ,new TermsQueryFilter("pdServiceVersions",pdServiceVersionLinks)
                 );
 
-        return ResponseEntity.ok(지라이슈_대시보드_서비스.집계결과_가져오기(일반_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery)));
+        return ResponseEntity.ok(요구사항_분석_서비스.집계결과_가져오기(일반_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery)));
     }
 
     // Analysis Resource
@@ -119,7 +114,7 @@ public class 요구사항_분석_컨트롤러 {
                         new MustTermQuery("pdServiceId",pdServiceId)
                 );
 
-        return ResponseEntity.ok(지라이슈_대시보드_서비스.집계결과_가져오기(일반_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery)));
+        return ResponseEntity.ok(요구사항_분석_서비스.집계결과_가져오기(일반_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery)));
     }
 
 
@@ -128,7 +123,7 @@ public class 요구사항_분석_컨트롤러 {
     public ResponseEntity<List<요구사항_버전_이슈_키_상태_작업자수>> 버전배열_요구사항_별_상태_및_관여_작업자_수(@PathVariable Long pdServiceId,
                                                                                 @RequestParam Long[] pdServiceVersionLinks) {
 
-        List<요구사항_버전_이슈_키_상태_작업자수> 요구사항_버전배열_이슈키_작업자수_목록 = 지라이슈_대시보드_서비스.버전별_요구사항_상태_및_관여_작업자수_내용(pdServiceId, pdServiceVersionLinks);
+        List<요구사항_버전_이슈_키_상태_작업자수> 요구사항_버전배열_이슈키_작업자수_목록 = 요구사항_분석_서비스.버전별_요구사항_상태_및_관여_작업자수_내용(pdServiceId, pdServiceVersionLinks);
         return ResponseEntity.ok(요구사항_버전배열_이슈키_작업자수_목록);
     }
 
@@ -138,7 +133,7 @@ public class 요구사항_분석_컨트롤러 {
     기준일자별_제품_및_제품버전목록_요구사항_및_연결된이슈_집계(
             지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청){
 
-        return ResponseEntity.ok(지라이슈_대시보드_서비스.지라이슈_기준일자별_제품_및_제품버전_집계검색(지라이슈_일자별_제품_및_제품버전_집계_요청));
+        return ResponseEntity.ok(요구사항_분석_서비스.지라이슈_기준일자별_제품_및_제품버전_집계검색(지라이슈_일자별_제품_및_제품버전_집계_요청));
     }
 
     // Analysis Time
@@ -147,7 +142,7 @@ public class 요구사항_분석_컨트롤러 {
     기준일자별_제품_및_제품버전목록_업데이트된_이슈조회(
             지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청){
 
-        return ResponseEntity.ok(지라이슈_대시보드_서비스.지라이슈_기준일자별_제품_및_제품버전_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_집계_요청));
+        return ResponseEntity.ok(요구사항_분석_서비스.지라이슈_기준일자별_제품_및_제품버전_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_집계_요청));
     }
 
     // Analysis Time
@@ -156,7 +151,7 @@ public class 요구사항_분석_컨트롤러 {
     public Map<Long, Map<String, Map<String,List<요구사항_별_업데이트_데이터>>>>  기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회(
             지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청) {
 
-        return 지라이슈_대시보드_서비스.요구사항별_업데이트_능선_데이터(지라이슈_일자별_제품_및_제품버전_집계_요청);
+        return 요구사항_분석_서비스.요구사항별_업데이트_능선_데이터(지라이슈_일자별_제품_및_제품버전_집계_요청);
     }
 
     // Analysis Time
@@ -180,7 +175,7 @@ public class 요구사항_분석_컨트롤러 {
                         , new ExistsQueryFilter(resolution)
                 );
 
-        return ResponseEntity.ok(지라이슈_대시보드_서비스.집계결과_가져오기(일반_집계_쿼리_생성기.of(지라이슈_제품_및_제품버전_집계_요청, esQuery)));
+        return ResponseEntity.ok(요구사항_분석_서비스.집계결과_가져오기(일반_집계_쿼리_생성기.of(지라이슈_제품_및_제품버전_집계_요청, esQuery)));
     }
 
     // Analysis Cost
@@ -188,13 +183,13 @@ public class 요구사항_분석_컨트롤러 {
     public ResponseEntity<List<버킷_집계_결과>> 제품별_버전_및_요구사항별_작업자(
             지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청
     ) {
-        return ResponseEntity.ok(지라이슈_대시보드_서비스.제품_버전별_요구사항별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청));
+        return ResponseEntity.ok(요구사항_분석_서비스.제품_버전별_요구사항별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청));
     }
 
     // Analysis Cost
     @GetMapping("/req-updated-list")
     public ResponseEntity<Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>>> 요구사항_지라이슈키별_업데이트_목록(@RequestParam List<String> issueList) {
-        return ResponseEntity.ok(지라이슈_대시보드_서비스.요구사항_지라이슈키별_업데이트_목록(issueList));
+        return ResponseEntity.ok(요구사항_분석_서비스.요구사항_지라이슈키별_업데이트_목록(issueList));
     }
 
     // Analysis Time, Analysis Scope
@@ -205,7 +200,7 @@ public class 요구사항_분석_컨트롤러 {
 
         log.info("제품서비스_버전목록으로_조회");
 
-        List<지라이슈> 제품서비스_버전목록으로_조회 = 지라이슈_서비스.제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
+        List<지라이슈> 제품서비스_버전목록으로_조회 = 요구사항_분석_서비스.제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
         return 제품서비스_버전목록으로_조회;
     }
 
@@ -216,9 +211,8 @@ public class 요구사항_분석_컨트롤러 {
                                       @RequestParam Long[] pdServiceVersionLinks) {
         log.info("히트맵_제품서비스_버전목록으로_조회");
 
-        return 지라이슈_서비스.히트맵_제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
+        return 요구사항_분석_서비스.히트맵_제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
     }
-
 
 
 
