@@ -16,6 +16,4 @@ public class 지라이슈_일반_집계_요청 extends 기본_집계_요청 {
 	private Boolean isReq;
 	private List<Long> pdServiceVersionLinks;
 
-	private String 필터필드;
-	private List<?> 필터필드검색어;
 }
