@@ -4,12 +4,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.arms.api.engine.model.dto.*;
-import com.arms.api.engine.model.vo.Worker;
 import com.arms.api.engine.jiraissue.entity.지라이슈;
 import com.arms.api.engine.model.dto.지라이슈_일자별_제품_및_제품버전_집계_요청;
 import com.arms.api.engine.model.dto.지라이슈_제품_및_제품버전_집계_요청;
-import com.arms.api.engine.model.dto.트리맵_집계_요청;
-import com.arms.api.engine.model.vo.히트맵데이터;
+import com.arms.api.engine.model.dto.히트맵데이터;
 import com.arms.elasticsearch.query.쿼리_추상_팩토리;
 import com.arms.elasticsearch.버킷_집계_결과;
 import com.arms.elasticsearch.버킷_집계_결과_목록_합계;

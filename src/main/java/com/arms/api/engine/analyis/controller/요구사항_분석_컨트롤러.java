@@ -3,7 +3,7 @@ package com.arms.api.engine.analyis.controller;
 import com.arms.api.engine.jiraissue.entity.지라이슈;
 import com.arms.api.engine.model.dto.*;
 import com.arms.api.engine.model.enums.IsReqType;
-import com.arms.api.engine.model.vo.히트맵데이터;
+import com.arms.api.engine.model.dto.히트맵데이터;
 import com.arms.api.engine.analyis.service.요구사항_분석_서비스;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsBoolQuery;

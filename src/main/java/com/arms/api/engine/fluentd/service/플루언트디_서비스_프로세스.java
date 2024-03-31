@@ -1,6 +1,6 @@
-package com.arms.api.engine.service;
+package com.arms.api.engine.fluentd.service;
 
-import com.arms.api.engine.model.vo.검색어_검색결과;
+import com.arms.api.engine.model.dto.검색어_검색결과;
 import com.arms.api.engine.model.dto.검색어_기본_검색_요청;
 import com.arms.api.engine.model.dto.검색어_날짜포함_검색_요청;
 import com.arms.api.engine.model.dto.검색어_집계_요청;
@@ -20,8 +20,6 @@ import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
