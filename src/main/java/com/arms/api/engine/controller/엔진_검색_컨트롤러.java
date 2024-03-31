@@ -109,4 +109,23 @@ public class 엔진_검색_컨트롤러 {
 
         return ResponseEntity.ok(집계_결과);
     }
+
+    @GetMapping("/project-aggs-top5/with-date")
+    public ResponseEntity<버킷_집계_결과_목록_합계> 검색엔진_이슈_프로젝트명_집계_top5(@RequestParam("search_string") String 검색어,
+                                                                  @RequestParam(value = "from",required = false) String 시작_날짜,
+                                                                  @RequestParam(value = "to",  required = false) String 끝_날짜) {
+        log.info("[엘라스틱_지라이슈_대시보드_컨트롤러 :: 검색엔진_플루언트디_로그네임_집계_top5]");
+        검색어_집계_요청 집계_요청 = new 검색어_집계_요청();
+        집계_요청.set검색어(검색어);
+        집계_요청.set시작_날짜(시작_날짜);
+        집계_요청.set끝_날짜(끝_날짜);
+        집계_요청.set컨텐츠보기여부(false);
+        집계_요청.set페이지(0);
+        집계_요청.set크기(5);
+        집계_요청.set메인그룹필드("project.project_name.keyword");
+
+        버킷_집계_결과_목록_합계 집계_결과 = 지라이슈_검색엔진.이슈_프로젝트명_집계(집계_요청);
+
+        return ResponseEntity.ok(집계_결과);
+    }
 }

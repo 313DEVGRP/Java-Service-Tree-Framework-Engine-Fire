@@ -15,6 +15,7 @@ import com.arms.elasticsearch.query.base.기본_정렬_요청;
 import com.arms.elasticsearch.query.esquery.EsBoolQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryString;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
+import com.arms.elasticsearch.query.factory.일반_집계_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
 import com.arms.elasticsearch.query.filter.QueryStringFilter;
 import com.arms.elasticsearch.query.filter.RangeQueryFilter;
@@ -61,6 +62,14 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     private 지라이슈_저장소 지라이슈저장소;
+
+    @Override
+    public 버킷_집계_결과_목록_합계 전체_집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) {
+
+        return 지라이슈저장소.전체버킷집계(
+                쿼리추상팩토리.생성()
+        );
+    }
 
     @Override
     public Map<String, Long> 제품서비스별_담당자_이름_통계(Long 지라서버_아이디, Long 제품서비스_아이디) {
@@ -855,5 +864,24 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
             검색결과_목록.set결과_총수(지라이슈_검색결과.getTotalHits());
         }
         return 검색결과_목록;
+    }
+
+    @Override
+    public 버킷_집계_결과_목록_합계 이슈_프로젝트명_집계(검색어_집계_요청 검색어_집계_요청) {
+        String start_date = null;
+        String end_date = null;
+        if(검색어_집계_요청.get시작_날짜() != null && !검색어_집계_요청.get시작_날짜().isBlank()) {
+            start_date = 검색어_집계_요청.get시작_날짜();
+        }
+        if(검색어_집계_요청.get끝_날짜() != null &&!검색어_집계_요청.get끝_날짜().isBlank()) {
+            end_date = 검색어_집계_요청.get끝_날짜();
+        }
+
+        EsQuery esQuery = new EsQueryBuilder()
+                .bool(new RangeQueryFilter("@timestamp", start_date, end_date,"fromto"),
+                        new QueryStringFilter(검색어_집계_요청.get검색어()));
+
+        버킷_집계_결과_목록_합계 집계_결과 = this.전체_집계결과_가져오기(일반_집계_쿼리_생성기.of(검색어_집계_요청, esQuery));
+        return 집계_결과;
     }
 }
