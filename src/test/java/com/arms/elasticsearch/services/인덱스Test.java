@@ -1,10 +1,9 @@
 package com.arms.elasticsearch.services;
 
 import com.arms.api.engine.model.dto.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
-import com.arms.api.engine.model.entity.지라이슈;
-import com.arms.api.engine.repository.인덱스자료;
-import com.arms.api.engine.repository.지라이슈_저장소;
-import com.arms.api.engine.service.지라이슈_서비스;
+import com.arms.api.engine.jiraissue.entity.지라이슈;
+import com.arms.api.engine.common.constrant.index.인덱스자료;
+import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
 import com.arms.elasticsearch.버킷_집계_결과;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
@@ -44,9 +43,6 @@ public class 인덱스Test {
 
     @Autowired
     지라이슈_저장소 지라이슈저장소;
-
-    @Autowired
-    지라이슈_서비스 지라이슈_서비스;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -380,14 +376,14 @@ public class 인덱스Test {
 
     //@Test
     public void 지라이슈컨트롤러_인덱스백업_Test() {
-        boolean 결과 = 지라이슈_서비스.지라이슈_인덱스백업();
-        assertTrue(결과);
+//        boolean 결과 = 지라이슈_서비스.지라이슈_인덱스백업();
+//        assertTrue(결과);
     }
 
     //@Test
     public void 지라이슈컨트롤러_인덱스삭제_Test() {
-        boolean 결과 = 지라이슈_서비스.지라이슈_인덱스삭제();
-        assertTrue(결과);
+//        boolean 결과 = 지라이슈_서비스.지라이슈_인덱스삭제();
+//        assertTrue(결과);
     }
 
     @Test

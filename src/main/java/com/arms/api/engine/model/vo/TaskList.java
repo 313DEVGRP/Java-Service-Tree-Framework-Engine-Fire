@@ -8,7 +8,6 @@ import lombok.Setter;
 import java.util.Map;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class TaskList {
