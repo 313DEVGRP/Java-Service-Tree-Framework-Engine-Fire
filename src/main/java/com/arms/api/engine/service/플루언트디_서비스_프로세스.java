@@ -4,8 +4,8 @@ import com.arms.api.engine.model.vo.검색어_검색결과;
 import com.arms.api.engine.model.dto.검색어_기본_검색_요청;
 import com.arms.api.engine.model.dto.검색어_날짜포함_검색_요청;
 import com.arms.api.engine.model.dto.검색어_집계_요청;
-import com.arms.api.engine.model.entity.플루언트디;
-import com.arms.api.engine.repository.플루언트디_저장소;
+import com.arms.api.engine.fluentd.entity.플루언트디;
+import com.arms.api.engine.fluentd.repository.플루언트디_저장소;
 import com.arms.elasticsearch.query.*;
 import com.arms.elasticsearch.query.base.기본_정렬_요청;
 import com.arms.elasticsearch.query.filter.QueryStringFilter;
@@ -31,9 +31,8 @@ import java.util.List;
 @Slf4j
 @Service("플루언트디_서비스")
 @AllArgsConstructor
-public class 플루언트디_서비스구현체 implements 플루언트디_서비스{
+public class 플루언트디_서비스_프로세스 implements 플루언트디_서비스{
 
-    private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     private 플루언트디_저장소 플루언트디_저장소;
 

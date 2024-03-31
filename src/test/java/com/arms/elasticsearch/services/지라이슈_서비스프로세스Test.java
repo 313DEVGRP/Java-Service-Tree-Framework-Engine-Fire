@@ -7,14 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.arms.api.engine.repository.지라이슈_저장소;
+import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
 
 @SpringBootTest
 @ActiveProfiles("dev")
-class 지라이슈_검색엔진Test {
+class 지라이슈_서비스프로세스Test {
 
 	@Autowired
-	private com.arms.api.engine.service.지라이슈_서비스 지라이슈_서비스;
+	private com.arms.api.engine.dashboard.service.지라이슈_서비스 지라이슈_서비스;
 
 	@Autowired
 	private 지라이슈_저장소 지라이슈저장소;

@@ -1,7 +1,7 @@
-package com.arms.api.engine.model.entity;
+package com.arms.api.engine.fluentd.entity;
 
 
-import com.arms.api.engine.repository.인덱스자료;
+import com.arms.api.engine.common.constrant.index.인덱스자료;
 import com.arms.elasticsearch.annotation.ElasticSearchIndex;
 import com.arms.elasticsearch.annotation.RollingIndexName;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

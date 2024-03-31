@@ -1,4 +1,4 @@
-package com.arms.api.engine.controller;
+package com.arms.api.engine.common.controller;
 
 import static com.arms.utils.response.응답처리.*;
 
@@ -13,15 +13,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.arms.api.engine.model.dto.요구사항_수정_요청;
-import com.arms.api.engine.model.entity.지라이슈;
-import com.arms.api.engine.repository.지라이슈_저장소;
+import com.arms.api.engine.jiraissue.entity.지라이슈;
+import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
 
 import lombok.AllArgsConstructor;
 
 @RestController
 @RequestMapping("/engine/jira/field/update")
 @AllArgsConstructor
-public class 엘라스틱_지라이슈_필드_업데이트_컨트롤러 {
+public class 지라이슈_필드_업데이트_컨트롤러 {
 
 	private final 지라이슈_저장소 지라이슈_저장소;
 

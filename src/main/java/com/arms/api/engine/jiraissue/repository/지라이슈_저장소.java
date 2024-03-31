@@ -1,6 +1,6 @@
-package com.arms.api.engine.repository;
+package com.arms.api.engine.jiraissue.repository;
 
-import com.arms.api.engine.model.entity.지라이슈;
+import com.arms.api.engine.jiraissue.entity.지라이슈;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;

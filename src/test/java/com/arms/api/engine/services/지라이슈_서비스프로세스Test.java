@@ -8,12 +8,12 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.arms.api.engine.model.entity.지라이슈;
-import com.arms.api.engine.repository.지라이슈_저장소;
+import com.arms.api.engine.jiraissue.entity.지라이슈;
+import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
 
 @SpringBootTest
 @ActiveProfiles("dev")
-public class 지라이슈_검색엔진Test {
+public class 지라이슈_서비스프로세스Test {
 
 
 	@Autowired

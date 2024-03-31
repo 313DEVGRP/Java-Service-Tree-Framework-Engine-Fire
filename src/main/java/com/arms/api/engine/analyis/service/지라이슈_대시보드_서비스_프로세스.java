@@ -1,27 +1,22 @@
-package com.arms.api.engine.service;
+package com.arms.api.engine.analyis.service;
 
 import com.arms.api.engine.model.dto.*;
 import com.arms.api.engine.model.enums.IsReqType;
 import com.arms.api.engine.model.vo.*;
 import com.arms.api.engine.model.dto.제품버전목록;
-import com.arms.api.engine.model.entity.지라이슈;
+import com.arms.api.engine.jiraissue.entity.지라이슈;
 import com.arms.api.engine.model.dto.지라이슈_일자별_제품_및_제품버전_집계_요청;
 import com.arms.api.engine.model.dto.지라이슈_제품_및_제품버전_집계_요청;
 import com.arms.api.engine.model.dto.트리맵_집계_요청;
-import com.arms.api.engine.repository.인덱스자료;
-import com.arms.api.engine.repository.지라이슈_저장소;
+import com.arms.api.engine.common.constrant.index.인덱스자료;
+import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
 import com.arms.elasticsearch.query.*;
-import com.arms.elasticsearch.query.base.기본_정렬_요청;
 import com.arms.elasticsearch.query.esquery.EsBoolQuery;
-import com.arms.elasticsearch.query.esquery.EsQueryString;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
 import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
-import com.arms.elasticsearch.query.filter.QueryStringFilter;
 import com.arms.elasticsearch.query.filter.RangeQueryFilter;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
-import com.arms.elasticsearch.query.factory.일반_검색_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
-import com.arms.elasticsearch.query.esquery.EsSortQuery;
 import com.arms.elasticsearch.버킷_집계_결과;
 import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import lombok.AllArgsConstructor;
@@ -40,8 +35,6 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.elasticsearch.core.SearchHit;
-import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
@@ -57,99 +50,10 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 @Service("지라이슈_대시보드_서비스")
 @AllArgsConstructor
-public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대시보드_서비스 {
+public class 지라이슈_대시보드_서비스_프로세스 implements 지라이슈_대시보드_서비스 {
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     private 지라이슈_저장소 지라이슈저장소;
-
-    @Override
-    public Map<String, Long> 제품서비스별_담당자_이름_통계(Long 지라서버_아이디, Long 제품서비스_아이디) {
-
-        BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
-        if (제품서비스_아이디 != null && 제품서비스_아이디 > 9L) {
-            MatchQueryBuilder 제품서비스_조회 = QueryBuilders.matchQuery("pdServiceId", 제품서비스_아이디);
-            복합조회.must(제품서비스_조회);
-        }
-
-        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
-                .withQuery(복합조회)
-                .addAggregation(
-                        AggregationBuilders
-                                .terms("담당자별_집계").field("assignee.assignee_displayName.keyword")
-                ).withMaxResults(0);
-
-        // 요구사항 vs 연결된이슈&서브테스크 구분안하고 한번에
-        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈저장소.버킷집계(nativeSearchQueryBuilder.build());
-        Long 결과 = 버킷_집계_결과_목록_합계.get전체합계();
-        로그.info("검색결과 개수: " + 결과);
-
-        List<버킷_집계_결과> 담당자별_집계 = 버킷_집계_결과_목록_합계.get검색결과().get("담당자별_집계");
-
-        long 담당자_총합 = 0;
-        Map<String, Long> 제품서비스별_하위이슈_담당자_집계 = new HashMap<>();
-        for (버킷_집계_결과 담당자 : 담당자별_집계) {
-            String 담당자_이메일 = 담당자.get필드명();
-            long 개수 = 담당자.get개수();
-            log.info("담당자: " + 담당자_이메일 + ", Count: " + 개수);
-            담당자_총합 += 개수;
-            제품서비스별_하위이슈_담당자_집계.put(담당자_이메일, 개수);
-        }
-        제품서비스별_하위이슈_담당자_집계.put("담당자 미지정", 결과 - 담당자_총합);
-
-        return 제품서비스별_하위이슈_담당자_집계;
-    }
-
-
-    @Override
-    public Map<String, Map<String, Map<String, Integer>>> 담당자_요구사항여부_상태별집계(Long pdServiceLink) {
-
-
-        MatchQueryBuilder 제품아이디별_조회 = QueryBuilders.matchQuery("pdServiceId", pdServiceLink);
-
-        TermsAggregationBuilder 담당자별_집계
-                = AggregationBuilders.terms("담당자별_집계")
-                .field("assignee.assignee_emailAddress.keyword")
-                .subAggregation(AggregationBuilders.terms("요구사항_여부별_집계").field("isReq")
-                        .subAggregation(AggregationBuilders.terms("상태별_집계").field("status.status_name.keyword")));
-
-        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
-                .withQuery(제품아이디별_조회)
-                .addAggregation(담당자별_집계)
-                .withMaxResults(0);
-
-        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈저장소.버킷집계(nativeSearchQueryBuilder.build());
-
-        Map<String, Map<String, Map<String, Integer>>> 담당자별_요구사항여부별_상태값_집계
-                = 버킷_집계_결과_목록_합계.get검색결과().get("담당자별_집계")
-                .stream()
-                .collect(
-                        Collectors.toMap(
-                                버킷_집계_결과::get필드명,
-                                담당자 -> {
-                                    List<버킷_집계_결과> 요구사항_여부별_집계 = 담당자.get하위검색결과().get("요구사항_여부별_집계");
-                                    return 요구사항_여부별_집계.stream()
-                                            .collect(Collectors.toMap(
-                                                    검색결과 -> {
-                                                        String 여부 = 검색결과.get필드명();
-                                                        if (여부.equals("true")) {
-                                                            return "requirement";
-                                                        } else {
-                                                            return "relation_issue";
-                                                        }
-                                                    },
-                                                    검색결과 -> {
-                                                        List<버킷_집계_결과> 상태별_집계 = 검색결과.get하위검색결과().get("상태별_집계");
-                                                        return 상태별_집계.stream()
-                                                                .collect(Collectors.toMap(
-                                                                        a -> a.get필드명(),
-                                                                        a -> (int) a.get개수()));
-                                                    }
-                                            ));
-                                }
-                        ));
-
-        return 담당자별_요구사항여부별_상태값_집계;
-    }
 
 
     @Override
@@ -159,14 +63,6 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 쿼리추상팩토리.생성()
         );
     }
-
-    @Override
-    public List<지라이슈> 지라이슈_조회(쿼리_추상_팩토리 쿼리추상팩토리) {
-        return 지라이슈저장소.normalSearch(
-                쿼리추상팩토리.생성()
-        );
-    }
-
 
     @Override
     public List<버킷_집계_결과> 제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
@@ -202,20 +98,6 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
                 .collect(Collectors.toList());
 
         return 버전검색결과.stream().filter(버전 -> filteredVersionIds.contains(버전.get필드명())).collect(toList());
-    }
-
-    @Override
-    public List<제품_서비스_버전> 요구사항_별_상태_및_관여_작업자수_내용(버킷_집계_결과_목록_합계 요구사항, 버킷_집계_결과_목록_합계 하위이슈) {
-
-        List<버킷_집계_결과> pdServiceVersions = 요구사항.get검색결과().entrySet().stream().flatMap(a->a.getValue().stream()).collect(toList());
-        List<버킷_집계_결과> parentReqKeys = 하위이슈.get검색결과().entrySet().stream().flatMap(a->a.getValue().stream()).collect(toList());
-
-        List<하위_이슈_사항> 하위_이슈_사항들 = parentReqKeys.stream()
-                .map(issue -> new 하위_이슈_사항(issue)).collect(toList());
-
-        return pdServiceVersions.stream()
-                .map(request -> new 제품_서비스_버전(request,new 하위_이슈_사항들(하위_이슈_사항들))).collect(toList());
-
     }
 
     @Override
@@ -747,11 +629,6 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
     }
 
-    @Override
-    public List<지라이슈> 요구사항키로_하위이슈_조회(String 지라키){ // parentReqKey
-        return 지라이슈저장소.findByParentReqKeyIn(Collections.singletonList(지라키));
-    }
-
 
     @Override
     public Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>> 요구사항_지라이슈키별_업데이트_목록(List<String> 지라키_목록){
@@ -818,42 +695,4 @@ public class 지라이슈_검색엔진_대시보드 implements 지라이슈_대�
 
     }
 
-
-    @Override
-    public 검색어_검색결과<SearchHit<지라이슈>> 지라이슈_검색(검색어_기본_검색_요청 검색어_기본_검색_요청) {
-        EsQuery esQuery = new EsQueryBuilder().queryString(new EsQueryString(검색어_기본_검색_요청.get검색어()));
-        SearchHits<지라이슈> 지라이슈_검색결과= 지라이슈저장소.search(일반_검색_쿼리_생성기.of(검색어_기본_검색_요청, esQuery).생성());
-        검색어_검색결과<SearchHit<지라이슈>> 검색결과_목록 = new 검색어_검색결과<>();
-        검색결과_목록.set검색결과_목록(지라이슈_검색결과.getSearchHits());
-        검색결과_목록.set결과_총수(지라이슈_검색결과.getTotalHits());
-        return 검색결과_목록;
-    }
-
-    @Override
-    public 검색어_검색결과<SearchHit<지라이슈>> 지라이슈_날짜포함_검색(검색어_날짜포함_검색_요청 검색어_날짜포함_검색_요청) {
-        String start_date = null;
-        String end_date = null;
-        if(검색어_날짜포함_검색_요청.get시작_날짜() != null && !검색어_날짜포함_검색_요청.get시작_날짜().isBlank()) {
-            start_date = 검색어_날짜포함_검색_요청.get시작_날짜();
-        }
-        if(검색어_날짜포함_검색_요청.get끝_날짜() != null &&!검색어_날짜포함_검색_요청.get끝_날짜().isBlank()) {
-            end_date = 검색어_날짜포함_검색_요청.get끝_날짜();
-        }
-
-        EsQuery esQuery = new EsQueryBuilder()
-                .bool(new RangeQueryFilter("@timestamp", start_date, end_date,"fromto"),
-                        new QueryStringFilter(검색어_날짜포함_검색_요청.get검색어()))
-                .sort(new EsSortQuery(
-                        List.of(
-                                기본_정렬_요청.builder().필드("@timestamp").정렬기준("desc").build()
-                        )
-                ));
-        SearchHits<지라이슈> 지라이슈_검색결과= 지라이슈저장소.search(일반_검색_쿼리_생성기.of(검색어_날짜포함_검색_요청, esQuery).생성());
-        검색어_검색결과<SearchHit<지라이슈>> 검색결과_목록 = new 검색어_검색결과<>();
-        if(지라이슈_검색결과 != null && !지라이슈_검색결과.isEmpty()) {
-            검색결과_목록.set검색결과_목록(지라이슈_검색결과.getSearchHits());
-            검색결과_목록.set결과_총수(지라이슈_검색결과.getTotalHits());
-        }
-        return 검색결과_목록;
-    }
 }

@@ -1,11 +1,12 @@
-package com.arms.api.engine.service;
+package com.arms.api.engine.dashboard.service;
 
 import com.arms.api.alm.issuestatus.model.이슈상태_데이터;
 import com.arms.api.engine.model.dto.지라이슈_일반_집계_요청;
-import com.arms.api.engine.model.entity.지라이슈;
+import com.arms.api.engine.jiraissue.entity.지라이슈;
+import com.arms.api.engine.requirement.service.지라이슈_요구사항_서비스;
 import com.arms.api.engine.util.지라이슈_생성;
-import com.arms.api.engine.repository.인덱스자료;
-import com.arms.api.engine.repository.지라이슈_저장소;
+import com.arms.api.engine.common.constrant.index.인덱스자료;
+import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
 import com.arms.api.engine.model.vo.히트맵날짜데이터;
 import com.arms.api.engine.model.vo.히트맵데이터;
 import com.arms.api.alm.issue.model.지라이슈_데이터;
@@ -25,9 +26,7 @@ import com.arms.utils.errors.codes.에러코드;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,11 +56,13 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 @Service("지라이슈_서비스")
 @AllArgsConstructor
-public class 지라이슈_검색엔진 implements 지라이슈_서비스{
+public class 지라이슈_서비스_프로세스 implements 지라이슈_서비스{
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     private 지라이슈_저장소 지라이슈저장소;
+
+    private 지라이슈_요구사항_서비스 지라이슈_요구사항_서비스;
 
     private 이슈전략_호출 이슈전략_호출;
 
@@ -78,27 +79,6 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         Iterable<지라이슈> 지라이슈s = 지라이슈저장소.saveAll(대량이슈_리스트);
         int size = StreamSupport.stream(지라이슈s.spliterator(), false).collect(toList()).size();
         return size;
-    }
-
-    @Override
-    public Iterable<지라이슈> 이슈리스트_추가하기(List<지라이슈> 지라이슈_리스트) {
-
-        Iterable<지라이슈> 결과 = 지라이슈저장소.saveAll(지라이슈_리스트);
-        return 결과;
-    }
-
-    @Override
-    public 지라이슈 이슈_삭제하기(지라이슈 지라_이슈) {
-
-        지라이슈 이슈 = 이슈_조회하기(지라_이슈.getId());
-        log.info("왠만하면 쓰지 마시지...");
-
-        if ( 이슈 == null ) {
-            return null;
-        }else{
-            지라이슈저장소.delete(이슈);
-            return 이슈;
-        }
     }
 
     @Override
@@ -243,7 +223,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
             벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 반환된_이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink));
 
             try {
-                List<지라이슈> 링크드이슈_서브테스크_목록 = Optional.ofNullable(요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디,
+                List<지라이슈> 링크드이슈_서브테스크_목록 = Optional.ofNullable(지라이슈_요구사항_서비스.요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디,
                                                                                         이슈_키, 0, 0))
                         .orElse(Collections.emptyList())
                         .stream()
@@ -361,7 +341,7 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
             증분벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 반환된_이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink));
 
             try {
-                List<지라이슈> 링크드이슈_서브테스크_목록 = Optional.ofNullable(요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디,
+                List<지라이슈> 링크드이슈_서브테스크_목록 = Optional.ofNullable(지라이슈_요구사항_서비스.요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디,
                                 이슈_키, 0, 0))
                         .orElse(Collections.emptyList())
                         .stream()
@@ -458,56 +438,6 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
     }
 
 
-
-    @Override
-    public List<지라이슈> 요구사항_링크드이슈_서브테스크_검색하기(Long 서버_아이디, String 이슈_키, int 페이지_번호, int 페이지_사이즈) {
-        List<String> 검색_필드 = new ArrayList<>();
-        검색_필드.add("parentReqKey");
-
-        검색조건 검색조건 = new 검색조건();
-        검색조건.setFields(검색_필드);
-        검색조건.setOrder(SortOrder.ASC);
-        검색조건.setSearchTerm(이슈_키);
-        검색조건.setPage(페이지_번호);
-        검색조건.setSize(페이지_사이즈);
-
-        Query query = 검색_쿼리_빌더.buildSearchQuery(검색조건,서버_아이디).build();
-
-        return 지라이슈저장소.normalSearch(query);
-    }
-
-    @Override
-    public Map<String, Long> 제품서비스_버전별_상태값_통계(Long 제품서비스_아이디, Long[] 버전_아이디들) throws IOException {
-        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
-
-        nativeSearchQueryBuilder.withQuery(QueryBuilders.matchAllQuery());
-
-        EsQuery esQuery
-            = new EsQueryBuilder()
-                .bool(
-                     new TermsQueryFilter("pdServiceId",Optional.ofNullable(제품서비스_아이디).filter(a->a!=null&&a>9L).map(a->List.of(a)).orElse(null))
-                    ,new TermsQueryFilter("pdServiceVersions", Arrays.stream(버전_아이디들).filter(a->a!=null&&a>9L).collect(toList()))
-                );
-        지라이슈_일반_집계_요청 지라이슈_일반_집계_요청 = new 지라이슈_일반_집계_요청();
-        지라이슈_일반_집계_요청.set메인그룹필드("status.status_name.keyword");
-        지라이슈_일반_집계_요청.set컨텐츠보기여부(false);
-        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈저장소.버킷집계(일반_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery).생성());
-
-        List<버킷_집계_결과> 상태값통계 = 버킷_집계_결과_목록_합계.get검색결과().get("group_by_status.status_name.keyword");
-
-        Map<String, Long> 제품서비스_버전별_집계 = new HashMap<>();
-        for (버킷_집계_결과 상태값 : 상태값통계) {
-            String statusName = 상태값.get필드명();
-            long docCount = 상태값.get개수();
-            log.info("Status Name: " + statusName + ", Count: " + docCount);
-
-            제품서비스_버전별_집계.put(statusName, docCount);
-        }
-
-        return 제품서비스_버전별_집계;
-
-    }
-
     private static LocalDateTime parseDateTime(String dateTimeStr) {
 
         try {
@@ -521,128 +451,6 @@ public class 지라이슈_검색엔진 implements 지라이슈_서비스{
         }
     }
 
-    @Override
-    public Map<String, Long> 제품서비스별_담당자_요구사항_통계(Long 지라서버_아이디, Long 제품서비스_아이디, String 담당자_이메일) throws IOException {
-        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
-        BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
-
-        if ( 제품서비스_아이디 != null && 제품서비스_아이디 > 9L) {
-            MatchQueryBuilder 제품서비스_조회 = QueryBuilders.matchQuery("pdServiceId", 제품서비스_아이디);
-            복합조회.must(제품서비스_조회);
-        }
-
-        nativeSearchQueryBuilder.withQuery(복합조회)
-                .withMaxResults(10000);
-
-//        검색결과_목록_메인 검색결과_목록_메인 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build());
-//        long 요구사항_개수 = 검색결과_목록_메인.get전체합계();
-        long 요구사항_개수 = Optional.ofNullable(지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build()))
-                .map(지라이슈 -> 지라이슈.size())
-                .orElse(0);
-
-        if ( 담당자_이메일 != null ) {
-            MatchQueryBuilder 담당자_조회 = QueryBuilders.matchQuery("assignee.assignee_emailAddress.keyword", 담당자_이메일);
-            복합조회.must(담당자_조회);
-        }
-
-        NativeSearchQueryBuilder aggregationQuery = new NativeSearchQueryBuilder();
-
-        aggregationQuery.withQuery(복합조회)
-                .addAggregation(AggregationBuilders.terms("상태값_집계").field("status.status_name.keyword"))
-                .withMaxResults(10000);
-
-        버킷_집계_결과_목록_합계 버킷집계결과_목록_합계_집계 = 지라이슈저장소.버킷집계(aggregationQuery.build());
-        long 할당된_요구사항_개수 = 버킷집계결과_목록_합계_집계.get전체합계();
-
-        로그.info("요구사항 개수: " + 요구사항_개수);
-        로그.info("할당된 요구사항 개수: " + 할당된_요구사항_개수);
-
-        List<버킷_집계_결과> 상태값_집계 = 버킷집계결과_목록_합계_집계.get검색결과().get("상태값_집계");
-
-        Map<String, Long> 제품서비스별_담당자_요구사항_통계 = new HashMap<>();
-        제품서비스별_담당자_요구사항_통계.put("allReq", 요구사항_개수);
-        제품서비스별_담당자_요구사항_통계.put("myReq", 할당된_요구사항_개수);
-
-        for (버킷_집계_결과 상태값 : 상태값_집계) {
-
-            String 상태 = 상태값.get필드명();
-            long 개수 = 상태값.get개수();
-            log.info("상태값: " + 상태 + ", Count: " + 개수);
-
-            제품서비스별_담당자_요구사항_통계.put(상태, 개수);
-        }
-
-        return 제품서비스별_담당자_요구사항_통계;
-    }
-
-    @Override
-    public Map<String, Long> 제품서비스별_담당자_연관된_요구사항_통계(Long 지라서버_아이디, Long 제품서비스_아이디, String 이슈키, String 담당자_이메일) throws IOException {
-
-        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
-        BoolQueryBuilder 복합조회 = QueryBuilders.boolQuery();
-
-        if ( 지라서버_아이디 != null ) {
-            MatchQueryBuilder 지라서버_조회 = QueryBuilders.matchQuery("jira_server_id", 지라서버_아이디);
-            복합조회.must(지라서버_조회);
-        }
-
-        if ( 제품서비스_아이디 != null && 제품서비스_아이디 > 9L) {
-            MatchQueryBuilder 제품서비스_조회 = QueryBuilders.matchQuery("pdServiceId", 제품서비스_아이디);
-            복합조회.must(제품서비스_조회);
-        }
-
-        if ( 이슈키 != null ) {
-            MatchQueryBuilder 요구사항_조회 = QueryBuilders.matchQuery("key", 이슈키);
-            MatchQueryBuilder 하위_요구사항_조회 = QueryBuilders.matchQuery("parentReqKey", 이슈키);
-            복합조회.should(요구사항_조회);
-            복합조회.should(하위_요구사항_조회);
-            복합조회.minimumShouldMatch(1);
-        }
-
-        nativeSearchQueryBuilder.withQuery(복합조회)
-                .withMaxResults(10000);
-
-        // aggregation 부분이 없어서 null 오류 발생
-        /*long 연관된_요구사항_개수
-                = 지라이슈저장소.aggregationSearch(nativeSearchQueryBuilder.build()).get전체합계();*/
-
-        long 연관된_요구사항_개수 = Optional.ofNullable(지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build()))
-                .map(지라이슈 -> 지라이슈.size())
-                .orElse(0);
-
-        if ( 담당자_이메일 != null ) {
-            MatchQueryBuilder 담당자_조회 = QueryBuilders.matchQuery("assignee.assignee_emailAddress.keyword", 담당자_이메일);
-            복합조회.must(담당자_조회);
-        }
-
-        NativeSearchQueryBuilder aggregationQuery = new NativeSearchQueryBuilder();
-
-        aggregationQuery.withQuery(복합조회)
-                .addAggregation(AggregationBuilders.terms("상태값_집계").field("status.status_name.keyword"))
-                .withMaxResults(10000);
-
-        버킷_집계_결과_목록_합계 버킷집계결과_목록_합계_집계 = 지라이슈저장소.버킷집계(aggregationQuery.build());
-        long 할당된_요구사항_개수 = 버킷집계결과_목록_합계_집계.get전체합계();
-
-        로그.info("연관된 요구사항 개수: " + 연관된_요구사항_개수);
-        로그.info("할당된 요구사항 개수: " + 할당된_요구사항_개수);
-
-        List<버킷_집계_결과> 상태값_집계 = 버킷집계결과_목록_합계_집계.get검색결과().get("상태값_집계");
-
-        Map<String, Long> 제품서비스별_담당자_연관된_요구사항_통계 = new HashMap<>();
-        제품서비스별_담당자_연관된_요구사항_통계.put("allReq", 연관된_요구사항_개수);
-        제품서비스별_담당자_연관된_요구사항_통계.put("myReq", 할당된_요구사항_개수);
-
-        for (버킷_집계_결과 상태값 : 상태값_집계) {
-            String 상태 = 상태값.get필드명();
-            long 개수 = 상태값.get개수();
-            log.info("상태값: " + 상태 + ", Count: " + 개수);
-
-            제품서비스별_담당자_연관된_요구사항_통계.put(상태, 개수);
-        }
-
-        return 제품서비스별_담당자_연관된_요구사항_통계;
-    }
 
     @Override
     public List<지라이슈> 제품서비스_버전목록으로_조회(Long pdServiceLink, Long[] pdServiceVersionLinks) {

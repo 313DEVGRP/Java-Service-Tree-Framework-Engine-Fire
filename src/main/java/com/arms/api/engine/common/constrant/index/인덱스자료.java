@@ -1,4 +1,4 @@
-package com.arms.api.engine.repository;
+package com.arms.api.engine.common.constrant.index;
 
 public final  class 인덱스자료 {
 

@@ -23,10 +23,10 @@ import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 
 @SpringBootTest
 @ActiveProfiles("dev")
-public class 지라이슈_검색엔진_대시보드Test {
+public class 지라이슈_서비스프로세스_대시보드Test {
 
     @Autowired
-    지라이슈_대시보드_서비스 지라이슈_대시보드_서비스;
+    com.arms.api.engine.analyis.service.지라이슈_대시보드_서비스 지라이슈_대시보드_서비스;
 
 
 
