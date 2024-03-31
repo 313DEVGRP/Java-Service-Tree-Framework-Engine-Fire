@@ -51,9 +51,16 @@ public class 온프레미스_레드마인_계정전략 implements 계정전략 {
     private 계정정보_데이터 계정정보_조회(서버정보_데이터  서버정보)  throws Exception{
 
         try{
+            String uri = 서버정보.getUri();
+            String serverType = 서버정보.getType();
+            String apiToken = 서버정보.getPasswordOrToken();
+            String userId = 서버정보.getUserId();
+
+            로그.info("레드마인_온프레미스_계정_전략 :: 계정정보_조회, 서버 주소: {}, 서버 타입: {}, apiToken: {}, 유저 아이디: {}",uri,serverType,apiToken,userId);
+
             String endpoint = "/my/account.json";
 
-            WebClient webClient = 지라유틸.레드마인_통신기_생성(서버정보.getUri(),서버정보.getPasswordOrToken());
+            WebClient webClient = 지라유틸.레드마인_통신기_생성(uri,apiToken);
 
             레드마인_유저_데이터 계정정보_조회결과 = 지라유틸.get(webClient, endpoint, 레드마인_유저_데이터.class).block();
 
@@ -61,7 +68,7 @@ public class 온프레미스_레드마인_계정전략 implements 계정전략 {
                 로그.error("온프라미스 레드마인 계정 조회 결과가 Null입니다.");
                 throw new IllegalArgumentException(에러코드.계정정보_조회_오류.getErrorMsg());
             }else{
-                return  계정정보_데이터_변환(계정정보_조회결과 , 서버정보.getUri());
+                return  계정정보_데이터_변환(계정정보_조회결과 , uri);
             }
 
         }catch (Exception e){

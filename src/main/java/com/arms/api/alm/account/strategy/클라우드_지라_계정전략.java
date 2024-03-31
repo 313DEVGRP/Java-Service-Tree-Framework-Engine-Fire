@@ -53,7 +53,14 @@ public class 클라우드_지라_계정전략 implements 계정전략 {
 
     private 계정정보_데이터 계정정보_조회(서버정보_데이터 서버정보) {
         try {
-            WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
+            String uri = 서버정보.getUri();
+            String serverType = 서버정보.getType();
+            String apiToken = 서버정보.getPasswordOrToken();
+            String userId = 서버정보.getUserId();
+
+            로그.info("클라우드_지라_계정전략 :: 계정정보_조회, 서버 주소: {}, 서버 타입: {}, apiToken: {}, 유저 아이디: {}",uri,serverType,apiToken,userId);
+
+            WebClient webClient = 지라유틸.클라우드_통신기_생성(uri, userId, apiToken);
 
             String endpoint = "/rest/api/3/myself";
 

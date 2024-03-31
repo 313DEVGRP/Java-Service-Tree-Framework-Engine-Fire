@@ -69,38 +69,27 @@ public class 계정전략_호출 {
         return 계정전략_등록_및_실행;
     }
 
-    public 계정정보_데이터 계정정보_검증하기(String uri,String serverType, String apiToken,String userId) throws Exception{
-
-
-        if (uri == null) {
-            로그.error("계정 정보 검증하기 Error: 서버주소 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("계정 정보 가져오기  Error: 서버주소 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+    private void 데이터_검증하기(String field, 에러코드 errorCode, String fieldName) {
+        if (field == null || field.isEmpty()) {
+            로그.error("계정 정보 검증하기 Error: " + fieldName + " " + errorCode.getErrorMsg());
+            throw new IllegalArgumentException("계정 정보 검증하기 Error: " + fieldName + " " + errorCode.getErrorMsg());
         }
+    }
 
-        if (serverType == null) {
-            로그.error("계정 정보 검증하기 Error: 서버타입 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("계정 정보 가져오기  Error: 서버타입 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+    public 계정정보_데이터 계정정보_검증하기(서버정보_데이터 서버정보_데이터) throws Exception{
+
+        if (서버정보_데이터 == null) {
+            로그.error("계정 정보 검증하기 Error: 서버주소 " + 에러코드.검색정보_오류.getErrorMsg());
+            throw new IllegalArgumentException("계정 정보 검증하기  Error: 서버주소 " + 에러코드.검색정보_오류.getErrorMsg());
         }
+        데이터_검증하기(서버정보_데이터.getUri(), 에러코드.서버_URI정보_오류, "서버주소");
+        데이터_검증하기(서버정보_데이터.getType(), 에러코드.서버유형_정보오류, "서버유형");
+        데이터_검증하기(서버정보_데이터.getPasswordOrToken(), 에러코드.서버_PW_또큰_API토큰정보_오류, "API 토큰 정보");
+        데이터_검증하기(서버정보_데이터.getUserId(), 에러코드.서버_ID정보_오류, "사용자 아이디");
 
-        if (apiToken == null) {
-            로그.error("계정 정보 검증하기 Error: 토큰정보 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("계정 정보 가져오기  Error: 토큰정보 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
+        계정전략_등록_및_실행 = 계정_전략_확인(서버정보_데이터);
 
-        if (userId == null) {
-            로그.error("계정 정보 검증하기 Error: 유저_아이디 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("계정 정보 가져오기  Error: 유저_아이디 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
-
-        서버정보_데이터 서버정보 = new 서버정보_데이터();
-        서버정보.setUri(uri);
-        서버정보.setType(serverType);
-        서버정보.setPasswordOrToken(apiToken);
-        서버정보.setUserId(userId);
-
-        계정전략_등록_및_실행 = 계정_전략_확인(서버정보);
-
-        계정정보_데이터 조회된_계정정보 = 계정전략_등록_및_실행.계정정보_검증(서버정보);
+        계정정보_데이터 조회된_계정정보 = 계정전략_등록_및_실행.계정정보_검증(서버정보_데이터);
 
         return 조회된_계정정보;
 

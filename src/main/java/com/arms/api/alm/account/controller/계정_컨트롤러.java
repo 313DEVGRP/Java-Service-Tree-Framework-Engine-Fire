@@ -2,13 +2,15 @@ package com.arms.api.alm.account.controller;
 
 import com.arms.api.alm.account.model.계정정보_데이터;
 import com.arms.api.alm.account.service.계정전략_호출;
+import com.arms.api.serverinfo.model.서버정보_데이터;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/jira/account")
+@RequestMapping("/alm/account")
 public class 계정_컨트롤러 {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
@@ -23,17 +25,15 @@ public class 계정_컨트롤러 {
     @RequestMapping(
             value = {"/verify"},
             method = {RequestMethod.GET}
-    ) // 임시 설정
+    )
     public 계정정보_데이터 계정정보_검증하기(
-            @RequestParam String uri,
-            @RequestParam String serverType,
-            @RequestParam String apiToken,
-            @RequestParam String userId
-    )throws Exception{
+            @RequestBody 서버정보_데이터 서버정보_데이터
+            )throws Exception{
 
-        로그.info("계정_컨트롤러 :: 계정정보_검증하기, 서버 주소: {}, 서버 타입: {}, apiToken: {}, 유저 아이디: {}",uri,serverType,apiToken,userId);
 
-        return 계정전략_호출.계정정보_검증하기(uri,serverType,apiToken,userId);
+        로그.info("계정_컨트롤러 :: 계정정보_검증하기, 서버 정보 데이터: {}",서버정보_데이터);
+
+        return 계정전략_호출.계정정보_검증하기(서버정보_데이터);
     }
 
     /*
