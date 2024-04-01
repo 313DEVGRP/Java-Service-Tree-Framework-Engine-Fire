@@ -1,6 +1,6 @@
-package com.arms.utils.response;
+package com.arms.api.utils.response;
 
-import com.arms.utils.errors.codes.에러코드;
+import com.arms.api.utils.errors.codes.에러코드;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;

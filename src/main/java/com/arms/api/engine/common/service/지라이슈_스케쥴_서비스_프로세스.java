@@ -12,7 +12,7 @@ import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
 import com.arms.api.engine.util.지라이슈_생성;
 import com.arms.elasticsearch.query.builder.검색_쿼리_빌더;
 import com.arms.elasticsearch.검색조건;
-import com.arms.utils.errors.codes.에러코드;
+import com.arms.api.utils.errors.codes.에러코드;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.QueryBuilders;

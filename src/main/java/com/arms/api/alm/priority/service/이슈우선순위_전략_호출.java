@@ -6,7 +6,7 @@ import com.arms.api.alm.priority.strategy.레드마인_온프레미스_이슈우
 import com.arms.api.serverinfo.model.enums.서버유형_정보;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.service.서버정보_서비스;
-import com.arms.utils.errors.codes.에러코드;
+import com.arms.api.utils.errors.codes.에러코드;
 import com.arms.api.alm.priority.strategy.온프레미스_지라_이슈우선순위_전략;
 
 import lombok.RequiredArgsConstructor;

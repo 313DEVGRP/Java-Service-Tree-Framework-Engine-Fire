@@ -1,8 +1,8 @@
-package com.arms.utils.errors.exception;
+package com.arms.api.utils.errors.exception;
 
 
-import com.arms.utils.errors.codes.에러코드;
-import com.arms.utils.response.응답처리;
+import com.arms.api.utils.errors.codes.에러코드;
+import com.arms.api.utils.response.응답처리;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;

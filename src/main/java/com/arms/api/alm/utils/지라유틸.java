@@ -1,11 +1,9 @@
 package com.arms.api.alm.utils;
 
 import com.arms.api.alm.issue.model.클라우드_이슈생성필드_메타데이터;
-import com.arms.utils.errors.에러로그_유틸;
+import com.arms.api.utils.errors.에러로그_유틸;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory;
-import com.taskadapter.redmineapi.RedmineManager;
-import com.taskadapter.redmineapi.RedmineManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

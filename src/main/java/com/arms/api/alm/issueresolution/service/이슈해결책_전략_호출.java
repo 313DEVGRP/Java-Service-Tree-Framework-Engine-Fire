@@ -1,7 +1,7 @@
 package com.arms.api.alm.issueresolution.service;
 
 import com.arms.api.alm.issueresolution.model.이슈해결책_데이터;
-import com.arms.utils.errors.codes.에러코드;
+import com.arms.api.utils.errors.codes.에러코드;
 import com.arms.api.alm.issueresolution.strategy.온프레미스_지라이슈해결책_전략;
 import com.arms.api.alm.issueresolution.strategy.클라우드_지라이슈해결책_전략;
 import com.arms.api.serverinfo.model.서버정보_데이터;

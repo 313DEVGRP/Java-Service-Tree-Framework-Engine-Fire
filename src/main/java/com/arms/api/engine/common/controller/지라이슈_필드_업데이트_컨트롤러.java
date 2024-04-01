@@ -1,7 +1,5 @@
 package com.arms.api.engine.common.controller;
 
-import static com.arms.utils.response.응답처리.*;
-
 import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
