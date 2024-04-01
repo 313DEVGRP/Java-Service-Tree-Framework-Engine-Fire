@@ -3,13 +3,13 @@ package com.arms.api.alm.issue.strategy;
 import com.arms.api.alm.issue.model.*;
 import com.arms.api.alm.issuestatus.model.이슈상태_데이터;
 import com.arms.api.alm.issuetype.model.이슈유형_데이터;
-import com.arms.api.alm.priority.model.지라이슈우선순위_데이터;
+import com.arms.api.alm.priority.model.이슈우선순위_데이터;
 import com.arms.api.alm.utils.레드마인API_정보;
 import com.arms.api.alm.utils.레드마인유틸;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.service.서버정보_서비스;
-import com.arms.utils.errors.codes.에러코드;
-import com.arms.utils.errors.에러로그_유틸;
+import com.arms.api.utils.errors.codes.에러코드;
+import com.arms.api.utils.errors.에러로그_유틸;
 import com.taskadapter.redmineapi.Include;
 import com.taskadapter.redmineapi.Params;
 import com.taskadapter.redmineapi.RedmineException;
@@ -92,11 +92,6 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
         RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
-        if (지라이슈생성_데이터 == null) {
-            로그.error(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: 지라이슈생성_데이터 값이 Null 입니다.");
-            throw new IllegalArgumentException(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: 지라이슈생성_데이터 값이 Null 입니다.");
-        }
-
         지라이슈생성필드_데이터 필드_데이터 = 지라이슈생성_데이터.getFields();
 
         if (필드_데이터 == null) {
@@ -106,7 +101,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
 
         지라프로젝트_데이터 프로젝트_데이터 = 필드_데이터.getProject();
         이슈유형_데이터 이슈유형_데이터 = 필드_데이터.getIssuetype();
-        지라이슈우선순위_데이터 우선순위_데이터 = 필드_데이터.getPriority();
+        이슈우선순위_데이터 우선순위_데이터 = 필드_데이터.getPriority();
 
         if (프로젝트_데이터 == null) {
             로그.error(this.getClass().getName() + " :: " + 에러코드.이슈생성_오류.getErrorMsg() + " :: 프로젝트_데이터 값이 Null 입니다.");
@@ -436,7 +431,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
                 .map(아이디 -> String.valueOf(아이디))
                 .ifPresent(아이디 -> {
                     String 우선순위_경로 = 기본경로 + 레드마인API_정보.아이디_대체하기(레드마인API_정보.getEndpoint().getPriority(), 아이디);
-                    지라이슈필드_데이터.setPriority(new 지라이슈우선순위_데이터(우선순위_경로, 아이디, 이슈.getPriorityText()));
+                    지라이슈필드_데이터.setPriority(new 이슈우선순위_데이터(우선순위_경로, 아이디, 이슈.getPriorityText()));
                 });
 
         Optional.ofNullable(이슈.getStatusId())

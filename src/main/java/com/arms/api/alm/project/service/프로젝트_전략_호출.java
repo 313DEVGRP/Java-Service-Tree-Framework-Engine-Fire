@@ -1,7 +1,7 @@
 package com.arms.api.alm.project.service;
 
 import com.arms.api.alm.project.model.프로젝트_데이터;
-import com.arms.utils.errors.codes.에러코드;
+import com.arms.api.utils.errors.codes.에러코드;
 import com.arms.api.serverinfo.model.서버정보_데이터;
 import com.arms.api.serverinfo.service.서버정보_서비스;
 import com.arms.api.alm.project.strategy.온프레미스_지라_프로젝트_전략;

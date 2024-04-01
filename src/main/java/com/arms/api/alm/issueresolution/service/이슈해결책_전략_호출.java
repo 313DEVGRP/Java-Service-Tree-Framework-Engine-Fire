@@ -1,7 +1,7 @@
 package com.arms.api.alm.issueresolution.service;
 
 import com.arms.api.alm.issueresolution.model.이슈해결책_데이터;
-import com.arms.utils.errors.codes.에러코드;
+import com.arms.api.utils.errors.codes.에러코드;
 import com.arms.api.alm.issueresolution.strategy.온프레미스_지라이슈해결책_전략;
 import com.arms.api.alm.issueresolution.strategy.클라우드_지라이슈해결책_전략;
 import com.arms.api.serverinfo.model.서버정보_데이터;
@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -76,7 +77,7 @@ public class 이슈해결책_전략_호출 {
 
         if (서버_유형 == 서버유형_정보.레드마인_온프레미스) {
             로그.info("레드마인 온프레미스 타입은 이슈 해결책을 지원하지 않습니다.");
-            return null;
+            return Collections.emptyList();
         }
 
         이슈해결책_전략_등록_및_실행 = 지라이슈해결책_전략_확인(연결정보);

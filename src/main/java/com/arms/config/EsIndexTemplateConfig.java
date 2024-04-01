@@ -50,7 +50,7 @@ public class EsIndexTemplateConfig {
 					var indexOperations = operations.indexOps(clazz);
 
 					if (!indexOperations.existsTemplate(templateName)) {
-						log.info("template-{} 생성진행",indexOperations.getIndexCoordinates().getIndexNames());
+						log.info("template-{} 생성진행",templateName);
 						var mapping = indexOperations.createMapping();
 
 						var aliasActions = new AliasActions().add(
