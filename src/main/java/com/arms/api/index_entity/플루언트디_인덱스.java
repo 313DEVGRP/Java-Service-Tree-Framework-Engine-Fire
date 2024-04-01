@@ -26,6 +26,7 @@ import java.util.Date;
 @Document(indexName = 인덱스자료.플루언트디_인덱스명, createIndex = false) // 인덱스명 _index 를 인덱스자료.플루언트디_인덱스명으로 가져가겠다.
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "_class")
 @JsonTypeName("com.arms.api.engine.models.Fluentd")
+// @JsonTypeName("com.arms.api.index_entity.플루언트디_인덱스")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ElasticSearchIndex
 public class 플루언트디_인덱스 {
