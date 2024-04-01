@@ -21,6 +21,7 @@ import org.springframework.data.annotation.Id;
 @Document(indexName = 인덱스자료.이슈_인덱스명, createIndex = false)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "_class")
 @JsonTypeName("com.arms.api.engine.models.지라이슈")
+// @JsonTypeName("om.arms.api.index_entity.이슈_인덱스")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ElasticSearchIndex
 @EqualsAndHashCode(exclude = {"recent","timestamp"})
