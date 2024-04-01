@@ -2,9 +2,9 @@ package com.arms.api.alm.issuestatus.strategy;
 
 import com.arms.api.alm.issuestatus.model.이슈상태_데이터;
 import com.arms.api.alm.issuestatus.model.클라우드_지라이슈상태_데이터;
-import com.arms.api.serverinfo.model.서버정보_데이터;
+import com.arms.api.alm.serverinfo.model.서버정보_데이터;
 import com.arms.api.utils.errors.codes.에러코드;
-import com.arms.api.serverinfo.service.서버정보_서비스;
+import com.arms.api.alm.serverinfo.service.서버정보_서비스;
 import com.arms.api.alm.utils.지라유틸;
 
 

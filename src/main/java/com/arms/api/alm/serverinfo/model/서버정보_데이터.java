@@ -1,4 +1,4 @@
-package com.arms.api.serverinfo.model;
+package com.arms.api.alm.serverinfo.model;
 
 import lombok.*;
 
