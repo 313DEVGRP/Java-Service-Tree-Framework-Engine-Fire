@@ -24,7 +24,7 @@ import org.springframework.data.annotation.Id;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ElasticSearchIndex
 @EqualsAndHashCode(exclude = {"recent","timestamp"})
-public class 지라이슈 {
+public class 이슈_인덱스 {
 
     //////////////
     @Id
@@ -36,7 +36,7 @@ public class 지라이슈 {
     private boolean recent;
 
 
-    public 지라이슈() {
+    public 이슈_인덱스() {
     }
 
     //////////////
@@ -74,31 +74,31 @@ public class 지라이슈 {
     private List<String> percolatorQueries;
 
 //    @Field(type = FieldType.Nested)
-    private 지라이슈.프로젝트 project;
+    private 이슈_인덱스.프로젝트 project;
 
 //    @Field(type = FieldType.Nested)
-    private 지라이슈.이슈유형 issuetype;
+    private 이슈_인덱스.이슈유형 issuetype;
 
 //    @Field(type = FieldType.Nested)
-    private 지라이슈.생성자 creator;
+    private 이슈_인덱스.생성자 creator;
 
 //    @Field(type = FieldType.Nested)
-    private 지라이슈.보고자 reporter;
+    private 이슈_인덱스.보고자 reporter;
 
 //    @Field(type = FieldType.Nested, fielddata = true)
-    private 지라이슈.담당자 assignee;
+    private 이슈_인덱스.담당자 assignee;
 
     @Field(type = FieldType.Text)
     private List<String> labels;
 
 //    @Field(type = FieldType.Nested)
-    private 지라이슈.우선순위 priority;
+    private 이슈_인덱스.우선순위 priority;
 
 //    @Field(type = FieldType.Nested, fielddata = true)
-    private 지라이슈.상태 status;
+    private 이슈_인덱스.상태 status;
 
 //    @Field(type = FieldType.Nested)
-    private 지라이슈.해결책 resolution;
+    private 이슈_인덱스.해결책 resolution;
 
     @Field(type = FieldType.Text, name = "resolutiondate")
     private String resolutiondate;
@@ -110,7 +110,7 @@ public class 지라이슈 {
     private String updated;
 
 //    @Field(type = FieldType.Nested)
-    private List<지라이슈.워크로그> worklogs;
+    private List<이슈_인덱스.워크로그> worklogs;
 
     @Field(type = FieldType.Integer, name = "timespent")
     private Integer timespent;

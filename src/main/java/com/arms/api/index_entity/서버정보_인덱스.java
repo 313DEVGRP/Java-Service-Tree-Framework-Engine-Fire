@@ -19,7 +19,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "_class")
 @JsonTypeName("com.arms.api.index_entity.서버정보_엔티티")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class 서버정보_엔티티 {
+public class 서버정보_인덱스 {
 
     @Id
     @Field(type = FieldType.Keyword, name = "connectId")
@@ -37,6 +37,6 @@ public class 서버정보_엔티티 {
     @Field(type = FieldType.Text, name = "uri")
     private String uri;
 
-    public 서버정보_엔티티() {
+    public 서버정보_인덱스() {
     }
 }

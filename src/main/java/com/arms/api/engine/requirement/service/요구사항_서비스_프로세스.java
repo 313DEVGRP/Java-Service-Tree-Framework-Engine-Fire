@@ -1,7 +1,7 @@
 package com.arms.api.engine.requirement.service;
 
 import com.arms.api.engine.common.component.서브테스크_조회;
-import com.arms.api.index_entity.지라이슈;
+import com.arms.api.index_entity.이슈_인덱스;
 import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
 import com.arms.api.engine.model.dto.지라이슈_일반_집계_요청;
 import com.arms.elasticsearch.query.EsQuery;
@@ -76,7 +76,7 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
 
 
     @Override
-    public List<지라이슈> 지라이슈_조회(쿼리_추상_팩토리 쿼리추상팩토리) {
+    public List<이슈_인덱스> 지라이슈_조회(쿼리_추상_팩토리 쿼리추상팩토리) {
         return 지라이슈저장소.normalSearch(
                 쿼리추상팩토리.생성()
         );
@@ -116,7 +116,7 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
     }
 
     @Override
-    public List<지라이슈> 요구사항_링크드이슈_서브테스크_검색하기(Long 서버_아이디, String 이슈_키, int 페이지_번호, int 페이지_사이즈) {
+    public List<이슈_인덱스> 요구사항_링크드이슈_서브테스크_검색하기(Long 서버_아이디, String 이슈_키, int 페이지_번호, int 페이지_사이즈) {
         return 서브테스크_조회.요구사항_링크드이슈_서브테스크_검색하기(서버_아이디, 이슈_키, 페이지_번호, 페이지_사이즈);
     }
 

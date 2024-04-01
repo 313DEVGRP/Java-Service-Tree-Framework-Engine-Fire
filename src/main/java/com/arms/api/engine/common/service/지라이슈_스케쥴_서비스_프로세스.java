@@ -7,7 +7,7 @@ import com.arms.api.alm.issue.service.이슈전략_호출;
 import com.arms.api.alm.issuestatus.model.이슈상태_데이터;
 import com.arms.api.engine.common.constrant.index.인덱스자료;
 import com.arms.api.engine.common.component.서브테스크_조회;
-import com.arms.api.index_entity.지라이슈;
+import com.arms.api.index_entity.이슈_인덱스;
 import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
 import com.arms.api.engine.util.지라이슈_생성;
 import com.arms.elasticsearch.query.builder.검색_쿼리_빌더;
@@ -46,40 +46,40 @@ public class 지라이슈_스케쥴_서비스_프로세스 implements 지라이�
     private 이슈전략_호출 이슈전략_호출;
 
     @Override
-    public 지라이슈 이슈_추가하기(지라이슈 지라이슈) {
+    public 이슈_인덱스 이슈_추가하기(이슈_인덱스 이슈_인덱스) {
 
-        지라이슈 결과 = 지라이슈저장소.save(지라이슈);
+        이슈_인덱스 결과 = 지라이슈저장소.save(이슈_인덱스);
         return 결과;
     }
 
     @Override
-    public int 대량이슈_추가하기(List<지라이슈> 대량이슈_리스트) {
+    public int 대량이슈_추가하기(List<이슈_인덱스> 대량이슈_리스트) {
 
-        Iterable<지라이슈> 지라이슈s = 지라이슈저장소.saveAll(대량이슈_리스트);
+        Iterable<이슈_인덱스> 지라이슈s = 지라이슈저장소.saveAll(대량이슈_리스트);
         int size = StreamSupport.stream(지라이슈s.spliterator(), false).collect(toList()).size();
         return size;
     }
 
     @Override
-    public 지라이슈 이슈_조회하기(String 조회조건_아이디) {
+    public 이슈_인덱스 이슈_조회하기(String 조회조건_아이디) {
 
         NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
                 .withQuery(QueryBuilders.termQuery("id", 조회조건_아이디))
                 .build();
 
         return 지라이슈저장소.normalSearch(searchQuery).stream()
-                .findFirst().orElseGet(지라이슈::new);
+                .findFirst().orElseGet(이슈_인덱스::new);
     }
 
     @Override
-    public List<지라이슈> 이슈_검색하기(검색조건 검색조건) {
+    public List<이슈_인덱스> 이슈_검색하기(검색조건 검색조건) {
         Query query
                 = 검색_쿼리_빌더.buildSearchQuery(검색조건).build();
         return 지라이슈저장소.normalSearch(query);
     }
 
     @Override
-    public 지라이슈 이슈_검색엔진_저장(Long 지라서버_아이디, String 이슈_키, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception {
+    public 이슈_인덱스 이슈_검색엔진_저장(Long 지라서버_아이디, String 이슈_키, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception {
 
         if (지라서버_아이디 == null) {
             로그.error("이슈_검색엔진_저장 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
@@ -109,10 +109,10 @@ public class 지라이슈_스케쥴_서비스_프로세스 implements 지라이�
             throw new IllegalArgumentException("이슈_검색엔진_저장 Error 이슈 키에 해당하는 데이터가 없음" + 에러코드.이슈_조회_오류.getErrorMsg());
         }
 
-        지라이슈 저장할_지라이슈 = 지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 반환된_이슈, true,
+        이슈_인덱스 저장할_이슈인덱스 = 지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 반환된_이슈, true,
                 "", 제품서비스_아이디, 제품서비스_버전들, cReqLink);
 
-        return 이슈_추가하기(저장할_지라이슈);
+        return 이슈_추가하기(저장할_이슈인덱스);
     }
 
     @Override
@@ -168,7 +168,7 @@ public class 지라이슈_스케쥴_서비스_프로세스 implements 지라이�
             throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error cReqLink " + 에러코드.파라미터_NULL_오류.getErrorMsg());
         }
 
-        List<지라이슈> 벌크_저장_목록 = new ArrayList<지라이슈>();
+        List<이슈_인덱스> 벌크_저장_목록 = new ArrayList<이슈_인덱스>();
 
         지라이슈_데이터 반환된_이슈 = Optional.ofNullable(이슈전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키))
                 .map(이슈 -> {
@@ -202,7 +202,7 @@ public class 지라이슈_스케쥴_서비스_프로세스 implements 지라이�
             벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 반환된_이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink));
 
             try {
-                List<지라이슈> 링크드이슈_서브테스크_목록 = Optional.ofNullable(서브테스크_조회.요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디,
+                List<이슈_인덱스> 링크드이슈_서브테스크_목록 = Optional.ofNullable(서브테스크_조회.요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디,
                                 이슈_키, 0, 0))
                         .orElse(Collections.emptyList())
                         .stream()
@@ -232,8 +232,8 @@ public class 지라이슈_스케쥴_서비스_프로세스 implements 지라이�
                     .ifPresent(서브테스크_목록 -> 이슈링크_또는_서브테스크_목록.addAll(서브테스크_목록));
 
             if (이슈링크_또는_서브테스크_목록 != null && 이슈링크_또는_서브테스크_목록.size() >= 1) {
-                List<지라이슈> 변환된_이슈_목록 = 이슈링크_또는_서브테스크_목록.stream().map(이슈링크또는서브테스크 -> {
-                            지라이슈 변환된_이슈 = 지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 이슈링크또는서브테스크,
+                List<이슈_인덱스> 변환된_이슈_목록 = 이슈링크_또는_서브테스크_목록.stream().map(이슈링크또는서브테스크 -> {
+                            이슈_인덱스 변환된_이슈 = 지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 이슈링크또는서브테스크,
                                     false, 이슈_키, 제품서비스_아이디, 제품서비스_버전들, cReqLink);
                             벌크_저장_목록.add(변환된_이슈);
                             return 변환된_이슈;
@@ -269,7 +269,7 @@ public class 지라이슈_스케쥴_서비스_프로세스 implements 지라이�
             throw new IllegalArgumentException("증분이슈_링크드이슈_서브테스크_벌크추가 Error cReqLink " + 에러코드.파라미터_NULL_오류.getErrorMsg());
         }
 
-        List<지라이슈> 증분벌크_저장_목록 = new ArrayList<지라이슈>();
+        List<이슈_인덱스> 증분벌크_저장_목록 = new ArrayList<이슈_인덱스>();
 
         /**
          * 스케줄러 작동 시 암스에서 생성한 요구사항 자체가 전날 업데이트가 일어났는지 확인 시 업데이트가 없을 시 null 반환(삭제된 이슈를 조회할 때 또한)
@@ -287,7 +287,7 @@ public class 지라이슈_스케쥴_서비스_프로세스 implements 지라이�
         if (반환된_이슈 == null) {
             String 프로젝트_키 = 이슈_키.substring(0, 이슈_키.indexOf("-"));
             String 조회조건_아이디 = 지라서버_아이디 + "_" + 프로젝트_키 + "_" + 이슈_키;
-            List<지라이슈> 조회결과 = ES데이터조회하기(조회조건_아이디);
+            List<이슈_인덱스> 조회결과 = ES데이터조회하기(조회조건_아이디);
 
             /**
              * Jira서버 조회 후 반환된 데이터가 Null -> 1. 삭제되어 조회가 안되는 경우 or 2. 에러가 터진 경우
@@ -320,7 +320,7 @@ public class 지라이슈_스케쥴_서비스_프로세스 implements 지라이�
             증분벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 반환된_이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink));
 
             try {
-                List<지라이슈> 링크드이슈_서브테스크_목록 = Optional.ofNullable(서브테스크_조회.요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디,
+                List<이슈_인덱스> 링크드이슈_서브테스크_목록 = Optional.ofNullable(서브테스크_조회.요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디,
                                 이슈_키, 0, 0))
                         .orElse(Collections.emptyList())
                         .stream()
@@ -350,8 +350,8 @@ public class 지라이슈_스케쥴_서비스_프로세스 implements 지라이�
                     .ifPresent(서브테스크_목록 -> 이슈링크_또는_서브테스크_목록.addAll(서브테스크_목록));
 
             if (이슈링크_또는_서브테스크_목록 != null && 이슈링크_또는_서브테스크_목록.size() >= 1) {
-                List<지라이슈> 변환된_이슈_목록 = 이슈링크_또는_서브테스크_목록.stream().map(이슈링크또는서브테스크 -> {
-                            지라이슈 변환된_이슈 = 지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 이슈링크또는서브테스크,
+                List<이슈_인덱스> 변환된_이슈_목록 = 이슈링크_또는_서브테스크_목록.stream().map(이슈링크또는서브테스크 -> {
+                            이슈_인덱스 변환된_이슈 = 지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 이슈링크또는서브테스크,
                                     false, 이슈_키, 제품서비스_아이디, 제품서비스_버전들, cReqLink);
                             증분벌크_저장_목록.add(변환된_이슈);
                             return 변환된_이슈;
@@ -407,7 +407,7 @@ public class 지라이슈_스케쥴_서비스_프로세스 implements 지라이�
     /**
      * Alias 조회 기능 추가 필요
      **/
-    public List<지라이슈> ES데이터조회하기(String 조회조건_아이디) {
+    public List<이슈_인덱스> ES데이터조회하기(String 조회조건_아이디) {
 
         NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
                 .withQuery(QueryBuilders.termQuery("id", 조회조건_아이디))

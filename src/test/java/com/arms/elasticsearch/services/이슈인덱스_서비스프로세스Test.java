@@ -11,7 +11,7 @@ import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
 
 @SpringBootTest
 @ActiveProfiles("dev")
-class 지라이슈_서비스프로세스Test {
+class 이슈인덱스_서비스프로세스Test {
 
 
 	@Autowired

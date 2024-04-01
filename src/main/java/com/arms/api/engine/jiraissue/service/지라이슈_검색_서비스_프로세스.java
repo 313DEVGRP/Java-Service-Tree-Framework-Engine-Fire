@@ -1,6 +1,6 @@
 package com.arms.api.engine.jiraissue.service;
 
-import com.arms.api.index_entity.지라이슈;
+import com.arms.api.index_entity.이슈_인덱스;
 import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
 import com.arms.api.engine.model.dto.검색어_검색결과;
 import com.arms.api.engine.model.dto.검색어_기본_검색_요청;
@@ -41,17 +41,17 @@ public class 지라이슈_검색_서비스_프로세스 implements 지라이슈_
     }
 
     @Override
-    public 검색어_검색결과<SearchHit<지라이슈>> 지라이슈_검색(검색어_기본_검색_요청 검색어_기본_검색_요청) {
+    public 검색어_검색결과<SearchHit<이슈_인덱스>> 지라이슈_검색(검색어_기본_검색_요청 검색어_기본_검색_요청) {
         EsQuery esQuery = new EsQueryBuilder().queryString(new EsQueryString(검색어_기본_검색_요청.get검색어()));
-        SearchHits<지라이슈> 지라이슈_검색결과= 지라이슈_저장소.search(일반_검색_쿼리_생성기.of(검색어_기본_검색_요청, esQuery).생성());
-        검색어_검색결과<SearchHit<지라이슈>> 검색결과_목록 = new 검색어_검색결과<>();
+        SearchHits<이슈_인덱스> 지라이슈_검색결과= 지라이슈_저장소.search(일반_검색_쿼리_생성기.of(검색어_기본_검색_요청, esQuery).생성());
+        검색어_검색결과<SearchHit<이슈_인덱스>> 검색결과_목록 = new 검색어_검색결과<>();
         검색결과_목록.set검색결과_목록(지라이슈_검색결과.getSearchHits());
         검색결과_목록.set결과_총수(지라이슈_검색결과.getTotalHits());
         return 검색결과_목록;
     }
 
     @Override
-    public 검색어_검색결과<SearchHit<지라이슈>> 지라이슈_날짜포함_검색(검색어_날짜포함_검색_요청 검색어_날짜포함_검색_요청) {
+    public 검색어_검색결과<SearchHit<이슈_인덱스>> 지라이슈_날짜포함_검색(검색어_날짜포함_검색_요청 검색어_날짜포함_검색_요청) {
         String start_date = null;
         String end_date = null;
         if(검색어_날짜포함_검색_요청.get시작_날짜() != null && !검색어_날짜포함_검색_요청.get시작_날짜().isBlank()) {
@@ -69,8 +69,8 @@ public class 지라이슈_검색_서비스_프로세스 implements 지라이슈_
                                 기본_정렬_요청.builder().필드("@timestamp").정렬기준("desc").build()
                         )
                 ));
-        SearchHits<지라이슈> 지라이슈_검색결과= 지라이슈_저장소.search(일반_검색_쿼리_생성기.of(검색어_날짜포함_검색_요청, esQuery).생성());
-        검색어_검색결과<SearchHit<지라이슈>> 검색결과_목록 = new 검색어_검색결과<>();
+        SearchHits<이슈_인덱스> 지라이슈_검색결과= 지라이슈_저장소.search(일반_검색_쿼리_생성기.of(검색어_날짜포함_검색_요청, esQuery).생성());
+        검색어_검색결과<SearchHit<이슈_인덱스>> 검색결과_목록 = new 검색어_검색결과<>();
         if(지라이슈_검색결과 != null && !지라이슈_검색결과.isEmpty()) {
             검색결과_목록.set검색결과_목록(지라이슈_검색결과.getSearchHits());
             검색결과_목록.set결과_총수(지라이슈_검색결과.getTotalHits());

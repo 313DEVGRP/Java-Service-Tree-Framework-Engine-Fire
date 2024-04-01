@@ -8,12 +8,12 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.arms.api.index_entity.지라이슈;
+import com.arms.api.index_entity.이슈_인덱스;
 import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
 
 @SpringBootTest
 @ActiveProfiles("dev")
-public class 지라이슈_서비스프로세스Test {
+public class 이슈인덱스_서비스프로세스Test {
 
 
 	@Autowired
@@ -25,7 +25,7 @@ public class 지라이슈_서비스프로세스Test {
 			.withQuery(QueryBuilders.termQuery("id", "1797187033776577721_DEMO_DEMO-21"))
 			.build();
 
-		지라이슈 지라이슈 = 지라이슈저장소.normalSearch(searchQuery).stream().findFirst().orElseGet(지라이슈::new);
-		System.out.println(지라이슈);
+		이슈_인덱스 이슈_인덱스 = 지라이슈저장소.normalSearch(searchQuery).stream().findFirst().orElseGet(이슈_인덱스::new);
+		System.out.println(이슈_인덱스);
 	}
 }

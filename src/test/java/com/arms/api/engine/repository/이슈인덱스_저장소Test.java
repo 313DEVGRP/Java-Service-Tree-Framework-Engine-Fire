@@ -9,11 +9,11 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.arms.api.index_entity.지라이슈;
+import com.arms.api.index_entity.이슈_인덱스;
 
 @ActiveProfiles("dev")
 @SpringBootTest
-public class 지라이슈_저장소Test {
+public class 이슈인덱스_저장소Test {
 
 
 	@Autowired
@@ -24,13 +24,13 @@ public class 지라이슈_저장소Test {
 
 		Long cReqLink = 10L;
 
-		SearchHits<지라이슈> ids = 지라이슈_저장소.search(
+		SearchHits<이슈_인덱스> ids = 지라이슈_저장소.search(
 			new NativeSearchQueryBuilder()
 				.withQuery(QueryBuilders.termQuery("id", "4491399083726213931_PHM_PHM-125"))
 				.build());
 
-		for (SearchHit<지라이슈> id : ids) {
-			지라이슈 content = id.getContent();
+		for (SearchHit<이슈_인덱스> id : ids) {
+			이슈_인덱스 content = id.getContent();
 			content.setCReqLink(cReqLink);
 			지라이슈_저장소.updateSave(content,id.getIndex());
 		}

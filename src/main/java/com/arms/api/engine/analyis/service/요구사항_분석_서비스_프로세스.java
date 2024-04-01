@@ -2,7 +2,7 @@ package com.arms.api.engine.analyis.service;
 
 import com.arms.api.engine.model.dto.*;
 import com.arms.api.engine.model.enums.IsReqType;
-import com.arms.api.index_entity.지라이슈;
+import com.arms.api.index_entity.이슈_인덱스;
 import com.arms.api.engine.model.dto.지라이슈_일자별_제품_및_제품버전_집계_요청;
 import com.arms.api.engine.model.dto.지라이슈_제품_및_제품버전_집계_요청;
 import com.arms.api.engine.common.constrant.index.인덱스자료;
@@ -104,34 +104,34 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
 
     @Override
     public List<요구사항_버전_이슈_키_상태_작업자수> 버전별_요구사항_상태_및_관여_작업자수_내용(Long pdServiceLink, Long[] pdServiceVersionLinks){
-        List<지라이슈> 요구사항_이슈_목록 = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionsIn(true, pdServiceLink, pdServiceVersionLinks);
-        List<지라이슈> 담당자_존재_요구사항_이슈_목록 = 요구사항_이슈_목록.stream()
+        List<이슈_인덱스> 요구사항_이슈_목록 = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionsIn(true, pdServiceLink, pdServiceVersionLinks);
+        List<이슈_인덱스> 담당자_존재_요구사항_이슈_목록 = 요구사항_이슈_목록.stream()
                                         .filter(지라이슈 -> 지라이슈.getAssignee() != null)
                                         .collect(toList());
         log.info(String.valueOf(요구사항_이슈_목록.size()));
 
         // 담당자 있는 요구사항_이슈의 키만 뽑기
         List<String> 담당자_존재_요구사항_이슈_키 = 담당자_존재_요구사항_이슈_목록.stream()
-                .map(지라이슈::getKey).collect(Collectors.toList());
-        List<지라이슈> allSubTasks = 지라이슈저장소.findByParentReqKeyIn(담당자_존재_요구사항_이슈_키);
+                .map(이슈_인덱스::getKey).collect(Collectors.toList());
+        List<이슈_인덱스> allSubTasks = 지라이슈저장소.findByParentReqKeyIn(담당자_존재_요구사항_이슈_키);
 
         //담당자가 있는 연결이슈만, 요구사항_이슈키에 매핑
-        Map<String, List<지라이슈>> 요구사항이슈_담당자있는_하위이슈들 = allSubTasks.stream()
+        Map<String, List<이슈_인덱스>> 요구사항이슈_담당자있는_하위이슈들 = allSubTasks.stream()
                 .filter(subtask -> subtask.getAssignee() != null)
-                .collect(Collectors.groupingBy(지라이슈::getParentReqKey));
+                .collect(Collectors.groupingBy(이슈_인덱스::getParentReqKey));
 
         List<요구사항_버전_이슈_키_상태_작업자수> 요구사항_버전이슈키상태_작업자수_목록 = new ArrayList<>();
 
         // 요구사항_이슈의 작업자의 메일을 set에 담고, 하위이슈 담당자 메일을 set에 담아서
         // 그 결과 set의 크기를 해당 요구사항_이슈에 관련된 작업자수로 가져가는게 나을듯 싶음.
-        for(지라이슈 요구사항_이슈 : 담당자_존재_요구사항_이슈_목록) {
+        for(이슈_인덱스 요구사항_이슈 : 담당자_존재_요구사항_이슈_목록) {
             Set 메일_세트 = new HashSet();
             메일_세트.add(요구사항_이슈.getAssignee().getEmailAddress());
 
             String 이슈키 = 요구사항_이슈.getKey();
             if(요구사항이슈_담당자있는_하위이슈들.containsKey(이슈키)) {
-                List<지라이슈> 하위이슈들 = 요구사항이슈_담당자있는_하위이슈들.get(이슈키);
-                for(지라이슈 하위이슈 : 하위이슈들) {
+                List<이슈_인덱스> 하위이슈들 = 요구사항이슈_담당자있는_하위이슈들.get(이슈키);
+                for(이슈_인덱스 하위이슈 : 하위이슈들) {
                     메일_세트.add(하위이슈.getAssignee().getEmailAddress());
                 }
             }
@@ -348,7 +348,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
          return 검색결과;
      }
     @Override
-    public List<지라이슈> 지라이슈_기준일자별_제품_및_제품버전_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청){
+    public List<이슈_인덱스> 지라이슈_기준일자별_제품_및_제품버전_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청){
 
         String 시작일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get시작일();
         String 종료일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get종료일();
@@ -427,7 +427,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                 .withSort(SortBuilders.fieldSort(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준()).order(SortOrder.ASC))
                 .withMaxResults(10000);
 
-        List<지라이슈> 전체결과 = new ArrayList<>();
+        List<이슈_인덱스> 전체결과 = new ArrayList<>();
 
         boolean 인덱스존재시까지  = true;
         LocalDate today = LocalDate.now();
@@ -446,7 +446,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
 
             today = today.minusDays(1);
 
-            List<지라이슈> 결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 호출할_지라인덱스);
+            List<이슈_인덱스> 결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 호출할_지라인덱스);
 
             if (결과 != null && 결과.size() > 0) {
                 전체결과.addAll(결과);
@@ -483,7 +483,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
 
     }
 
-    private List<요구사항_별_업데이트_데이터> 요구사항_별_업데이트_데이터(지라이슈 issue) {
+    private List<요구사항_별_업데이트_데이터> 요구사항_별_업데이트_데이터(이슈_인덱스 issue) {
 
         return Arrays.stream(issue.getPdServiceVersions()).collect(toList())
             .stream()
@@ -579,7 +579,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                 .withQuery(boolQuery)
                 .withMaxResults(10000);
 
-        List<지라이슈> 전체결과 = new ArrayList<>();
+        List<이슈_인덱스> 전체결과 = new ArrayList<>();
 
         boolean 인덱스존재시까지  = true;
         LocalDate today = LocalDate.now();
@@ -598,7 +598,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
 
             today = today.minusDays(1);
 
-            List<지라이슈> 결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 호출할_지라인덱스);
+            List<이슈_인덱스> 결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 호출할_지라인덱스);
 
             if (결과 != null && 결과.size() > 0) {
                 전체결과.addAll(결과);
@@ -620,19 +620,19 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         return 조회_결과;
     }
 
-    private 요구사항_지라이슈키별_업데이트_목록_데이터 요구사항_지라이슈키별_업데이트_목록_데이터(지라이슈 지라이슈){
+    private 요구사항_지라이슈키별_업데이트_목록_데이터 요구사항_지라이슈키별_업데이트_목록_데이터(이슈_인덱스 이슈_인덱스){
         return new 요구사항_지라이슈키별_업데이트_목록_데이터(
-                지라이슈.getKey(),
-                지라이슈.getParentReqKey(),
-                지라이슈.getUpdated(),
-                지라이슈.getResolutiondate(),
-                지라이슈.getIsReq()
+                이슈_인덱스.getKey(),
+                이슈_인덱스.getParentReqKey(),
+                이슈_인덱스.getUpdated(),
+                이슈_인덱스.getResolutiondate(),
+                이슈_인덱스.getIsReq()
         );
 
     }
 
     @Override
-    public List<지라이슈> 제품서비스_버전목록으로_조회(Long pdServiceLink, Long[] pdServiceVersionLinks) {
+    public List<이슈_인덱스> 제품서비스_버전목록으로_조회(Long pdServiceLink, Long[] pdServiceVersionLinks) {
         return 지라이슈저장소.findByPdServiceIdAndPdServiceVersionsIn(pdServiceLink, pdServiceVersionLinks);
     }
 
@@ -650,7 +650,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                 .withQuery(boolQuery)
                 .withPageable(PageRequest.of(0, 10000));
 
-        List<지라이슈> 전체결과 = new ArrayList<>();
+        List<이슈_인덱스> 전체결과 = new ArrayList<>();
         boolean 인덱스존재시까지  = true;
 
         LocalDate today = LocalDate.now();
@@ -669,7 +669,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
 
             today = today.minusDays(1);
 
-            List<지라이슈> 결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 호출할_지라인덱스);
+            List<이슈_인덱스> 결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 호출할_지라인덱스);
 
             if (결과 != null && 결과.size() > 0) {
                 전체결과.addAll(결과);
@@ -694,7 +694,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         return 히트맵데이터;
     }
 
-    private void 히트맵데이터_파싱(Map<String, 히트맵날짜데이터> returnObject, 지라이슈 item, Set<String> returnColors) {
+    private void 히트맵데이터_파싱(Map<String, 히트맵날짜데이터> returnObject, 이슈_인덱스 item, Set<String> returnColors) {
         if (item.getUpdated() == null || item.getUpdated().isEmpty()) {
             로그.info(item.getKey());
             return;

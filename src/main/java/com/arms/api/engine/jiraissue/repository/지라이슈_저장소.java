@@ -1,6 +1,6 @@
 package com.arms.api.engine.jiraissue.repository;
 
-import com.arms.api.index_entity.지라이슈;
+import com.arms.api.index_entity.이슈_인덱스;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
@@ -15,9 +15,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface 지라이슈_저장소 extends 공통저장소<지라이슈,String>{
+public interface 지라이슈_저장소 extends 공통저장소<이슈_인덱스,String>{
 
-    default List<지라이슈> findByPdServiceIdAndPdServiceVersionsIn(Long pdServiceLink, Long[] pdServiceVersionLinks){
+    default List<이슈_인덱스> findByPdServiceIdAndPdServiceVersionsIn(Long pdServiceLink, Long[] pdServiceVersionLinks){
         EsQuery esQuery = new EsQueryBuilder()
             .bool(
                 new MustTermQuery("pdServiceId", pdServiceLink),
@@ -33,7 +33,7 @@ public interface 지라이슈_저장소 extends 공통저장소<지라이슈,Str
         return this.normalSearch(nativeSearchQueryBuilder.build());
     };
 
-    default List<지라이슈> findByIsReqAndPdServiceIdAndPdServiceVersionsIn(boolean isReq, Long pdServiceLink
+    default List<이슈_인덱스> findByIsReqAndPdServiceIdAndPdServiceVersionsIn(boolean isReq, Long pdServiceLink
         , Long[] pdServiceVersionLinks){
         EsQuery esQuery = new EsQueryBuilder()
             .bool(
@@ -50,7 +50,7 @@ public interface 지라이슈_저장소 extends 공통저장소<지라이슈,Str
         return this.normalSearch(nativeSearchQueryBuilder.build());
     };
 
-    default List<지라이슈> findByParentReqKeyIn(List<String> parentReqKeys){
+    default List<이슈_인덱스> findByParentReqKeyIn(List<String> parentReqKeys){
         EsQuery esQuery = new EsQueryBuilder()
             .bool(
                 new TermsQueryFilter("parentReqKey", parentReqKeys)

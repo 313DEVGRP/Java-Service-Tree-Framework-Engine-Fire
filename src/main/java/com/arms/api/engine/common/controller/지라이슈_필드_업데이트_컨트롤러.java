@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.arms.api.engine.model.dto.요구사항_수정_요청;
-import com.arms.api.index_entity.지라이슈;
+import com.arms.api.index_entity.이슈_인덱스;
 import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
 
 import lombok.AllArgsConstructor;
@@ -30,13 +30,13 @@ public class 지라이슈_필드_업데이트_컨트롤러 {
 			@RequestBody 요구사항_수정_요청 updateReqLinkDTOs
 	) {
 
-			SearchHits<지라이슈> 지라이슈들 = 지라이슈_저장소.search(
+			SearchHits<이슈_인덱스> 지라이슈들 = 지라이슈_저장소.search(
 				new NativeSearchQueryBuilder()
 					.withQuery(QueryBuilders.termQuery("id", updateReqLinkDTOs.getConnectInfo()))
 					.build());
 
-			for (SearchHit<지라이슈> 지라이슈 : 지라이슈들) {
-				지라이슈 content = 지라이슈.getContent();
+			for (SearchHit<이슈_인덱스> 지라이슈 : 지라이슈들) {
+				이슈_인덱스 content = 지라이슈.getContent();
 				content.setCReqLink(updateReqLinkDTOs.getReqLink());
 				지라이슈_저장소.updateSave(content,지라이슈.getIndex());
 			}

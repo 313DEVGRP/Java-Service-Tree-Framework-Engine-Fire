@@ -28,7 +28,7 @@ import java.util.Date;
 @JsonTypeName("com.arms.api.engine.models.Fluentd")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ElasticSearchIndex
-public class 플루언트디 {
+public class 플루언트디_인덱스 {
 
     @Id
     @Field(type = FieldType.Keyword)

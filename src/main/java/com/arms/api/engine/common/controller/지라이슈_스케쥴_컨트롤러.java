@@ -1,7 +1,7 @@
 package com.arms.api.engine.common.controller;
 
 import com.arms.api.engine.common.service.지라이슈_스케쥴_서비스;
-import com.arms.api.index_entity.지라이슈;
+import com.arms.api.index_entity.이슈_인덱스;
 import com.arms.elasticsearch.검색조건;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +23,9 @@ public class 지라이슈_스케쥴_컨트롤러 {
     // 스케쥴러 컨트롤러
     @ResponseBody
     @GetMapping("/get/{reqProjectKey}/{reqIssueKey}")
-    public 지라이슈 요구사항이슈_조회(@PathVariable("connectId") Long 지라서버_아이디,
-                          @PathVariable("reqProjectKey") String 지라프로젝트_키,
-                          @PathVariable("reqIssueKey") String 지라이슈_키) {
+    public 이슈_인덱스 요구사항이슈_조회(@PathVariable("connectId") Long 지라서버_아이디,
+                            @PathVariable("reqProjectKey") String 지라프로젝트_키,
+                            @PathVariable("reqIssueKey") String 지라이슈_키) {
 
         String 조회조건_아이디 = Long.toString(지라서버_아이디) + "_" + 지라프로젝트_키 + "_" + 지라이슈_키;
 
@@ -39,7 +39,7 @@ public class 지라이슈_스케쥴_컨트롤러 {
             value = {"/search"},
             method = {RequestMethod.POST}
     )
-    public List<지라이슈> 요구사항이슈_검색(@RequestBody final 검색조건 검색조건) {
+    public List<이슈_인덱스> 요구사항이슈_검색(@RequestBody final 검색조건 검색조건) {
         return 지라이슈_스케쥴_서비스.이슈_검색하기(검색조건);
     }
 
@@ -52,12 +52,12 @@ public class 지라이슈_스케쥴_컨트롤러 {
             value = {"/loadToES/{issueKey}"},
             method = {RequestMethod.GET}
     )
-    public 지라이슈 이슈_검색엔진_저장(@PathVariable("connectId") Long 지라서버_아이디,
-                               @PathVariable("issueKey") String 이슈_키,
-                               @RequestParam("pdServiceId") Long 제품서비스_아이디,
-                               @RequestParam("pdServiceVersions") Long[] 제품서비스_버전_아이디들,
-                               @RequestParam("cReqLink") Long cReqLink,
-                           ModelMap model, HttpServletRequest request) throws Exception {
+    public 이슈_인덱스 이슈_검색엔진_저장(@PathVariable("connectId") Long 지라서버_아이디,
+                             @PathVariable("issueKey") String 이슈_키,
+                             @RequestParam("pdServiceId") Long 제품서비스_아이디,
+                             @RequestParam("pdServiceVersions") Long[] 제품서비스_버전_아이디들,
+                             @RequestParam("cReqLink") Long cReqLink,
+                             ModelMap model, HttpServletRequest request) throws Exception {
         log.info("지라 이슈_검색엔진_저장");
 
         return 지라이슈_스케쥴_서비스.이슈_검색엔진_저장(지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디들, cReqLink);
