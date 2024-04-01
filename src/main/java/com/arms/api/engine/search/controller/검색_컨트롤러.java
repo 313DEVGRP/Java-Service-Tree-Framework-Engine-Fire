@@ -1,9 +1,9 @@
 package com.arms.api.engine.search.controller;
 
 import com.arms.api.index_entity.플루언트디_인덱스;
-import com.arms.api.engine.fluentd.service.플루언트디_서비스;
+import com.arms.api.alm.fluentd.service.플루언트디_서비스;
 import com.arms.api.index_entity.이슈_인덱스;
-import com.arms.api.engine.jiraissue.service.지라이슈_검색_서비스;
+import com.arms.api.alm.issue.service.지라이슈_검색_서비스;
 import com.arms.api.engine.model.dto.검색어_검색결과;
 import com.arms.api.engine.model.dto.검색어_기본_검색_요청;
 import com.arms.api.engine.model.dto.검색어_날짜포함_검색_요청;

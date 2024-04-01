@@ -2,7 +2,7 @@ package com.arms.api.engine.common.component;
 
 
 import com.arms.api.index_entity.이슈_인덱스;
-import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
+import com.arms.api.alm.issue.repository.지라이슈_저장소;
 import com.arms.elasticsearch.query.builder.검색_쿼리_빌더;
 import com.arms.elasticsearch.검색조건;
 import lombok.AllArgsConstructor;

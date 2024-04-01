@@ -1,11 +1,10 @@
-package com.arms.api.engine.fluentd.service;
+package com.arms.api.alm.fluentd.service;
 
 import com.arms.api.engine.model.dto.검색어_검색결과;
 import com.arms.api.engine.model.dto.검색어_기본_검색_요청;
 import com.arms.api.engine.model.dto.검색어_날짜포함_검색_요청;
 import com.arms.api.engine.model.dto.검색어_집계_요청;
 import com.arms.api.index_entity.플루언트디_인덱스;
-import com.arms.api.engine.fluentd.repository.플루언트디_저장소;
 import com.arms.elasticsearch.query.*;
 import com.arms.elasticsearch.query.base.기본_정렬_요청;
 import com.arms.elasticsearch.query.filter.QueryStringFilter;
@@ -32,7 +31,7 @@ import java.util.List;
 public class 플루언트디_서비스_프로세스 implements 플루언트디_서비스{
 
 
-    private 플루언트디_저장소 플루언트디_저장소;
+    private com.arms.api.alm.fluentd.repository.플루언트디_저장소 플루언트디_저장소;
 
     @Override
     public 버킷_집계_결과_목록_합계 전체_집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) {

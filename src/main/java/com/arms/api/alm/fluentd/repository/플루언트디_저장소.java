@@ -1,4 +1,4 @@
-package com.arms.api.engine.fluentd.repository;
+package com.arms.api.alm.fluentd.repository;
 
 import com.arms.api.index_entity.플루언트디_인덱스;
 import com.arms.elasticsearch.repository.공통저장소;
