@@ -1,4 +1,4 @@
-package com.arms.api.engine.jiraissue.entity;
+package com.arms.api.index_entity;
 
 import com.arms.api.engine.common.constrant.index.인덱스자료;
 import com.arms.elasticsearch.annotation.ElasticSearchIndex;
@@ -18,7 +18,7 @@ import org.springframework.data.annotation.Id;
 @AllArgsConstructor
 @Getter
 @Setter
-@Document(indexName = 인덱스자료.지라이슈_인덱스명, createIndex = false)
+@Document(indexName = 인덱스자료.이슈_인덱스명, createIndex = false)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "_class")
 @JsonTypeName("com.arms.api.engine.models.지라이슈")
 @JsonIgnoreProperties(ignoreUnknown = true)

@@ -2,7 +2,7 @@ package com.arms.api.engine.analyis.service;
 
 import com.arms.api.engine.model.dto.*;
 import com.arms.api.engine.model.enums.IsReqType;
-import com.arms.api.engine.jiraissue.entity.지라이슈;
+import com.arms.api.index_entity.지라이슈;
 import com.arms.api.engine.model.dto.지라이슈_일자별_제품_및_제품버전_집계_요청;
 import com.arms.api.engine.model.dto.지라이슈_제품_및_제품버전_집계_요청;
 import com.arms.api.engine.common.constrant.index.인덱스자료;
@@ -432,7 +432,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         boolean 인덱스존재시까지  = true;
         LocalDate today = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String 지라인덱스 = 인덱스자료.지라이슈_인덱스명;
+        String 지라인덱스 = 인덱스자료.이슈_인덱스명;
 
         while(인덱스존재시까지) {
             LocalDate 오늘일경우 = LocalDate.now();
@@ -584,7 +584,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         boolean 인덱스존재시까지  = true;
         LocalDate today = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String 지라인덱스 = 인덱스자료.지라이슈_인덱스명;
+        String 지라인덱스 = 인덱스자료.이슈_인덱스명;
 
         while(인덱스존재시까지) {
             LocalDate 오늘일경우 = LocalDate.now();
@@ -655,7 +655,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
 
         LocalDate today = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String 지라인덱스 = 인덱스자료.지라이슈_인덱스명;
+        String 지라인덱스 = 인덱스자료.이슈_인덱스명;
 
         while(인덱스존재시까지) {
             LocalDate 오늘일경우 = LocalDate.now();

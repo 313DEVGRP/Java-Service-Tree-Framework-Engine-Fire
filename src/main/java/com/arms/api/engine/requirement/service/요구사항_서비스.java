@@ -1,6 +1,6 @@
 package com.arms.api.engine.requirement.service;
 
-import com.arms.api.engine.jiraissue.entity.지라이슈;
+import com.arms.api.index_entity.지라이슈;
 import com.arms.elasticsearch.query.쿼리_추상_팩토리;
 
 import java.io.IOException;

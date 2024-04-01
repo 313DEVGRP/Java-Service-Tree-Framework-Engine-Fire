@@ -7,7 +7,7 @@ import com.arms.api.alm.issue.service.이슈전략_호출;
 import com.arms.api.alm.issuestatus.model.이슈상태_데이터;
 import com.arms.api.engine.common.constrant.index.인덱스자료;
 import com.arms.api.engine.common.component.서브테스크_조회;
-import com.arms.api.engine.jiraissue.entity.지라이슈;
+import com.arms.api.index_entity.지라이슈;
 import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
 import com.arms.api.engine.util.지라이슈_생성;
 import com.arms.elasticsearch.query.builder.검색_쿼리_빌더;
@@ -117,7 +117,7 @@ public class 지라이슈_스케쥴_서비스_프로세스 implements 지라이�
 
     @Override
     public boolean 지라이슈_인덱스백업() {
-        String 현재_지라이슈인덱스 = 인덱스자료.지라이슈_인덱스명;
+        String 현재_지라이슈인덱스 = 인덱스자료.이슈_인덱스명;
         String currentDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         String 백업_지라이슈인덱스 = 현재_지라이슈인덱스 + "-" + currentDate;
 
@@ -133,7 +133,7 @@ public class 지라이슈_스케쥴_서비스_프로세스 implements 지라이�
 
     @Override
     public boolean 지라이슈_인덱스삭제() {
-        String 현재_지라이슈인덱스 = 인덱스자료.지라이슈_인덱스명;
+        String 현재_지라이슈인덱스 = 인덱스자료.이슈_인덱스명;
 
         boolean 삭제성공 = 지라이슈저장소.인덱스삭제(현재_지라이슈인덱스);
         if (삭제성공) {

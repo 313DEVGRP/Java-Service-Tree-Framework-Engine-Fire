@@ -1,48 +1,19 @@
 package com.arms.api.engine.dashboard.service;
 
-import com.arms.api.engine.common.constrant.index.인덱스자료;
-import com.arms.api.engine.jiraissue.entity.지라이슈;
+import com.arms.api.index_entity.지라이슈;
 import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
 import com.arms.api.engine.model.dto.*;
-import com.arms.api.engine.model.enums.IsReqType;
 import com.arms.api.engine.model.vo.TaskList;
 import com.arms.api.engine.model.vo.Worker;
-import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.esquery.EsBoolQuery;
-import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
-import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
-import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
-import com.arms.elasticsearch.query.filter.RangeQueryFilter;
-import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.query.쿼리_추상_팩토리;
-import com.arms.elasticsearch.버킷_집계_결과;
 import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.aggregations.AggregationBuilder;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.BucketOrder;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.sort.SortBuilders;
-import org.elasticsearch.search.sort.SortOrder;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service("지라이슈_대시보드_서비스")

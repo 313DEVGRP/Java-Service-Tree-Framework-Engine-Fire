@@ -1,7 +1,7 @@
 package com.arms.api.engine.common.controller;
 
 import com.arms.api.engine.common.service.지라이슈_스케쥴_서비스;
-import com.arms.api.engine.jiraissue.entity.지라이슈;
+import com.arms.api.index_entity.지라이슈;
 import com.arms.elasticsearch.검색조건;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package com.arms.api.engine.fluentd.entity;
+package com.arms.api.index_entity;
 
 
 import com.arms.api.engine.common.constrant.index.인덱스자료;

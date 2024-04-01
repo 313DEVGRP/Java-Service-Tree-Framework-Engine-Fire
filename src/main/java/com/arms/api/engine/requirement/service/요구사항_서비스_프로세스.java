@@ -1,7 +1,7 @@
 package com.arms.api.engine.requirement.service;
 
 import com.arms.api.engine.common.component.서브테스크_조회;
-import com.arms.api.engine.jiraissue.entity.지라이슈;
+import com.arms.api.index_entity.지라이슈;
 import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
 import com.arms.api.engine.model.dto.지라이슈_일반_집계_요청;
 import com.arms.elasticsearch.query.EsQuery;

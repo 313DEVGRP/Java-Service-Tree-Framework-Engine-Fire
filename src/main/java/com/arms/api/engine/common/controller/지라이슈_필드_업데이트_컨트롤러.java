@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.arms.api.engine.model.dto.요구사항_수정_요청;
-import com.arms.api.engine.jiraissue.entity.지라이슈;
+import com.arms.api.index_entity.지라이슈;
 import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
 
 import lombok.AllArgsConstructor;

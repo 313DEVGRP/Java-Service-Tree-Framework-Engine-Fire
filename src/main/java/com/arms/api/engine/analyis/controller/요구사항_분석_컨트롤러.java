@@ -1,6 +1,6 @@
 package com.arms.api.engine.analyis.controller;
 
-import com.arms.api.engine.jiraissue.entity.지라이슈;
+import com.arms.api.index_entity.지라이슈;
 import com.arms.api.engine.model.dto.*;
 import com.arms.api.engine.model.enums.IsReqType;
 import com.arms.api.engine.model.dto.히트맵데이터;

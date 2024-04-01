@@ -1,6 +1,6 @@
 package com.arms.api.engine.common.service;
 
-import com.arms.api.engine.jiraissue.entity.지라이슈;
+import com.arms.api.index_entity.지라이슈;
 import com.arms.elasticsearch.검색조건;
 
 import java.util.List;

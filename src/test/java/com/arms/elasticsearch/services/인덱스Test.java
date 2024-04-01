@@ -1,7 +1,7 @@
 package com.arms.elasticsearch.services;
 
 import com.arms.api.engine.model.dto.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
-import com.arms.api.engine.jiraissue.entity.지라이슈;
+import com.arms.api.index_entity.지라이슈;
 import com.arms.api.engine.common.constrant.index.인덱스자료;
 import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
 import com.arms.elasticsearch.버킷_집계_결과;
@@ -54,7 +54,7 @@ public class 인덱스Test {
     }
 
     public boolean 인덱스클래스로_인덱스백업(Class<?> clazz) {
-        String 현재_지라이슈인덱스 = 인덱스자료.지라이슈_인덱스명;
+        String 현재_지라이슈인덱스 = 인덱스자료.이슈_인덱스명;
         String currentDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         currentDate = "-2024-01-04";
         String 백업_지라이슈인덱스 = 현재_지라이슈인덱스 + currentDate;
@@ -83,7 +83,7 @@ public class 인덱스Test {
 
     @Test
     public void 인덱스삭제Test() {
-        String 현재_지라이슈인덱스 = 인덱스자료.지라이슈_인덱스명;
+        String 현재_지라이슈인덱스 = 인덱스자료.이슈_인덱스명;
         String currentDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date(2023-11-28));
         String 백업_지라이슈인덱스 = 현재_지라이슈인덱스 + "-2023-11-30";
 
@@ -112,7 +112,7 @@ public class 인덱스Test {
 
     @Test
     public void Doc백업() {
-        String 현재_지라이슈인덱스 = 인덱스자료.지라이슈_인덱스명;
+        String 현재_지라이슈인덱스 = 인덱스자료.이슈_인덱스명;
         String 백업_지라이슈인덱스 = 현재_지라이슈인덱스 + "_backup";
 
         if (!인덱스_존재_확인(백업_지라이슈인덱스)) {
@@ -207,7 +207,7 @@ public class 인덱스Test {
         ZonedDateTime utcTime = kstTime.withZoneSameInstant(ZoneOffset.UTC);
         LocalDate currentDate = utcTime.toLocalDate();
         // String 오늘날짜 = utcTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String backupIndexName = 인덱스자료.지라이슈_인덱스명+"_backup";
+        String backupIndexName = 인덱스자료.이슈_인덱스명 +"_backup";
 
         while (!currentDate.isBefore(endDate)) { // 현재 날짜가 종료 날짜보다 이전이 아닐 때까지 반복
             // 필요한 로직을 실행합니다.
@@ -224,7 +224,7 @@ public class 인덱스Test {
             System.out.println(arr[0]); // 예시로 현재 날짜를 출력합니다.
             System.out.println(formattedDate); // 예시로 현재 날짜를 출력합니다.
 
-            String originIndexName = 인덱스자료.지라이슈_인덱스명+"-"+arr[0];
+            String originIndexName = 인덱스자료.이슈_인덱스명 +"-"+arr[0];
 
             if (인덱스_존재_확인(originIndexName)) {
                 if(!인덱스_존재_확인(backupIndexName)) {
