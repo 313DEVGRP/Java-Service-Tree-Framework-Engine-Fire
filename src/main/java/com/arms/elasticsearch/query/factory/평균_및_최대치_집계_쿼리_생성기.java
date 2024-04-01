@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.support.ValuesSourceAggregationBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
@@ -21,11 +22,27 @@ import java.util.function.Function;
 	public class 평균_및_최대치_집계_쿼리_생성기 implements 쿼리_추상_팩토리 {
 
 	private final List<String> 그룹_필드들;
+	private final String 메인_그룹_필드;
 	private final EsQuery esQuery;
 	private final NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
+	private final TermsAggregationBuilder termsAggregationBuilder;
 
 	private 평균_및_최대치_집계_쿼리_생성기(평균_및_최대치_집계_요청 평균_및_최대치_집계_요청, EsQuery esQuery){
-		this.그룹_필드들 = 평균_및_최대치_집계_요청.get그룹_필드들();
+		this.termsAggregationBuilder
+			= AggregationBuilders.terms("group_by_" + 평균_및_최대치_집계_요청.get메인_그룹_필드())
+				.field(평균_및_최대치_집계_요청.get메인_그룹_필드());
+
+		nativeSearchQueryBuilder.addAggregation(
+				this.termsAggregationBuilder
+		);
+
+		Optional.of(평균_및_최대치_집계_요청.get하위크기()).filter(a->a>0)
+			.ifPresent(a->{
+				this.termsAggregationBuilder.size(평균_및_최대치_집계_요청.get하위크기());
+			});
+
+		this.메인_그룹_필드 = 평균_및_최대치_집계_요청.get메인_그룹_필드();
+		this.그룹_필드들 = 평균_및_최대치_집계_요청.get하위_그룹_필드들();
 		this.esQuery = esQuery;
 	}
 
@@ -48,8 +65,8 @@ import java.util.function.Function;
 
 	private <T extends ValuesSourceAggregationBuilder<T>> void aggregation(Function<String,ValuesSourceAggregationBuilder<T>> aggregationBuilders) {
 
-		그룹_필드들.forEach(그룹_필드-> nativeSearchQueryBuilder
-			.addAggregation(
+		그룹_필드들.forEach(그룹_필드-> termsAggregationBuilder
+			.subAggregation(
 				aggregationBuilders.apply(그룹_필드)
 					.field(그룹_필드)
 			)
