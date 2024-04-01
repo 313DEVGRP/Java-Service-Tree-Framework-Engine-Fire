@@ -28,7 +28,7 @@ import java.util.*;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
-@Service("지라이슈_요구사항_서비스")
+@Service("요구사항_서비스")
 @AllArgsConstructor
 public class 요구사항_서비스_프로세스 implements 요구사항_서비스 {
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());

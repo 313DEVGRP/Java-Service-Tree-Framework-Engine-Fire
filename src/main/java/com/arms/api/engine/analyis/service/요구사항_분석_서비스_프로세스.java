@@ -52,7 +52,7 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 @Service("요구사항_분석_서비스")
 @AllArgsConstructor
-public class 요구사항분석_서비스_프로세스 implements 요구사항_분석_서비스 {
+public class 요구사항_분석_서비스_프로세스 implements 요구사항_분석_서비스 {
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     private 지라이슈_저장소 지라이슈저장소;

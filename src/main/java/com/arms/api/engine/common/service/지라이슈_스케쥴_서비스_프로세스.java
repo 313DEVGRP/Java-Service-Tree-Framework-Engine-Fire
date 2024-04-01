@@ -33,7 +33,7 @@ import java.util.stream.StreamSupport;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
-@Service("지라이슈_서비스")
+@Service("지라이슈_스케쥴_서비스")
 @AllArgsConstructor
 public class 지라이슈_스케쥴_서비스_프로세스 implements 지라이슈_스케쥴_서비스 {
 
