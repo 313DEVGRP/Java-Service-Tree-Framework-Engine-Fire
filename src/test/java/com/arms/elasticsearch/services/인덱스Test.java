@@ -1,8 +1,8 @@
 package com.arms.elasticsearch.services;
 
-import com.arms.api.engine.model.dto.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
-import com.arms.api.index_entity.이슈_인덱스;
-import com.arms.api.engine.common.constrant.index.인덱스자료;
+import com.arms.api.utils.model.dto.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
+import com.arms.api.alm.issue.model.지라이슈_엔티티;
+import com.arms.api.utils.common.constrant.index.인덱스자료;
 import com.arms.api.alm.issue.repository.지라이슈_저장소;
 import com.arms.elasticsearch.버킷_집계_결과;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,7 +49,7 @@ public class 인덱스Test {
 
     @Test
     public void 인덱스백업Test() {
-        boolean 결과 = 인덱스클래스로_인덱스백업(이슈_인덱스.class);
+        boolean 결과 = 인덱스클래스로_인덱스백업(지라이슈_엔티티.class);
         assertTrue(결과);
     }
 
@@ -120,7 +120,7 @@ public class 인덱스Test {
                 System.out.println("현재 인덱스 정보가 없습니다.");
             }
 
-            if (!인덱스_백업_생성(백업_지라이슈인덱스, 이슈_인덱스.class)) {
+            if (!인덱스_백업_생성(백업_지라이슈인덱스, 지라이슈_엔티티.class)) {
             } else {
                 System.out.println("백업 인덱스 생성 성공");
             }
@@ -146,7 +146,7 @@ public class 인덱스Test {
                     .withQuery(전체조회)
                     .withPageable(PageRequest.of(페이지, 페이지크기));
 
-            List<이슈_인덱스> 페이징결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build());
+            List<지라이슈_엔티티> 페이징결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build());
 
             if (페이징결과 == null || 페이징결과.isEmpty()) {
                 break;
@@ -184,7 +184,7 @@ public class 인덱스Test {
         }
     }
 
-    public int 대량이슈_추가하기(List<이슈_인덱스> 대량이슈_리스트, String 백업인덱스) {
+    public int 대량이슈_추가하기(List<지라이슈_엔티티> 대량이슈_리스트, String 백업인덱스) {
 
         List<IndexQuery> 검색엔진_쿼리 = 대량이슈_리스트.stream()
                 .map(지라이슈 -> new IndexQueryBuilder().withId(String.valueOf(지라이슈.getId()))
@@ -228,7 +228,7 @@ public class 인덱스Test {
 
             if (인덱스_존재_확인(originIndexName)) {
                 if(!인덱스_존재_확인(backupIndexName)) {
-                    인덱스_백업_생성(backupIndexName, 이슈_인덱스.class);
+                    인덱스_백업_생성(backupIndexName, 지라이슈_엔티티.class);
                 }
 
                 backupIndexQuery(originIndexName, backupIndexName, arr[0], formattedDate);
@@ -329,7 +329,7 @@ public class 인덱스Test {
                 System.out.println("현재 인덱스 정보가 없습니다.");
             }
 
-            if (!인덱스_백업_생성(백업_지라이슈인덱스, 이슈_인덱스.class)) {
+            if (!인덱스_백업_생성(백업_지라이슈인덱스, 지라이슈_엔티티.class)) {
             }
         } else {
             System.out.println("백업 인덱스 정보가 있습니다.");
@@ -343,7 +343,7 @@ public class 인덱스Test {
                     .withQuery(QueryBuilders.matchAllQuery())
                     .withPageable(PageRequest.of(페이지, 페이지크기));
 
-            List<이슈_인덱스> 지라이슈목록 = 지라이슈저장소.normalSearch(searchQuery.build());
+            List<지라이슈_엔티티> 지라이슈목록 = 지라이슈저장소.normalSearch(searchQuery.build());
             // SearchHits<지라이슈> searchHits = 엘라스틱서치_작업.search(searchQuery, 지라이슈.class, IndexCoordinates.of(현재_지라이슈인덱스));
 
             if (지라이슈목록.isEmpty()) {
@@ -352,7 +352,7 @@ public class 인덱스Test {
 
             List<IndexQuery> indexQueries = new ArrayList<>();
 
-            for (이슈_인덱스 이슈 : 지라이슈목록) {
+            for (지라이슈_엔티티 이슈 : 지라이슈목록) {
                 String newId = 이슈.getId() + 백업날짜;
 
                 IndexQuery indexQuery = new IndexQueryBuilder()

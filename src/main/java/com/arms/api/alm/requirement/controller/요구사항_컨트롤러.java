@@ -1,8 +1,8 @@
 package com.arms.api.alm.requirement.controller;
 
 
-import com.arms.api.index_entity.이슈_인덱스;
-import com.arms.api.engine.model.dto.지라이슈_일반_집계_요청;
+import com.arms.api.alm.issue.model.지라이슈_엔티티;
+import com.arms.api.utils.model.dto.지라이슈_일반_집계_요청;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
@@ -26,7 +26,7 @@ public class 요구사항_컨트롤러 {
 
     // Requirement - ReqStatus
     @PostMapping("/requirement-linkedissue/{pdServiceId}")
-    public ResponseEntity<List<이슈_인덱스>> 제품별_요구사항_연결이슈_조회(@PathVariable Long pdServiceId, 지라이슈_일반_집계_요청 지라이슈_일반_집계_요청) {
+    public ResponseEntity<List<지라이슈_엔티티>> 제품별_요구사항_연결이슈_조회(@PathVariable Long pdServiceId, 지라이슈_일반_집계_요청 지라이슈_일반_집계_요청) {
 
         EsQuery esQuery
                 = new EsQueryBuilder()
@@ -61,10 +61,10 @@ public class 요구사항_컨트롤러 {
             value = {"/search/{issueKey}/subAndLinks"},
             method = {RequestMethod.GET}
     )
-    public List<이슈_인덱스> 요구사항_링크드이슈_서브테스크_검색하기(@PathVariable("connectId") Long 지라서버_아이디,
-                                              @PathVariable("issueKey") String 이슈_키,
-                                              @RequestParam("page") int 페이지_번호,
-                                              @RequestParam("size") int 페이지_사이즈 ) {
+    public List<지라이슈_엔티티> 요구사항_링크드이슈_서브테스크_검색하기(@PathVariable("connectId") Long 지라서버_아이디,
+                                                @PathVariable("issueKey") String 이슈_키,
+                                                @RequestParam("page") int 페이지_번호,
+                                                @RequestParam("size") int 페이지_사이즈 ) {
 
         return 요구사항_서비스.요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디, 이슈_키, 페이지_번호, 페이지_사이즈);
     }

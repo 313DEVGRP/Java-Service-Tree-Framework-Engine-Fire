@@ -1,6 +1,6 @@
 package com.arms.api.alm.utils;
 
-import com.arms.api.index_entity.이슈_인덱스;
+import com.arms.api.alm.issue.model.지라이슈_엔티티;
 import com.arms.api.alm.issue.model.지라이슈_데이터;
 
 import java.util.Collections;
@@ -11,15 +11,15 @@ import static java.util.stream.Collectors.toList;
 
 public class 지라이슈_생성 {
 
-    public static 이슈_인덱스 ELK_데이터로_변환(
+    public static 지라이슈_엔티티 ELK_데이터로_변환(
             Long 지라서버_아이디, 지라이슈_데이터 지라이슈_데이터,
             boolean 요구사항유형_여부, String 부모_요구사항_키,
             Long 제품서비스_아이디, Long[] 제품서비스_버전들,
             Long cReqLink
     ) {
 
-        이슈_인덱스.프로젝트 프로젝트 = Optional.ofNullable(지라이슈_데이터.getFields().getProject())
-                .map(project -> 이슈_인덱스.프로젝트.builder()
+        지라이슈_엔티티.프로젝트 프로젝트 = Optional.ofNullable(지라이슈_데이터.getFields().getProject())
+                .map(project -> 지라이슈_엔티티.프로젝트.builder()
                         .id(project.getId())
                         .key(project.getKey())
                         .name(project.getName())
@@ -27,8 +27,8 @@ public class 지라이슈_생성 {
                         .build())
                 .orElse(null);
 
-        이슈_인덱스.이슈유형 이슈유형 = Optional.ofNullable(지라이슈_데이터.getFields().getIssuetype())
-                .map(issuetype -> 이슈_인덱스.이슈유형.builder()
+        지라이슈_엔티티.이슈유형 이슈유형 = Optional.ofNullable(지라이슈_데이터.getFields().getIssuetype())
+                .map(issuetype -> 지라이슈_엔티티.이슈유형.builder()
                         .self(issuetype.getSelf())
                         .id(issuetype.getId())
                         .description(issuetype.getDescription())
@@ -39,32 +39,32 @@ public class 지라이슈_생성 {
                         .build())
                 .orElse(null);
 
-        이슈_인덱스.생성자 생성자 = Optional.ofNullable(지라이슈_데이터.getFields().getCreator())
-                .map(creator -> 이슈_인덱스.생성자.builder()
+        지라이슈_엔티티.생성자 생성자 = Optional.ofNullable(지라이슈_데이터.getFields().getCreator())
+                .map(creator -> 지라이슈_엔티티.생성자.builder()
                         .accountId(creator.getAccountId())
                         .emailAddress(creator.getEmailAddress())
                         .displayName(creator.getDisplayName())
                         .build())
                 .orElse(null);
 
-        이슈_인덱스.보고자 보고자 = Optional.ofNullable(지라이슈_데이터.getFields().getReporter())
-                .map(reporter -> 이슈_인덱스.보고자.builder()
+        지라이슈_엔티티.보고자 보고자 = Optional.ofNullable(지라이슈_데이터.getFields().getReporter())
+                .map(reporter -> 지라이슈_엔티티.보고자.builder()
                         .accountId(reporter.getAccountId())
                         .emailAddress(reporter.getEmailAddress())
                         .displayName(reporter.getDisplayName())
                         .build())
                 .orElse(null);
 
-        이슈_인덱스.담당자 담당자 = Optional.ofNullable(지라이슈_데이터.getFields().getAssignee())
-                .map(assignee -> 이슈_인덱스.담당자.builder()
+        지라이슈_엔티티.담당자 담당자 = Optional.ofNullable(지라이슈_데이터.getFields().getAssignee())
+                .map(assignee -> 지라이슈_엔티티.담당자.builder()
                         .accountId(assignee.getAccountId())
                         .emailAddress(assignee.getEmailAddress())
                         .displayName(assignee.getDisplayName())
                         .build())
                 .orElse(null);
 
-        이슈_인덱스.우선순위 우선순위 = Optional.ofNullable(지라이슈_데이터.getFields().getPriority())
-                .map(priority -> 이슈_인덱스.우선순위.builder()
+        지라이슈_엔티티.우선순위 우선순위 = Optional.ofNullable(지라이슈_데이터.getFields().getPriority())
+                .map(priority -> 지라이슈_엔티티.우선순위.builder()
                         .self(priority.getSelf())
                         .id(priority.getId())
                         .name(priority.getName())
@@ -73,8 +73,8 @@ public class 지라이슈_생성 {
                         .build())
                 .orElse(null);
 
-        이슈_인덱스.상태 상태 = Optional.ofNullable(지라이슈_데이터.getFields().getStatus())
-                .map(status -> 이슈_인덱스.상태.builder()
+        지라이슈_엔티티.상태 상태 = Optional.ofNullable(지라이슈_데이터.getFields().getStatus())
+                .map(status -> 지라이슈_엔티티.상태.builder()
                         .self(status.getSelf())
                         .id(status.getId())
                         .name(status.getName())
@@ -82,8 +82,8 @@ public class 지라이슈_생성 {
                         .build())
                 .orElse(null);
 
-        이슈_인덱스.해결책 해결책 = Optional.ofNullable(지라이슈_데이터.getFields().getResolution())
-                .map(resolution -> 이슈_인덱스.해결책.builder()
+        지라이슈_엔티티.해결책 해결책 = Optional.ofNullable(지라이슈_데이터.getFields().getResolution())
+                .map(resolution -> 지라이슈_엔티티.해결책.builder()
                         .self(resolution.getSelf())
                         .id(resolution.getId())
                         .name(resolution.getName())
@@ -92,23 +92,23 @@ public class 지라이슈_생성 {
                         .build())
                 .orElse(null);
 
-        List<이슈_인덱스.워크로그> 워크로그 = Optional.ofNullable(지라이슈_데이터.getFields().getWorklogs())
+        List<지라이슈_엔티티.워크로그> 워크로그 = Optional.ofNullable(지라이슈_데이터.getFields().getWorklogs())
                 .orElse(Collections.emptyList()) // null인 경우 빈 리스트 반환
                 .stream()
                 .map(워크로그아이템 -> {
-                    이슈_인덱스.저자 저자 = Optional.ofNullable(워크로그아이템.getAuthor())
-                            .map(author -> new 이슈_인덱스.저자(
+                    지라이슈_엔티티.저자 저자 = Optional.ofNullable(워크로그아이템.getAuthor())
+                            .map(author -> new 지라이슈_엔티티.저자(
                                     author.getAccountId(),
                                     author.getEmailAddress()))
                             .orElse(null);
 
-                    이슈_인덱스.수정한_저자 수정한_저자 = Optional.ofNullable(워크로그아이템.getUpdateAuthor())
-                            .map(updateAuthor -> new 이슈_인덱스.수정한_저자(
+                    지라이슈_엔티티.수정한_저자 수정한_저자 = Optional.ofNullable(워크로그아이템.getUpdateAuthor())
+                            .map(updateAuthor -> new 지라이슈_엔티티.수정한_저자(
                                     updateAuthor.getAccountId(),
                                     updateAuthor.getEmailAddress()))
                             .orElse(null);
 
-                    return new 이슈_인덱스.워크로그(워크로그아이템.getSelf(),
+                    return new 지라이슈_엔티티.워크로그(워크로그아이템.getSelf(),
                             저자,
                             수정한_저자,
                             워크로그아이템.getCreated(),
@@ -122,7 +122,7 @@ public class 지라이슈_생성 {
                 })
                 .collect(toList());
 
-        이슈_인덱스 이슈 = 이슈_인덱스.builder()
+        지라이슈_엔티티 이슈 = 지라이슈_엔티티.builder()
                 .jira_server_id(지라서버_아이디)
                 .issueID(지라이슈_데이터.getId())
                 .key(지라이슈_데이터.getKey())
