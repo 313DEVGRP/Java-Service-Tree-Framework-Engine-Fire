@@ -1,7 +1,7 @@
 package com.arms.api.alm.utils;
 
-import com.arms.api.alm.issue.model.지라이슈_엔티티;
-import com.arms.api.alm.issue.model.지라이슈_데이터;
+import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
+import com.arms.api.alm.issue.base.model.지라이슈_데이터;
 
 import java.util.Collections;
 import java.util.List;

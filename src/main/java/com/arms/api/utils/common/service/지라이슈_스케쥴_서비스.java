@@ -1,6 +1,6 @@
 package com.arms.api.utils.common.service;
 
-import com.arms.api.alm.issue.model.지라이슈_엔티티;
+import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.elasticsearch.검색조건;
 
 import java.util.List;

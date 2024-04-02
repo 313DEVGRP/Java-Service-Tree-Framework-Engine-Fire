@@ -9,7 +9,7 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.arms.api.alm.issue.model.지라이슈_엔티티;
+import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 
 @ActiveProfiles("dev")
 @SpringBootTest
@@ -17,7 +17,7 @@ public class 이슈인덱스_저장소Test {
 
 
 	@Autowired
-	private com.arms.api.alm.issue.repository.지라이슈_저장소 지라이슈_저장소;
+	private com.arms.api.alm.issue.base.repository.지라이슈_저장소 지라이슈_저장소;
 
 	@Test
 	public void test(){

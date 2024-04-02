@@ -2,9 +2,9 @@ package com.arms.api.alm.analyis.service;
 
 import com.arms.api.utils.model.dto.*;
 import com.arms.api.utils.model.enums.IsReqType;
-import com.arms.api.alm.issue.model.지라이슈_엔티티;
+import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.utils.common.constrant.index.인덱스자료;
-import com.arms.api.alm.issue.repository.지라이슈_저장소;
+import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
 import com.arms.elasticsearch.query.*;
 import com.arms.elasticsearch.query.esquery.EsBoolQuery;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;

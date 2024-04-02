@@ -1,6 +1,6 @@
 package com.arms.api.alm.utils;
 
-import com.arms.api.alm.issue.model.클라우드_이슈생성필드_메타데이터;
+import com.arms.api.alm.issue.base.model.클라우드_이슈생성필드_메타데이터;
 import com.arms.api.utils.errors.에러로그_유틸;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory;
@@ -211,7 +211,7 @@ public class 지라유틸 {
         }
 
         Map<String, 클라우드_이슈생성필드_메타데이터.필드_메타데이터> 필드맵 = 메타데이터_목록.stream()
-                .collect(Collectors.toMap(com.arms.api.alm.issue.model.클라우드_이슈생성필드_메타데이터.필드_메타데이터::getFieldId, field -> field));
+                .collect(Collectors.toMap(com.arms.api.alm.issue.base.model.클라우드_이슈생성필드_메타데이터.필드_메타데이터::getFieldId, field -> field));
 
         return 필드맵;
     }

@@ -1,13 +1,13 @@
 package com.arms.api.utils.common.service;
 
-import com.arms.api.alm.issue.model.지라이슈_데이터;
-import com.arms.api.alm.issue.model.지라이슈필드_데이터;
-import com.arms.api.alm.issue.model.지라프로젝트_데이터;
-import com.arms.api.alm.issue.service.이슈전략_호출;
-import com.arms.api.alm.issuestatus.model.이슈상태_데이터;
+import com.arms.api.alm.issue.base.model.지라이슈_데이터;
+import com.arms.api.alm.issue.base.model.지라이슈필드_데이터;
+import com.arms.api.alm.issue.base.model.지라프로젝트_데이터;
+import com.arms.api.alm.issue.base.service.이슈전략_호출;
+import com.arms.api.alm.issue.status.model.이슈상태_데이터;
 import com.arms.api.utils.common.constrant.index.인덱스자료;
-import com.arms.api.alm.issue.model.지라이슈_엔티티;
-import com.arms.api.alm.issue.repository.지라이슈_저장소;
+import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
+import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
 import com.arms.api.alm.utils.지라이슈_생성;
 import com.arms.elasticsearch.query.builder.검색_쿼리_빌더;
 import com.arms.elasticsearch.검색조건;
