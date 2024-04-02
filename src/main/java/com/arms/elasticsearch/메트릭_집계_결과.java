@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation.Bucket;
 import org.elasticsearch.search.aggregations.metrics.ParsedSingleValueNumericMetricsAggregation;
 
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,6 +37,17 @@ public class 메트릭_집계_결과 {
 
     public Double 필터필드개수(String name){
         return 하위검색결과.get(name).stream().findFirst().map(a->a.get개수()).orElse(0D);
+    }
+
+    public Float 필터필드개수ToFloat(String name){
+        DecimalFormat df = new DecimalFormat("#.#");
+        return 하위검색결과.get(name).stream().findFirst().map(a->{
+            try{
+                return Float.parseFloat(df.format(Double.valueOf(a.get개수())));
+            }catch (NumberFormatException nfe){
+                return 0.0f;
+            }
+        }).orElse(0.0f);
     }
 
     public String 필터필드명(String name){
