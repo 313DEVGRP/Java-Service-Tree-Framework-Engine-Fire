@@ -1,7 +1,7 @@
 package com.arms.api.alm.serverinfo.controller;
 
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
-import com.arms.api.index_entity.서버정보_인덱스;
+import com.arms.api.alm.serverinfo.model.서버정보_엔티티;
 import com.arms.api.alm.serverinfo.service.서버정보_서비스;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,7 @@ public class 서버정보_컨트롤러 {
             value = {""},
             method = {RequestMethod.POST}
     )
-    public 서버정보_인덱스 서버정보_저장_또는_수정(@RequestBody 서버정보_데이터 서버정보_데이터,
+    public 서버정보_엔티티 서버정보_저장_또는_수정(@RequestBody 서버정보_데이터 서버정보_데이터,
                                   ModelMap model, HttpServletRequest request) throws Exception {
 
         로그.info("서버정보 저장");
@@ -38,7 +38,7 @@ public class 서버정보_컨트롤러 {
             value = {"/backup/scheduler"},
             method = {RequestMethod.POST}
     )
-    public Iterable<서버정보_인덱스> 서버정보백업_스케줄러(ModelMap model, HttpServletRequest request) throws Exception {
+    public Iterable<서버정보_엔티티> 서버정보백업_스케줄러(ModelMap model, HttpServletRequest request) throws Exception {
 
         로그.info("서버정보백업 스케줄러");
 
@@ -53,7 +53,7 @@ public class 서버정보_컨트롤러 {
             value = {""},
             method = {RequestMethod.DELETE}
     )
-    public 서버정보_인덱스 서버정보_삭제(@RequestBody 서버정보_데이터 서버정보_데이터,
+    public 서버정보_엔티티 서버정보_삭제(@RequestBody 서버정보_데이터 서버정보_데이터,
                             ModelMap model, HttpServletRequest request) throws Exception {
 
         로그.info("특정 서버정보 삭제");
