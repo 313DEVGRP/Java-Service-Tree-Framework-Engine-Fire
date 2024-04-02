@@ -1,9 +1,9 @@
 package com.arms.api.engine.search.controller;
 
-import com.arms.api.engine.fluentd.entity.플루언트디;
-import com.arms.api.engine.fluentd.service.플루언트디_서비스;
-import com.arms.api.engine.jiraissue.entity.지라이슈;
-import com.arms.api.engine.jiraissue.service.지라이슈_검색_서비스;
+import com.arms.api.index_entity.플루언트디_인덱스;
+import com.arms.api.alm.fluentd.service.플루언트디_서비스;
+import com.arms.api.index_entity.이슈_인덱스;
+import com.arms.api.alm.issue.service.지라이슈_검색_서비스;
 import com.arms.api.engine.model.dto.검색어_검색결과;
 import com.arms.api.engine.model.dto.검색어_기본_검색_요청;
 import com.arms.api.engine.model.dto.검색어_날짜포함_검색_요청;
@@ -37,7 +37,7 @@ public class 검색_컨트롤러 {
         검색어_기본_검색_요청.set검색어(검색어);
         검색어_기본_검색_요청.set페이지(Integer.parseInt(페이지));
         검색어_기본_검색_요청.set크기(Integer.parseInt(크기));
-        검색어_검색결과<SearchHit<지라이슈>> 검색결과_목록 = 지라이슈_검색_서비스.지라이슈_검색(검색어_기본_검색_요청);
+        검색어_검색결과<SearchHit<이슈_인덱스>> 검색결과_목록 = 지라이슈_검색_서비스.지라이슈_검색(검색어_기본_검색_요청);
         return ResponseEntity.ok(검색결과_목록);
     }
 
@@ -54,7 +54,7 @@ public class 검색_컨트롤러 {
         검색어_날짜포함_검색_요청.set크기(Integer.parseInt(크기));
         검색어_날짜포함_검색_요청.set시작_날짜(시작_날짜);
         검색어_날짜포함_검색_요청.set끝_날짜(끝_날짜);
-        검색어_검색결과<SearchHit<지라이슈>> 검색결과_목록 = 지라이슈_검색_서비스.지라이슈_날짜포함_검색(검색어_날짜포함_검색_요청);
+        검색어_검색결과<SearchHit<이슈_인덱스>> 검색결과_목록 = 지라이슈_검색_서비스.지라이슈_날짜포함_검색(검색어_날짜포함_검색_요청);
         return ResponseEntity.ok(검색결과_목록);
     }
 
@@ -68,7 +68,7 @@ public class 검색_컨트롤러 {
         검색어_기본_검색_요청.set검색어(검색어);
         검색어_기본_검색_요청.set페이지(Integer.parseInt(페이지));
         검색어_기본_검색_요청.set크기(Integer.parseInt(크기));
-        검색어_검색결과<SearchHit<플루언트디>> 검색결과_목록 = 플루언트디_서비스.플루언트디_검색(검색어_기본_검색_요청);
+        검색어_검색결과<SearchHit<플루언트디_인덱스>> 검색결과_목록 = 플루언트디_서비스.플루언트디_검색(검색어_기본_검색_요청);
         return ResponseEntity.ok(검색결과_목록);
     }
 
@@ -85,7 +85,7 @@ public class 검색_컨트롤러 {
         검색어_날짜포함_검색_요청.set크기(Integer.parseInt(크기));
         검색어_날짜포함_검색_요청.set시작_날짜(시작_날짜);
         검색어_날짜포함_검색_요청.set끝_날짜(끝_날짜);
-        검색어_검색결과<SearchHit<플루언트디>> 검색결과_목록 = 플루언트디_서비스.플루언트디_날짜포함_검색(검색어_날짜포함_검색_요청);
+        검색어_검색결과<SearchHit<플루언트디_인덱스>> 검색결과_목록 = 플루언트디_서비스.플루언트디_날짜포함_검색(검색어_날짜포함_검색_요청);
         return ResponseEntity.ok(검색결과_목록);
     }
 

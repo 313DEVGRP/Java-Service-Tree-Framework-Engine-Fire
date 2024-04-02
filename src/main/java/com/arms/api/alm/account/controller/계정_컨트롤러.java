@@ -2,7 +2,7 @@ package com.arms.api.alm.account.controller;
 
 import com.arms.api.alm.account.model.계정정보_데이터;
 import com.arms.api.alm.account.service.계정전략_호출;
-import com.arms.api.serverinfo.model.서버정보_데이터;
+import com.arms.api.alm.serverinfo.model.서버정보_데이터;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,9 +1,9 @@
 package com.arms.elasticsearch.services;
 
 import com.arms.api.engine.model.dto.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
-import com.arms.api.engine.jiraissue.entity.지라이슈;
+import com.arms.api.index_entity.이슈_인덱스;
 import com.arms.api.engine.common.constrant.index.인덱스자료;
-import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
+import com.arms.api.alm.issue.repository.지라이슈_저장소;
 import com.arms.elasticsearch.버킷_집계_결과;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
@@ -49,12 +49,12 @@ public class 인덱스Test {
 
     @Test
     public void 인덱스백업Test() {
-        boolean 결과 = 인덱스클래스로_인덱스백업(지라이슈.class);
+        boolean 결과 = 인덱스클래스로_인덱스백업(이슈_인덱스.class);
         assertTrue(결과);
     }
 
     public boolean 인덱스클래스로_인덱스백업(Class<?> clazz) {
-        String 현재_지라이슈인덱스 = 인덱스자료.지라이슈_인덱스명;
+        String 현재_지라이슈인덱스 = 인덱스자료.이슈_인덱스명;
         String currentDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         currentDate = "-2024-01-04";
         String 백업_지라이슈인덱스 = 현재_지라이슈인덱스 + currentDate;
@@ -83,7 +83,7 @@ public class 인덱스Test {
 
     @Test
     public void 인덱스삭제Test() {
-        String 현재_지라이슈인덱스 = 인덱스자료.지라이슈_인덱스명;
+        String 현재_지라이슈인덱스 = 인덱스자료.이슈_인덱스명;
         String currentDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date(2023-11-28));
         String 백업_지라이슈인덱스 = 현재_지라이슈인덱스 + "-2023-11-30";
 
@@ -112,7 +112,7 @@ public class 인덱스Test {
 
     @Test
     public void Doc백업() {
-        String 현재_지라이슈인덱스 = 인덱스자료.지라이슈_인덱스명;
+        String 현재_지라이슈인덱스 = 인덱스자료.이슈_인덱스명;
         String 백업_지라이슈인덱스 = 현재_지라이슈인덱스 + "_backup";
 
         if (!인덱스_존재_확인(백업_지라이슈인덱스)) {
@@ -120,7 +120,7 @@ public class 인덱스Test {
                 System.out.println("현재 인덱스 정보가 없습니다.");
             }
 
-            if (!인덱스_백업_생성(백업_지라이슈인덱스, 지라이슈.class)) {
+            if (!인덱스_백업_생성(백업_지라이슈인덱스, 이슈_인덱스.class)) {
             } else {
                 System.out.println("백업 인덱스 생성 성공");
             }
@@ -146,7 +146,7 @@ public class 인덱스Test {
                     .withQuery(전체조회)
                     .withPageable(PageRequest.of(페이지, 페이지크기));
 
-            List<지라이슈> 페이징결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build());
+            List<이슈_인덱스> 페이징결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build());
 
             if (페이징결과 == null || 페이징결과.isEmpty()) {
                 break;
@@ -184,7 +184,7 @@ public class 인덱스Test {
         }
     }
 
-    public int 대량이슈_추가하기(List<지라이슈> 대량이슈_리스트, String 백업인덱스) {
+    public int 대량이슈_추가하기(List<이슈_인덱스> 대량이슈_리스트, String 백업인덱스) {
 
         List<IndexQuery> 검색엔진_쿼리 = 대량이슈_리스트.stream()
                 .map(지라이슈 -> new IndexQueryBuilder().withId(String.valueOf(지라이슈.getId()))
@@ -207,7 +207,7 @@ public class 인덱스Test {
         ZonedDateTime utcTime = kstTime.withZoneSameInstant(ZoneOffset.UTC);
         LocalDate currentDate = utcTime.toLocalDate();
         // String 오늘날짜 = utcTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String backupIndexName = 인덱스자료.지라이슈_인덱스명+"_backup";
+        String backupIndexName = 인덱스자료.이슈_인덱스명 +"_backup";
 
         while (!currentDate.isBefore(endDate)) { // 현재 날짜가 종료 날짜보다 이전이 아닐 때까지 반복
             // 필요한 로직을 실행합니다.
@@ -224,11 +224,11 @@ public class 인덱스Test {
             System.out.println(arr[0]); // 예시로 현재 날짜를 출력합니다.
             System.out.println(formattedDate); // 예시로 현재 날짜를 출력합니다.
 
-            String originIndexName = 인덱스자료.지라이슈_인덱스명+"-"+arr[0];
+            String originIndexName = 인덱스자료.이슈_인덱스명 +"-"+arr[0];
 
             if (인덱스_존재_확인(originIndexName)) {
                 if(!인덱스_존재_확인(backupIndexName)) {
-                    인덱스_백업_생성(backupIndexName, 지라이슈.class);
+                    인덱스_백업_생성(backupIndexName, 이슈_인덱스.class);
                 }
 
                 backupIndexQuery(originIndexName, backupIndexName, arr[0], formattedDate);
@@ -329,7 +329,7 @@ public class 인덱스Test {
                 System.out.println("현재 인덱스 정보가 없습니다.");
             }
 
-            if (!인덱스_백업_생성(백업_지라이슈인덱스, 지라이슈.class)) {
+            if (!인덱스_백업_생성(백업_지라이슈인덱스, 이슈_인덱스.class)) {
             }
         } else {
             System.out.println("백업 인덱스 정보가 있습니다.");
@@ -343,7 +343,7 @@ public class 인덱스Test {
                     .withQuery(QueryBuilders.matchAllQuery())
                     .withPageable(PageRequest.of(페이지, 페이지크기));
 
-            List<지라이슈> 지라이슈목록 = 지라이슈저장소.normalSearch(searchQuery.build());
+            List<이슈_인덱스> 지라이슈목록 = 지라이슈저장소.normalSearch(searchQuery.build());
             // SearchHits<지라이슈> searchHits = 엘라스틱서치_작업.search(searchQuery, 지라이슈.class, IndexCoordinates.of(현재_지라이슈인덱스));
 
             if (지라이슈목록.isEmpty()) {
@@ -352,7 +352,7 @@ public class 인덱스Test {
 
             List<IndexQuery> indexQueries = new ArrayList<>();
 
-            for (지라이슈 이슈 : 지라이슈목록) {
+            for (이슈_인덱스 이슈 : 지라이슈목록) {
                 String newId = 이슈.getId() + 백업날짜;
 
                 IndexQuery indexQuery = new IndexQueryBuilder()

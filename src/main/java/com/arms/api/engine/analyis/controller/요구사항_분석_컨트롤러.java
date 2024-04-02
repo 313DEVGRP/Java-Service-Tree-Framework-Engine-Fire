@@ -1,6 +1,6 @@
 package com.arms.api.engine.analyis.controller;
 
-import com.arms.api.engine.jiraissue.entity.지라이슈;
+import com.arms.api.index_entity.이슈_인덱스;
 import com.arms.api.engine.model.dto.*;
 import com.arms.api.engine.model.enums.IsReqType;
 import com.arms.api.engine.model.dto.히트맵데이터;
@@ -138,7 +138,7 @@ public class 요구사항_분석_컨트롤러 {
 
     // Analysis Time
     @GetMapping("/standard-daily/updated-jira-issue")
-    public ResponseEntity<List<지라이슈>>
+    public ResponseEntity<List<이슈_인덱스>>
     기준일자별_제품_및_제품버전목록_업데이트된_이슈조회(
             지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청){
 
@@ -195,12 +195,12 @@ public class 요구사항_분석_컨트롤러 {
     // Analysis Time, Analysis Scope
     @ResponseBody
     @GetMapping("/pdService/pdServiceVersions")
-    public List<지라이슈> 제품서비스_버전목록으로_조회(@RequestParam Long pdServiceLink,
-                                      @RequestParam Long[] pdServiceVersionLinks) throws IOException {
+    public List<이슈_인덱스> 제품서비스_버전목록으로_조회(@RequestParam Long pdServiceLink,
+                                        @RequestParam Long[] pdServiceVersionLinks) throws IOException {
 
         log.info("제품서비스_버전목록으로_조회");
 
-        List<지라이슈> 제품서비스_버전목록으로_조회 = 요구사항_분석_서비스.제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
+        List<이슈_인덱스> 제품서비스_버전목록으로_조회 = 요구사항_분석_서비스.제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
         return 제품서비스_버전목록으로_조회;
     }
 

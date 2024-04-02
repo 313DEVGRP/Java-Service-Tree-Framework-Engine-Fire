@@ -1,8 +1,8 @@
 package com.arms.api.engine.common.component;
 
 
-import com.arms.api.engine.jiraissue.entity.지라이슈;
-import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
+import com.arms.api.index_entity.이슈_인덱스;
+import com.arms.api.alm.issue.repository.지라이슈_저장소;
 import com.arms.elasticsearch.query.builder.검색_쿼리_빌더;
 import com.arms.elasticsearch.검색조건;
 import lombok.AllArgsConstructor;
@@ -21,7 +21,7 @@ public class 서브테스크_조회 {
 
     private 지라이슈_저장소 지라이슈저장소;
 
-    public List<지라이슈> 요구사항_링크드이슈_서브테스크_검색하기(Long 서버_아이디, String 이슈_키, int 페이지_번호, int 페이지_사이즈) {
+    public List<이슈_인덱스> 요구사항_링크드이슈_서브테스크_검색하기(Long 서버_아이디, String 이슈_키, int 페이지_번호, int 페이지_사이즈) {
         List<String> 검색_필드 = new ArrayList<>();
         검색_필드.add("parentReqKey");
 

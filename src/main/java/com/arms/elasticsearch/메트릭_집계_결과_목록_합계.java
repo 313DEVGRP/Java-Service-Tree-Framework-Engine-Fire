@@ -3,6 +3,7 @@ package com.arms.elasticsearch;
 import lombok.Getter;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
 import org.elasticsearch.search.aggregations.metrics.ParsedSingleValueNumericMetricsAggregation;
 import org.springframework.data.elasticsearch.core.SearchHits;
 
@@ -40,8 +41,14 @@ public class 메트릭_집계_결과_목록_합계 {
 	}
 
 	private Stream<메트릭_집계_결과> 매트릭_집계_결과_매핑 (Entry<String, Aggregation> 메트릭_집계_맵) {
-		 return Stream.of((ParsedSingleValueNumericMetricsAggregation) 메트릭_집계_맵.getValue())
-			.map(메트릭_집계_결과::new);
+		if( 메트릭_집계_맵.getValue() instanceof ParsedSingleValueNumericMetricsAggregation){
+			return Stream.of((ParsedSingleValueNumericMetricsAggregation) 메트릭_집계_맵.getValue())
+					.map(메트릭_집계_결과::new);
+		}
+
+		return ((MultiBucketsAggregation) 메트릭_집계_맵.getValue())
+				.getBuckets()
+				.stream().map(메트릭_집계_결과::new);
 	}
 
 	private Map<String, Aggregation> getAsMap(Aggregations aggregationsContainer){

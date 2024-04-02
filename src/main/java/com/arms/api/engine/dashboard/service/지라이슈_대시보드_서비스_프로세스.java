@@ -1,48 +1,19 @@
 package com.arms.api.engine.dashboard.service;
 
-import com.arms.api.engine.common.constrant.index.인덱스자료;
-import com.arms.api.engine.jiraissue.entity.지라이슈;
-import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
+import com.arms.api.index_entity.이슈_인덱스;
+import com.arms.api.alm.issue.repository.지라이슈_저장소;
 import com.arms.api.engine.model.dto.*;
-import com.arms.api.engine.model.enums.IsReqType;
 import com.arms.api.engine.model.vo.TaskList;
 import com.arms.api.engine.model.vo.Worker;
-import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.esquery.EsBoolQuery;
-import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
-import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
-import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
-import com.arms.elasticsearch.query.filter.RangeQueryFilter;
-import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.query.쿼리_추상_팩토리;
-import com.arms.elasticsearch.버킷_집계_결과;
 import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.aggregations.AggregationBuilder;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.BucketOrder;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.sort.SortBuilders;
-import org.elasticsearch.search.sort.SortOrder;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service("지라이슈_대시보드_서비스")
@@ -65,18 +36,18 @@ public class 지라이슈_대시보드_서비스_프로세스 implements 지라�
 
         List<제품버전목록> 제품버전목록데이터 = 트리맵_집계_요청.get제품버전목록();
        
-        List<지라이슈> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionsIn(true, 트리맵_집계_요청.getPdServiceLink(), 트리맵_집계_요청.getPdServiceVersionLinks());
+        List<이슈_인덱스> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionsIn(true, 트리맵_집계_요청.getPdServiceLink(), 트리맵_집계_요청.getPdServiceVersionLinks());
 
         // 요구사항의 키를 모두 추출
-        List<String> allReqKeys = requirementIssues.stream().map(지라이슈::getKey).collect(Collectors.toList());
+        List<String> allReqKeys = requirementIssues.stream().map(이슈_인덱스::getKey).collect(Collectors.toList());
 
         // 모든 하위 태스크를 한 번에 로드
-        List<지라이슈> allSubTasks = 지라이슈저장소.findByParentReqKeyIn(allReqKeys);
+        List<이슈_인덱스> allSubTasks = 지라이슈저장소.findByParentReqKeyIn(allReqKeys);
 
         // 하위 태스크를 부모 키로 그룹화
-        Map<String, List<지라이슈>> subTasksByParent = allSubTasks.stream()
+        Map<String, List<이슈_인덱스>> subTasksByParent = allSubTasks.stream()
                 .filter(subtask -> subtask.getAssignee() != null)
-                .collect(Collectors.groupingBy(지라이슈::getParentReqKey));
+                .collect(Collectors.groupingBy(이슈_인덱스::getParentReqKey));
 
         requirementIssues.stream().forEach(reqIssue -> {
             String key = reqIssue.getKey();

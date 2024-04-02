@@ -1,10 +1,10 @@
 package com.arms.api.alm.project.strategy;
 
 import com.arms.api.alm.project.model.프로젝트_데이터;
-import com.arms.utils.errors.codes.에러코드;
+import com.arms.api.utils.errors.codes.에러코드;
 import com.arms.api.alm.utils.지라유틸;
-import com.arms.api.serverinfo.model.서버정보_데이터;
-import com.arms.api.serverinfo.service.서버정보_서비스;
+import com.arms.api.alm.serverinfo.model.서버정보_데이터;
+import com.arms.api.alm.serverinfo.service.서버정보_서비스;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.api.domain.BasicProject;
 import org.slf4j.Logger;
