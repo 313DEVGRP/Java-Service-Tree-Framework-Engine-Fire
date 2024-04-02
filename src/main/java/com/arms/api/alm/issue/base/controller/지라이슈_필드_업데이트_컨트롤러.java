@@ -1,4 +1,4 @@
-package com.arms.api.utils.common.controller;
+package com.arms.api.alm.issue.base.controller;
 
 import com.arms.api.utils.response.응답처리;
 import org.elasticsearch.index.query.QueryBuilders;
