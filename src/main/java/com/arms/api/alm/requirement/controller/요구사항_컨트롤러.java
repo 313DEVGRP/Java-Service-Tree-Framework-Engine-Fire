@@ -1,7 +1,7 @@
 package com.arms.api.alm.requirement.controller;
 
 
-import com.arms.api.alm.issue.model.지라이슈_엔티티;
+import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.utils.model.dto.지라이슈_일반_집계_요청;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;

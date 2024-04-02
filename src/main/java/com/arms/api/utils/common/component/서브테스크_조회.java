@@ -1,8 +1,8 @@
 package com.arms.api.utils.common.component;
 
 
-import com.arms.api.alm.issue.model.지라이슈_엔티티;
-import com.arms.api.alm.issue.repository.지라이슈_저장소;
+import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
+import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
 import com.arms.elasticsearch.query.builder.검색_쿼리_빌더;
 import com.arms.elasticsearch.검색조건;
 import lombok.AllArgsConstructor;

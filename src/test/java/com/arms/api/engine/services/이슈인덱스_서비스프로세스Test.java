@@ -8,8 +8,8 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.arms.api.alm.issue.model.지라이슈_엔티티;
-import com.arms.api.alm.issue.repository.지라이슈_저장소;
+import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
+import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
 
 @SpringBootTest
 @ActiveProfiles("dev")

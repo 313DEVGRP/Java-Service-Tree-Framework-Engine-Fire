@@ -1,7 +1,7 @@
 package com.arms.api.alm.dashboard.service;
 
-import com.arms.api.alm.issue.model.지라이슈_엔티티;
-import com.arms.api.alm.issue.repository.지라이슈_저장소;
+import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
+import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
 import com.arms.api.utils.model.dto.제품버전목록;
 import com.arms.api.utils.model.dto.트리맵_집계_요청;
 import com.arms.api.utils.model.vo.TaskList;

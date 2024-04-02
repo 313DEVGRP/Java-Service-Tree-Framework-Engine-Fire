@@ -1,6 +1,6 @@
 package com.arms.api.alm.requirement.service;
 
-import com.arms.api.alm.issue.model.지라이슈_엔티티;
+import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.elasticsearch.query.쿼리_추상_팩토리;
 
 import java.io.IOException;

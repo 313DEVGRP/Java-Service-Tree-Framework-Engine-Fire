@@ -1,7 +1,7 @@
 package com.arms.api.alm.serverinfo.service;
 
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
-import com.arms.api.alm.issue.repository.지라이슈_저장소;
+import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
 import com.arms.api.alm.serverinfo.repository.서버정보_저장소;
 import com.arms.api.alm.serverinfo.model.서버정보_엔티티;
 import com.arms.api.utils.errors.codes.에러코드;
