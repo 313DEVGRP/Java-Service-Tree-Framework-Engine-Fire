@@ -1,7 +1,7 @@
 package com.arms.api.engine.dashboard.service;
 
 import com.arms.api.index_entity.이슈_인덱스;
-import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
+import com.arms.api.alm.issue.repository.지라이슈_저장소;
 import com.arms.api.engine.model.dto.*;
 import com.arms.api.engine.model.vo.TaskList;
 import com.arms.api.engine.model.vo.Worker;

@@ -1,5 +1,6 @@
 package com.arms.api.engine.common.controller;
 
+import com.arms.api.utils.response.응답처리;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
@@ -12,9 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.arms.api.engine.model.dto.요구사항_수정_요청;
 import com.arms.api.index_entity.이슈_인덱스;
-import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
+import com.arms.api.alm.issue.repository.지라이슈_저장소;
 
 import lombok.AllArgsConstructor;
+
+import static com.arms.api.utils.response.응답처리.success;
 
 @RestController
 @RequestMapping("/engine/jira/field/update")
@@ -24,7 +27,7 @@ public class 지라이슈_필드_업데이트_컨트롤러 {
 	private final 지라이슈_저장소 지라이슈_저장소;
 
 	@PostMapping("/c_req_link")
-	public ResponseEntity<ApiResult<String>> cReqLink_수정(
+	public ResponseEntity<응답처리.ApiResult<String>> cReqLink_수정(
 			@RequestBody 요구사항_수정_요청 updateReqLinkDTOs
 	) {
 

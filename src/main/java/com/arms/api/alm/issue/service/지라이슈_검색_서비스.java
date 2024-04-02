@@ -1,4 +1,4 @@
-package com.arms.api.engine.jiraissue.service;
+package com.arms.api.alm.issue.service;
 
 import com.arms.api.index_entity.이슈_인덱스;
 import com.arms.api.engine.model.dto.검색어_검색결과;

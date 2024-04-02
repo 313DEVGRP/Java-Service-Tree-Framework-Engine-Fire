@@ -1,8 +1,8 @@
-package com.arms.api.serverinfo.controller;
+package com.arms.api.alm.serverinfo.controller;
 
-import com.arms.api.serverinfo.model.서버정보_데이터;
+import com.arms.api.alm.serverinfo.model.서버정보_데이터;
 import com.arms.api.index_entity.서버정보_인덱스;
-import com.arms.api.serverinfo.service.서버정보_서비스;
+import com.arms.api.alm.serverinfo.service.서버정보_서비스;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

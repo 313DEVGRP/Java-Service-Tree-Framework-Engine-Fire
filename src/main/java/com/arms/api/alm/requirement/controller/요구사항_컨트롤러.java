@@ -1,9 +1,8 @@
-package com.arms.api.engine.requirement.controller;
+package com.arms.api.alm.requirement.controller;
 
 
 import com.arms.api.index_entity.이슈_인덱스;
 import com.arms.api.engine.model.dto.지라이슈_일반_집계_요청;
-import com.arms.api.engine.requirement.service.요구사항_서비스;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
@@ -22,7 +21,7 @@ import java.util.Map;
 public class 요구사항_컨트롤러 {
 
     @Autowired
-    private 요구사항_서비스 요구사항_서비스;
+    private com.arms.api.alm.requirement.service.요구사항_서비스 요구사항_서비스;
 
 
     // Requirement - ReqStatus

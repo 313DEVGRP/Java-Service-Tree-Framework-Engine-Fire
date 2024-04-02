@@ -1,4 +1,4 @@
-package com.arms.api.engine.jiraissue.repository;
+package com.arms.api.alm.issue.repository;
 
 import com.arms.api.index_entity.이슈_인덱스;
 import com.arms.elasticsearch.query.EsQuery;

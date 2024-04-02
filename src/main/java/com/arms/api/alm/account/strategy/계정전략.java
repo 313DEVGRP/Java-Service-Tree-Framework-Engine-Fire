@@ -1,7 +1,7 @@
 package com.arms.api.alm.account.strategy;
 
 import com.arms.api.alm.account.model.계정정보_데이터;
-import com.arms.api.serverinfo.model.서버정보_데이터;
+import com.arms.api.alm.serverinfo.model.서버정보_데이터;
 
 public interface 계정전략 {
 

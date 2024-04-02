@@ -1,4 +1,4 @@
-package com.arms.api.engine.fluentd.service;
+package com.arms.api.alm.fluentd.service;
 
 import com.arms.api.engine.model.dto.검색어_검색결과;
 import com.arms.api.engine.model.dto.검색어_기본_검색_요청;

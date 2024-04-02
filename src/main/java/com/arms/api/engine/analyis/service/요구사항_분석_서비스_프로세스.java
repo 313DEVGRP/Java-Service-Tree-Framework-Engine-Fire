@@ -6,7 +6,7 @@ import com.arms.api.index_entity.이슈_인덱스;
 import com.arms.api.engine.model.dto.지라이슈_일자별_제품_및_제품버전_집계_요청;
 import com.arms.api.engine.model.dto.지라이슈_제품_및_제품버전_집계_요청;
 import com.arms.api.engine.common.constrant.index.인덱스자료;
-import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
+import com.arms.api.alm.issue.repository.지라이슈_저장소;
 import com.arms.elasticsearch.query.*;
 import com.arms.elasticsearch.query.esquery.EsBoolQuery;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;

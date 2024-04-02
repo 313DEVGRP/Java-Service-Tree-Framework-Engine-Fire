@@ -17,7 +17,7 @@ public class 이슈인덱스_저장소Test {
 
 
 	@Autowired
-	private com.arms.api.engine.jiraissue.repository.지라이슈_저장소 지라이슈_저장소;
+	private com.arms.api.alm.issue.repository.지라이슈_저장소 지라이슈_저장소;
 
 	@Test
 	public void test(){

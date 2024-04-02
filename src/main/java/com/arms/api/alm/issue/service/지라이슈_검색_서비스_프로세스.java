@@ -1,7 +1,7 @@
-package com.arms.api.engine.jiraissue.service;
+package com.arms.api.alm.issue.service;
 
 import com.arms.api.index_entity.이슈_인덱스;
-import com.arms.api.engine.jiraissue.repository.지라이슈_저장소;
+import com.arms.api.alm.issue.repository.지라이슈_저장소;
 import com.arms.api.engine.model.dto.검색어_검색결과;
 import com.arms.api.engine.model.dto.검색어_기본_검색_요청;
 import com.arms.api.engine.model.dto.검색어_날짜포함_검색_요청;

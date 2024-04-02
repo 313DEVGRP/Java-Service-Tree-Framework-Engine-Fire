@@ -1,4 +1,4 @@
-package com.arms.api.engine.util;
+package com.arms.api.alm.utils;
 
 import com.arms.api.index_entity.이슈_인덱스;
 import com.arms.api.alm.issue.model.지라이슈_데이터;
