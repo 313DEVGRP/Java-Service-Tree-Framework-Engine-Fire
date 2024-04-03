@@ -36,6 +36,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static com.arms.elasticsearch.util.ReflectionUtil.*;
 import static java.util.stream.Collectors.*;
 
 @Slf4j
@@ -431,37 +432,6 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
             .forEach((key, value) -> operations.save(value, IndexCoordinates.of(key)));
         IndexCoordinates indexCoordinates = indexName();
         return operations.save(recentTrueList, indexCoordinates);
-    }
-
-    private  <S extends T> List<Object> fieldValues(Iterable<S> entities, Class<? extends Annotation> annotation){
-        return StreamSupport.stream(entities.spliterator(), false)
-            .collect(toList())
-            .stream().map(a -> {
-                try {
-                    return fieldInfo(a.getClass(),annotation).get(a);
-                } catch (IllegalAccessException e) {
-                    throw new IllegalArgumentException(e);
-                }
-            }).collect(toList());
-    }
-
-    public Field fieldInfo(Class<?> entityClass, Class<? extends Annotation> annotation){
-        return Arrays.stream(entityClass.getDeclaredFields())
-            .filter(field -> field.isAnnotationPresent(annotation))
-            .map(field -> {
-                field.setAccessible(true);
-                return field;
-            }).findAny().orElseThrow(() -> new RuntimeException("해당 어노테이션이 지정 되어있지 않습니다."));
-    }
-
-
-    public Method methodInfo(Class<?> entityClass, Class<? extends Annotation> annotation){
-        return Arrays.stream(entityClass.getDeclaredMethods())
-                .filter(m -> m.isAnnotationPresent(annotation))
-                .map(m -> {
-                    m.setAccessible(true);
-                    return m;
-                }).findAny().orElseThrow(() -> new RuntimeException("해당 어노테이션이 지정 되어있지 않습니다."));
     }
 
 

@@ -22,11 +22,13 @@ public class 일반_검색_쿼리_생성기 implements 쿼리_추상_팩토리 {
 
 	private final int 크기;
 	private final int 페이지;
+	private final boolean 페이지_처리_여부;
 	private final EsQuery esQuery;
 
 	private 일반_검색_쿼리_생성기(기본_검색_요청 기본_검색_요청, EsQuery esQuery){
 		this.크기 = 기본_검색_요청.get크기();
 		this.페이지 = 기본_검색_요청.get페이지();
+		this.페이지_처리_여부 = 기본_검색_요청.is페이지_처리_여부();
 		this.esQuery = esQuery;
 	}
 
@@ -45,25 +47,19 @@ public class 일반_검색_쿼리_생성기 implements 쿼리_추상_팩토리 {
 		highlightBuilder.field("*").preTags("<em>").postTags("</em>");
 		nativeSearchQueryBuilder.withHighlightBuilder(highlightBuilder);
 
-		Optional.ofNullable(크기)
-				.ifPresent(크기->{
-					nativeSearchQueryBuilder
-							.withMaxResults(크기);
-					Optional.ofNullable(페이지)
-							.ifPresent(페이지->{
-								nativeSearchQueryBuilder
-										.withPageable(PageRequest.of(페이지,크기));
-							});
-				});
+		nativeSearchQueryBuilder
+				.withMaxResults(크기);
+
+		if(페이지_처리_여부){
+			nativeSearchQueryBuilder
+				.withPageable(PageRequest.of(페이지,크기));
+		}
 
 		Optional.ofNullable(boolQuery)
 				.ifPresent(nativeSearchQueryBuilder::withQuery);
 
-
 		Optional.ofNullable(fieldSortBuilders)
-				.ifPresent(sorts -> {
-					sorts.forEach(nativeSearchQueryBuilder::withSort);
-				});
+				.ifPresent(sorts -> sorts.forEach(nativeSearchQueryBuilder::withSort));
 
 		return nativeSearchQueryBuilder.build();
 	}
