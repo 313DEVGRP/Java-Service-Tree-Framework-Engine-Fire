@@ -83,9 +83,9 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
 
             return 프로젝트_이슈_목록;
         } catch (Exception e) {
-            로그.error("클라우드 이슈 전체 조회시 오류가 발생하였습니다."+e.getMessage());
-            throw new IllegalArgumentException(에러코드.이슈_조회_오류.getErrorMsg());
-
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+            "클라우드 지라("+ 연결_아이디 +") :: 프로젝트("+ 프로젝트_키_또는_아이디+ ") :: 전체이슈_목록_가져오기에 실패하였습니다.");
+            throw new IllegalArgumentException(에러코드.이슈_조회_오류.getErrorMsg() + " :: " + 에러로그);
         }
     }
 
@@ -289,8 +289,9 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
 
             return 결과;
         } catch (Exception e) {
-            로그.error("이슈 수정시 오류가 발생하였습니다. "+e.getMessage());
-            throw new IllegalArgumentException(에러코드.이슈수정_오류.getErrorMsg());
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                    "클라우드 지라("+ 연결_아이디 +") :: 이슈 키("+ 이슈_키_또는_아이디+ ") :: 이슈_수정하기에 실패하였습니다.");
+            throw new IllegalArgumentException(에러코드.이슈수정_오류.getErrorMsg() + " :: " + 에러로그);
         }
 
     }
@@ -323,7 +324,9 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
 
             return 반환할_결과맵;
         } catch (Exception e) {
-            throw new IllegalArgumentException(에러코드.이슈수정_오류.getErrorMsg());
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                    "클라우드 지라("+ 연결_아이디 +") :: 이슈 키("+ 이슈_키_또는_아이디+ ") :: 이슈_삭제 라벨 처리하기에 실패하였습니다.");
+            throw new IllegalArgumentException(에러코드.이슈수정_오류.getErrorMsg() + " :: " + 에러로그);
         }
     }
 
@@ -411,7 +414,8 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
 
             return 지라이슈_데이터;
         } catch (Exception e) {
-            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "이슈_상세정보_가져오기");
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(),
+                    "클라우드 지라("+ 연결_아이디 +") :: 이슈 키("+ 이슈_키_또는_아이디+ ") :: 이슈_상세정보_가져오기에 실패하였습니다.");
             return null;
         }
     }
@@ -458,7 +462,8 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
             return 이슈링크_목록;
         }
         catch (Exception e) {
-            로그.error("클라우드에서 조회하려는 이슈 키의 연결된 이슈 정보 가져오기에 실패하였습니다. 조회 대상 정보 확인이 필요합니다.");
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(),
+                    "클라우드 지라("+ 연결_아이디 +") :: 이슈 키("+ 이슈_키_또는_아이디+ ") :: 링크드 이슈 조회에 실패하였습니다.");
             return null;
         }
     }
@@ -505,7 +510,8 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
             return 서브테스크_목록;
         }
         catch (Exception e) {
-            로그.error("클라우드에서 조회하려는 이슈 키의 서브테스크 정보 가져오기에 실패하였습니다. 조회 대상 정보 확인이 필요합니다.");
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(),
+                    "클라우드 지라("+ 연결_아이디 +") :: 이슈 키("+ 이슈_키_또는_아이디+ ") :: 서브테스크_가져오기에 실패하였습니다.");
             return null;
         }
     }
@@ -592,7 +598,8 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
             return null;
         }
         catch (Exception e) {
-            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "증분이슈_상세정보_가져오기");
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(),
+            "클라우드 지라("+ 연결_아이디 +") :: 이슈 키("+ 이슈_키_또는_아이디+ ") :: 증분이슈_상세정보_가져오기에 실패하였습니다.");
             return null;
         }
     }
@@ -640,7 +647,8 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
             return 이슈링크_목록;
         }
         catch (Exception e) {
-            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "증분이슈링크_가져오기");
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(),
+                    "클라우드 지라("+ 연결_아이디 +") :: 이슈 키("+ 이슈_키_또는_아이디+ ") :: 증분_링크드이슈_가져오기에 실패하였습니다.");
             return null;
         }
     }
@@ -688,7 +696,8 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
             return 서브테스크_목록;
         }
         catch (Exception e) {
-            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "증분서브테스크_가져오기");
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(),
+                    "클라우드 지라("+ 연결_아이디 +") :: 이슈 키("+ 이슈_키_또는_아이디+ ") :: 증분_서브테스크_가져오기에 실패하였습니다.");
             return null;
         }
     }
@@ -723,7 +732,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
         }
 
         if (프로젝트_아이디.isEmpty() || 이슈유형_아이디.isEmpty()) {
-            throw new IllegalArgumentException("이슈 생성 필드 확인에 필요한 프로젝트 아이디, 이슈유형 아이디가 존재 하지 않습니다.");
+            throw new IllegalArgumentException("클라우드 지라("+ 연결_아이디 +") 이슈 생성 필드 확인에 필요한 프로젝트 아이디, 이슈유형 아이디가 존재 하지 않습니다.");
         }
 
         /* ***
@@ -748,7 +757,9 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
         catch (Exception e) {
             로그.error("클라우드 지라 프로젝트 : {}, 이슈유형 : {}, 생성 필드 : {}, 이슈 생성하기 중 오류"
                     , 프로젝트_아이디, 이슈유형_아이디, 입력_데이터.toString());
-            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(), "이슈 생성하기");
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                "이슈 생성하기 클라우드 지라 프로젝트 :: "+프로젝트_아이디+ " :: 이슈유형 :: "+
+                        이슈유형_아이디+ " :: 생성 필드 :: "+ 입력_데이터.toString() + ", 이슈 생성하기 중 오류");
             throw new IllegalArgumentException("이슈 생성 중 오류 :: " + 에러로그);
         }
 
