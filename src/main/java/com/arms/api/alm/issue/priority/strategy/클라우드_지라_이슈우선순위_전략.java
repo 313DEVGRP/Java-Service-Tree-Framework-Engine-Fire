@@ -7,6 +7,7 @@ import com.arms.api.utils.errors.codes.에러코드;
 import com.arms.api.alm.serverinfo.service.서버정보_서비스;
 import com.arms.api.alm.utils.지라유틸;
 
+import com.arms.api.utils.errors.에러로그_유틸;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,8 +70,9 @@ public class 클라우드_지라_이슈우선순위_전략 implements 이슈우�
             return 반환할_이슈우선순위_데이터_목록;
 
         } catch (Exception e) {
-            로그.error("클라우드 지라 이슈 우선순위 전체 목록 가져오기에 실패하였습니다." + e.getMessage());
-            throw new IllegalArgumentException(에러코드.이슈우선순위_조회_오류.getErrorMsg());
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                    "클라우드 지라("+ 연결_아이디 +") :: 이슈우선순위_목록_가져오기에 실패하였습니다.");
+            throw new IllegalArgumentException(에러코드.이슈우선순위_조회_오류.getErrorMsg() + " :: " + 에러로그);
         }
     }
 }
