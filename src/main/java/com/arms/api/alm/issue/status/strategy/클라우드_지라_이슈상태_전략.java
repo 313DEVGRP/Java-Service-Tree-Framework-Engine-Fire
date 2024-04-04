@@ -8,6 +8,7 @@ import com.arms.api.alm.serverinfo.service.서버정보_서비스;
 import com.arms.api.alm.utils.지라유틸;
 
 
+import com.arms.api.utils.errors.에러로그_유틸;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,17 +78,8 @@ public class 클라우드_지라_이슈상태_전략 implements 이슈상태_전
             return 반환할_이슈상태_데이터_목록;
 
         } catch (Exception e) {
-            로그.error("클라우드 이슈 상태 목록 조회에 실패하였습니다");
-            로그.error(e.getClass().getName() + " : "+ e.getMessage());
-
-            if (e instanceof WebClientResponseException) {
-                WebClientResponseException wcException = (WebClientResponseException) e;
-                HttpStatus status = wcException.getStatusCode();
-                String body = wcException.getResponseBodyAsString();
-
-                로그.error(status + " : " + body);
-            }
-
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(),
+                    "클라우드 지라("+ 연결_아이디 +") :: 이슈상태_목록_가져오기에 실패하였습니다.");
             return Collections.emptyList();
         }
     }
@@ -143,17 +135,8 @@ public class 클라우드_지라_이슈상태_전략 implements 이슈상태_전
             return 반환할_이슈상태_데이터_목록;
 
         } catch (Exception e) {
-            로그.error("클라우드 이슈 상태 목록 조회에 실패하였습니다");
-            로그.error(e.getClass().getName() + " : "+ e.getMessage());
-
-            if (e instanceof WebClientResponseException) {
-                WebClientResponseException wcException = (WebClientResponseException) e;
-                HttpStatus status = wcException.getStatusCode();
-                String body = wcException.getResponseBodyAsString();
-
-                로그.error(status + " : " + body);
-            }
-
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(),
+        "클라우드 지라("+ 연결_아이디 +") :: 프로젝트("+ 프로젝트_아이디+ ") :: 프로젝트별_이슈상태_목록_가져오기에 실패하였습니다.");
             return Collections.emptyList();
         }
     }
