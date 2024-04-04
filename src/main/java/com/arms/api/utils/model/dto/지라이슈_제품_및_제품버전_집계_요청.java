@@ -11,5 +11,6 @@ public class 지라이슈_제품_및_제품버전_집계_요청 extends 기본_�
     private Long pdServiceLink;
     private Long[] pdServiceVersionLinks;
     private IsReqType isReqType;
+    private Long[] cReqLinks;
 
 }

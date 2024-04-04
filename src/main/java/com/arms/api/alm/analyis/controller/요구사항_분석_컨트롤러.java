@@ -42,6 +42,7 @@ public class 요구사항_분석_컨트롤러 {
         EsBoolQuery[] esBoolQueries = Stream.of(
                 new MustTermQuery("pdServiceId", 검색요청.getPdServiceLink()),
                 new TermsQueryFilter("pdServiceVersions", 검색요청.getPdServiceVersionLinks()),
+                검색요청.getCReqLinks() != null && 검색요청.getCReqLinks().length > 0 ? new TermsQueryFilter("cReqLink", 검색요청.getCReqLinks()) : null,
                 검색요청.getIsReqType() == IsReqType.REQUIREMENT ? new MustTermQuery("isReq", true) : null,
                 검색요청.getIsReqType() == IsReqType.ISSUE ? new MustTermQuery("isReq", false) : null
         ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
