@@ -65,7 +65,7 @@ public class 클라우드_지라_이슈유형_전략 implements 이슈유형_전
     @Override
     public List<이슈유형_데이터> 프로젝트별_이슈유형_목록_가져오기(Long 연결_아이디, String 프로젝트_아이디) {
 
-        로그.info("클라우드 지라 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록_가져오기");
+        로그.info("클라우드 지라("+ 연결_아이디 +") :: 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록_가져오기");
 
         if (프로젝트_아이디 == null || 프로젝트_아이디.isEmpty()) {
             throw new IllegalArgumentException(에러코드.파라미터_NULL_오류.getErrorMsg());
@@ -81,11 +81,11 @@ public class 클라우드_지라_이슈유형_전략 implements 이슈유형_전
                     new ParameterizedTypeReference<List<이슈유형_데이터>>() {}).block();
 
             if (이슈_유형_목록 == null) {
-                로그.error("클라우드 지라 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록이 Null입니다.");
+                로그.error("클라우드 지라("+ 연결_아이디 +") :: 프로젝트 아이디 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록이 Null입니다.");
                 return Collections.emptyList();
             }
             else if (이슈_유형_목록.size() == 0) {
-                로그.error("클라우드 지라 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록이 없습니다.");
+                로그.error("클라우드 지라("+ 연결_아이디 +") :: 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록이 없습니다.");
                 return Collections.emptyList();
             }
 
@@ -101,7 +101,7 @@ public class 클라우드_지라_이슈유형_전략 implements 이슈유형_전
 
     public List<이슈유형_데이터> 프로젝트별_이슈유형_목록_가져오기2(Long 연결_아이디, String 프로젝트_아이디) {
 
-        로그.info("클라우드 지라 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록_가져오기");
+        로그.info("클라우드 지라("+ 연결_아이디 +") :: 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록_가져오기");
 
         if (프로젝트_아이디 == null || 프로젝트_아이디.isEmpty()) {
             throw new IllegalArgumentException(에러코드.파라미터_NULL_오류.getErrorMsg());
@@ -118,11 +118,11 @@ public class 클라우드_지라_이슈유형_전략 implements 이슈유형_전
                     new ParameterizedTypeReference<List<이슈유형_데이터>>() {}).block();
 
             if (이슈_유형_목록 == null) {
-                로그.error("클라우드 지라 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록이 Null입니다.");
+                로그.error("클라우드 지라("+ 연결_아이디 +") :: 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록이 Null입니다.");
                 return Collections.emptyList();
             }
             else if (이슈_유형_목록.size() == 0) {
-                로그.error("클라우드 지라 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록이 없습니다.");
+                로그.error("클라우드 지라("+ 연결_아이디 +") :: 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록이 없습니다.");
                 return Collections.emptyList();
             }
 
@@ -146,7 +146,7 @@ public class 클라우드_지라_이슈유형_전략 implements 이슈유형_전
                         .noneMatch(필드 -> {
                             boolean 필수필드 = 필드.getValue().isRequired();
                             if (필수필드) {
-                                로그.info("프로젝트("+ 프로젝트_아이디 +") ::  이슈유형(" + 이슈유형.getId()+
+                                로그.info("클라우드 지라("+ 연결_아이디 +") :: 프로젝트 아이디("+ 프로젝트_아이디 +") ::  이슈유형 아이디 (" + 이슈유형.getId()+
                                         ") :: {} 필드가 필수로 지정되어있습니다. A-RMS에서 지원하지 않는 필드입니다.", 필드.getKey());
                             }
                             return 필수필드;
