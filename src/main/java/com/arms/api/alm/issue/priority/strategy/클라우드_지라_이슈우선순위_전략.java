@@ -3,6 +3,7 @@ package com.arms.api.alm.issue.priority.strategy;
 import com.arms.api.alm.issue.priority.model.이슈우선순위_데이터;
 import com.arms.api.alm.issue.priority.model.클라우드_지라이슈우선순위_데이터;
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
+import com.arms.api.alm.utils.지라API_정보;
 import com.arms.api.utils.errors.codes.에러코드;
 import com.arms.api.alm.serverinfo.service.서버정보_서비스;
 import com.arms.api.alm.utils.지라유틸;
@@ -28,6 +29,9 @@ public class 클라우드_지라_이슈우선순위_전략 implements 이슈우�
     @Autowired
     private 지라유틸 지라유틸;
 
+    @Autowired
+    private 지라API_정보 지라API_정보;
+
     @Override
     public List<이슈우선순위_데이터> 우선순위_목록_가져오기(Long 연결_아이디) throws Exception {
 
@@ -37,7 +41,7 @@ public class 클라우드_지라_이슈우선순위_전략 implements 이슈우�
             서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
             WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
 
-            int 최대_검색수 = 지라유틸.최대_검색수_가져오기();
+            int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
             int startAt = 0;
             boolean isLast = false;
 
