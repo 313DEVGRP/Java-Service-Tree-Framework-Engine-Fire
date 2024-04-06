@@ -3,6 +3,7 @@ package com.arms.api.alm.issue.resolution.strategy;
 import com.arms.api.alm.issue.resolution.model.이슈해결책_데이터;
 import com.arms.api.alm.issue.resolution.model.클라우드_지라이슈해결책_데이터;
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
+import com.arms.api.alm.utils.지라API_정보;
 import com.arms.api.utils.errors.codes.에러코드;
 import com.arms.api.alm.serverinfo.service.서버정보_서비스;
 import com.arms.api.alm.utils.지라유틸;
@@ -29,6 +30,9 @@ public class 클라우드_지라이슈해결책_전략 implements 지라이슈�
     @Autowired
     private 지라유틸 지라유틸;
 
+    @Autowired
+    private 지라API_정보 지라API_정보;
+
     @Override
     public List<이슈해결책_데이터> 이슈해결책_목록_가져오기(Long 연결_아이디) {
 
@@ -39,7 +43,7 @@ public class 클라우드_지라이슈해결책_전략 implements 지라이슈�
             WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
 
             int startAt = 0;
-            int 최대_검색수 = 지라유틸.최대_검색수_가져오기();
+            int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
             boolean checkLast = false;
 
             List<이슈해결책_데이터> 반환할_이슈해결책_데이터_목록 = new ArrayList<이슈해결책_데이터>();

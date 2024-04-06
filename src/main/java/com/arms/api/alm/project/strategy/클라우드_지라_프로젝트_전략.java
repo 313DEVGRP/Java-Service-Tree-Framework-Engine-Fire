@@ -2,6 +2,7 @@ package com.arms.api.alm.project.strategy;
 
 import com.arms.api.alm.project.model.프로젝트_데이터;
 import com.arms.api.alm.project.model.클라우드_지라프로젝트_데이터;
+import com.arms.api.alm.utils.지라API_정보;
 import com.arms.api.utils.errors.codes.에러코드;
 import com.arms.api.alm.utils.지라유틸;
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
@@ -27,6 +28,9 @@ public class 클라우드_지라_프로젝트_전략 implements 프로젝트_전
 
     @Autowired
     private 지라유틸 지라유틸;
+
+    @Autowired
+    private 지라API_정보 지라API_정보;
 
     @Override
     public 프로젝트_데이터 프로젝트_상세정보_가져오기(Long 연결_아이디, String 프로젝트_키_또는_아이디) {
@@ -68,7 +72,7 @@ public class 클라우드_지라_프로젝트_전략 implements 프로젝트_전
                     서버정보.getPasswordOrToken());
 
             int startAt = 0;
-            int 최대_검색수 = 지라유틸.최대_검색수_가져오기();
+            int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
             boolean isLast = false;
 
             List<프로젝트_데이터> 반환할_프로젝트_데이터_목록 = new ArrayList<>();

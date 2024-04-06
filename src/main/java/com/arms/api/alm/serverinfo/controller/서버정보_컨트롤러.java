@@ -61,19 +61,4 @@ public class 서버정보_컨트롤러 {
         return 서버정보_서비스.서버정보_삭제하기(서버정보_데이터);
     }
 
-    /*
-     * 삭제 관련 차후 설계 후 개발 진행
-     * */
-//    @ResponseBody
-//    @RequestMapping(
-//            value = {"/all"},
-//            method = {RequestMethod.DELETE}
-//    )
-//    public void 서버정보_전체_삭제하기(ModelMap model, HttpServletRequest request) throws Exception {
-//
-//        로그.info("전체 서버정보 삭제");
-//
-//        서버정보_서비스.서버정보_전체_삭제하기();
-//    }
-
 }

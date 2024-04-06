@@ -44,7 +44,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
 
         try {
             int 검색_시작_지점 = 0;
-            int 최대_검색수 = 지라유틸.최대_검색수_가져오기();
+            int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
             boolean isLast = false;
 
             서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
@@ -55,7 +55,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
             while (!isLast) {
                 String endpoint = "/rest/api/3/search?jql=project=" + 프로젝트_키_또는_아이디
                         + "&startAt=" + 검색_시작_지점 + "&maxResults=" + 최대_검색수
-                        + "&" + 지라유틸.조회할_필드_목록_가져오기();
+                        + "&" + 지라API_정보.getParameter().getFields();
 
                 지라이슈조회_데이터 프로젝트_이슈_검색결과 = 지라유틸.get(webClient, endpoint, 지라이슈조회_데이터.class).block();
 
@@ -88,145 +88,6 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
             throw new IllegalArgumentException(에러코드.이슈_조회_오류.getErrorMsg() + " :: " + 에러로그);
         }
     }
-
-    /****
-     * 기존 이슈 생성하기  이슈_생성하기 2024-03-15로 백업
-     ****/
- /*   public 지라이슈_데이터 이슈_생성하기_기존버전(Long 연결_아이디, 지라이슈생성_데이터 지라이슈생성_데이터) throws JsonProcessingException {
-
-        로그.info("클라우드 지라 이슈 생성하기");
-
-        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
-        WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
-
-
-        지라이슈생성필드_데이터 필드_데이터 = 지라이슈생성_데이터.getFields();
-
-        if (필드_데이터 == null) {
-            throw new IllegalArgumentException(에러코드.요청본문_오류체크.getErrorMsg());
-        }
-
-        클라우드_지라이슈생성_데이터 입력_데이터 = new 클라우드_지라이슈생성_데이터();
-        클라우드_지라이슈필드_데이터 클라우드_필드_데이터 = new 클라우드_지라이슈필드_데이터();
-
-        if (필드_데이터.getProject() != null) {
-            클라우드_필드_데이터.setProject(필드_데이터.getProject());
-        }
-        if (필드_데이터.getIssuetype() != null) {
-            클라우드_필드_데이터.setIssuetype(필드_데이터.getIssuetype());
-        }
-        if (필드_데이터.getSummary() != null) {
-            클라우드_필드_데이터.setSummary(필드_데이터.getSummary());
-        }
-
-        if (필드_데이터.getDescription() != null) {
-            클라우드_필드_데이터.setDescription(내용_변환((String) 필드_데이터.getDescription()));
-        }
-
-        지라사용자_데이터 사용자 = 사용자_정보_조회(webClient);
-
-        if (사용자 == null) {
-            로그.info("이슈 생성 필드 확인에 필요한 사용자 데이터가 Null입니다.");
-        }
-        else {
-            클라우드_필드_데이터.setReporter(사용자);
-        }
-
-        String 프로젝트_아이디 = "";
-        String 이슈유형_아이디 = "";
-
-        if (지라이슈생성_데이터.getFields().getProject().getId() != null
-                    && !지라이슈생성_데이터.getFields().getProject().getId().isEmpty()) {
-            프로젝트_아이디 = 지라이슈생성_데이터.getFields().getProject().getId();
-        }
-
-        if (지라이슈생성_데이터.getFields().getIssuetype().getId() != null
-                    && !지라이슈생성_데이터.getFields().getIssuetype().getId().isEmpty()) {
-            이슈유형_아이디 = 지라이슈생성_데이터.getFields().getIssuetype().getId();
-        }
-
-        if (프로젝트_아이디.isEmpty() || 이슈유형_아이디.isEmpty()) {
-            throw new IllegalArgumentException("이슈 생성 필드 확인에 필요한 프로젝트 아이디, 이슈유형 아이디가 존재 하지 않습니다.");
-        }
-
-        String 이슈생성_필드확인_지점 = "/rest/api/3/issue/createmeta?expand=projects.issuetypes.fields&projectIds="+ 프로젝트_아이디 +"&issuetypeIds=" +이슈유형_아이디;
-
-        Map<String, Object> 반환할_이슈생성_필드 = 지라유틸.get(webClient, 이슈생성_필드확인_지점, Map.class).block();
-        List<Map<String, Object>> 프로젝트_목록 = null;
-
-        if(반환할_이슈생성_필드 != null && 반환할_이슈생성_필드.containsKey("projects") && 반환할_이슈생성_필드.get("projects") != null) {
-            프로젝트_목록 = (List<Map<String, Object>>) 반환할_이슈생성_필드.get("projects");
-        } else {
-            throw new IllegalArgumentException("이슈 생성 필드 확인 중 프로젝트 목록에 문제가있습니다.");
-        }
-
-        if (프로젝트_목록.size() != 1) {
-            throw new IllegalArgumentException("이슈 생성 필드 확인 중 프로젝트 목록에 문제가있습니다.");
-        }
-
-        List<Map<String, Object>> 이슈유형 = null;
-
-        if(프로젝트_목록 != null && !프로젝트_목록.isEmpty() && 프로젝트_목록.get(0) != null) {
-            Map<String, Object> 프로젝트 = 프로젝트_목록.get(0);
-            if(프로젝트.containsKey("issuetypes") && 프로젝트.get("issuetypes") != null) {
-                이슈유형 = (List<Map<String, Object>>) 프로젝트.get("issuetypes");
-            } else {
-                throw new IllegalArgumentException("이슈 생성 필드 확인 중 이슈유형 목록에 문제가있습니다.");
-            }
-        } else {
-            throw new IllegalArgumentException("이슈 생성 필드 확인 중 이슈유형 목록에 문제가있습니다.");
-        }
-
-        Map<String, Object> 필드 = null;
-
-        if(이슈유형 != null && !이슈유형.isEmpty() && 이슈유형.get(0) != null) {
-            Map<String, Object> firstIssueType = 이슈유형.get(0);
-            if(firstIssueType.containsKey("fields") && firstIssueType.get("fields") != null) {
-                필드 = (Map<String, Object>) firstIssueType.get("fields");
-            } else {
-                throw new IllegalArgumentException("이슈 생성 필드 확인 중 fields 목록에 문제가있습니다.");
-            }
-        } else {
-            throw new IllegalArgumentException("이슈 생성 필드 확인 중 fields 목록에 문제가있습니다.");
-        }
-
-        boolean 우선순위_유무 = 필드.containsKey("priority");
-
-        if (우선순위_유무 && 필드_데이터.getPriority() != null) {
-            클라우드_필드_데이터.setPriority(필드_데이터.getPriority());
-        }
-
-        입력_데이터.setFields(클라우드_필드_데이터);
-        ObjectMapper objectMapper = new ObjectMapper();
-        로그.info(objectMapper.writeValueAsString(입력_데이터));
-
-        String endpoint = "/rest/api/3/issue";
-        지라이슈_데이터 반환할_지라이슈_데이터 = null;
-        try {
-            반환할_지라이슈_데이터 = 지라유틸.post(webClient, endpoint, 입력_데이터, 지라이슈_데이터.class).block();
-        } catch (Exception e) {
-            if (e instanceof WebClientResponseException) {
-                WebClientResponseException wcException = (WebClientResponseException) e;
-                HttpStatus status = wcException.getStatusCode();
-                String body = wcException.getResponseBodyAsString();
-
-                로그.error(status + " : " + body);
-            }
-        }
-
-        if (반환할_지라이슈_데이터 == null) {
-            로그.error("이슈 생성에 실패하였습니다.");
-            return null;
-        }
-
-        // DB 저장 ELK로 변경
-//        지라_이슈_엔티티 지라_이슈_엔티티 = modelMapper.map(반환할_지라이슈_데이터, 지라_이슈_엔티티.class);
-//        지라_이슈_엔티티.setConnectId(연결_아이디);
-//        지라_이슈_저장소.save(지라_이슈_엔티티);
-
-        return 반환할_지라이슈_데이터;
-    }
-*/
 
     @Override
     public Map<String, Object> 이슈_수정하기(Long 연결_아이디, String 이슈_키_또는_아이디, 지라이슈생성_데이터 지라이슈생성_데이터) {
@@ -396,7 +257,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
         }
 
         try {
-            String endpoint = "/rest/api/3/issue/" + 이슈_키_또는_아이디 + "?" + 지라유틸.조회할_필드_목록_가져오기();
+            String endpoint = "/rest/api/3/issue/" + 이슈_키_또는_아이디 + "?" + 지라API_정보.getParameter().getFields();
 
             서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
             WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
@@ -435,7 +296,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
 
         try {
             while (!isLast) {
-                String endpoint = "/rest/api/3/search?jql=issue in linkedIssues(" + 이슈_키_또는_아이디 + ")&" + 지라유틸.조회할_필드_목록_가져오기()
+                String endpoint = "/rest/api/3/search?jql=issue in linkedIssues(" + 이슈_키_또는_아이디 + ")&" + 지라API_정보.getParameter().getFields()
                         + "&startAt=" + 검색_시작_지점 + "&maxResults=" + 최대_검색수;
 
                 지라이슈조회_데이터 이슈링크_조회결과
@@ -483,7 +344,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
         try {
             while (!isLast) {
                 String endpoint = "/rest/api/3/search?jql=parent=" + 이슈_키_또는_아이디 +
-                        "&" + 지라유틸.조회할_필드_목록_가져오기() +
+                        "&" + 지라API_정보.getParameter().getFields() +
                         "&startAt=" + 검색_시작_지점 + "&maxResults=" + 최대_검색수;
 
                 지라이슈조회_데이터 서브테스크_조회결과
@@ -519,7 +380,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
     public List<지라이슈워크로그_데이터> 이슈_워크로그_조회(WebClient webClient, String 이슈_키_또는_아이디) {
 
         int 검색_시작_지점 = 0;
-        int 최대_검색수 = 지라유틸.최대_검색수_가져오기();
+        int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
         boolean isLast = false;
 
         List<지라이슈워크로그_데이터> 지라이슈워크로그_목록 = new ArrayList<>();
@@ -613,7 +474,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
         WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
 
         int 검색_시작_지점 = 0;
-        int 최대_검색수 = 지라유틸.최대_검색수_가져오기();
+        int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
         boolean isLast = false;
 
         List<지라이슈_데이터> 이슈링크_목록 = new ArrayList<>(); // 이슈 저장
@@ -662,7 +523,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
         WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
 
         int 검색_시작_지점 = 0;
-        int 최대_검색수 = 지라유틸.최대_검색수_가져오기();
+        int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
         boolean isLast = false;
 
         List<지라이슈_데이터> 서브테스크_목록 = new ArrayList<>(); // 이슈 저장
@@ -814,16 +675,6 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
             /***
              * reporter 필드는 필수 여부와 상관없이 추가하지 않아도 API를 요청한 사용자로 자동으로 추가된다.
              ***/
-//            클라우드_이슈생성필드_메타데이터.필드_메타데이터 reporter
-//                                = 필드_메타데이터_목록.get(지라API_정보.getFields().getReporter());
-//            if (reporter.isRequired() && 지라이슈생성필드_데이터.getReporter() != null) {
-//                지라사용자_데이터 사용자 = 사용자_정보_조회(webClient);
-//                if (사용자 == null) {
-//                    로그.info("이슈 생성 필드 확인에 필요한 사용자 데이터가 Null입니다.");
-//                } else {
-//                    클라우드_지라이슈필드_데이터.setReporter(사용자);
-//                }
-//            }
             필드_메타데이터_목록.remove(지라API_정보.getFields().getReporter());
         }
 

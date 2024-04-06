@@ -3,6 +3,7 @@ package com.arms.api.alm.issue.status.strategy;
 import com.arms.api.alm.issue.status.model.이슈상태_데이터;
 import com.arms.api.alm.issue.status.model.클라우드_지라이슈상태_데이터;
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
+import com.arms.api.alm.utils.지라API_정보;
 import com.arms.api.utils.errors.codes.에러코드;
 import com.arms.api.alm.serverinfo.service.서버정보_서비스;
 import com.arms.api.alm.utils.지라유틸;
@@ -32,6 +33,9 @@ public class 클라우드_지라_이슈상태_전략 implements 이슈상태_전
     @Autowired
     private 지라유틸 지라유틸;
 
+    @Autowired
+    private 지라API_정보 지라API_정보;
+
     @Override
     public List<이슈상태_데이터> 이슈상태_목록_가져오기(Long 연결_아이디) throws Exception{
 
@@ -42,7 +46,7 @@ public class 클라우드_지라_이슈상태_전략 implements 이슈상태_전
             WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
 
             int startAt = 0;
-            int 최대_검색수 = 지라유틸.최대_검색수_가져오기();
+            int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
             boolean checkLast = false;
 
             List<이슈상태_데이터> 반환할_이슈상태_데이터_목록 = new ArrayList<이슈상태_데이터>();
@@ -99,7 +103,7 @@ public class 클라우드_지라_이슈상태_전략 implements 이슈상태_전
             WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
 
             int startAt = 0;
-            int 최대_검색수 = 지라유틸.최대_검색수_가져오기();
+            int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
             boolean checkLast = false;
 
             List<이슈상태_데이터> 반환할_이슈상태_데이터_목록 = new ArrayList<이슈상태_데이터>();
