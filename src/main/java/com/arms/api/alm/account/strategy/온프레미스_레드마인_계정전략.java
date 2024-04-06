@@ -33,14 +33,14 @@ public class 온프레미스_레드마인_계정전략 implements 계정전략 {
     }
 
     @Override
-    public 계정정보_데이터 계정정보_검증( 서버정보_데이터 서버정보) throws Exception {
+    public 계정정보_데이터 계정정보_검증(서버정보_데이터 서버정보) {
         로그.info("레드마인_온프레미스_계정_전략 :: 계정정보_검증");
 
         return 계정정보_조회(서버정보);
     }
 
     @Override
-    public 계정정보_데이터 계정정보_가져오기(Long 연결_아이디) throws Exception {
+    public 계정정보_데이터 계정정보_가져오기(Long 연결_아이디) {
         로그.info("레드마인_온프레미스_계정_전략 :: 계정정보_가져오기");
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
@@ -48,7 +48,7 @@ public class 온프레미스_레드마인_계정전략 implements 계정전략 {
         return 계정정보_조회(서버정보);
     }
 
-    private 계정정보_데이터 계정정보_조회(서버정보_데이터  서버정보)  throws Exception{
+    private 계정정보_데이터 계정정보_조회(서버정보_데이터  서버정보) {
 
         try{
             String uri = 서버정보.getUri();
@@ -60,7 +60,7 @@ public class 온프레미스_레드마인_계정전략 implements 계정전략 {
 
             String endpoint = "/my/account.json";
 
-            WebClient webClient = 지라유틸.레드마인_통신기_생성(uri,apiToken);
+            WebClient webClient = 레드마인유틸.레드마인_웹클라이언트_통신기_생성(uri,apiToken);
 
             레드마인_유저_데이터 계정정보_조회결과 = 지라유틸.get(webClient, endpoint, 레드마인_유저_데이터.class).block();
 
@@ -70,8 +70,8 @@ public class 온프레미스_레드마인_계정전략 implements 계정전략 {
             }else{
                 return  계정정보_데이터_변환(계정정보_조회결과 , uri);
             }
-
-        }catch (Exception e){
+        }
+        catch (Exception e){
             로그.error("온프라미스 레드마인 계정 정보 조회시 오류가 발생하였습니다." + e.getMessage());
             throw new IllegalArgumentException(에러코드.계정정보_조회_오류.getErrorMsg());
         }
