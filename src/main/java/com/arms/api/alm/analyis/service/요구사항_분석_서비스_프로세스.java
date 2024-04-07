@@ -55,7 +55,6 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
 
     private 지라이슈_저장소 지라이슈저장소;
 
-
     @Override
     public 버킷_집계_결과_목록_합계 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) {
 
@@ -402,7 +401,9 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
     }
 
     @Override
-    public Map<Long, Map<String, Map<String,List<요구사항_별_업데이트_데이터>>>>  요구사항별_업데이트_능선_데이터(지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청){
+    public Map<Long, Map<String, Map<String,List<요구사항_별_업데이트_데이터>>>> 요구사항별_업데이트_능선_데이터(
+                                지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청){
+
         String 시작일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get시작일();
         String 종료일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get종료일();
 
@@ -425,37 +426,13 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                 .withSort(SortBuilders.fieldSort(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준()).order(SortOrder.ASC))
                 .withMaxResults(10000);
 
-        List<지라이슈_엔티티> 전체결과 = new ArrayList<>();
+        String 지라인덱스별칭 = 인덱스자료.이슈_인덱스명;
+        List<지라이슈_엔티티> 전체결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 지라인덱스별칭);
 
-        boolean 인덱스존재시까지  = true;
-        LocalDate today = LocalDate.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String 지라인덱스 = 인덱스자료.이슈_인덱스명;
-
-        while(인덱스존재시까지) {
-            LocalDate 오늘일경우 = LocalDate.now();
-            String 호출할_지라인덱스 = 오늘일경우.format(formatter).equals(today.format(formatter))
-                    ? 지라인덱스 : 지라인덱스 + "-" + today.format(formatter);
-
-            if (!지라이슈저장소.인덱스_존재_확인(호출할_지라인덱스)) {
-                인덱스존재시까지 = false;
-                break;
-            }
-
-            today = today.minusDays(1);
-
-            List<지라이슈_엔티티> 결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 호출할_지라인덱스);
-
-            if (결과 != null && 결과.size() > 0) {
-                전체결과.addAll(결과);
-            }
-        }
         // 업데이트가 기준일에 일어난 모든 이슈를 조회
         Map<Long, Map<String, Map<String,List<요구사항_별_업데이트_데이터>>>> 조회_결과 = null;
 
-
         if (지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ) {
-
 
             조회_결과= 전체결과.stream()
                     .map(this::요구사항_별_업데이트_데이터)
@@ -466,7 +443,8 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                             Collectors.groupingBy(이슈 -> transformDateForUpdatedField(이슈.getUpdated()),
                                     Collectors.groupingBy(요구사항_별_업데이트_데이터::getParentReqKey))));
 
-        }else if(지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT){
+        }
+        else if(지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT){
 
             조회_결과= 전체결과.stream()
                     .map(this::요구사항_별_업데이트_데이터)
@@ -648,31 +626,8 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                 .withQuery(boolQuery)
                 .withPageable(PageRequest.of(0, 10000));
 
-        List<지라이슈_엔티티> 전체결과 = new ArrayList<>();
-        boolean 인덱스존재시까지  = true;
-
-        LocalDate today = LocalDate.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String 지라인덱스 = 인덱스자료.이슈_인덱스명;
-
-        while(인덱스존재시까지) {
-            LocalDate 오늘일경우 = LocalDate.now();
-            String 호출할_지라인덱스 = 오늘일경우.format(formatter).equals(today.format(formatter))
-                    ? 지라인덱스 : 지라인덱스 + "-" + today.format(formatter);
-
-            if (!지라이슈저장소.인덱스_존재_확인(호출할_지라인덱스)) {
-                인덱스존재시까지 = false;
-                break;
-            }
-
-            today = today.minusDays(1);
-
-            List<지라이슈_엔티티> 결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 호출할_지라인덱스);
-
-            if (결과 != null && 결과.size() > 0) {
-                전체결과.addAll(결과);
-            }
-        }
+        String 지라인덱스별칭 = 인덱스자료.이슈_인덱스명;
+        List<지라이슈_엔티티> 전체결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 지라인덱스별칭);
 
         히트맵데이터 히트맵데이터 = new 히트맵데이터();
         Set<String> requirementColors = new HashSet<>();
