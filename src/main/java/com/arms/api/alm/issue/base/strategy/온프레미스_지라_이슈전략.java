@@ -66,7 +66,7 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
             String 조회할_프로젝트 = "project = " + 프로젝트_키_또는_아이디;
 
             int 검색_시작_지점 = 0;
-            int 최대_검색수 = 지라유틸.최대_검색수_가져오기();
+            int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
             Set<String> 필드 = new HashSet<>(Arrays.asList("*all")); // 검색 필드
 
             // 이슈 건수가 1000이 넘을 때 이슈 조회를 위한 처리
@@ -540,7 +540,7 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
         String jql = "issue in linkedIssues("+이슈_키_또는_아이디+")";
 
         int startAt = 0;
-        int 최대_검색수 = 지라유틸.최대_검색수_가져오기();
+        int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
         Set<String> fields = new HashSet<>(Arrays.asList("*all")); // 검색 필드
 
         // 이슈 건수가 1000이 넘을때 이슈 조회를 위한 처리
@@ -597,7 +597,7 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
         String jql = "parent="+ 이슈_키_또는_아이디;
 
         int startAt = 0;
-        int 최대_검색수 = 지라유틸.최대_검색수_가져오기();
+        int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
         Set<String> fields = new HashSet<>(Arrays.asList("*all")); // 검색 필드
 
         // 이슈 건수가 1000이 넘을때 이슈 조회를 위한 처리

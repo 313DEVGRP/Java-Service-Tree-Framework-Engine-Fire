@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 @Component
-@ConfigurationProperties(prefix = "jira.api")
+@ConfigurationProperties(prefix = "jira.api") // application.yml에 정의된 내용
 public class 지라API_정보 {
 
     private Fields fields;

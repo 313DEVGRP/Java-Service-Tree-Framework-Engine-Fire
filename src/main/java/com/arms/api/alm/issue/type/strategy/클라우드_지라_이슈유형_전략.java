@@ -6,15 +6,14 @@ import com.arms.api.utils.errors.codes.에러코드;
 import com.arms.api.alm.issue.type.model.이슈유형_데이터;
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
 import com.arms.api.alm.serverinfo.service.서버정보_서비스;
+import com.arms.api.alm.issue.base.model.클라우드_이슈생성필드_메타데이터;
 import com.arms.api.utils.errors.에러로그_유틸;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.*;
 
@@ -57,17 +56,8 @@ public class 클라우드_지라_이슈유형_전략 implements 이슈유형_전
             return 반환할_이슈_유형_목록;
 
         } catch (Exception e) {
-            로그.error("클라우드 지라 이슈 유형 목록 가져오기 실패하였습니다.");
-            로그.error(e.getClass().getName() + " : "+ e.getMessage());
-
-            if (e instanceof WebClientResponseException) {
-                WebClientResponseException wcException = (WebClientResponseException) e;
-                HttpStatus status = wcException.getStatusCode();
-                String body = wcException.getResponseBodyAsString();
-
-                로그.error(status + " : " + body);
-            }
-
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(),
+                    "클라우드 지라("+ 연결_아이디 +") :: 이슈유형_목록_가져오기에 실패하였습니다.");
             return Collections.emptyList();
         }
     }
@@ -75,7 +65,7 @@ public class 클라우드_지라_이슈유형_전략 implements 이슈유형_전
     @Override
     public List<이슈유형_데이터> 프로젝트별_이슈유형_목록_가져오기(Long 연결_아이디, String 프로젝트_아이디) {
 
-        로그.info("클라우드 지라 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록_가져오기");
+        로그.info("클라우드 지라("+ 연결_아이디 +") :: 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록_가져오기");
 
         if (프로젝트_아이디 == null || 프로젝트_아이디.isEmpty()) {
             throw new IllegalArgumentException(에러코드.파라미터_NULL_오류.getErrorMsg());
@@ -91,16 +81,53 @@ public class 클라우드_지라_이슈유형_전략 implements 이슈유형_전
                     new ParameterizedTypeReference<List<이슈유형_데이터>>() {}).block();
 
             if (이슈_유형_목록 == null) {
-                로그.error("클라우드 지라 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록이 Null입니다.");
+                로그.error("클라우드 지라("+ 연결_아이디 +") :: 프로젝트 아이디 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록이 Null입니다.");
                 return Collections.emptyList();
             }
             else if (이슈_유형_목록.size() == 0) {
-                로그.error("클라우드 지라 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록이 없습니다.");
+                로그.error("클라우드 지라("+ 연결_아이디 +") :: 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록이 없습니다.");
                 return Collections.emptyList();
             }
 
-/*            List<지라이슈유형_데이터> 반환할_이슈_유형_목록 = new ArrayList<>();
-            for(지라이슈유형_데이터 이슈유형 : 이슈_유형_목록) {
+            return 이슈_유형_목록;
+//            return 반환할_이슈_유형_목록;
+
+        } catch (Exception e) {
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(),
+                    "클라우드 지라("+ 연결_아이디 +") :: 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록_가져오기에 실패하였습니다.");
+            return Collections.emptyList();
+        }
+    }
+
+    public List<이슈유형_데이터> 프로젝트별_이슈유형_목록_가져오기2(Long 연결_아이디, String 프로젝트_아이디) {
+
+        로그.info("클라우드 지라("+ 연결_아이디 +") :: 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록_가져오기");
+
+        if (프로젝트_아이디 == null || 프로젝트_아이디.isEmpty()) {
+            throw new IllegalArgumentException(에러코드.파라미터_NULL_오류.getErrorMsg());
+        }
+
+        try {
+            String endpoint = "/rest/api/3/issuetype/project?projectId=" + 프로젝트_아이디;
+
+            서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+            WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
+
+            List<이슈유형_데이터> 이슈_유형_목록
+                    = 지라유틸.get(webClient, endpoint,
+                    new ParameterizedTypeReference<List<이슈유형_데이터>>() {}).block();
+
+            if (이슈_유형_목록 == null) {
+                로그.error("클라우드 지라("+ 연결_아이디 +") :: 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록이 Null입니다.");
+                return Collections.emptyList();
+            }
+            else if (이슈_유형_목록.size() == 0) {
+                로그.error("클라우드 지라("+ 연결_아이디 +") :: 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록이 없습니다.");
+                return Collections.emptyList();
+            }
+
+            List<이슈유형_데이터> 반환할_이슈_유형_목록 = new ArrayList<>();
+            for(이슈유형_데이터 이슈유형 : 이슈_유형_목록) {
                 Map<String, 클라우드_이슈생성필드_메타데이터.필드_메타데이터> 필드_메타데이터_목록
                         = 지라유틸.필드_메타데이터_확인하기(webClient, 프로젝트_아이디, 이슈유형.getId());
 
@@ -119,7 +146,7 @@ public class 클라우드_지라_이슈유형_전략 implements 이슈유형_전
                         .noneMatch(필드 -> {
                             boolean 필수필드 = 필드.getValue().isRequired();
                             if (필수필드) {
-                                로그.info("프로젝트("+ 프로젝트_아이디 +") ::  이슈유형(" + 이슈유형.getId()+
+                                로그.info("클라우드 지라("+ 연결_아이디 +") :: 프로젝트 아이디("+ 프로젝트_아이디 +") ::  이슈유형 아이디 (" + 이슈유형.getId()+
                                         ") :: {} 필드가 필수로 지정되어있습니다. A-RMS에서 지원하지 않는 필드입니다.", 필드.getKey());
                             }
                             return 필수필드;
@@ -128,54 +155,13 @@ public class 클라우드_지라_이슈유형_전략 implements 이슈유형_전
                 if(필수필드없음) {
                     반환할_이슈_유형_목록.add(이슈유형);
                 }
-            }*/
-
-            return 이슈_유형_목록;
-//            return 반환할_이슈_유형_목록;
-
-        } catch (Exception e) {
-            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
-                    "클라우드 지라("+ 연결_아이디 +") :: 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록_가져오기에 실패하였습니다.");
-            로그.error(에러로그 + " : " + "클라우드 지라("+ 연결_아이디 +") :: 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록_가져오기에 실패하였습니다.");
-
-            return Collections.emptyList();
-        }
-    }
-
-    public List<이슈유형_데이터> 프로젝트별_이슈유형_목록_가져오기2(Long 연결_아이디, String 프로젝트_아이디) {
-
-        로그.info("클라우드 지라 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록_가져오기");
-
-        if (프로젝트_아이디 == null || 프로젝트_아이디.isEmpty()) {
-            throw new IllegalArgumentException(에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
-
-        try {
-            String endpoint = "/rest/api/3/issuetype/project?projectId=" + 프로젝트_아이디;
-
-            서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
-            WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
-
-            List<이슈유형_데이터> 반환할_이슈_유형_목록
-                    = 지라유틸.get(webClient, endpoint,
-                    new ParameterizedTypeReference<List<이슈유형_데이터>>() {}).block();
-
-            if (반환할_이슈_유형_목록 == null) {
-                로그.error("클라우드 지라 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록이 Null입니다.");
-                return Collections.emptyList();
-            }
-            else if (반환할_이슈_유형_목록.size() == 0) {
-                로그.error("클라우드 지라 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록이 없습니다.");
-                return Collections.emptyList();
             }
 
             return 반환할_이슈_유형_목록;
 
         } catch (Exception e) {
-            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(),
                     "클라우드 지라("+ 연결_아이디 +") :: 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록_가져오기에 실패하였습니다.");
-            로그.error(에러로그 + " : " + "클라우드 지라("+ 연결_아이디 +") :: 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록_가져오기에 실패하였습니다.");
-
             return Collections.emptyList();
         }
     }

@@ -28,7 +28,7 @@ public class 온프레미스_지라_이슈유형_전략 implements 이슈유형_
     private 서버정보_서비스 서버정보_서비스;
 
     @Override
-    public List<이슈유형_데이터> 이슈유형_목록_가져오기(Long 연결_아이디) throws URISyntaxException, IOException, ExecutionException, InterruptedException {
+    public List<이슈유형_데이터> 이슈유형_목록_가져오기(Long 연결_아이디) {
 
         로그.info("온프레미스 지라 이슈유형_목록_가져오기");
 
