@@ -1,10 +1,10 @@
 package com.arms.api.alm.project.strategy;
 
 import com.arms.api.alm.project.model.프로젝트_데이터;
-import com.arms.api.utils.errors.codes.에러코드;
-import com.arms.api.alm.utils.지라유틸;
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
 import com.arms.api.alm.serverinfo.service.서버정보_서비스;
+import com.arms.api.alm.utils.지라유틸;
+import com.arms.api.utils.errors.codes.에러코드;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.api.domain.BasicProject;
 import org.slf4j.Logger;
@@ -20,13 +20,15 @@ public class 온프레미스_지라_프로젝트_전략 implements 프로젝트_
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
     private 서버정보_서비스 서버정보_서비스;
+
+    @Autowired
+    public 온프레미스_지라_프로젝트_전략(서버정보_서비스 서버정보_서비스) {
+        this.서버정보_서비스 = 서버정보_서비스;
+    }
 
     @Override
     public 프로젝트_데이터 프로젝트_상세정보_가져오기(Long 연결_아이디, String 프로젝트_키_또는_아이디) {
-
-        로그.info("온프레미스 지라 프로젝트 "+ 프로젝트_키_또는_아이디 +" 상세정보 가져오기");
 
         try {
             서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
@@ -55,8 +57,6 @@ public class 온프레미스_지라_프로젝트_전략 implements 프로젝트_
 
     @Override
     public List<프로젝트_데이터> 프로젝트_목록_가져오기(Long 연결_아이디) {
-
-        로그.info("온프레미스 지라 프로젝트 전체목록 가져오기");
 
         try {
             서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
