@@ -1,10 +1,10 @@
 package com.arms.api.alm.project.strategy;
 
 import com.arms.api.alm.project.model.프로젝트_데이터;
-import com.arms.api.alm.utils.레드마인API_정보;
-import com.arms.api.alm.utils.레드마인유틸;
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
 import com.arms.api.alm.serverinfo.service.서버정보_서비스;
+import com.arms.api.alm.utils.레드마인API_정보;
+import com.arms.api.alm.utils.레드마인유틸;
 import com.arms.api.utils.errors.codes.에러코드;
 import com.arms.api.utils.errors.에러로그_유틸;
 import com.taskadapter.redmineapi.RedmineException;
@@ -24,20 +24,21 @@ import static java.util.stream.Collectors.toList;
 public class 레드마인_온프레미스_프로젝트_전략 implements 프로젝트_전략 {
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
     private 서버정보_서비스 서버정보_서비스;
-
-    @Autowired
     private 레드마인유틸 레드마인유틸;
+    private 레드마인API_정보 레드마인API_정보;
 
     @Autowired
-    private 레드마인API_정보 레드마인API_정보;
+    public 레드마인_온프레미스_프로젝트_전략(서버정보_서비스 서버정보_서비스,
+                                      레드마인유틸 레드마인유틸,
+                                      레드마인API_정보 레드마인API_정보) {
+        this.서버정보_서비스 = 서버정보_서비스;
+        this.레드마인유틸 = 레드마인유틸;
+        this.레드마인API_정보 = 레드마인API_정보;
+    }
 
     @Override
     public 프로젝트_데이터 프로젝트_상세정보_가져오기(Long 연결_아이디, String 프로젝트_키_또는_아이디) {
-
-        로그.info("레드마인_온프레미스_프로젝트_전략 :: 프로젝트_상세정보_가져오기 :: 연결_아이디 :: {}, 프로젝트_키_또는_아이디 :: {}"
-                                                                                    , 연결_아이디, 프로젝트_키_또는_아이디);
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
         RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
@@ -58,7 +59,6 @@ public class 레드마인_온프레미스_프로젝트_전략 implements 프로�
 
     @Override
     public List<프로젝트_데이터> 프로젝트_목록_가져오기(Long 연결_아이디) {
-        로그.info("레드마인_온프레미스_프로젝트_전략 :: 프로젝트_목록_가져오기 :: 연결_아이디 :: {}", 연결_아이디);
 
         서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
         RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
