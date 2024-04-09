@@ -614,40 +614,39 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
 
     @Override
     public 히트맵데이터 히트맵_제품서비스_버전목록으로_조회(Long pdServiceLink, Long[] pdServiceVersionLinks) {
+        LocalDate now = LocalDate.now(ZoneId.of("UTC"));
+        LocalDate yearsAgo = now.minusYears(1);
 
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new MustTermQuery("pdServiceId", pdServiceLink),
-                        new TermsQueryFilter("pdServiceVersions", pdServiceVersionLinks)
+                        new TermsQueryFilter("pdServiceVersions", pdServiceVersionLinks),
+                        new RangeQueryFilter("updated", yearsAgo, now, "fromto")
                 );
+
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
         });
 
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
                 .withQuery(boolQuery)
-                .withPageable(PageRequest.of(0, 10000));
+                .withMaxResults(10000);
 
         String 지라인덱스별칭 = 인덱스자료.이슈_인덱스명;
         List<지라이슈_엔티티> 전체결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 지라인덱스별칭);
 
         히트맵데이터 히트맵데이터 = new 히트맵데이터();
-        Set<String> requirementColors = new HashSet<>();
-        Set<String> relationIssueColors = new HashSet<>();
 
         전체결과.stream().forEach(지라이슈 -> {
             if (지라이슈.getIsReq()) {
-                히트맵데이터_파싱(히트맵데이터.getRequirement(), 지라이슈, requirementColors);
+                히트맵데이터_파싱(히트맵데이터.getRequirement(), 지라이슈);
             } else {
-                히트맵데이터_파싱(히트맵데이터.getRelationIssue(), 지라이슈, relationIssueColors);
+                히트맵데이터_파싱(히트맵데이터.getRelationIssue(), 지라이슈);
             }
         });
-
-        히트맵데이터.setRequirementColors(assignColors(requirementColors));
-        히트맵데이터.setRelationIssueColors(assignColors(relationIssueColors));
 
         return 히트맵데이터;
     }
 
-    private void 히트맵데이터_파싱(Map<String, 히트맵날짜데이터> returnObject, 지라이슈_엔티티 item, Set<String> returnColors) {
+    private void 히트맵데이터_파싱(Map<String, 히트맵날짜데이터> returnObject, 지라이슈_엔티티 item) {
         if (item.getUpdated() == null || item.getUpdated().isEmpty()) {
             로그.info(item.getKey());
             return;
@@ -663,7 +662,6 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         히트맵날짜데이터.getContents().add(item.getSummary());
         히트맵날짜데이터.setCount(returnObject.get(표시날짜).getContents().size());
         히트맵날짜데이터.setItems(Collections.singleton(히트맵날짜데이터.getCount() + "개 업데이트"));
-        returnColors.add(item.getSummary());
     }
 
     private String formatDate(LocalDateTime date) {

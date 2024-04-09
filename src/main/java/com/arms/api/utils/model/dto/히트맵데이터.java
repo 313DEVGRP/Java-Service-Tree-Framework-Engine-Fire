@@ -15,6 +15,4 @@ import java.util.Map;
 public class 히트맵데이터 {
     private Map<String, 히트맵날짜데이터> requirement = new HashMap<>();
     private Map<String, 히트맵날짜데이터> relationIssue = new HashMap<>();
-    private Map<String, String> requirementColors = new HashMap<>();
-    private Map<String, String> relationIssueColors = new HashMap<>();
 }

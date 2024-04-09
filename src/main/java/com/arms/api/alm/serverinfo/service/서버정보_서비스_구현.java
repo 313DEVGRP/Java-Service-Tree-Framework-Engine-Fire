@@ -38,10 +38,6 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
     @Autowired
     private 백엔드통신기 백엔드통신기;
 
-    @Autowired
-    private 지라이슈_저장소 지라이슈저장소;
-
-
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     @Override
@@ -146,11 +142,6 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
             return 서버정보;
         }
     }
-
-//    @Override
-//    public void 서버정보_전체_삭제하기() {
-//        서버정보_저장소.deleteAll();
-//    }
 
     @Override
     public 서버정보_데이터 서버정보_검증(Long 서버_아이디) {
