@@ -6,12 +6,17 @@ import com.arms.elasticsearch.annotation.Recent;
 import com.arms.elasticsearch.annotation.RollingIndexName;
 import com.fasterxml.jackson.annotation.*;
 import lombok.*;
-import org.springframework.data.elasticsearch.annotations.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
-import org.springframework.data.annotation.Id;
 
 @Data
 @Builder
@@ -45,6 +50,12 @@ public class 지라이슈_엔티티 {
         if (timestamp == null) {
             this.timestamp = new Date();
         }
+
+        // 타임스탬프를 UTC+9로 변환
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(timestamp.toInstant(), ZoneId.of("UTC+9"));
+        ZonedDateTime zonedDateTime = ZonedDateTime.of(localDateTime, ZoneId.of("UTC+9"));
+        this.timestamp = Date.from(zonedDateTime.toInstant());
+
         this.id = this.jira_server_id + "_" + this.project.getKey() + "_" + this.key;
     }
 

@@ -14,7 +14,9 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
@@ -83,8 +85,10 @@ public class 플루언트디_엔티티 {
     @RollingIndexName
     private String indexName() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-        // 포맷 적용
-        return LocalDate.now().format(formatter);
+        // UTC+9 시간대의 현재 시간을 얻기 위해 ZoneId.of("Asia/Seoul")를 사용합니다.
+        LocalDateTime localDateTime = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+        ZonedDateTime zonedDateTime = ZonedDateTime.of(localDateTime, ZoneId.of("Asia/Seoul"));
+        return zonedDateTime.format(formatter);
     }
 
 
