@@ -59,6 +59,7 @@ import java.util.function.Function;
 
 		aggregation((그룹_필드) -> AggregationBuilders.avg("avg_by_" + 그룹_필드));
 		aggregation((그룹_필드) -> AggregationBuilders.max("max_by_" + 그룹_필드));
+		aggregation((그룹_필드) -> AggregationBuilders.min("min_by_" + 그룹_필드));
 
 		return nativeSearchQueryBuilder.build();
 	}
