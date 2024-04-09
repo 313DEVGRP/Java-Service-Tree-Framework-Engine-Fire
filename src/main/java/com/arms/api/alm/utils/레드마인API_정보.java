@@ -21,6 +21,7 @@ public class 레드마인API_정보 {
         private String priority;
         private String issuestatus;
         private String issue;
+        private String priorityList;
     }
 
     public String 아이디_대체하기(String 쿼리, String 대체아이디) {
