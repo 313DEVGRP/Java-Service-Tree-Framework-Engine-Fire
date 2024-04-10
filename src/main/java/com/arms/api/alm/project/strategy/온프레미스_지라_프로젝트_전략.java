@@ -2,7 +2,6 @@ package com.arms.api.alm.project.strategy;
 
 import com.arms.api.alm.project.model.프로젝트_데이터;
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
-import com.arms.api.alm.serverinfo.service.서버정보_서비스;
 import com.arms.api.alm.utils.지라유틸;
 import com.arms.api.utils.errors.codes.에러코드;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
@@ -20,18 +19,17 @@ public class 온프레미스_지라_프로젝트_전략 implements 프로젝트_
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
-    private 서버정보_서비스 서버정보_서비스;
+    private 지라유틸 지라유틸;
 
     @Autowired
-    public 온프레미스_지라_프로젝트_전략(서버정보_서비스 서버정보_서비스) {
-        this.서버정보_서비스 = 서버정보_서비스;
+    public 온프레미스_지라_프로젝트_전략(지라유틸 지라유틸) {
+        this.지라유틸 = 지라유틸;
     }
 
     @Override
-    public 프로젝트_데이터 프로젝트_상세정보_가져오기(Long 연결_아이디, String 프로젝트_키_또는_아이디) {
+    public 프로젝트_데이터 프로젝트_상세정보_가져오기(서버정보_데이터 서버정보, String 프로젝트_키_또는_아이디) {
 
         try {
-            서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
             JiraRestClient restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(),
                                                                 서버정보.getUserId(),
                                                                 서버정보.getPasswordOrToken());
@@ -56,10 +54,9 @@ public class 온프레미스_지라_프로젝트_전략 implements 프로젝트_
     }
 
     @Override
-    public List<프로젝트_데이터> 프로젝트_목록_가져오기(Long 연결_아이디) {
+    public List<프로젝트_데이터> 프로젝트_목록_가져오기(서버정보_데이터 서버정보) {
 
         try {
-            서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
             JiraRestClient restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(),
                                                                 서버정보.getUserId(),
                                                                 서버정보.getPasswordOrToken());
