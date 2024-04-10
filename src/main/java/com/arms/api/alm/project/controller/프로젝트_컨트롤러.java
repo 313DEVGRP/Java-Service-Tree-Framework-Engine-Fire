@@ -1,16 +1,13 @@
 package com.arms.api.alm.project.controller;
 
 import com.arms.api.alm.project.model.프로젝트_데이터;
-
+import com.arms.api.alm.project.service.프로젝트_전략_호출;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import com.arms.api.alm.project.service.프로젝트_전략_호출;
 
 
 @RestController
@@ -19,8 +16,12 @@ public class 프로젝트_컨트롤러 {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
+    private 프로젝트_전략_호출 프로젝트_전략_호출;
+
     @Autowired
-    프로젝트_전략_호출 프로젝트_전략_호출;
+    public 프로젝트_컨트롤러(프로젝트_전략_호출 프로젝트_전략_호출) {
+        this.프로젝트_전략_호출 = 프로젝트_전략_호출;
+    }
 
     @ResponseBody
     @RequestMapping(

@@ -22,26 +22,21 @@ public class 클라우드_지라_프로젝트_전략 implements 프로젝트_전
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
-    private 서버정보_서비스 서버정보_서비스;
     private 지라유틸 지라유틸;
     private 지라API_정보 지라API_정보;
 
     @Autowired
-    public 클라우드_지라_프로젝트_전략(서버정보_서비스 서버정보_서비스,
-                           지라유틸 지라유틸,
-                           지라API_정보 지라API_정보) {
-        this.서버정보_서비스 = 서버정보_서비스;
+    public 클라우드_지라_프로젝트_전략(지라유틸 지라유틸,
+                                    지라API_정보 지라API_정보) {
         this.지라유틸 = 지라유틸;
         this.지라API_정보 = 지라API_정보;
     }
 
     @Override
-    public 프로젝트_데이터 프로젝트_상세정보_가져오기(Long 연결_아이디, String 프로젝트_키_또는_아이디) {
+    public 프로젝트_데이터 프로젝트_상세정보_가져오기(서버정보_데이터 서버정보, String 프로젝트_키_또는_아이디) {
 
         try {
             String endpoint = "/rest/api/3/project/"+ 프로젝트_키_또는_아이디;
-
-            서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
             WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(),
                     서버정보.getPasswordOrToken());
 
@@ -63,11 +58,9 @@ public class 클라우드_지라_프로젝트_전략 implements 프로젝트_전
     }
 
     @Override
-    public List<프로젝트_데이터> 프로젝트_목록_가져오기(Long 연결_아이디) {
+    public List<프로젝트_데이터> 프로젝트_목록_가져오기(서버정보_데이터 서버정보) {
 
         try {
-            서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
-
             WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(),
                     서버정보.getPasswordOrToken());
 
@@ -105,7 +98,7 @@ public class 클라우드_지라_프로젝트_전략 implements 프로젝트_전
 
         }
         catch (Exception e) {
-            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(), "연결_아이디 :: "+ 연결_아이디 +" 프로젝트_목록_가져오기");
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(), "연결_아이디 :: "+ 서버정보.getConnectId() +" 프로젝트_목록_가져오기");
             throw new IllegalArgumentException(에러코드.프로젝트_조회_오류.getErrorMsg()+ " :: " + 에러로그);
         }
     }
