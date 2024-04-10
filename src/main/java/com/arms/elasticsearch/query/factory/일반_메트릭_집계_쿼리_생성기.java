@@ -1,7 +1,7 @@
 package com.arms.elasticsearch.query.factory;
 
 import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.base.평균_및_최대치_집계_요청;
+import com.arms.elasticsearch.query.base.메트릭_집계_요청;
 import com.arms.elasticsearch.query.쿼리_추상_팩토리;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,7 +19,7 @@ import java.util.function.Function;
 
 @Setter
 @Getter
-	public class 평균_및_최대치_집계_쿼리_생성기 implements 쿼리_추상_팩토리 {
+	public class 일반_메트릭_집계_쿼리_생성기 implements 쿼리_추상_팩토리 {
 
 	private final List<String> 그룹_필드들;
 	private final String 메인_그룹_필드;
@@ -27,27 +27,27 @@ import java.util.function.Function;
 	private final NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
 	private final TermsAggregationBuilder termsAggregationBuilder;
 
-	private 평균_및_최대치_집계_쿼리_생성기(평균_및_최대치_집계_요청 평균_및_최대치_집계_요청, EsQuery esQuery){
+	private 일반_메트릭_집계_쿼리_생성기(메트릭_집계_요청 메트릭_집계_요청, EsQuery esQuery){
 		this.termsAggregationBuilder
-			= AggregationBuilders.terms("group_by_" + 평균_및_최대치_집계_요청.get메인_그룹_필드())
-				.field(평균_및_최대치_집계_요청.get메인_그룹_필드());
+			= AggregationBuilders.terms("group_by_" + 메트릭_집계_요청.get메인_그룹_필드())
+				.field(메트릭_집계_요청.get메인_그룹_필드());
 
 		nativeSearchQueryBuilder.addAggregation(
 				this.termsAggregationBuilder
 		);
 
-		Optional.of(평균_및_최대치_집계_요청.get하위크기()).filter(a->a>0)
+		Optional.of(메트릭_집계_요청.get하위크기()).filter(a->a>0)
 			.ifPresent(a->{
-				this.termsAggregationBuilder.size(평균_및_최대치_집계_요청.get하위크기());
+				this.termsAggregationBuilder.size(메트릭_집계_요청.get하위크기());
 			});
 
-		this.메인_그룹_필드 = 평균_및_최대치_집계_요청.get메인_그룹_필드();
-		this.그룹_필드들 = 평균_및_최대치_집계_요청.get하위_그룹_필드들();
+		this.메인_그룹_필드 = 메트릭_집계_요청.get메인_그룹_필드();
+		this.그룹_필드들 = 메트릭_집계_요청.get하위_그룹_필드들();
 		this.esQuery = esQuery;
 	}
 
-	public static 쿼리_추상_팩토리 of(평균_및_최대치_집계_요청 평균_및_최대치_집계_요청, EsQuery esQuery){
-		return new 평균_및_최대치_집계_쿼리_생성기(평균_및_최대치_집계_요청, esQuery);
+	public static 쿼리_추상_팩토리 of(메트릭_집계_요청 메트릭_집계_요청, EsQuery esQuery){
+		return new 일반_메트릭_집계_쿼리_생성기(메트릭_집계_요청, esQuery);
 	}
 
 	@Override
