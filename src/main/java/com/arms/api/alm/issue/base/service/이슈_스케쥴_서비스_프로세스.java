@@ -3,8 +3,6 @@ package com.arms.api.alm.issue.base.service;
 import com.arms.api.alm.issue.base.model.지라이슈_데이터;
 import com.arms.api.alm.issue.base.model.지라이슈필드_데이터;
 import com.arms.api.alm.issue.base.model.지라프로젝트_데이터;
-import com.arms.api.alm.issue.base.service.이슈전략_호출;
-import com.arms.api.alm.issue.base.service.지라이슈_스케쥴_서비스;
 import com.arms.api.alm.issue.status.model.이슈상태_데이터;
 import com.arms.api.utils.common.constrant.index.인덱스자료;
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
@@ -35,7 +33,7 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 @Service("지라이슈_스케쥴_서비스")
 @AllArgsConstructor
-public class 지라이슈_스케쥴_서비스_프로세스 implements 지라이슈_스케쥴_서비스 {
+public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴_서비스 {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 

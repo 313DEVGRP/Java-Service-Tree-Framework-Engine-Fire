@@ -5,7 +5,7 @@ import com.arms.elasticsearch.검색조건;
 
 import java.util.List;
 
-public interface 지라이슈_스케쥴_서비스 {
+public interface 이슈_스케쥴_서비스 {
 
     지라이슈_엔티티 이슈_추가하기(지라이슈_엔티티 지라이슈_엔티티);
 

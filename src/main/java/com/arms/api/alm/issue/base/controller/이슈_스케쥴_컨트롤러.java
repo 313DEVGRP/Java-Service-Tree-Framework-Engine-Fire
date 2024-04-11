@@ -1,6 +1,6 @@
 package com.arms.api.alm.issue.base.controller;
 
-import com.arms.api.alm.issue.base.service.지라이슈_스케쥴_서비스;
+import com.arms.api.alm.issue.base.service.이슈_스케쥴_서비스;
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.elasticsearch.검색조건;
 import lombok.extern.slf4j.Slf4j;
@@ -14,11 +14,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/engine/jira/{connectId}/issue")
 @Slf4j
-public class 지라이슈_스케쥴_컨트롤러 {
+public class 이슈_스케쥴_컨트롤러 {
 
 
     @Autowired
-    private 지라이슈_스케쥴_서비스 지라이슈_스케쥴_서비스;
+    private 이슈_스케쥴_서비스 이슈_스케쥴_서비스;
 
     // 스케쥴러 컨트롤러
     @ResponseBody
@@ -31,7 +31,7 @@ public class 지라이슈_스케쥴_컨트롤러 {
 
         log.info("조회조건_아이디 = " + 조회조건_아이디);
 
-        return 지라이슈_스케쥴_서비스.이슈_조회하기(조회조건_아이디);
+        return 이슈_스케쥴_서비스.이슈_조회하기(조회조건_아이디);
     }
 
     @ResponseBody
@@ -40,7 +40,7 @@ public class 지라이슈_스케쥴_컨트롤러 {
             method = {RequestMethod.POST}
     )
     public List<지라이슈_엔티티> 요구사항이슈_검색(@RequestBody final 검색조건 검색조건) {
-        return 지라이슈_스케쥴_서비스.이슈_검색하기(검색조건);
+        return 이슈_스케쥴_서비스.이슈_검색하기(검색조건);
     }
 
 
@@ -60,7 +60,7 @@ public class 지라이슈_스케쥴_컨트롤러 {
                                ModelMap model, HttpServletRequest request) throws Exception {
         log.info("지라 이슈_검색엔진_저장");
 
-        return 지라이슈_스케쥴_서비스.이슈_검색엔진_저장(지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디들, cReqLink);
+        return 이슈_스케쥴_서비스.이슈_검색엔진_저장(지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디들, cReqLink);
     }
 
     @ResponseBody
@@ -71,7 +71,7 @@ public class 지라이슈_스케쥴_컨트롤러 {
     public boolean 지라이슈_인덱스백업() {
         log.info("지라이슈_인덱스백업 컨트롤러");
 
-        return 지라이슈_스케쥴_서비스.지라이슈_인덱스백업();
+        return 이슈_스케쥴_서비스.지라이슈_인덱스백업();
     }
 
     @ResponseBody
@@ -82,7 +82,7 @@ public class 지라이슈_스케쥴_컨트롤러 {
     public boolean 지라이슈_인덱스삭제() {
         log.info("지라이슈_인덱스삭제 컨트롤러");
 
-        return 지라이슈_스케쥴_서비스.지라이슈_인덱스삭제();
+        return 이슈_스케쥴_서비스.지라이슈_인덱스삭제();
     }
 
     // 스케쥴러 컨트롤러
@@ -102,7 +102,7 @@ public class 지라이슈_스케쥴_컨트롤러 {
         log.info("지라서버 아이디 : {}\n이슈 키 : {}\n제품서비스 아이디 : {}\n제품서비스 버전 목록 : {}"
                 , 지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디들);
 
-        return 지라이슈_스케쥴_서비스.이슈_링크드이슈_서브테스크_벌크로_추가하기(지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디들, cReqLink);
+        return 이슈_스케쥴_서비스.이슈_링크드이슈_서브테스크_벌크로_추가하기(지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디들, cReqLink);
     }
 
     // 스케쥴러 컨트롤러
@@ -121,7 +121,7 @@ public class 지라이슈_스케쥴_컨트롤러 {
         log.info("지라서버 아이디 : {},\t이슈 키 : {},\t제품서비스 아이디 : {},\t제품서비스 버전 목록 : {}"
                             , 지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디들);
 
-        return 지라이슈_스케쥴_서비스.증분이슈_링크드이슈_서브테스크_벌크추가(지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디들, cReqLink);
+        return 이슈_스케쥴_서비스.증분이슈_링크드이슈_서브테스크_벌크추가(지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디들, cReqLink);
     }
 
 }
