@@ -28,12 +28,9 @@ public class 온프레미스_지라_이슈유형_전략 implements 이슈유형_
     private 서버정보_서비스 서버정보_서비스;
 
     @Override
-    public List<이슈유형_데이터> 이슈유형_목록_가져오기(Long 연결_아이디) {
-
-        로그.info("온프레미스 지라 이슈유형_목록_가져오기");
+    public List<이슈유형_데이터> 이슈유형_목록_가져오기(서버정보_데이터 서버정보) {
 
         try {
-            서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
             JiraRestClient restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(),
                     서버정보.getUserId(),
                     서버정보.getPasswordOrToken());
@@ -76,7 +73,7 @@ public class 온프레미스_지라_이슈유형_전략 implements 이슈유형_
     }
 
     @Override
-    public List<이슈유형_데이터> 프로젝트별_이슈유형_목록_가져오기(Long 연결_아이디, String 프로젝트_아이디) throws URISyntaxException, IOException, ExecutionException, InterruptedException {
+    public List<이슈유형_데이터> 프로젝트별_이슈유형_목록_가져오기(서버정보_데이터 서버정보, String 프로젝트_아이디) {
 
         로그.info("온프레미스는 전역 지라 이슈유형_목록_가져오기");
 
@@ -85,7 +82,6 @@ public class 온프레미스_지라_이슈유형_전략 implements 이슈유형_
         }
 
         try {
-            서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
             JiraRestClient restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(),
                                                                             서버정보.getUserId(),
                                                                             서버정보.getPasswordOrToken());
