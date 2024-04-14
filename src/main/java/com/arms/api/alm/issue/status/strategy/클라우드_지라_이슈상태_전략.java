@@ -27,22 +27,20 @@ public class 클라우드_지라_이슈상태_전략 implements 이슈상태_전
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
-    private 서버정보_서비스 서버정보_서비스;
-
-    @Autowired
     private 지라유틸 지라유틸;
-
-    @Autowired
     private 지라API_정보 지라API_정보;
 
-    @Override
-    public List<이슈상태_데이터> 이슈상태_목록_가져오기(Long 연결_아이디) throws Exception{
+    @Autowired
+    public 클라우드_지라_이슈상태_전략(지라유틸 지라유틸,
+                           지라API_정보 지라API_정보) {
+        this.지라유틸 = 지라유틸;
+        this.지라API_정보 = 지라API_정보;
+    }
 
-        로그.info("클라우드 이슈 상태 목록 가져오기");
+    @Override
+    public List<이슈상태_데이터> 이슈상태_목록_가져오기(서버정보_데이터 서버정보) {
 
         try {
-            서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
             WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
 
             int startAt = 0;
@@ -56,11 +54,11 @@ public class 클라우드_지라_이슈상태_전략 implements 이슈상태_전
                 클라우드_지라이슈상태_데이터 지라이슈상태_조회_결과 = 지라유틸.get(webClient, endpoint, 클라우드_지라이슈상태_데이터.class).block();
 
                 if (지라이슈상태_조회_결과 == null) {
-                    로그.error("클라우드 지라 이슈 상태 목록이 Null입니다.");
+                    로그.error("클라우드 지라("+ 서버정보.getConnectId() +") :: 이슈상태_목록_가져오기에 실패하였습니다.");
                     return Collections.emptyList();
                 }
                 else if (지라이슈상태_조회_결과.getValues() == null || 지라이슈상태_조회_결과.getValues().size() == 0) {
-                    로그.error("클라우드 지라 이슈 상태 목록이 없습니다.");
+                    로그.info("클라우드 지라("+ 서버정보.getConnectId() +") :: 이슈 상태 목록이 없습니다.");
                     return Collections.emptyList();
                 }
 
@@ -81,25 +79,23 @@ public class 클라우드_지라_이슈상태_전략 implements 이슈상태_전
 
             return 반환할_이슈상태_데이터_목록;
 
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             에러로그_유틸.예외로그출력(e, this.getClass().getName(),
-                    "클라우드 지라("+ 연결_아이디 +") :: 이슈상태_목록_가져오기에 실패하였습니다.");
+                    "클라우드 지라("+ 서버정보.getConnectId() +") :: 이슈상태_목록_가져오기에 실패하였습니다.");
             return Collections.emptyList();
         }
     }
 
 
     @Override
-    public List<이슈상태_데이터> 프로젝트별_이슈상태_목록_가져오기(Long 연결_아이디, String 프로젝트_아이디) throws Exception{
-
-        로그.info("클라우드 프로젝트별_이슈상태_목록_가져오기 실행");
+    public List<이슈상태_데이터> 프로젝트별_이슈상태_목록_가져오기(서버정보_데이터 서버정보, String 프로젝트_아이디) throws Exception{
 
         if (프로젝트_아이디 == null || 프로젝트_아이디.isEmpty()) {
             throw new IllegalArgumentException(에러코드.파라미터_NULL_오류.getErrorMsg());
         }
 
         try {
-            서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
             WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
 
             int startAt = 0;
@@ -113,11 +109,11 @@ public class 클라우드_지라_이슈상태_전략 implements 이슈상태_전
                 클라우드_지라이슈상태_데이터 지라이슈상태_조회_결과 = 지라유틸.get(webClient, endpoint, 클라우드_지라이슈상태_데이터.class).block();
 
                 if (지라이슈상태_조회_결과 == null) {
-                    로그.error("클라우드 지라 이슈 상태 목록이 Null입니다.");
+                    로그.error("클라우드 지라("+ 서버정보.getConnectId() +") :: 프로젝트("+ 프로젝트_아이디+ ") :: 프로젝트별_이슈상태_목록_가져오기에 실패하였습니다.");
                     return Collections.emptyList();
                 }
                 else if (지라이슈상태_조회_결과.getValues() == null || 지라이슈상태_조회_결과.getValues().size() == 0) {
-                    로그.error("클라우드 지라 이슈 상태 목록이 없습니다.");
+                    로그.info("클라우드 지라("+ 서버정보.getConnectId() +") :: 프로젝트("+ 프로젝트_아이디+ ") :: 이슈상태 목록이 없습니다.");
                     return Collections.emptyList();
                 }
 
@@ -138,9 +134,10 @@ public class 클라우드_지라_이슈상태_전략 implements 이슈상태_전
 
             return 반환할_이슈상태_데이터_목록;
 
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             에러로그_유틸.예외로그출력(e, this.getClass().getName(),
-        "클라우드 지라("+ 연결_아이디 +") :: 프로젝트("+ 프로젝트_아이디+ ") :: 프로젝트별_이슈상태_목록_가져오기에 실패하였습니다.");
+                "클라우드 지라("+ 서버정보.getConnectId() +") :: 프로젝트("+ 프로젝트_아이디+ ") :: 프로젝트별_이슈상태_목록_가져오기에 실패하였습니다.");
             return Collections.emptyList();
         }
     }
