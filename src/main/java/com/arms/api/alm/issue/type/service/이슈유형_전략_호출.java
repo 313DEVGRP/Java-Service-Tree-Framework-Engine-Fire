@@ -73,7 +73,7 @@ public class 이슈유형_전략_호출 {
 
         서버유형_정보 서버_유형 = 서버유형_정보.valueOf(서버정보.getType());
         if (서버_유형 == 서버유형_정보.클라우드) {
-            throw new IllegalArgumentException("클라우드 타입은 이슈 유형 목록 가져오기를 사용할 수 없습니다.");
+            throw new IllegalArgumentException("지라 클라우드 타입은 이슈 유형 목록 가져오기를 사용할 수 없습니다.");
         }
         else if (서버_유형 == 서버유형_정보.레드마인_온프레미스) {
             throw new IllegalArgumentException("레드마인 온프레미스 타입은 이슈 유형 목록 가져오기를 사용할 수 없습니다.");
@@ -107,7 +107,7 @@ public class 이슈유형_전략_호출 {
         서버유형_정보 서버_유형 = 서버유형_정보.valueOf(서버정보.getType());
 
         if (서버_유형 == 서버유형_정보.온프레미스) {
-            throw new IllegalArgumentException("온프레미스 타입은 프로젝트별 이슈 유형 목록 가져오기를 사용할 수 없습니다.");
+            throw new IllegalArgumentException("지라 온프레미스 타입은 프로젝트별 이슈 유형 목록 가져오기를 사용할 수 없습니다.");
         }
 
         이슈유형_전략 이슈유형_전략 = 이슈유형_전략_확인(서버정보);
