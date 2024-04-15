@@ -1,5 +1,6 @@
 server:
   port: 33333
+  address: 0.0.0.0
   servlet:
     session:
       timeout: 7200
