@@ -66,3 +66,4 @@ redmine:
       priority: /enumerations/issue_priorities.json?priority_id={아이디}
       issuestatus: /issue_statuses.json?status_id={아이디}
       issue: /issues/{아이디}.json
+      priorityList: /enumerations/issue_priorities.json
