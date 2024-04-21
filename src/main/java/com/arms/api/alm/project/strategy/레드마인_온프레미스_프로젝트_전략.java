@@ -24,23 +24,19 @@ import static java.util.stream.Collectors.toList;
 public class 레드마인_온프레미스_프로젝트_전략 implements 프로젝트_전략 {
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
-    private 서버정보_서비스 서버정보_서비스;
     private 레드마인유틸 레드마인유틸;
     private 레드마인API_정보 레드마인API_정보;
 
     @Autowired
-    public 레드마인_온프레미스_프로젝트_전략(서버정보_서비스 서버정보_서비스,
-                                      레드마인유틸 레드마인유틸,
+    public 레드마인_온프레미스_프로젝트_전략(레드마인유틸 레드마인유틸,
                                       레드마인API_정보 레드마인API_정보) {
-        this.서버정보_서비스 = 서버정보_서비스;
         this.레드마인유틸 = 레드마인유틸;
         this.레드마인API_정보 = 레드마인API_정보;
     }
 
     @Override
-    public 프로젝트_데이터 프로젝트_상세정보_가져오기(Long 연결_아이디, String 프로젝트_키_또는_아이디) {
+    public 프로젝트_데이터 프로젝트_상세정보_가져오기(서버정보_데이터 서버정보, String 프로젝트_키_또는_아이디) {
 
-        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
         RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
         프로젝트_데이터 프로젝트_데이터;
@@ -58,12 +54,10 @@ public class 레드마인_온프레미스_프로젝트_전략 implements 프로�
     }
 
     @Override
-    public List<프로젝트_데이터> 프로젝트_목록_가져오기(Long 연결_아이디) {
+    public List<프로젝트_데이터> 프로젝트_목록_가져오기(서버정보_데이터 서버정보) {
 
-        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
         RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
-        List<프로젝트_데이터> 지라프로젝트_목록;
         List<Project> 프로젝트_목록;
         try {
             프로젝트_목록 = 레드마인_매니저.getProjectManager().getProjects();
@@ -74,7 +68,7 @@ public class 레드마인_온프레미스_프로젝트_전략 implements 프로�
                     + 에러코드.프로젝트_조회_오류.getErrorMsg() + " :: " +e.getMessage());
         }
 
-        지라프로젝트_목록 = 프로젝트_목록.stream().map(프로젝트 -> {
+        List<프로젝트_데이터> 지라프로젝트_목록 = 프로젝트_목록.stream().map(프로젝트 -> {
                 프로젝트_데이터 프로젝트_데이터 = 지라프로젝트_데이터형_변환(프로젝트, 서버정보.getUri());
                 return 프로젝트_데이터;
             })

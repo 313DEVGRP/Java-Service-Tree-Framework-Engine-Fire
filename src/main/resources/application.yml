@@ -1,5 +1,6 @@
 server:
   port: 33333
+  address: 0.0.0.0
   servlet:
     session:
       timeout: 7200
@@ -18,6 +19,8 @@ springfox:
 spring:
   application:
     name: javaServiceTreeFrameworkEngineFire
+  jackson:
+    time-zone: Asia/Seoul
   autoconfigure:
     exclude:
       - org.springframework.boot.actuate.autoconfigure.elasticsearch.ElasticSearchReactiveHealthContributorAutoConfiguration
@@ -63,3 +66,4 @@ redmine:
       priority: /enumerations/issue_priorities.json?priority_id={아이디}
       issuestatus: /issue_statuses.json?status_id={아이디}
       issue: /issues/{아이디}.json
+      priorityList: /enumerations/issue_priorities.json

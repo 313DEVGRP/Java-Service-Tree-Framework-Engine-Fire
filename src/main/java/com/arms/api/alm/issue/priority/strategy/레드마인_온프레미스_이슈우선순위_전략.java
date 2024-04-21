@@ -15,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
@@ -52,12 +54,18 @@ public class 레드마인_온프레미스_이슈우선순위_전략 implements �
                     + 에러코드.이슈우선순위_조회_오류.getErrorMsg() + " :: " +e.getMessage());
         }
 
-        지라이슈우선순위_목록 = 온프레미스_레드마인_우선순위_데이터.getIssue_priorities().stream().map(우선순위 -> {
-                    이슈우선순위_데이터 이슈우선순위_데이터 = null;
+        if (온프레미스_레드마인_우선순위_데이터 == null) {
+            return Collections.emptyList();
+        }
+
+        지라이슈우선순위_목록 = Optional.ofNullable(온프레미스_레드마인_우선순위_데이터.getIssue_priorities())
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(우선순위 -> {
                     if (우선순위.isActive()) {
-                        이슈우선순위_데이터 = 레드마인_웹클라이언트_이슈우선순위_데이터형_변환(우선순위, 서버정보.getUri());
+                        return 레드마인_웹클라이언트_이슈우선순위_데이터형_변환(우선순위, 서버정보.getUri());
                     }
-                    return 이슈우선순위_데이터;
+                    return null;
                 })
                 .filter(Objects::nonNull)
                 .collect(toList());

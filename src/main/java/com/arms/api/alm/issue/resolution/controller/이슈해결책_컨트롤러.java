@@ -24,10 +24,8 @@ public class 이슈해결책_컨트롤러 {
             value = {"/list"},
             method = {RequestMethod.GET}
     )
-    public List<이슈해결책_데이터> 이슈해결책_목록_가져오기(@PathVariable("connectId") Long 연결_아이디,
-                                         ModelMap model, HttpServletRequest request) throws Exception {
-        로그.info("지라 이슈해결책_목록_가져오기");
-
+    public List<이슈해결책_데이터> 이슈해결책_목록_가져오기(@PathVariable("connectId") Long 연결_아이디) {
+        로그.info("이슈해결책_목록_가져오기 :: 연결_아이디 :: {}", 연결_아이디);
         return 이슈해결책_전략_호출.이슈해결책_목록_가져오기(연결_아이디);
     }
 }

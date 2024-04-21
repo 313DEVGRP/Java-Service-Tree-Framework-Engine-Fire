@@ -3,8 +3,6 @@ package com.arms.api.alm.issue.base.service;
 import com.arms.api.alm.issue.base.model.지라이슈_데이터;
 import com.arms.api.alm.issue.base.model.지라이슈필드_데이터;
 import com.arms.api.alm.issue.base.model.지라프로젝트_데이터;
-import com.arms.api.alm.issue.base.service.이슈전략_호출;
-import com.arms.api.alm.issue.base.service.지라이슈_스케쥴_서비스;
 import com.arms.api.alm.issue.status.model.이슈상태_데이터;
 import com.arms.api.utils.common.constrant.index.인덱스자료;
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
@@ -35,7 +33,7 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 @Service("지라이슈_스케쥴_서비스")
 @AllArgsConstructor
-public class 지라이슈_스케쥴_서비스_프로세스 implements 지라이슈_스케쥴_서비스 {
+public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴_서비스 {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
@@ -198,7 +196,6 @@ public class 지라이슈_스케쥴_서비스_프로세스 implements 지라이�
             지라이슈필드_데이터.setStatus(이슈상태_데이터);
 
             반환된_이슈.setFields(지라이슈필드_데이터);
-
             벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 반환된_이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink));
 
             try {

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,20 +27,18 @@ public class 온프레미스_레드마인_이슈유형_전략 implements 이슈�
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
-    private 서버정보_서비스 서버정보_서비스;
-
-    @Autowired
     private 레드마인유틸 레드마인유틸;
-
-    @Autowired
     private 레드마인API_정보 레드마인API_정보;
 
-    @Override
-    public List<이슈유형_데이터> 이슈유형_목록_가져오기(Long 연결_아이디) {
-        로그.info("레드마인_온프레미스_이슈유형_전략 "+ 연결_아이디 +" 이슈유형_목록_가져오기");
+    @Autowired
+    public 온프레미스_레드마인_이슈유형_전략(레드마인유틸 레드마인유틸,
+                                        레드마인API_정보 레드마인API_정보) {
+        this.레드마인유틸 = 레드마인유틸;
+        this.레드마인API_정보 = 레드마인API_정보;
+    }
 
-        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+    @Override
+    public List<이슈유형_데이터> 이슈유형_목록_가져오기(서버정보_데이터 서버정보) {
         RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
         List<이슈유형_데이터> 지라이슈유형_목록;
@@ -47,10 +46,11 @@ public class 온프레미스_레드마인_이슈유형_전략 implements 이슈�
 
         try {
             우선순위_목록 = 레드마인_매니저.getIssueManager().getTrackers();
-        } catch (RedmineException e) {
-            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "이슈유형_목록_가져오기");
-            throw new IllegalArgumentException(this.getClass().getName() + " :: "
-                    + 에러코드.이슈유형_조회_오류.getErrorMsg() + " :: " +e.getMessage());
+        }
+        catch (RedmineException e) {
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(),
+                    "온프레미스 레드마인("+ 서버정보.getConnectId() +") :: 이슈유형_목록_가져오기에 실패하였습니다.");
+            return Collections.emptyList();
         }
 
         지라이슈유형_목록 = 우선순위_목록.stream().map(이슈유형 -> {
@@ -64,10 +64,12 @@ public class 온프레미스_레드마인_이슈유형_전략 implements 이슈�
     }
 
     @Override
-    public List<이슈유형_데이터> 프로젝트별_이슈유형_목록_가져오기(Long 연결_아이디, String 프로젝트_아이디) {
-        로그.info("레드마인_온프레미스_이슈유형_전략 "+ 연결_아이디 +" 프로젝트별_이슈유형_목록_가져오기");
+    public List<이슈유형_데이터> 프로젝트별_이슈유형_목록_가져오기(서버정보_데이터 서버정보, String 프로젝트_아이디) {
 
-        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+        if (프로젝트_아이디 == null || 프로젝트_아이디.isEmpty()) {
+            throw new IllegalArgumentException("프로젝트_아이디 :: " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+        }
+
         RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
         List<이슈유형_데이터> 지라이슈유형_목록;
@@ -75,10 +77,11 @@ public class 온프레미스_레드마인_이슈유형_전략 implements 이슈�
 
         try {
             프로젝트 = 레드마인_매니저.getProjectManager().getProjectById(Integer.parseInt(프로젝트_아이디));
-        } catch (RedmineException e) {
-            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "프로젝트별_이슈유형_목록_가져오기");
-            throw new IllegalArgumentException(this.getClass().getName() + " :: "
-                    + 에러코드.이슈유형_조회_오류.getErrorMsg() + " :: " +e.getMessage());
+        }
+        catch (RedmineException e) {
+            에러로그_유틸.예외로그출력(e, this.getClass().getName(),
+                    "온프레미스 레드마인("+ 서버정보.getConnectId() +") :: 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록_가져오기에 실패하였습니다.");
+            return Collections.emptyList();
         }
 
         지라이슈유형_목록 =  프로젝트.getTrackers().stream().map(이슈유형 -> {

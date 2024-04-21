@@ -1,10 +1,9 @@
 package com.arms.api.alm.issue.status.strategy;
 
 import com.arms.api.alm.issue.status.model.이슈상태_데이터;
+import com.arms.api.alm.serverinfo.model.서버정보_데이터;
 import com.arms.api.alm.utils.레드마인API_정보;
 import com.arms.api.alm.utils.레드마인유틸;
-import com.arms.api.alm.serverinfo.model.서버정보_데이터;
-import com.arms.api.alm.serverinfo.service.서버정보_서비스;
 import com.arms.api.utils.errors.codes.에러코드;
 import com.arms.api.utils.errors.에러로그_유틸;
 import com.taskadapter.redmineapi.RedmineException;
@@ -25,20 +24,19 @@ public class 온프레미스_레드마인_이슈상태_전략 implements 이슈�
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
-    private 서버정보_서비스 서버정보_서비스;
-
-    @Autowired
     private 레드마인유틸 레드마인유틸;
-
-    @Autowired
     private 레드마인API_정보 레드마인API_정보;
 
-    @Override
-    public List<이슈상태_데이터> 이슈상태_목록_가져오기(Long 연결_아이디) {
-        로그.info("레드마인_온프레미스_이슈상태_전략 "+ 연결_아이디 +" 이슈상태_목록_가져오기");
+    @Autowired
+    public 온프레미스_레드마인_이슈상태_전략(레드마인유틸 레드마인유틸,
+                              레드마인API_정보 레드마인API_정보) {
+        this.레드마인유틸 = 레드마인유틸;
+        this.레드마인API_정보 = 레드마인API_정보;
+    }
 
-        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+    @Override
+    public List<이슈상태_데이터> 이슈상태_목록_가져오기(서버정보_데이터 서버정보) {
+
         RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
         List<이슈상태_데이터> 지라이슈상태_목록;
@@ -46,7 +44,8 @@ public class 온프레미스_레드마인_이슈상태_전략 implements 이슈�
 
         try {
             이슈상태_목록 = 레드마인_매니저.getIssueManager().getStatuses();
-        } catch (RedmineException e) {
+        }
+        catch (RedmineException e) {
             에러로그_유틸.예외로그출력(e, this.getClass().getName(), "이슈상태_목록_가져오기");
             throw new IllegalArgumentException(this.getClass().getName() + " :: "
                     + 에러코드.이슈상태_조회_오류.getErrorMsg() + " :: " +e.getMessage());
@@ -63,8 +62,7 @@ public class 온프레미스_레드마인_이슈상태_전략 implements 이슈�
     }
 
     @Override
-    public List<이슈상태_데이터> 프로젝트별_이슈상태_목록_가져오기(Long 연결_아이디, String 프로젝트_아이디) {
-        로그.info("레드마인_온프레미스_이슈상태_전략 "+ 연결_아이디 +" 프로젝트별_이슈상태_목록_가져오기를 사용하지 않습니다.");
+    public List<이슈상태_데이터> 프로젝트별_이슈상태_목록_가져오기(서버정보_데이터 서버정보, String 프로젝트_아이디) {
         return null;
     }
 
