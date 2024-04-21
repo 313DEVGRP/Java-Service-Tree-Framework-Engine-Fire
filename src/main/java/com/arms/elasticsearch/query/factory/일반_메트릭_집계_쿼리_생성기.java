@@ -32,7 +32,7 @@ import java.util.function.Function;
 			= AggregationBuilders.terms("group_by_" + 메트릭_집계_요청.get메인_그룹_필드())
 				.field(메트릭_집계_요청.get메인_그룹_필드());
 
-		nativeSearchQueryBuilder.addAggregation(
+		this.nativeSearchQueryBuilder.addAggregation(
 				this.termsAggregationBuilder
 		);
 
