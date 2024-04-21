@@ -20,7 +20,7 @@ import java.util.function.Function;
 
 @Setter
 @Getter
-	public class 일자별_메트릭_집계_집계_쿼리_생성기 implements 쿼리_추상_팩토리 {
+	public class 일자별_메트릭_집계_쿼리_생성기 implements 쿼리_추상_팩토리 {
 
 	private final List<String> 그룹_필드들;
 	private final String 메인_그룹_필드;
@@ -30,7 +30,7 @@ import java.util.function.Function;
 	private final NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
 	private final DateHistogramAggregationBuilder dateHistogramAggregationBuilder;
 
-	private 일자별_메트릭_집계_집계_쿼리_생성기(메트릭_집계_요청 메트릭_집계_요청, EsQuery esQuery){
+	private 일자별_메트릭_집계_쿼리_생성기(메트릭_집계_요청 메트릭_집계_요청, EsQuery esQuery){
 		this.컨텐츠보기여부 = 메트릭_집계_요청.is컨텐츠보기여부();
 		this.dateHistogramAggregationBuilder = new DateHistogramAggregationBuilder(
 			"date_group_by_" + 메트릭_집계_요청.get메인_그룹_필드())
@@ -49,7 +49,7 @@ import java.util.function.Function;
 	}
 
 	public static 쿼리_추상_팩토리 of(메트릭_집계_요청 메트릭_집계_요청, EsQuery esQuery){
-		return new 일자별_메트릭_집계_집계_쿼리_생성기(메트릭_집계_요청, esQuery);
+		return new 일자별_메트릭_집계_쿼리_생성기(메트릭_집계_요청, esQuery);
 	}
 
 	@Override
