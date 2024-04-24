@@ -143,7 +143,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     }
 
     @Override
-    public int 이슈_링크드이슈_서브테스크_벌크로_추가하기(Long 지라서버_아이디, String 이슈_키 , String 프로젝트_키, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception {
+    public int 이슈_링크드이슈_서브테스크_벌크로_추가하기(Long 지라서버_아이디, String 이슈_키 , String 프로젝트키_또는_아이디, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception {
 
                         if (지라서버_아이디 == null) {
                             로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
@@ -155,9 +155,9 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
                             throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
                         }
 
-                        if (프로젝트_키 == null || 프로젝트_키.isEmpty()) {
-                            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 프로젝트_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-                            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 프로젝트_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+                        if (프로젝트키_또는_아이디 == null || 프로젝트키_또는_아이디.isEmpty()) {
+                            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 프로젝트키_또는_아이디 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+                            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 프로젝트키_또는_아이디 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
                         }
 
                         if (제품서비스_아이디 == null || 제품서비스_버전들 == null) {
@@ -184,7 +184,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
              * ALM 서버 조회 후 반환된 데이터가 Null -> 1. 삭제되어 조회가 안 되는 경우 2. 서버에서 에러가 터진 경우
              * ES 데이터에 있는지 조회 후 암스에서 관리하지 않는 요구사항으로 처리하는 로직
              **/
-            String 조회조건_아이디 = 지라서버_아이디 + "_" + 프로젝트_키 + "_" + 이슈_키;
+            String 조회조건_아이디 = 지라서버_아이디 + "_" + 프로젝트키_또는_아이디 + "_" + 이슈_키;
             지라이슈_엔티티 조회결과 = this.이슈_조회하기(조회조건_아이디);
 
             if (조회결과 == null) {
@@ -195,7 +195,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
             반환된_이슈.setKey(이슈_키);
 
             지라프로젝트_데이터 지라프로젝트_데이터 = new 지라프로젝트_데이터();
-            지라프로젝트_데이터.setKey(프로젝트_키);
+            지라프로젝트_데이터.setKey(프로젝트키_또는_아이디);
 
             이슈상태_데이터 이슈상태_데이터 = new 이슈상태_데이터();
             이슈상태_데이터.setId("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
@@ -257,7 +257,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     }
 
     @Override
-    public int 증분이슈_링크드이슈_서브테스크_벌크추가(Long 지라서버_아이디, String 이슈_키 , String 프로젝트_키, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception {
+    public int 증분이슈_링크드이슈_서브테스크_벌크추가(Long 지라서버_아이디, String 이슈_키 , String 프로젝트키_또는_아이디, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception {
 
         if (지라서버_아이디 == null) {
             로그.error("증분이슈_링크드이슈_서브테스크_벌크추가 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
@@ -269,7 +269,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
             throw new IllegalArgumentException("증분이슈_링크드이슈_서브테스크_벌크추가 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
         }
 
-        if (프로젝트_키 == null || 프로젝트_키.isEmpty()) {
+        if (프로젝트키_또는_아이디 == null || 프로젝트키_또는_아이디.isEmpty()) {
             로그.error("증분이슈_링크드이슈_서브테스크_벌크추가 Error 프로젝트_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
             throw new IllegalArgumentException("증분이슈_링크드이슈_서브테스크_벌크추가 Error 프로젝트_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
         }
@@ -304,7 +304,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
              * ALM 서버 조회 후 반환된 데이터가 Null -> 1. 삭제되어 조회가 안 되는 경우 2. 서버에서 에러가 터진 경우
              * ES 데이터에 있는지 조회 후 암스에서 관리하지 않는 요구사항으로 처리하는 로직
              **/
-            String 조회조건_아이디 = 지라서버_아이디 + "_" + 프로젝트_키 + "_" + 이슈_키;
+            String 조회조건_아이디 = 지라서버_아이디 + "_" + 프로젝트키_또는_아이디 + "_" + 이슈_키;
             지라이슈_엔티티 조회결과 = this.이슈_조회하기(조회조건_아이디);
 
             if (조회결과 == null) {
@@ -315,7 +315,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
             반환된_이슈.setKey(이슈_키);
 
             지라프로젝트_데이터 지라프로젝트_데이터 = new 지라프로젝트_데이터();
-            지라프로젝트_데이터.setKey(프로젝트_키);
+            지라프로젝트_데이터.setKey(프로젝트키_또는_아이디);
 
             이슈상태_데이터 이슈상태_데이터 = new 이슈상태_데이터();
             이슈상태_데이터.setId("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");

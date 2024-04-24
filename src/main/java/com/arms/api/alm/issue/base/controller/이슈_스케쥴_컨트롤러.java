@@ -96,13 +96,13 @@ public class 이슈_스케쥴_컨트롤러 {
                                     @RequestParam("pdServiceId") Long 제품서비스_아이디,
                                     @RequestParam("pdServiceVersions") Long[] 제품서비스_버전_아이디들,
                                     @RequestParam("cReqLink") Long cReqLink,
-                                    @RequestParam("projectKey") String 프로젝트_키,
+                                    @RequestParam("projectKeyOrId") String 프로젝트키_또는_아이디,
                               ModelMap model, HttpServletRequest request) throws Exception {
 
-        log.info(" [ 이슈_검색엔진_벌크_저장 ] :: 지라서버 아이디 : {},\t이슈 키 : {},\t프로젝트 키 : {},\t제품서비스 아이디 : {},\t제품서비스 버전 목록 : {}"
-                , 지라서버_아이디, 이슈_키, 프로젝트_키, 제품서비스_아이디, 제품서비스_버전_아이디들);
+        log.info(" [ 이슈_검색엔진_벌크_저장 ] :: 지라서버 아이디 : {},\t이슈 키 : {},\t프로젝트키_또는_아이디 : {},\t제품서비스 아이디 : {},\t제품서비스 버전 목록 : {}"
+                , 지라서버_아이디, 이슈_키, 프로젝트키_또는_아이디, 제품서비스_아이디, 제품서비스_버전_아이디들);
 
-        return 이슈_스케쥴_서비스.이슈_링크드이슈_서브테스크_벌크로_추가하기(지라서버_아이디, 이슈_키, 프로젝트_키, 제품서비스_아이디, 제품서비스_버전_아이디들, cReqLink);
+        return 이슈_스케쥴_서비스.이슈_링크드이슈_서브테스크_벌크로_추가하기(지라서버_아이디, 이슈_키, 프로젝트키_또는_아이디, 제품서비스_아이디, 제품서비스_버전_아이디들, cReqLink);
     }
 
     // 스케쥴러 컨트롤러
@@ -116,13 +116,13 @@ public class 이슈_스케쥴_컨트롤러 {
                                      @RequestParam("pdServiceId") Long 제품서비스_아이디,
                                      @RequestParam("pdServiceVersions") Long[] 제품서비스_버전_아이디들,
                                      @RequestParam("cReqLink") Long cReqLink,
-                                     @RequestParam("projectKey") String 프로젝트_키,
+                                     @RequestParam("projectKeyOrId") String 프로젝트키_또는_아이디,
                              ModelMap model, HttpServletRequest request) throws Exception {
 
-        log.info("지라서버 아이디 : {},\t이슈 키 : {},\t프로젝트 키 : {},\t제품서비스 아이디 : {},\t제품서비스 버전 목록 : {}"
-                            , 지라서버_아이디, 이슈_키, 프로젝트_키, 제품서비스_아이디, 제품서비스_버전_아이디들);
+        log.info("지라서버 아이디 : {},\t이슈 키 : {},\t프로젝트키_또는_아이디 : {},\t제품서비스 아이디 : {},\t제품서비스 버전 목록 : {}"
+                            , 지라서버_아이디, 이슈_키, 프로젝트키_또는_아이디, 제품서비스_아이디, 제품서비스_버전_아이디들);
 
-        return 이슈_스케쥴_서비스.증분이슈_링크드이슈_서브테스크_벌크추가(지라서버_아이디, 이슈_키, 프로젝트_키, 제품서비스_아이디, 제품서비스_버전_아이디들, cReqLink);
+        return 이슈_스케쥴_서비스.증분이슈_링크드이슈_서브테스크_벌크추가(지라서버_아이디, 이슈_키, 프로젝트키_또는_아이디, 제품서비스_아이디, 제품서비스_버전_아이디들, cReqLink);
     }
 
 }
