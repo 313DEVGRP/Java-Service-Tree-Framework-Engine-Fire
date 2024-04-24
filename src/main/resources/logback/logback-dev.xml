@@ -3,19 +3,15 @@
 <configuration>
     <timestamp key="BY_DATE" datePattern="yyyy-MM-dd"/>
 
+    <conversionRule conversionWord="highlightCustom" converterClass="com.arms.api.utils.HighlightingCompositeConverterCustom" />
+
     <property name="LOG_PATTERN"
-              value="[%d{yyyy-MM-dd HH:mm:ss}:%-4relative] %([%thread]) %(%-5level) %([%C.%M:%(%L)]) - %msg%n"/>
+              value="%highlightCustom([%d{yyyy-MM-dd HH:mm:ss}:%-4relative] %([%thread]) %(%-5level) %([%C.%M:%(%L)]) - %(%msg%n))"/>
 
     <include resource="logback/console-appender.xml"/>
-    <include resource="logback/file-error-appender.xml"/>
-    <include resource="logback/file-info-appender.xml"/>
-    <include resource="logback/file-warn-appender.xml"/>
 
-    <root level="INFO">
+    <root level="DEBUG">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE-INFO"/>
-        <appender-ref ref="FILE-WARN"/>
-        <appender-ref ref="FILE-ERROR"/>
     </root>
 
 
