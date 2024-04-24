@@ -5,6 +5,7 @@ import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import com.arms.elasticsearch.검색조건;
 import org.springframework.data.elasticsearch.core.IndexedObjectInformation;
 import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
@@ -13,6 +14,7 @@ import org.springframework.data.repository.NoRepositoryBean;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @NoRepositoryBean
 public interface 공통저장소<T,ID extends Serializable> extends ElasticsearchRepository<T,ID> {
@@ -48,4 +50,8 @@ public interface 공통저장소<T,ID extends Serializable> extends Elasticsearc
 	boolean 인덱스삭제(String 삭제할_지라이슈인덱스);
 
 	boolean 리인덱스(String 현재_인덱스, String 백업_인덱스);
+
+    Set<String> findIndexNamesByAlias(IndexCoordinates indexCoordinates);
+
+	boolean deleteIndex(IndexCoordinates indexCoordinates);
 }

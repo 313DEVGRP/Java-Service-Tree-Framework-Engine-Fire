@@ -28,9 +28,7 @@ import org.springframework.data.elasticsearch.repository.support.ElasticsearchEn
 import org.springframework.data.elasticsearch.repository.support.SimpleElasticsearchRepository;
 
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -474,6 +472,17 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
             log.info(e.getMessage());
             return null;
         }
+    }
+    @Override
+    public Set<String> findIndexNamesByAlias(IndexCoordinates indexCoordinates) {
+        IndexOperations indexOperations = operations.indexOps(indexCoordinates);
+        return indexOperations.getAliasesForIndex(indexCoordinates.getIndexName()).keySet();
+    }
+
+    @Override
+    public boolean deleteIndex(IndexCoordinates indexCoordinates) {
+        IndexOperations indexOperations = operations.indexOps(indexCoordinates);
+        return indexOperations.delete();
     }
 
 
