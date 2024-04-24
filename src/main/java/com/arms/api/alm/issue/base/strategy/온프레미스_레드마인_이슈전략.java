@@ -1,13 +1,13 @@
 package com.arms.api.alm.issue.base.strategy;
 
 import com.arms.api.alm.issue.base.model.*;
+import com.arms.api.alm.issue.priority.model.이슈우선순위_데이터;
 import com.arms.api.alm.issue.status.model.이슈상태_데이터;
 import com.arms.api.alm.issue.type.model.이슈유형_데이터;
-import com.arms.api.alm.issue.priority.model.이슈우선순위_데이터;
-import com.arms.api.alm.utils.레드마인API_정보;
-import com.arms.api.alm.utils.레드마인유틸;
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
 import com.arms.api.alm.serverinfo.service.서버정보_서비스;
+import com.arms.api.alm.utils.레드마인API_정보;
+import com.arms.api.alm.utils.레드마인유틸;
 import com.arms.api.utils.errors.codes.에러코드;
 import com.arms.api.utils.errors.에러로그_유틸;
 import com.taskadapter.redmineapi.Include;
@@ -46,7 +46,9 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
     private final 레드마인API_정보 레드마인API_정보;
 
     @Autowired
-    public 온프레미스_레드마인_이슈전략(서버정보_서비스 서버정보_서비스, 레드마인유틸 레드마인유틸, 레드마인API_정보 레드마인API_정보) {
+    public 온프레미스_레드마인_이슈전략(서버정보_서비스 서버정보_서비스,
+                           레드마인유틸 레드마인유틸,
+                           레드마인API_정보 레드마인API_정보) {
         this.서버정보_서비스 = 서버정보_서비스;
         this.레드마인유틸 = 레드마인유틸;
         this.레드마인API_정보 = 레드마인API_정보;
@@ -418,7 +420,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
                 .map(아이디 -> String.valueOf(아이디))
                 .ifPresent(아이디 -> {
                     String 프로젝트_경로 = 기본경로 + 레드마인API_정보.아이디_대체하기(레드마인API_정보.getEndpoint().getProject(), 아이디);
-                    지라이슈필드_데이터.setProject(new 지라프로젝트_데이터(프로젝트_경로, 아이디, 이슈.getProjectName()));
+                    지라이슈필드_데이터.setProject(new 지라프로젝트_데이터(프로젝트_경로, 아이디, 아이디, 이슈.getProjectName()));
                 });
 
         Optional.ofNullable(이슈.getTracker().getId())

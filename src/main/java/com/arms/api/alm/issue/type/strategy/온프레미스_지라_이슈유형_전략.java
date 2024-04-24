@@ -9,6 +9,7 @@ import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.api.domain.IssueType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -19,6 +20,13 @@ import java.util.List;
 public class 온프레미스_지라_이슈유형_전략 implements 이슈유형_전략 {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
+
+    private 지라유틸 지라유틸;
+
+    @Autowired
+    public 온프레미스_지라_이슈유형_전략(지라유틸 지라유틸) {
+        this.지라유틸 = 지라유틸;
+    }
 
     @Override
     public List<이슈유형_데이터> 이슈유형_목록_가져오기(서버정보_데이터 서버정보) {

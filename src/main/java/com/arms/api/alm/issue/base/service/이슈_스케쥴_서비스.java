@@ -21,7 +21,7 @@ public interface 이슈_스케쥴_서비스 {
 
     boolean 지라이슈_인덱스삭제();
 
-    int 이슈_링크드이슈_서브테스크_벌크로_추가하기(Long 지라서버_아이디, String 이슈_키, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception;
+    int 이슈_링크드이슈_서브테스크_벌크로_추가하기(Long 지라서버_아이디, String 이슈_키, String 프로젝트_키, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception;
 
-    int 증분이슈_링크드이슈_서브테스크_벌크추가(Long 지라서버_아이디, String 이슈_키, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception;
+    int 증분이슈_링크드이슈_서브테스크_벌크추가(Long 지라서버_아이디, String 이슈_키, String 프로젝트_키, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception;
 }

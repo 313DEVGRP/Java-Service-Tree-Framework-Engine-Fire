@@ -1,16 +1,17 @@
 package com.arms.api.alm.issue.base.service;
 
 import com.arms.api.alm.issue.base.model.지라이슈_데이터;
+import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.model.지라이슈필드_데이터;
 import com.arms.api.alm.issue.base.model.지라프로젝트_데이터;
-import com.arms.api.alm.issue.status.model.이슈상태_데이터;
-import com.arms.api.utils.common.constrant.index.인덱스자료;
-import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
+import com.arms.api.alm.issue.status.model.이슈상태_데이터;
 import com.arms.api.alm.utils.지라이슈_생성;
+import com.arms.api.utils.common.component.서브테스크_조회;
+import com.arms.api.utils.common.constrant.index.인덱스자료;
+import com.arms.api.utils.errors.codes.에러코드;
 import com.arms.elasticsearch.query.builder.검색_쿼리_빌더;
 import com.arms.elasticsearch.검색조건;
-import com.arms.api.utils.errors.codes.에러코드;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -20,11 +21,11 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
+
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.List;
 import java.util.*;
 import java.util.stream.StreamSupport;
 
@@ -38,9 +39,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     private 지라이슈_저장소 지라이슈저장소;
-
-    private com.arms.api.utils.common.component.서브테스크_조회 서브테스크_조회;
-
+    private 서브테스크_조회 서브테스크_조회;
     private 이슈전략_호출 이슈전략_호출;
 
     @Override
@@ -144,42 +143,56 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     }
 
     @Override
-    public int 이슈_링크드이슈_서브테스크_벌크로_추가하기(Long 지라서버_아이디, String 이슈_키 , Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception {
+    public int 이슈_링크드이슈_서브테스크_벌크로_추가하기(Long 지라서버_아이디, String 이슈_키 , String 프로젝트_키, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception {
 
-        if (지라서버_아이디 == null) {
-            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
-            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
-        }
+                        if (지라서버_아이디 == null) {
+                            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
+                            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
+                        }
 
-        if (이슈_키 == null || 이슈_키.isEmpty()) {
-            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
+                        if (이슈_키 == null || 이슈_키.isEmpty()) {
+                            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+                            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+                        }
 
-        if (제품서비스_아이디 == null || 제품서비스_버전들 == null) {
-            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 제품서비스_아이디 또는 제품서비스_버전 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 제품서비스_아이디 또는 제품서비스_버전 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
+                        if (프로젝트_키 == null || 프로젝트_키.isEmpty()) {
+                            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 프로젝트_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+                            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 프로젝트_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+                        }
 
-        if (cReqLink == null) {
-            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error cReqLink " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error cReqLink " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
+                        if (제품서비스_아이디 == null || 제품서비스_버전들 == null) {
+                            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 제품서비스_아이디 또는 제품서비스_버전 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+                            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 제품서비스_아이디 또는 제품서비스_버전 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+                        }
 
-        List<지라이슈_엔티티> 벌크_저장_목록 = new ArrayList<지라이슈_엔티티>();
+                        if (cReqLink == null) {
+                            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error cReqLink " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+                            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error cReqLink " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+                        }
 
-        지라이슈_데이터 반환된_이슈 = Optional.ofNullable(이슈전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키))
-                .map(이슈 -> {
-                    벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink));
+                        List<지라이슈_엔티티> 벌크_저장_목록 = new ArrayList<지라이슈_엔티티>();
+
+                        지라이슈_데이터 반환된_이슈 = Optional.ofNullable(이슈전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키))
+                                .map(이슈 -> {
+                                    벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink));
                     return 이슈;
                 }).orElse(null);
 
         if (반환된_이슈 == null) {
 
+            /**
+             * ALM 서버 조회 후 반환된 데이터가 Null -> 1. 삭제되어 조회가 안 되는 경우 2. 서버에서 에러가 터진 경우
+             * ES 데이터에 있는지 조회 후 암스에서 관리하지 않는 요구사항으로 처리하는 로직
+             **/
+            String 조회조건_아이디 = 지라서버_아이디 + "_" + 프로젝트_키 + "_" + 이슈_키;
+            지라이슈_엔티티 조회결과 = this.이슈_조회하기(조회조건_아이디);
+
+            if (조회결과 == null) {
+                return 0;
+            }
+
             반환된_이슈 = new 지라이슈_데이터();
             반환된_이슈.setKey(이슈_키);
-
-            String 프로젝트_키 = 이슈_키.substring(0, 이슈_키.indexOf("-"));
 
             지라프로젝트_데이터 지라프로젝트_데이터 = new 지라프로젝트_데이터();
             지라프로젝트_데이터.setKey(프로젝트_키);
@@ -244,7 +257,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     }
 
     @Override
-    public int 증분이슈_링크드이슈_서브테스크_벌크추가(Long 지라서버_아이디, String 이슈_키 , Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception {
+    public int 증분이슈_링크드이슈_서브테스크_벌크추가(Long 지라서버_아이디, String 이슈_키 , String 프로젝트_키, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception {
 
         if (지라서버_아이디 == null) {
             로그.error("증분이슈_링크드이슈_서브테스크_벌크추가 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
@@ -254,6 +267,11 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
         if (이슈_키 == null || 이슈_키.isEmpty()) {
             로그.error("증분이슈_링크드이슈_서브테스크_벌크추가 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
             throw new IllegalArgumentException("증분이슈_링크드이슈_서브테스크_벌크추가 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+        }
+
+        if (프로젝트_키 == null || 프로젝트_키.isEmpty()) {
+            로그.error("증분이슈_링크드이슈_서브테스크_벌크추가 Error 프로젝트_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+            throw new IllegalArgumentException("증분이슈_링크드이슈_서브테스크_벌크추가 Error 프로젝트_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
         }
 
         if (제품서비스_아이디 == null || 제품서비스_버전들 == null) {
@@ -282,16 +300,14 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
                 }).orElse(null);
 
         if (반환된_이슈 == null) {
-            String 프로젝트_키 = 이슈_키.substring(0, 이슈_키.indexOf("-"));
-            String 조회조건_아이디 = 지라서버_아이디 + "_" + 프로젝트_키 + "_" + 이슈_키;
-            List<지라이슈_엔티티> 조회결과 = ES데이터조회하기(조회조건_아이디);
-
             /**
-             * Jira서버 조회 후 반환된 데이터가 Null -> 1. 삭제되어 조회가 안되는 경우 or 2. 에러가 터진 경우
-             * ES 데이터에 있는지 조회 후 ES에 있는지 확인 후 암스에서 관리하지 않는 요구사항으로 처리하는 로직
-             * jiraissue-* 인덱스 전체에서 조회해야하는 듯한 생각###
+             * ALM 서버 조회 후 반환된 데이터가 Null -> 1. 삭제되어 조회가 안 되는 경우 2. 서버에서 에러가 터진 경우
+             * ES 데이터에 있는지 조회 후 암스에서 관리하지 않는 요구사항으로 처리하는 로직
              **/
-            if (조회결과 == null || 조회결과.size() == 0) {
+            String 조회조건_아이디 = 지라서버_아이디 + "_" + 프로젝트_키 + "_" + 이슈_키;
+            지라이슈_엔티티 조회결과 = this.이슈_조회하기(조회조건_아이디);
+
+            if (조회결과 == null) {
                 return 0;
             }
 
@@ -400,23 +416,5 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
 
         return inputDateTime.isAfter(startOfYesterday) && inputDateTime.isBefore(endOfYesterday);
     }
-
-    /**
-     * Alias 조회 기능 추가 필요
-     **/
-    public List<지라이슈_엔티티> ES데이터조회하기(String 조회조건_아이디) {
-
-        NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(QueryBuilders.termQuery("id", 조회조건_아이디))
-                .build();
-
-        return 지라이슈저장소.normalSearch(searchQuery);
-    }
-
-
-
-
-
-
 
 }

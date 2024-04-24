@@ -83,7 +83,7 @@ public class 레드마인_온프레미스_프로젝트_전략 implements 프로�
 
         프로젝트_데이터.setId(String.valueOf(프로젝트.getId()));
         프로젝트_데이터.setName(프로젝트.getName());
-        프로젝트_데이터.setKey(프로젝트.getIdentifier());
+        프로젝트_데이터.setKey(String.valueOf(프로젝트.getId()));
         프로젝트_데이터.setSelf(레드마인유틸.서버정보경로_체크(서버정보경로) + 레드마인API_정보.아이디_대체하기(레드마인API_정보.getEndpoint().getProject(), String.valueOf(프로젝트.getId())));
 
         return 프로젝트_데이터;
