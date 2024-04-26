@@ -21,6 +21,7 @@ import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.api.domain.*;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,6 +119,7 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
         String 내용 = null;
         String 보고자 = null;
         Long 우선순위아이디 = null;
+        Date 종료기한일자 = null;
 
         if (필드_데이터.getProject() != null) {
             프로젝트키 = 필드_데이터.getProject().getKey();
@@ -143,6 +145,10 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
             우선순위아이디 = Long.valueOf(필드_데이터.getPriority().getId());
         }
 
+        if (필드_데이터.getDueDate() != null) {
+            종료기한일자 = 필드_데이터.getDueDate();
+        }
+
         IssueInputBuilder 입력_생성 = new IssueInputBuilder(프로젝트키, 이슈유형아이디, 제목);
 
         입력_생성.setDescription(내용);
@@ -153,6 +159,11 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
 
         if (우선순위아이디 != null) {
             입력_생성.setPriorityId(우선순위아이디);
+        }
+
+        if (종료기한일자 != null) {
+            DateTime dateTime = new DateTime(종료기한일자);
+            입력_생성.setDueDate(dateTime);
         }
 
         IssueInput 입력_데이터 = 입력_생성.build();

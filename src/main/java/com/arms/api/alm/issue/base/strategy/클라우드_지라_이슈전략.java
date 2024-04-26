@@ -7,6 +7,7 @@ import com.arms.api.alm.serverinfo.model.서버정보_데이터;
 import com.arms.api.alm.serverinfo.service.서버정보_서비스;
 import com.arms.api.utils.errors.codes.에러코드;
 import com.arms.api.utils.errors.에러로그_유틸;
+import org.apache.http.client.utils.DateUtils;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -580,16 +581,14 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
         String 프로젝트_아이디 = "";
         String 이슈유형_아이디 = "";
 
-        if (지라이슈생성_데이터.getFields().getProject() != null &&
-                지라이슈생성_데이터.getFields().getProject().getId() != null &&
-                !지라이슈생성_데이터.getFields().getProject().getId().isEmpty()) {
-            프로젝트_아이디 = 지라이슈생성_데이터.getFields().getProject().getId();
+        if (이슈생성필드_데이터.getProject() != null && 이슈생성필드_데이터.getProject().getId() != null &&
+                !이슈생성필드_데이터.getProject().getId().isEmpty()) {
+            프로젝트_아이디 = 이슈생성필드_데이터.getProject().getId();
         }
 
-        if (지라이슈생성_데이터.getFields().getIssuetype() != null &&
-                지라이슈생성_데이터.getFields().getIssuetype().getId() != null
-                && !지라이슈생성_데이터.getFields().getIssuetype().getId().isEmpty()) {
-            이슈유형_아이디 = 지라이슈생성_데이터.getFields().getIssuetype().getId();
+        if (이슈생성필드_데이터.getIssuetype() != null && 이슈생성필드_데이터.getIssuetype().getId() != null
+                && !이슈생성필드_데이터.getIssuetype().getId().isEmpty()) {
+            이슈유형_아이디 = 이슈생성필드_데이터.getIssuetype().getId();
         }
 
         if (프로젝트_아이디.isEmpty() || 이슈유형_아이디.isEmpty()) {
@@ -605,6 +604,11 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
         Map<String, 클라우드_이슈생성필드_메타데이터.필드_메타데이터> 필드_메타데이터_목록
                 = 지라유틸.필드_메타데이터_확인하기(webClient, 프로젝트_아이디, 이슈유형_아이디);
         클라우드_필드_데이터 = 필드검증_및_추가하기(webClient, 이슈생성필드_데이터, 필드_메타데이터_목록);
+
+        if (이슈생성필드_데이터.getDueDate() != null) {
+            String 종료기한일자 = DateUtils.formatDate(이슈생성필드_데이터.getDueDate(), "yyyy-MM-dd");
+            클라우드_필드_데이터.setDuedate(종료기한일자);
+        }
 
         입력_데이터.setFields(클라우드_필드_데이터);
 
