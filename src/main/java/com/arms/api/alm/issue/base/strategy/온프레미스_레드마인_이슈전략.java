@@ -129,6 +129,14 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
             생성이슈.setPriorityId(Integer.parseInt(필드_데이터.getPriority().getId()));
         }
 
+        if (필드_데이터.getStartDate() != null) {
+            생성이슈.setStartDate(필드_데이터.getStartDate());
+        }
+
+        if (필드_데이터.getDueDate() != null) {
+            생성이슈.setDueDate(필드_데이터.getDueDate());
+        }
+
         try {
             생성이슈 = 생성이슈.create();
         }

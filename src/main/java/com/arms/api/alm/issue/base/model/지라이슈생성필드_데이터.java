@@ -7,6 +7,7 @@ import com.arms.api.alm.issue.priority.model.이슈우선순위_데이터;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -38,4 +39,7 @@ public class 지라이슈생성필드_데이터 {
 
     private 이슈해결책_데이터 resolution;
 
+    private Date startDate;
+
+    private Date dueDate;
 }
