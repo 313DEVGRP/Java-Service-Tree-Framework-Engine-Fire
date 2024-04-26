@@ -1,5 +1,7 @@
-package com.arms.notification.slack;
+package com.arms.config;
 
+import com.arms.api.utils.slack.SlackNotificationService;
+import com.arms.api.utils.slack.SlackProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

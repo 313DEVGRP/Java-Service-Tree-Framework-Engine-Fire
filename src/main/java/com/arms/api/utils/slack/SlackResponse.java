@@ -1,4 +1,4 @@
-package com.arms.notification.slack;
+package com.arms.api.utils.slack;
 
 
 import java.io.IOException;
