@@ -5,7 +5,7 @@ import com.arms.api.alm.issue.resolution.strategy.온프레미스_지라_이슈�
 import com.arms.api.alm.issue.resolution.strategy.이슈해결책_전략;
 import com.arms.api.alm.issue.resolution.strategy.이슈해결책_전략_등록_및_실행;
 import com.arms.api.alm.issue.resolution.strategy.클라우드_지라_이슈해결책_전략;
-import com.arms.api.utils.errors.codes.에러코드;
+import com.arms.api.util.errors.codes.에러코드;
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
 import com.arms.api.alm.serverinfo.model.enums.서버유형_정보;
 import com.arms.api.alm.serverinfo.service.서버정보_서비스;

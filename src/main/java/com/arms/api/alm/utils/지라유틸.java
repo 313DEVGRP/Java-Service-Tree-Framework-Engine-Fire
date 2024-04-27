@@ -1,13 +1,12 @@
 package com.arms.api.alm.utils;
 
 import com.arms.api.alm.issue.base.model.클라우드_이슈생성필드_메타데이터;
-import com.arms.api.utils.errors.에러로그_유틸;
+import com.arms.api.util.errors.에러로그_유틸;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

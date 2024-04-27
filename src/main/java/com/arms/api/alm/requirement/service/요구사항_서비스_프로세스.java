@@ -1,9 +1,9 @@
 package com.arms.api.alm.requirement.service;
 
-import com.arms.api.utils.common.component.서브테스크_조회;
+import com.arms.api.util.common.component.서브테스크_조회;
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
-import com.arms.api.utils.model.dto.지라이슈_일반_집계_요청;
+import com.arms.api.util.model.dto.지라이슈_일반_집계_요청;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.factory.계층_집계_쿼리_생성기;

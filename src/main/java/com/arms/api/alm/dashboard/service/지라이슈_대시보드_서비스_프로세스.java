@@ -2,10 +2,10 @@ package com.arms.api.alm.dashboard.service;
 
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
-import com.arms.api.utils.model.dto.제품버전목록;
-import com.arms.api.utils.model.dto.트리맵_집계_요청;
-import com.arms.api.utils.model.vo.TaskList;
-import com.arms.api.utils.model.vo.Worker;
+import com.arms.api.util.model.dto.제품버전목록;
+import com.arms.api.util.model.dto.트리맵_집계_요청;
+import com.arms.api.util.model.vo.TaskList;
+import com.arms.api.util.model.vo.Worker;
 import com.arms.elasticsearch.query.쿼리_추상_팩토리;
 import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import lombok.AllArgsConstructor;

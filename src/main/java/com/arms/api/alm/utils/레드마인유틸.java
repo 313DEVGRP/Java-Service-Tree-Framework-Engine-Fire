@@ -1,6 +1,6 @@
 package com.arms.api.alm.utils;
 
-import com.arms.api.utils.errors.에러로그_유틸;
+import com.arms.api.util.errors.에러로그_유틸;
 import com.taskadapter.redmineapi.RedmineException;
 import com.taskadapter.redmineapi.RedmineManager;
 import com.taskadapter.redmineapi.RedmineManagerFactory;

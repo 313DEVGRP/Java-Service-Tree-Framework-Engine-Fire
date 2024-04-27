@@ -1,8 +1,8 @@
 package com.arms.elasticsearch.services;
 
-import com.arms.api.utils.model.dto.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
+import com.arms.api.util.model.dto.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
-import com.arms.api.utils.common.constrant.index.인덱스자료;
+import com.arms.api.util.common.constrant.index.인덱스자료;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
 import com.arms.elasticsearch.버킷_집계_결과;
 import com.fasterxml.jackson.databind.ObjectMapper;

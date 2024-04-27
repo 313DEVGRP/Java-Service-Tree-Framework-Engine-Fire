@@ -1,10 +1,10 @@
 package com.arms.api.alm.issue.base.service;
 
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
-import com.arms.api.utils.model.dto.검색어_검색결과;
-import com.arms.api.utils.model.dto.검색어_기본_검색_요청;
-import com.arms.api.utils.model.dto.검색어_날짜포함_검색_요청;
-import com.arms.api.utils.model.dto.검색어_집계_요청;
+import com.arms.api.util.model.dto.검색어_검색결과;
+import com.arms.api.util.model.dto.검색어_기본_검색_요청;
+import com.arms.api.util.model.dto.검색어_날짜포함_검색_요청;
+import com.arms.api.util.model.dto.검색어_집계_요청;
 import com.arms.elasticsearch.query.쿼리_추상_팩토리;
 import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import org.springframework.data.elasticsearch.core.SearchHit;

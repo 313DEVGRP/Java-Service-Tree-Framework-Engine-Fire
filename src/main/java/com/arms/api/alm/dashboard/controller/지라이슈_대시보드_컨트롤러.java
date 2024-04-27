@@ -1,8 +1,8 @@
 package com.arms.api.alm.dashboard.controller;
 
-import com.arms.api.utils.model.dto.지라이슈_일반_집계_요청;
-import com.arms.api.utils.model.dto.트리맵_집계_요청;
-import com.arms.api.utils.model.vo.Worker;
+import com.arms.api.util.model.dto.지라이슈_일반_집계_요청;
+import com.arms.api.util.model.dto.트리맵_집계_요청;
+import com.arms.api.util.model.vo.Worker;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;

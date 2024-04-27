@@ -9,7 +9,7 @@ import com.arms.api.alm.issue.base.model.지라이슈생성_데이터;
 import com.arms.api.alm.serverinfo.model.enums.서버유형_정보;
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
 import com.arms.api.alm.serverinfo.service.서버정보_서비스;
-import com.arms.api.utils.errors.codes.에러코드;
+import com.arms.api.util.errors.codes.에러코드;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

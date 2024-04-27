@@ -1,6 +1,6 @@
 package com.arms.api.alm.issue.base.model;
 
-import com.arms.api.utils.common.constrant.index.인덱스자료;
+import com.arms.api.util.common.constrant.index.인덱스자료;
 import com.arms.elasticsearch.annotation.ElasticSearchIndex;
 import com.arms.elasticsearch.annotation.Recent;
 import com.arms.elasticsearch.annotation.RollingIndexName;

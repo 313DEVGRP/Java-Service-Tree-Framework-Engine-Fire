@@ -1,6 +1,6 @@
 package com.arms.api.alm.issue.base.controller;
 
-import com.arms.api.utils.response.응답처리;
+import com.arms.api.util.response.응답처리;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.arms.api.utils.model.dto.요구사항_수정_요청;
+import com.arms.api.util.model.dto.요구사항_수정_요청;
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
 
 import lombok.AllArgsConstructor;
 
-import static com.arms.api.utils.response.응답처리.success;
+import static com.arms.api.util.response.응답처리.success;
 
 @RestController
 @RequestMapping("/engine/jira/field/update")

@@ -4,19 +4,16 @@ import com.arms.api.alm.issue.status.model.이슈상태_데이터;
 import com.arms.api.alm.issue.status.model.클라우드_지라이슈상태_데이터;
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
 import com.arms.api.alm.utils.지라API_정보;
-import com.arms.api.utils.errors.codes.에러코드;
-import com.arms.api.alm.serverinfo.service.서버정보_서비스;
+import com.arms.api.util.errors.codes.에러코드;
 import com.arms.api.alm.utils.지라유틸;
 
 
-import com.arms.api.utils.errors.에러로그_유틸;
+import com.arms.api.util.errors.에러로그_유틸;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -3,7 +3,7 @@ package com.arms.api.alm.project.strategy;
 import com.arms.api.alm.project.model.프로젝트_데이터;
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
 import com.arms.api.alm.utils.지라유틸;
-import com.arms.api.utils.errors.codes.에러코드;
+import com.arms.api.util.errors.codes.에러코드;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.api.domain.BasicProject;
 import org.slf4j.Logger;

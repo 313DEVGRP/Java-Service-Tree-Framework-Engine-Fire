@@ -1,8 +1,8 @@
 package com.arms.api.alm.analyis.controller;
 
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
-import com.arms.api.utils.model.dto.*;
-import com.arms.api.utils.model.enums.IsReqType;
+import com.arms.api.util.model.dto.*;
+import com.arms.api.util.model.enums.IsReqType;
 import com.arms.api.alm.analyis.service.요구사항_분석_서비스;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsBoolQuery;
