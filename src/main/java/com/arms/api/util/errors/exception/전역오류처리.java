@@ -43,8 +43,6 @@ public class 전역오류처리 {
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<?> onException(Exception e) {
         slackNotificationService.sendMessageToChannel(SlackProperty.Channel.engine, e);
-        e.printStackTrace();
-        System.out.println(e.getMessage());
         return newResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
     }
     /*
