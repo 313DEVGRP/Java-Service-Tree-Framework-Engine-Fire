@@ -9,6 +9,7 @@ import lombok.Getter;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.springframework.core.ParameterizedTypeReference;
@@ -43,6 +44,7 @@ public class 일반_집계_쿼리 {
 
         this.termsAggregationBuilder = AggregationBuilders.terms("group_by_" + 메인그룹필드)
                 .field(메인그룹필드)
+                .order(BucketOrder.count(기본_집계_요청.is결과_갯수_기준_오름차순()))
                 .size(크기);
 
         this.nativeSearchQueryBuilder.addAggregation(

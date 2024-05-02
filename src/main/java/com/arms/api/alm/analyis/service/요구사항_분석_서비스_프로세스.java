@@ -1,17 +1,19 @@
 package com.arms.api.alm.analyis.service;
 
+import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
+import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
+import com.arms.api.util.common.constrant.index.인덱스자료;
 import com.arms.api.util.model.dto.*;
 import com.arms.api.util.model.enums.IsReqType;
-import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
-import com.arms.api.util.common.constrant.index.인덱스자료;
-import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
-import com.arms.elasticsearch.query.*;
+import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsBoolQuery;
+import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
+import com.arms.elasticsearch.query.factory.계층_집계_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
 import com.arms.elasticsearch.query.filter.RangeQueryFilter;
-import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
+import com.arms.elasticsearch.query.쿼리_추상_팩토리;
 import com.arms.elasticsearch.버킷_집계_결과;
 import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import lombok.AllArgsConstructor;
@@ -36,11 +38,14 @@ import org.springframework.stereotype.Service;
 import java.awt.*;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -65,37 +70,34 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
     @Override
     public List<버킷_집계_결과> 제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
         EsQuery esQuery = new EsQueryBuilder()
-                .bool(new MustTermQuery("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
-                        new MustTermQuery("isReq", 지라이슈_제품_및_제품버전_집계_요청.getIsReqType().isNotAllAndIsReq()),
-                        new TermsQueryFilter("pdServiceVersions", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
-                        new ExistsQueryFilter("assignee")
-                );
+            .bool(new MustTermQuery("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
+                    new MustTermQuery("isReq", 지라이슈_제품_및_제품버전_집계_요청.getIsReqType().isNotAllAndIsReq()),
+                    new TermsQueryFilter("pdServiceVersions", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
+                    new ExistsQueryFilter("assignee")
+            );
 
-        BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
+        지라이슈_제품_및_제품버전_집계_요청.set메인그룹필드("pdServiceVersions");
 
-        TermsAggregationBuilder versionsAgg = AggregationBuilders.terms("versions").field("pdServiceVersions")
-                .subAggregation(
-                        AggregationBuilders.terms("assignees")
-                                .field("assignee.assignee_accountId.keyword")
-                                .order(BucketOrder.count(false))
-                                .size(지라이슈_제품_및_제품버전_집계_요청.get하위크기())
-                                .subAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"))
-                );
+        지라이슈_제품_및_제품버전_집계_요청.set하위그룹필드들(
+            List.of("assignee.assignee_accountId.keyword","assignee.assignee_displayName.keyword")
+        );
 
-        NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(boolQuery)
-                .addAggregation(versionsAgg)
-                .build();
+        지라이슈_제품_및_제품버전_집계_요청.set결과_갯수_기준_오름차순(false);
 
-        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈저장소.버킷집계(searchQuery);
+        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계
+                = 집계결과_가져오기(계층_집계_쿼리_생성기.of(지라이슈_제품_및_제품버전_집계_요청, esQuery));
 
-        List<버킷_집계_결과> 버전검색결과 = 버킷_집계_결과_목록_합계.get검색결과().get("versions");
+        List<버킷_집계_결과> 버전검색결과 = 버킷_집계_결과_목록_합계
+            .get검색결과().get("group_by_"+지라이슈_제품_및_제품버전_집계_요청.get메인그룹필드());
 
-        List<String> filteredVersionIds = Arrays.stream(지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks())
+        List<String> filteredVersionIds
+            = Arrays.stream(지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks())
                 .map(String::valueOf)
                 .collect(Collectors.toList());
 
-        return 버전검색결과.stream().filter(버전 -> filteredVersionIds.contains(버전.get필드명())).collect(toList());
+        return 버전검색결과.stream()
+                    .filter(버전 -> filteredVersionIds.contains(버전.get필드명()))
+                    .collect(toList());
     }
 
     @Override
