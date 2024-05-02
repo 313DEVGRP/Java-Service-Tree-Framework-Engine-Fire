@@ -2,11 +2,10 @@ package com.arms.api.alm.account.strategy;
 
 import com.arms.api.alm.account.model.계정정보_데이터;
 import com.arms.api.alm.account.model.레드마인_유저_데이터;
-import com.arms.api.alm.utils.레드마인API_정보;
-import com.arms.api.alm.utils.레드마인유틸;
-import com.arms.api.alm.utils.지라유틸;
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
 import com.arms.api.alm.serverinfo.service.서버정보_서비스;
+import com.arms.api.alm.utils.레드마인API_정보;
+import com.arms.api.alm.utils.레드마인유틸;
 import com.arms.api.util.errors.codes.에러코드;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +61,7 @@ public class 온프레미스_레드마인_계정전략 implements 계정전략 {
 
             WebClient webClient = 레드마인유틸.레드마인_웹클라이언트_통신기_생성(uri,apiToken);
 
-            레드마인_유저_데이터 계정정보_조회결과 = 지라유틸.get(webClient, endpoint, 레드마인_유저_데이터.class).block();
+            레드마인_유저_데이터 계정정보_조회결과 = 레드마인유틸.get(webClient, endpoint, 레드마인_유저_데이터.class).block();
 
             if (계정정보_조회결과 == null) {
                 로그.error("온프라미스 레드마인 계정 조회 결과가 Null입니다.");

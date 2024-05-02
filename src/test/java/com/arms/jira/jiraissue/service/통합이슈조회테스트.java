@@ -49,6 +49,9 @@ class 통합이슈조회테스트 {
     @Autowired
     이슈전략_호출 이슈전략_호출;
 
+    @Autowired
+    지라유틸 지라유틸;
+
     String fieldsParam = "project,issuetype,creator,reporter,assignee,labels,priority,status,resolution,resolutiondate,created,worklogs,timespent,fixVersions";
 
     int 페이지_사이즈 = 10;

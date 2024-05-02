@@ -20,16 +20,17 @@ public class 온프레미스_지라_이슈우선순위_전략 implements 이슈�
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
+    private 지라유틸 지라유틸;
+
     @Autowired
-    private 서버정보_서비스 서버정보_서비스;
+    public 온프레미스_지라_이슈우선순위_전략(지라유틸 지라유틸) {
+        this.지라유틸 = 지라유틸;
+    }
 
     @Override
-    public List<이슈우선순위_데이터> 우선순위_목록_가져오기(Long 연결_아이디) throws Exception {
-
-        로그.info("온프레미스 지라 이슈 우선순위 전체 목록 가져오기");
+    public List<이슈우선순위_데이터> 우선순위_목록_가져오기(서버정보_데이터 서버정보) {
 
         try {
-            서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
             JiraRestClient restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(),
                                                                              서버정보.getUserId(),
                                                                              서버정보.getPasswordOrToken());

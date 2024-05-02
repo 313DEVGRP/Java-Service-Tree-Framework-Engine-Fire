@@ -32,7 +32,7 @@ public class 지라유틸 {
     @Autowired
     private 지라API_정보 지라API_정보;
 
-    public static WebClient 클라우드_통신기_생성(String uri, String email, String apiToken) {
+    public WebClient 클라우드_통신기_생성(String uri, String email, String apiToken) {
 
         return WebClient.builder()
                 .baseUrl(uri)
@@ -42,7 +42,7 @@ public class 지라유틸 {
                 .build();
     }
 
-    public static JiraRestClient 온프레미스_통신기_생성(String jiraUrl, String jiraID, String jiraPass) throws URISyntaxException, IOException {
+    public JiraRestClient 온프레미스_통신기_생성(String jiraUrl, String jiraID, String jiraPass) throws URISyntaxException, IOException {
 
         final AsynchronousJiraRestClientFactory factory = new AsynchronousJiraRestClientFactory();
 
@@ -50,12 +50,12 @@ public class 지라유틸 {
 
     }
 
-    private static String getBase64Credentials(String jiraID, String jiraPass) {
+    private String getBase64Credentials(String jiraID, String jiraPass) {
         String credentials = jiraID + ":" + jiraPass;
         return new String(Base64.getEncoder().encode(credentials.getBytes()));
     }
 
-    public static <T> Mono<T> get(WebClient webClient, String uri, Class<T> responseType) {
+    public <T> Mono<T> get(WebClient webClient, String uri, Class<T> responseType) {
 
         return webClient.get()
                 .uri(uri)
@@ -63,7 +63,7 @@ public class 지라유틸 {
                 .bodyToMono(responseType);
     }
 
-    public static <T> Mono<T> get(WebClient webClient, String uri, ParameterizedTypeReference<T> elementTypeRef) {
+    public <T> Mono<T> get(WebClient webClient, String uri, ParameterizedTypeReference<T> elementTypeRef) {
 
         return webClient.get()
                 .uri(uri)
@@ -71,7 +71,7 @@ public class 지라유틸 {
                 .bodyToMono(elementTypeRef);
     }
 
-    public static <T> Mono<T> post(WebClient webClient, String uri, Object requestBody, Class<T> responseType) {
+    public <T> Mono<T> post(WebClient webClient, String uri, Object requestBody, Class<T> responseType) {
 
         return webClient.post()
                 .uri(uri)
@@ -80,7 +80,7 @@ public class 지라유틸 {
                 .bodyToMono(responseType);
     }
 
-    public static <T> Mono<T> put(WebClient webClient, String uri, Object requestBody, Class<T> responseType) {
+    public <T> Mono<T> put(WebClient webClient, String uri, Object requestBody, Class<T> responseType) {
 
         return webClient.put()
                 .uri(uri)
@@ -89,7 +89,7 @@ public class 지라유틸 {
                 .bodyToMono(responseType);
     }
 
-    public static <T> Mono<T> delete(WebClient webClient, String uri, Class<T> responseType) {
+    public <T> Mono<T> delete(WebClient webClient, String uri, Class<T> responseType) {
 
         return webClient.delete()
                 .uri(uri)
@@ -97,7 +97,7 @@ public class 지라유틸 {
                 .bodyToMono(responseType);
     }
 
-    public static Optional<Boolean> executePost(WebClient webClient, String uri, Object requestBody) {
+    public Optional<Boolean> executePost(WebClient webClient, String uri, Object requestBody) {
 
         Mono<ResponseEntity<Void>> response = webClient.post()
                 .uri(uri)
@@ -109,7 +109,7 @@ public class 지라유틸 {
                 .blockOptional();
     }
 
-    public static Optional<Boolean> executePut(WebClient webClient, String uri, Object requestBody) {
+    public Optional<Boolean> executePut(WebClient webClient, String uri, Object requestBody) {
 
         Mono<ResponseEntity<Void>> response = webClient.put()
                 .uri(uri)
@@ -121,7 +121,7 @@ public class 지라유틸 {
                 .blockOptional();
     }
 
-    public static Optional<Boolean> executeDelete(WebClient webClient, String uri) {
+    public Optional<Boolean> executeDelete(WebClient webClient, String uri) {
 
         Mono<ResponseEntity<Void>> response = webClient.delete()
                 .uri(uri)
@@ -156,7 +156,7 @@ public class 지라유틸 {
                         "?startAt=" + 검색_시작_지점 + "&maxResults=" + 최대_검색수;
 
                 클라우드_이슈생성필드_메타데이터
-                        = 지라유틸.get(webClient, endpoint, 클라우드_이슈생성필드_메타데이터.class).block();
+                        = this.get(webClient, endpoint, 클라우드_이슈생성필드_메타데이터.class).block();
 
                 if (클라우드_이슈생성필드_메타데이터 == null) {
                     로그.info("클라우드 지라 클라우드 프로젝트 : {}, 이슈유형 : {}, 이슈생성필드_메타데이터 목록이 없습니다."

@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 @Component
 public class 레드마인유틸 {
@@ -43,4 +44,11 @@ public class 레드마인유틸 {
         return 사용자정보;
     }
 
+    public <T> Mono<T> get(WebClient webClient, String uri, Class<T> responseType) {
+
+        return webClient.get()
+                .uri(uri)
+                .retrieve()
+                .bodyToMono(responseType);
+    }
 }
