@@ -605,11 +605,6 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
                 = 지라유틸.필드_메타데이터_확인하기(webClient, 프로젝트_아이디, 이슈유형_아이디);
         클라우드_필드_데이터 = 필드검증_및_추가하기(webClient, 이슈생성필드_데이터, 필드_메타데이터_목록);
 
-        if (이슈생성필드_데이터.getDueDate() != null) {
-            String 종료기한일자 = DateUtils.formatDate(이슈생성필드_데이터.getDueDate(), "yyyy-MM-dd");
-            클라우드_필드_데이터.setDuedate(종료기한일자);
-        }
-
         입력_데이터.setFields(클라우드_필드_데이터);
 
         String endpoint = "/rest/api/3/issue";
@@ -687,6 +682,14 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
 
             클라우드_지라이슈필드_데이터.setPriority(지라이슈생성필드_데이터.getPriority());
             필드_메타데이터_목록.remove(지라API_정보.getFields().getPriority());
+        }
+
+        if (필드_메타데이터_목록.containsKey(지라API_정보.getFields().getDuedate())
+                && 지라이슈생성필드_데이터.getDueDate() != null) {
+
+            String 종료기한일자 = DateUtils.formatDate(지라이슈생성필드_데이터.getDueDate(), "yyyy-MM-dd");
+            클라우드_지라이슈필드_데이터.setDuedate(종료기한일자);
+            필드_메타데이터_목록.remove(지라API_정보.getFields().getDuedate());
         }
 
         /***
