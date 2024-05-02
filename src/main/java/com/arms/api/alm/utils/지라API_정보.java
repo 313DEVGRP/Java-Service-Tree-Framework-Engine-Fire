@@ -24,6 +24,7 @@ public class 지라API_정보 {
         private String description;
         private String reporter;
         private String priority;
+        private String duedate;
     }
 
     @Getter

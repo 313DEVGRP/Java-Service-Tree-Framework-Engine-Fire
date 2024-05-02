@@ -37,6 +37,7 @@ jira:
       description: description
       reporter: reporter
       priority: priority
+      duedate: duedate
     parameter:
       maxResults: 50
       fields: fields=project,issuetype,creator,reporter,assignee,labels,priority,status,resolution,resolutiondate,created,updated,worklogs,timespent,summary
