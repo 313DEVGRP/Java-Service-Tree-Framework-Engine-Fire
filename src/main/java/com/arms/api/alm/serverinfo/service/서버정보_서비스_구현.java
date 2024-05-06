@@ -78,7 +78,7 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
     @Override
     public Iterable<서버정보_엔티티> 서버정보백업_스케줄러() {
 
-//        boolean 인덱스확인 = 지라이슈저장소.인덱스확인_및_생성_매핑(인덱스자료.서버정보_인덱스명);
+//        boolean 인덱스확인 = 지라이슈_저장소.인덱스확인_및_생성_매핑(인덱스자료.서버정보_인덱스명);
 //
 //        if (!인덱스확인) {
 //            throw new IllegalArgumentException(에러코드.서버인덱스_NULL_오류.getErrorMsg());

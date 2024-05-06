@@ -42,7 +42,7 @@ public class 인덱스Test {
     ElasticsearchOperations 엘라스틱서치_작업;
 
     @Autowired
-    지라이슈_저장소 지라이슈저장소;
+    지라이슈_저장소 지라이슈_저장소;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -146,7 +146,7 @@ public class 인덱스Test {
                     .withQuery(전체조회)
                     .withPageable(PageRequest.of(페이지, 페이지크기));
 
-            List<지라이슈_엔티티> 페이징결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build());
+            List<지라이슈_엔티티> 페이징결과 = 지라이슈_저장소.normalSearch(nativeSearchQueryBuilder.build());
 
             if (페이징결과 == null || 페이징결과.isEmpty()) {
                 break;
@@ -343,7 +343,7 @@ public class 인덱스Test {
                     .withQuery(QueryBuilders.matchAllQuery())
                     .withPageable(PageRequest.of(페이지, 페이지크기));
 
-            List<지라이슈_엔티티> 지라이슈목록 = 지라이슈저장소.normalSearch(searchQuery.build());
+            List<지라이슈_엔티티> 지라이슈목록 = 지라이슈_저장소.normalSearch(searchQuery.build());
             // SearchHits<지라이슈> searchHits = 엘라스틱서치_작업.search(searchQuery, 지라이슈.class, IndexCoordinates.of(현재_지라이슈인덱스));
 
             if (지라이슈목록.isEmpty()) {

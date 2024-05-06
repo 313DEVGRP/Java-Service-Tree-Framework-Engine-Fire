@@ -2,7 +2,8 @@ package com.arms.elasticsearch.query.factory;
 
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.base.기본_검색_요청;
-import com.arms.elasticsearch.query.쿼리_추상_팩토리;
+import com.arms.elasticsearch.query.쿼리_생성기;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -18,7 +19,7 @@ import java.util.Optional;
 
 @Setter
 @Getter
-public class 일반_검색_쿼리_생성기 implements 쿼리_추상_팩토리 {
+public class 일반_검색_쿼리_생성기 implements 쿼리_생성기 {
 
 	private final int 크기;
 	private final int 페이지;
@@ -32,7 +33,7 @@ public class 일반_검색_쿼리_생성기 implements 쿼리_추상_팩토리 {
 		this.esQuery = esQuery;
 	}
 
-	public static 쿼리_추상_팩토리 of(기본_검색_요청 기본_검색_요청, EsQuery esQuery){
+	public static 쿼리_생성기 of(기본_검색_요청 기본_검색_요청, EsQuery esQuery){
 		return new 일반_검색_쿼리_생성기(기본_검색_요청, esQuery);
 	}
 

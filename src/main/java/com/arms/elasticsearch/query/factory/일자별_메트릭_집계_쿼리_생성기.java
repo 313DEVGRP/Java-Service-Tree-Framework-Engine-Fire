@@ -2,7 +2,8 @@ package com.arms.elasticsearch.query.factory;
 
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.base.메트릭_집계_요청;
-import com.arms.elasticsearch.query.쿼리_추상_팩토리;
+import com.arms.elasticsearch.query.쿼리_생성기;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -20,7 +21,7 @@ import java.util.function.Function;
 
 @Setter
 @Getter
-	public class 일자별_메트릭_집계_쿼리_생성기 implements 쿼리_추상_팩토리 {
+	public class 일자별_메트릭_집계_쿼리_생성기 implements 쿼리_생성기 {
 
 	private final List<String> 그룹_필드들;
 	private final String 메인_그룹_필드;
@@ -48,7 +49,7 @@ import java.util.function.Function;
 		this.크기 = 메트릭_집계_요청.get크기();
 	}
 
-	public static 쿼리_추상_팩토리 of(메트릭_집계_요청 메트릭_집계_요청, EsQuery esQuery){
+	public static 쿼리_생성기 of(메트릭_집계_요청 메트릭_집계_요청, EsQuery esQuery){
 		return new 일자별_메트릭_집계_쿼리_생성기(메트릭_집계_요청, esQuery);
 	}
 

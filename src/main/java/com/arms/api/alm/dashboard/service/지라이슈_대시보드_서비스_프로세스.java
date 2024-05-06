@@ -6,7 +6,7 @@ import com.arms.api.util.model.dto.제품버전목록;
 import com.arms.api.util.model.dto.트리맵_집계_요청;
 import com.arms.api.util.model.vo.TaskList;
 import com.arms.api.util.model.vo.Worker;
-import com.arms.elasticsearch.query.쿼리_추상_팩토리;
+import com.arms.elasticsearch.query.쿼리_생성기;
 import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,13 +21,13 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 public class 지라이슈_대시보드_서비스_프로세스 implements 지라이슈_대시보드_서비스 {
 
-    private 지라이슈_저장소 지라이슈저장소;
+    private 지라이슈_저장소 지라이슈_저장소;
 
     @Override
-    public 버킷_집계_결과_목록_합계 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) {
+    public 버킷_집계_결과_목록_합계 집계결과_가져오기(쿼리_생성기 쿼리_생성기) {
 
-        return 지라이슈저장소.버킷집계(
-                쿼리추상팩토리.생성()
+        return 지라이슈_저장소.버킷집계(
+                쿼리_생성기.생성()
         );
     }
 
@@ -37,13 +37,13 @@ public class 지라이슈_대시보드_서비스_프로세스 implements 지라�
 
         List<제품버전목록> 제품버전목록데이터 = 트리맵_집계_요청.get제품버전목록();
        
-        List<지라이슈_엔티티> requirementIssues = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionsIn(true, 트리맵_집계_요청.getPdServiceLink(), 트리맵_집계_요청.getPdServiceVersionLinks());
+        List<지라이슈_엔티티> requirementIssues = 지라이슈_저장소.findByIsReqAndPdServiceIdAndPdServiceVersionsIn(true, 트리맵_집계_요청.getPdServiceLink(), 트리맵_집계_요청.getPdServiceVersionLinks());
 
         // 요구사항의 키를 모두 추출
         List<String> allReqKeys = requirementIssues.stream().map(지라이슈_엔티티::getKey).collect(Collectors.toList());
 
         // 모든 하위 태스크를 한 번에 로드
-        List<지라이슈_엔티티> allSubTasks = 지라이슈저장소.findByParentReqKeyIn(allReqKeys);
+        List<지라이슈_엔티티> allSubTasks = 지라이슈_저장소.findByParentReqKeyIn(allReqKeys);
 
         // 하위 태스크를 부모 키로 그룹화
         Map<String, List<지라이슈_엔티티>> subTasksByParent = allSubTasks.stream()

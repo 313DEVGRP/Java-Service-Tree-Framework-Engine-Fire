@@ -38,21 +38,21 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
-    private 지라이슈_저장소 지라이슈저장소;
+    private 지라이슈_저장소 지라이슈_저장소;
     private 서브테스크_조회 서브테스크_조회;
     private 이슈전략_호출 이슈전략_호출;
 
     @Override
     public 지라이슈_엔티티 이슈_추가하기(지라이슈_엔티티 지라이슈_엔티티) {
 
-        지라이슈_엔티티 결과 = 지라이슈저장소.save(지라이슈_엔티티);
+        지라이슈_엔티티 결과 = 지라이슈_저장소.save(지라이슈_엔티티);
         return 결과;
     }
 
     @Override
     public int 대량이슈_추가하기(List<지라이슈_엔티티> 대량이슈_리스트) {
 
-        Iterable<지라이슈_엔티티> 지라이슈s = 지라이슈저장소.saveAll(대량이슈_리스트);
+        Iterable<지라이슈_엔티티> 지라이슈s = 지라이슈_저장소.saveAll(대량이슈_리스트);
         int size = StreamSupport.stream(지라이슈s.spliterator(), false).collect(toList()).size();
         return size;
     }
@@ -64,7 +64,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
                 .withQuery(QueryBuilders.termQuery("id", 조회조건_아이디))
                 .build();
 
-        return 지라이슈저장소.normalSearch(searchQuery).stream()
+        return 지라이슈_저장소.normalSearch(searchQuery).stream()
                 .findFirst().orElseGet(지라이슈_엔티티::new);
     }
 
@@ -72,7 +72,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     public List<지라이슈_엔티티> 이슈_검색하기(검색조건 검색조건) {
         Query query
                 = 검색_쿼리_빌더.buildSearchQuery(검색조건).build();
-        return 지라이슈저장소.normalSearch(query);
+        return 지라이슈_저장소.normalSearch(query);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
         String currentDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         String 백업_지라이슈인덱스 = 현재_지라이슈인덱스 + "-" + currentDate;
 
-        boolean 인덱스백업 = 지라이슈저장소.리인덱스(현재_지라이슈인덱스, 백업_지라이슈인덱스);
+        boolean 인덱스백업 = 지라이슈_저장소.리인덱스(현재_지라이슈인덱스, 백업_지라이슈인덱스);
 
         if (!인덱스백업) {
             로그.error(this.getClass().getName() + " :: 지라이슈_인덱스백업() :: 리인덱스 실패!");
@@ -132,7 +132,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     public boolean 지라이슈_인덱스삭제() {
         String 현재_지라이슈인덱스 = 인덱스자료.이슈_인덱스명;
 
-        boolean 삭제성공 = 지라이슈저장소.인덱스삭제(현재_지라이슈인덱스);
+        boolean 삭제성공 = 지라이슈_저장소.인덱스삭제(현재_지라이슈인덱스);
         if (삭제성공) {
             로그.info(this.getClass().getName() + " :: 지라이슈_인덱스삭제() :: 인덱스 삭제 완료!");
         } else {

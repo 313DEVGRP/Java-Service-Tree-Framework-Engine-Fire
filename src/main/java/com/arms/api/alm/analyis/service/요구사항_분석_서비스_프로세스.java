@@ -13,7 +13,7 @@ import com.arms.elasticsearch.query.factory.계층_집계_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
 import com.arms.elasticsearch.query.filter.RangeQueryFilter;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
-import com.arms.elasticsearch.query.쿼리_추상_팩토리;
+import com.arms.elasticsearch.query.쿼리_생성기;
 import com.arms.elasticsearch.버킷_집계_결과;
 import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import lombok.AllArgsConstructor;
@@ -57,13 +57,13 @@ import static java.util.stream.Collectors.toList;
 public class 요구사항_분석_서비스_프로세스 implements 요구사항_분석_서비스 {
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
-    private 지라이슈_저장소 지라이슈저장소;
+    private 지라이슈_저장소 지라이슈_저장소;
 
     @Override
-    public 버킷_집계_결과_목록_합계 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) {
+    public 버킷_집계_결과_목록_합계 집계결과_가져오기(쿼리_생성기 쿼리_생성기) {
 
-        return 지라이슈저장소.버킷집계(
-                쿼리추상팩토리.생성()
+        return 지라이슈_저장소.버킷집계(
+                쿼리_생성기.생성()
         );
     }
 
@@ -102,7 +102,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
 
     @Override
     public List<요구사항_버전_이슈_키_상태_작업자수> 버전별_요구사항_상태_및_관여_작업자수_내용(Long pdServiceLink, Long[] pdServiceVersionLinks){
-        List<지라이슈_엔티티> 요구사항_이슈_목록 = 지라이슈저장소.findByIsReqAndPdServiceIdAndPdServiceVersionsIn(true, pdServiceLink, pdServiceVersionLinks);
+        List<지라이슈_엔티티> 요구사항_이슈_목록 = 지라이슈_저장소.findByIsReqAndPdServiceIdAndPdServiceVersionsIn(true, pdServiceLink, pdServiceVersionLinks);
         List<지라이슈_엔티티> 담당자_존재_요구사항_이슈_목록 = 요구사항_이슈_목록.stream()
                                         .filter(지라이슈 -> 지라이슈.getAssignee() != null)
                                         .collect(toList());
@@ -111,7 +111,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         // 담당자 있는 요구사항_이슈의 키만 뽑기
         List<String> 담당자_존재_요구사항_이슈_키 = 담당자_존재_요구사항_이슈_목록.stream()
                 .map(지라이슈_엔티티::getKey).collect(Collectors.toList());
-        List<지라이슈_엔티티> allSubTasks = 지라이슈저장소.findByParentReqKeyIn(담당자_존재_요구사항_이슈_키);
+        List<지라이슈_엔티티> allSubTasks = 지라이슈_저장소.findByParentReqKeyIn(담당자_존재_요구사항_이슈_키);
 
         //담당자가 있는 연결이슈만, 요구사항_이슈키에 매핑
         Map<String, List<지라이슈_엔티티>> 요구사항이슈_담당자있는_하위이슈들 = allSubTasks.stream()
@@ -180,7 +180,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         NativeSearchQueryBuilder nativeSearchQueryBuilder
                 = new NativeSearchQueryBuilder().withQuery(boolQuery).addAggregation(weeklyAggregationBuilder);
 
-        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈저장소.버킷집계(nativeSearchQueryBuilder.build());
+        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(nativeSearchQueryBuilder.build());
 
         List<버킷_집계_결과> aggregationByWeek = 버킷_집계_결과_목록_합계.get검색결과().get("aggregation_by_week");
 
@@ -237,7 +237,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                 = new NativeSearchQueryBuilder().withQuery(boolQueryForTotalIssues).addAggregation(totalAggregationBuilder);
 
         버킷_집계_결과_목록_합계 searchResponseForTotalIssues
-                = 지라이슈저장소.버킷집계(nativeSearchQueryBuilderForTotalIssues.build());
+                = 지라이슈_저장소.버킷집계(nativeSearchQueryBuilderForTotalIssues.build());
 
         Long totalIssuesCount
                 = searchResponseForTotalIssues.get전체합계();
@@ -246,7 +246,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         NativeSearchQueryBuilder nativeSearchQueryBuilderForTotalRequirements
                 = new NativeSearchQueryBuilder().withQuery(boolQueryForTotalRequirements);
 
-        Long totalRequirementsCount = Long.valueOf(Optional.ofNullable(지라이슈저장소.normalSearch(nativeSearchQueryBuilderForTotalRequirements.build()))
+        Long totalRequirementsCount = Long.valueOf(Optional.ofNullable(지라이슈_저장소.normalSearch(nativeSearchQueryBuilderForTotalRequirements.build()))
                 .map(지라이슈 -> 지라이슈.size())
                 .orElse(0));
 
@@ -330,7 +330,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
          NativeSearchQueryBuilder nativeSearchQueryBuilder
                  = new NativeSearchQueryBuilder().withQuery(boolQuery).addAggregation(dailyAggregationBuilder);
 
-         버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈저장소.버킷집계(nativeSearchQueryBuilder.build());
+         버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(nativeSearchQueryBuilder.build());
 
          List<버킷_집계_결과> aggregationByDay = 버킷_집계_결과_목록_합계.get검색결과().get("aggregation_by_day");
 
@@ -370,7 +370,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                 .withSort(SortBuilders.fieldSort(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준()).order(SortOrder.ASC))
                 .withMaxResults(10000);
 
-        return 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build());
+        return 지라이슈_저장소.normalSearch(nativeSearchQueryBuilder.build());
     }
     private 일자별_요구사항_연결된이슈_생성개수_및_상태데이터 일별_생성개수_및_상태_데이터생성(버킷_집계_결과 결과) {
         Map<String, Long> 요구사항여부결과 = new HashMap<>();
@@ -428,7 +428,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                 .withMaxResults(10000);
 
         String 지라인덱스별칭 = 인덱스자료.이슈_인덱스명;
-        List<지라이슈_엔티티> 전체결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 지라인덱스별칭);
+        List<지라이슈_엔티티> 전체결과 = 지라이슈_저장소.normalSearch(nativeSearchQueryBuilder.build(), 지라인덱스별칭);
 
         // 업데이트가 기준일에 일어난 모든 이슈를 조회
         Map<Long, Map<String, Map<String,List<요구사항_별_업데이트_데이터>>>> 조회_결과 = null;
@@ -537,7 +537,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                 .addAggregation(versionsAgg)
                 .build();
 
-        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈저장소.버킷집계(searchQuery);
+        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(searchQuery);
 
         return 버킷_집계_결과_목록_합계.get검색결과().get("versions");
 
@@ -568,14 +568,14 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
             String 호출할_지라인덱스 = 오늘일경우.format(formatter).equals(today.format(formatter))
                     ? 지라인덱스 : 지라인덱스 + "-" + today.format(formatter);
 
-            if (!지라이슈저장소.인덱스_존재_확인(호출할_지라인덱스)) {
+            if (!지라이슈_저장소.인덱스_존재_확인(호출할_지라인덱스)) {
                 인덱스존재시까지 = false;
                 break;
             }
 
             today = today.minusDays(1);
 
-            List<지라이슈_엔티티> 결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 호출할_지라인덱스);
+            List<지라이슈_엔티티> 결과 = 지라이슈_저장소.normalSearch(nativeSearchQueryBuilder.build(), 호출할_지라인덱스);
 
             if (결과 != null && 결과.size() > 0) {
                 전체결과.addAll(결과);
@@ -610,7 +610,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
 
     @Override
     public List<지라이슈_엔티티> 제품서비스_버전목록으로_조회(Long pdServiceLink, Long[] pdServiceVersionLinks) {
-        return 지라이슈저장소.findByPdServiceIdAndPdServiceVersionsIn(pdServiceLink, pdServiceVersionLinks);
+        return 지라이슈_저장소.findByPdServiceIdAndPdServiceVersionsIn(pdServiceLink, pdServiceVersionLinks);
     }
 
     @Override
@@ -632,7 +632,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                 .withMaxResults(10000);
 
         String 지라인덱스별칭 = 인덱스자료.이슈_인덱스명;
-        List<지라이슈_엔티티> 전체결과 = 지라이슈저장소.normalSearch(nativeSearchQueryBuilder.build(), 지라인덱스별칭);
+        List<지라이슈_엔티티> 전체결과 = 지라이슈_저장소.normalSearch(nativeSearchQueryBuilder.build(), 지라인덱스별칭);
 
         히트맵데이터 히트맵데이터 = new 히트맵데이터();
 

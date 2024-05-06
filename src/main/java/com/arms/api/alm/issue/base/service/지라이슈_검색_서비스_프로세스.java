@@ -14,7 +14,7 @@ import com.arms.elasticsearch.query.factory.일반_검색_쿼리_생성기;
 import com.arms.elasticsearch.query.factory.계층_집계_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.QueryStringFilter;
 import com.arms.elasticsearch.query.filter.RangeQueryFilter;
-import com.arms.elasticsearch.query.쿼리_추상_팩토리;
+import com.arms.elasticsearch.query.쿼리_생성기;
 import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,10 +32,10 @@ public class 지라이슈_검색_서비스_프로세스 implements 지라이슈_
     private com.arms.api.alm.issue.base.repository.지라이슈_저장소 지라이슈_저장소;
 
     @Override
-    public 버킷_집계_결과_목록_합계 전체_집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리) {
+    public 버킷_집계_결과_목록_합계 전체_집계결과_가져오기(쿼리_생성기 쿼리_생성기) {
 
         return 지라이슈_저장소.전체버킷집계(
-                쿼리추상팩토리.생성()
+                쿼리_생성기.생성()
         );
     }
 

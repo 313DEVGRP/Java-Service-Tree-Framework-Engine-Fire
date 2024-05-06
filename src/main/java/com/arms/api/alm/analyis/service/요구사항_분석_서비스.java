@@ -5,13 +5,13 @@ import java.util.Map;
 
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.util.model.dto.*;
-import com.arms.elasticsearch.query.쿼리_추상_팩토리;
+import com.arms.elasticsearch.query.쿼리_생성기;
 import com.arms.elasticsearch.버킷_집계_결과;
 import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 
 public interface 요구사항_분석_서비스 {
 
-    버킷_집계_결과_목록_합계 집계결과_가져오기(쿼리_추상_팩토리 쿼리추상팩토리);
+    버킷_집계_결과_목록_합계 집계결과_가져오기(쿼리_생성기 쿼리_생성기);
 
     List<버킷_집계_결과> 제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청);
 
