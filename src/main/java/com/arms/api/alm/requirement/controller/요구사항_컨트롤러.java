@@ -4,11 +4,13 @@ package com.arms.api.alm.requirement.controller;
 import com.arms.api.alm.requirement.service.요구사항_서비스;
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.util.model.dto.지라이슈_일반_집계_요청;
+import com.arms.api.util.model.dto.지라이슈_제품_및_제품버전_집계_요청;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
 import com.arms.elasticsearch.query.factory.일반_검색_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
+import com.arms.elasticsearch.버킷_집계_결과;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -67,6 +69,13 @@ public class 요구사항_컨트롤러 {
                                                 @RequestParam("size") int 페이지_사이즈 ) {
 
         return 요구사항_서비스.요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디, 이슈_키, 페이지_번호, 페이지_사이즈);
+    }
+
+    @GetMapping("/req-assignees")
+    public ResponseEntity<List<버킷_집계_결과>> 제품_요구사항별_담당자_목록(
+            지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청
+    ) {
+        return ResponseEntity.ok(요구사항_서비스.제품_요구사항별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청));
     }
 
 }

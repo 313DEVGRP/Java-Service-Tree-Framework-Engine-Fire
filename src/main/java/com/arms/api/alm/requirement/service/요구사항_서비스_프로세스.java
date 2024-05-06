@@ -4,9 +4,11 @@ import com.arms.api.util.common.component.서브테스크_조회;
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
 import com.arms.api.util.model.dto.지라이슈_일반_집계_요청;
+import com.arms.api.util.model.dto.지라이슈_제품_및_제품버전_집계_요청;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.factory.하위_계층_집계_쿼리_생성기;
+import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.query.쿼리_생성기;
 import com.arms.elasticsearch.버킷_집계_결과;
@@ -17,8 +19,12 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.BucketOrder;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
@@ -121,4 +127,41 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
     }
 
 
+    @Override
+    public List<버킷_집계_결과> 제품_요구사항별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
+
+
+        EsQuery esQuery = new EsQueryBuilder()
+                .bool(new MustTermQuery("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
+                        new MustTermQuery("isReq", false)/*,
+                        new ExistsQueryFilter("assignee")*/
+                );
+
+        BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
+
+        TermsAggregationBuilder reqAgg;
+        reqAgg = AggregationBuilders
+                .terms("requirement")
+                .field("parentReqKey")
+                .size(지라이슈_제품_및_제품버전_집계_요청.get크기())
+                .subAggregation(
+                        AggregationBuilders.terms("assignees")
+                                .field("assignee.assignee_accountId.keyword")
+                                .order(BucketOrder.count(false))
+                                .size(지라이슈_제품_및_제품버전_집계_요청.get크기())
+                                .subAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"))
+                                .subAggregation(AggregationBuilders.terms("cReqLink").field("cReqLink"))
+                );
+
+        NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
+                .withQuery(boolQuery)
+                .addAggregation(reqAgg)
+                .build();
+
+
+        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(searchQuery);
+
+        return 버킷_집계_결과_목록_합계.get검색결과().get("requirement");
+
+    }
 }
