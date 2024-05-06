@@ -1,23 +1,31 @@
 package com.arms.api.alm.analyis.service;
 
-import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
-import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
-import com.arms.api.util.common.constrant.index.인덱스자료;
-import com.arms.api.util.model.dto.*;
-import com.arms.api.util.model.enums.IsReqType;
-import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.esquery.EsBoolQuery;
-import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
-import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
-import com.arms.elasticsearch.query.factory.계층_집계_쿼리_생성기;
-import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
-import com.arms.elasticsearch.query.filter.RangeQueryFilter;
-import com.arms.elasticsearch.query.filter.TermsQueryFilter;
-import com.arms.elasticsearch.query.쿼리_생성기;
-import com.arms.elasticsearch.버킷_집계_결과;
-import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static java.util.stream.Collectors.*;
+
+import java.awt.*;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
@@ -35,21 +43,35 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
-import java.awt.*;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.List;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
+import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
+import com.arms.api.util.common.constrant.index.인덱스자료;
+import com.arms.api.util.model.dto.요구사항_버전_이슈_키_상태_작업자수;
+import com.arms.api.util.model.dto.요구사항_별_업데이트_데이터;
+import com.arms.api.util.model.dto.요구사항_지라이슈상태_주별_집계;
+import com.arms.api.util.model.dto.요구사항_지라이슈키별_업데이트_목록_데이터;
+import com.arms.api.util.model.dto.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
+import com.arms.api.util.model.dto.지라이슈_일자별_제품_및_제품버전_집계_요청;
+import com.arms.api.util.model.dto.지라이슈_제품_및_제품버전_집계_요청;
+import com.arms.api.util.model.dto.히트맵날짜데이터;
+import com.arms.api.util.model.dto.히트맵데이터;
+import com.arms.api.util.model.enums.IsReqType;
+import com.arms.elasticsearch.query.EsQuery;
+import com.arms.elasticsearch.query.base.일반_집계_요청;
+import com.arms.elasticsearch.query.esquery.EsBoolQuery;
+import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
+import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
+import com.arms.elasticsearch.query.factory.집계_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.하위_계층_집계_쿼리_생성기;
+import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
+import com.arms.elasticsearch.query.filter.RangeQueryFilter;
+import com.arms.elasticsearch.query.filter.TermsQueryFilter;
+import com.arms.elasticsearch.query.쿼리_생성기;
+import com.arms.elasticsearch.버킷_집계_결과;
+import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 
-import static java.util.stream.Collectors.toList;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service("요구사항_분석_서비스")
@@ -85,7 +107,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         지라이슈_제품_및_제품버전_집계_요청.set결과_갯수_기준_오름차순(false);
 
         버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계
-                = 집계결과_가져오기(계층_집계_쿼리_생성기.of(지라이슈_제품_및_제품버전_집계_요청, esQuery));
+                = 집계결과_가져오기(하위_계층_집계_쿼리_생성기.of(지라이슈_제품_및_제품버전_집계_요청, esQuery));
 
         List<버킷_집계_결과> 버전검색결과 = 버킷_집계_결과_목록_합계
             .get검색결과().get("group_by_"+지라이슈_제품_및_제품버전_집계_요청.get메인그룹필드());
@@ -219,6 +241,10 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                         new TermsQueryFilter("pdServiceVersions", pdServiceVersionLinks),
                         new RangeQueryFilter("created", null, monthAgo, "lt")
                 );
+
+        NativeSearchQuery 생성 = 집계_쿼리_생성기.of(new 일반_집계_요청() {
+        }, issueEsQuery).생성();
+
         BoolQueryBuilder boolQueryForTotalIssues = issueEsQuery.getQuery(new ParameterizedTypeReference<>() {});
 
         // 총 요구사항 개수를 구하기 위한 쿼리

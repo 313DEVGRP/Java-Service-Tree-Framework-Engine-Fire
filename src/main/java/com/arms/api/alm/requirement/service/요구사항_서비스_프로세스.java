@@ -6,7 +6,7 @@ import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
 import com.arms.api.util.model.dto.지라이슈_일반_집계_요청;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
-import com.arms.elasticsearch.query.factory.계층_집계_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.하위_계층_집계_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.query.쿼리_생성기;
 import com.arms.elasticsearch.버킷_집계_결과;
@@ -98,7 +98,7 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
         지라이슈_일반_집계_요청 지라이슈_일반_집계_요청 = new 지라이슈_일반_집계_요청();
         지라이슈_일반_집계_요청.set메인그룹필드("status.status_name.keyword");
         지라이슈_일반_집계_요청.set컨텐츠보기여부(false);
-        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(계층_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery).생성());
+        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(하위_계층_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery).생성());
 
         List<버킷_집계_결과> 상태값통계 = 버킷_집계_결과_목록_합계.get검색결과().get("group_by_status.status_name.keyword");
 

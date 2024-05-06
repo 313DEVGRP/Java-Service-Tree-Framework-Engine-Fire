@@ -8,8 +8,8 @@ import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsBoolQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
-import com.arms.elasticsearch.query.factory.비계층_집계_쿼리_생성기;
-import com.arms.elasticsearch.query.factory.계층_집계_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.하위_비계층_집계_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.하위_계층_집계_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.버킷_집계_결과;
@@ -48,7 +48,7 @@ public class 요구사항_분석_컨트롤러 {
 
         EsQuery esQuery = new EsQueryBuilder().bool(esBoolQueries);
 
-        return ResponseEntity.ok(요구사항_분석_서비스.집계결과_가져오기(비계층_집계_쿼리_생성기.of(검색요청, esQuery)));
+        return ResponseEntity.ok(요구사항_분석_서비스.집계결과_가져오기(하위_비계층_집계_쿼리_생성기.of(검색요청, esQuery)));
     }
 
     // 대시보드, 디테일_대시보드, 범위분석
@@ -82,7 +82,7 @@ public class 요구사항_분석_컨트롤러 {
                         ,new TermsQueryFilter("pdServiceVersions",pdServiceVersionLinks)
                 );
 
-        return ResponseEntity.ok(요구사항_분석_서비스.집계결과_가져오기(계층_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery)));
+        return ResponseEntity.ok(요구사항_분석_서비스.집계결과_가져오기(하위_계층_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery)));
     }
 
     // Analysis Resource, Analysis Scope
@@ -97,7 +97,7 @@ public class 요구사항_분석_컨트롤러 {
                         ,new TermsQueryFilter("pdServiceVersions",pdServiceVersionLinks)
                 );
 
-        return ResponseEntity.ok(요구사항_분석_서비스.집계결과_가져오기(계층_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery)));
+        return ResponseEntity.ok(요구사항_분석_서비스.집계결과_가져오기(하위_계층_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery)));
     }
 
     // Analysis Resource
@@ -113,7 +113,7 @@ public class 요구사항_분석_컨트롤러 {
                         new MustTermQuery("pdServiceId",pdServiceId)
                 );
 
-        return ResponseEntity.ok(요구사항_분석_서비스.집계결과_가져오기(계층_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery)));
+        return ResponseEntity.ok(요구사항_분석_서비스.집계결과_가져오기(하위_계층_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery)));
     }
 
 
@@ -174,7 +174,7 @@ public class 요구사항_분석_컨트롤러 {
                         , new ExistsQueryFilter(resolution)
                 );
 
-        return ResponseEntity.ok(요구사항_분석_서비스.집계결과_가져오기(계층_집계_쿼리_생성기.of(지라이슈_제품_및_제품버전_집계_요청, esQuery)));
+        return ResponseEntity.ok(요구사항_분석_서비스.집계결과_가져오기(하위_계층_집계_쿼리_생성기.of(지라이슈_제품_및_제품버전_집계_요청, esQuery)));
     }
 
     // Analysis Cost
