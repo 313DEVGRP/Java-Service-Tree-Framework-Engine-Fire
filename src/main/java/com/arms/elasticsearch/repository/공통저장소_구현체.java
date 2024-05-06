@@ -469,8 +469,8 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         try{
             return operations.search(query, entityClass);
         }catch (Exception e){
-            log.info(e.getMessage());
-            return null;
+            log.error(e.getMessage());
+            throw e;
         }
     }
     @Override
