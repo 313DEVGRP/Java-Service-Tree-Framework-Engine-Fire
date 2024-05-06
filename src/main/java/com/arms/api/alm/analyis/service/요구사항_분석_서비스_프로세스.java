@@ -57,10 +57,12 @@ import com.arms.api.util.model.dto.히트맵날짜데이터;
 import com.arms.api.util.model.dto.히트맵데이터;
 import com.arms.api.util.model.enums.IsReqType;
 import com.arms.elasticsearch.query.EsQuery;
+import com.arms.elasticsearch.query.base.기본_검색_요청;
 import com.arms.elasticsearch.query.base.일반_집계_요청;
 import com.arms.elasticsearch.query.esquery.EsBoolQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
+import com.arms.elasticsearch.query.factory.일반_검색_쿼리_생성기;
 import com.arms.elasticsearch.query.factory.집계_쿼리_생성기;
 import com.arms.elasticsearch.query.factory.하위_계층_집계_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
@@ -234,52 +236,37 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         return 검색결과;
     }
 
-    public 요구사항_지라이슈상태_주별_집계 누적데이터조회(Long pdServiceLink, Long[] pdServiceVersionLinks, LocalDate monthAgo) {
+    private 요구사항_지라이슈상태_주별_집계 누적데이터조회(Long pdServiceLink, Long[] pdServiceVersionLinks, LocalDate monthAgo) {
         // 총 이슈 개수를 구하기 위한 쿼리
         EsQuery issueEsQuery = new EsQueryBuilder()
-                .bool(new MustTermQuery("pdServiceId", pdServiceLink),
-                        new TermsQueryFilter("pdServiceVersions", pdServiceVersionLinks),
-                        new RangeQueryFilter("created", null, monthAgo, "lt")
+                .bool(
+                    new MustTermQuery("pdServiceId", pdServiceLink),
+                    new TermsQueryFilter("pdServiceVersions", pdServiceVersionLinks),
+                    RangeQueryFilter.of("created").lt(monthAgo)
                 );
-
-        NativeSearchQuery 생성 = 집계_쿼리_생성기.of(new 일반_집계_요청() {
-        }, issueEsQuery).생성();
-
-        BoolQueryBuilder boolQueryForTotalIssues = issueEsQuery.getQuery(new ParameterizedTypeReference<>() {});
+        일반_집계_요청 일반_집계_요청 = new 일반_집계_요청(){};
+        일반_집계_요청.set메인그룹필드("status.status_name.keyword");
+        버킷_집계_결과_목록_합계 searchResponseForTotalIssues = 지라이슈_저장소.버킷집계(집계_쿼리_생성기.of(일반_집계_요청,issueEsQuery).생성());
+        Long totalIssuesCount = searchResponseForTotalIssues.get전체합계();
 
         // 총 요구사항 개수를 구하기 위한 쿼리
         EsQuery reqEsQuery = new EsQueryBuilder()
-                .bool(new MustTermQuery("pdServiceId", pdServiceLink),
-                        new MustTermQuery("isReq", true),
-                        new RangeQueryFilter("created", null, monthAgo, "lt")
+                .bool(
+                    new MustTermQuery("pdServiceId", pdServiceLink),
+                    new MustTermQuery("isReq", true),
+                    RangeQueryFilter.of("created").lt(monthAgo)
                 );
-        BoolQueryBuilder boolQueryForTotalRequirements = reqEsQuery.getQuery(new ParameterizedTypeReference<>() {});
 
-        // 이슈 상태에 대한 집계 쿼리
-        TermsAggregationBuilder totalAggregationBuilder = AggregationBuilders.terms("total_status").field("status.status_name.keyword");
-
-        // 총 이슈 개수 검색
-        NativeSearchQueryBuilder nativeSearchQueryBuilderForTotalIssues
-                = new NativeSearchQueryBuilder().withQuery(boolQueryForTotalIssues).addAggregation(totalAggregationBuilder);
-
-        버킷_집계_결과_목록_합계 searchResponseForTotalIssues
-                = 지라이슈_저장소.버킷집계(nativeSearchQueryBuilderForTotalIssues.build());
-
-        Long totalIssuesCount
-                = searchResponseForTotalIssues.get전체합계();
-
-        // 총 요구사항 개수 검색
-        NativeSearchQueryBuilder nativeSearchQueryBuilderForTotalRequirements
-                = new NativeSearchQueryBuilder().withQuery(boolQueryForTotalRequirements);
-
-        Long totalRequirementsCount = Long.valueOf(Optional.ofNullable(지라이슈_저장소.normalSearch(nativeSearchQueryBuilderForTotalRequirements.build()))
-                .map(지라이슈 -> 지라이슈.size())
-                .orElse(0));
+        Long totalRequirementsCount = Long.valueOf(
+            Optional.ofNullable(지라이슈_저장소.normalSearch(일반_검색_쿼리_생성기.of(new 기본_검색_요청(){}, reqEsQuery).생성()))
+                .map(List::size)
+                .orElse(0)
+        );
 
         // 이슈 상태 집계 결과 가져오기
         Map<String, Long> statusMap = new HashMap<>();
-        Optional.ofNullable(searchResponseForTotalIssues)
-                .map(response -> response.get검색결과().get("total_status"))
+        Optional.of(searchResponseForTotalIssues)
+                .map(response -> response.get검색결과().get("group_by_status.status_name.keyword"))
                 .ifPresent(totalStatus -> {
                     for (버킷_집계_결과 버킷_집계_결과 : totalStatus) {
                         String key = 버킷_집계_결과.get필드명();
