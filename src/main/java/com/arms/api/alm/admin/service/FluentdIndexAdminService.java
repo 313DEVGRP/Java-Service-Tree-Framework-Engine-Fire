@@ -27,7 +27,11 @@ public class FluentdIndexAdminService implements IndexAdminService {
         Set<String> fluentd = fluentdRepository.findIndexNamesByAlias(IndexCoordinates.of("fluentd"));
         fluentd.stream()
             .filter(indexName->!twoDayList(indexName))
-            .forEach(indexName-> fluentdRepository.deleteIndex(IndexCoordinates.of(indexName)));
+            .collect(Collectors.toList())
+            .forEach(indexName-> {
+                fluentdRepository.deleteIndex(IndexCoordinates.of(indexName));
+            }
+        );
     }
 
     private boolean twoDayList(String indexName){
