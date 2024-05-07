@@ -170,6 +170,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         return 요구사항_버전이슈키상태_작업자수_목록;
     }
 
+
     @Override
     public Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항_지라이슈상태_주별_집계(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
         LocalDate now = LocalDate.now(ZoneId.of("UTC"));
@@ -309,20 +310,22 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
 
         EsQueryBuilder esQuery = new EsQueryBuilder().bool(esBoolQueries);
-        BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
-        });
 
         하위_집계_요청 하위_집계_요청 = new 하위_집계_요청(){};
         하위_집계_요청.set메인그룹필드(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준());
 
-        List<String> 하위그룹필드들 = new ArrayList<>(List.of(지라이슈_일자별_제품_및_제품버전_집계_요청.get메인그룹필드()));
+        List<String> 하위그룹필드들 = new ArrayList<>();
 
-        하위그룹필드들.addAll(지라이슈_일자별_제품_및_제품버전_집계_요청.get하위그룹필드들());
+        Optional.ofNullable(지라이슈_일자별_제품_및_제품버전_집계_요청.get메인그룹필드())
+            .ifPresent(element->{
+                하위그룹필드들.add(element);
+                지라이슈_일자별_제품_및_제품버전_집계_요청.get하위그룹필드들()
+                    .stream().findFirst()
+                    .ifPresent(하위그룹필드들::add);
+            });
 
         하위_집계_요청.set하위그룹필드들(하위그룹필드들);
-
         버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(하위_계층_집계_쿼리_생성기.day(하위_집계_요청,esQuery).생성());
-
         List<버킷_집계_결과> aggregationByDay = 버킷_집계_결과_목록_합계.get검색결과().get("date_group_by_"+지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준());
 
         Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> 검색결과 = aggregationByDay.stream()

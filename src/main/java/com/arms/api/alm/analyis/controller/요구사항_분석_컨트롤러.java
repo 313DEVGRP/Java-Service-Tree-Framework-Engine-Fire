@@ -48,7 +48,7 @@ public class 요구사항_분석_컨트롤러 {
 
         EsQuery esQuery = new EsQueryBuilder().bool(esBoolQueries);
 
-        return ResponseEntity.ok(요구사항_분석_서비스.집계결과_가져오기(하위_비계층_집계_쿼리_생성기.of(검색요청, esQuery)));
+        return ResponseEntity.ok(요구사항_분석_서비스.집계결과_가져오기(하위_계층_집계_쿼리_생성기.of(검색요청, esQuery)));
     }
 
     // 대시보드, 디테일_대시보드, 범위분석
