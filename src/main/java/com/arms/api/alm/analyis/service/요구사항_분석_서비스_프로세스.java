@@ -459,19 +459,21 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
 
     private List<요구사항_별_업데이트_데이터> 요구사항_별_업데이트_데이터(지라이슈_엔티티 issue) {
 
-        return Arrays.stream(issue.getPdServiceVersions()).collect(toList())
-            .stream()
-            .map(지라이슈->{
+        return Arrays.stream(issue.getPdServiceVersions())
+            .map(지라이슈 -> {
                 요구사항_별_업데이트_데이터 요구사항_별_업데이트_데이터 = new 요구사항_별_업데이트_데이터();
                 요구사항_별_업데이트_데이터.setKey(issue.getKey());
                 요구사항_별_업데이트_데이터.setParentReqKey(issue.getParentReqKey());
                 요구사항_별_업데이트_데이터.setUpdated(issue.getUpdated());
-                요구사항_별_업데이트_데이터.setPdServiceVersion(지라이슈.longValue());
+                요구사항_별_업데이트_데이터.setPdServiceVersion(지라이슈);
                 요구사항_별_업데이트_데이터.setSummary(issue.getSummary());
                 요구사항_별_업데이트_데이터.setIsReq(issue.getIsReq());
+
                 return 요구사항_별_업데이트_데이터;
-            }).collect(toList());
+            })
+            .collect(toList());
     }
+
     private String transformDateForUpdatedField(String date) {
         String subDate = date.substring(0,10);
         LocalDate localDate = LocalDate.parse(subDate);
