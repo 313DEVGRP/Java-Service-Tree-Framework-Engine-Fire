@@ -3,6 +3,7 @@ package com.arms.elasticsearch.query.factory;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.base.하위_집계_요청;
 import com.arms.elasticsearch.query.factory.query.일반_집계_쿼리;
+import com.arms.elasticsearch.query.factory.query.일자별_집계_쿼리;
 import com.arms.elasticsearch.query.factory.query.집계_쿼리;
 import com.arms.elasticsearch.query.쿼리_생성기;
 import lombok.Setter;
@@ -18,6 +19,14 @@ public class 하위_계층_집계_쿼리_생성기 implements 쿼리_생성기 {
 
 	public static 쿼리_생성기 of(하위_집계_요청 하위_집계_요청, EsQuery esQuery){
 		return new 하위_계층_집계_쿼리_생성기(일반_집계_쿼리.of(하위_집계_요청, esQuery));
+	}
+
+	public static 쿼리_생성기 week(하위_집계_요청 하위_집계_요청, EsQuery esQuery){
+		return new 하위_계층_집계_쿼리_생성기(일자별_집계_쿼리.week(하위_집계_요청, esQuery));
+	}
+
+	public static 쿼리_생성기 day(하위_집계_요청 하위_집계_요청, EsQuery esQuery){
+		return new 하위_계층_집계_쿼리_생성기(일자별_집계_쿼리.day(하위_집계_요청, esQuery));
 	}
 
 	@Override
