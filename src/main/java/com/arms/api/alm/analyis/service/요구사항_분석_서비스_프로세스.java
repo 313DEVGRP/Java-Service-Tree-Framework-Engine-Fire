@@ -59,12 +59,14 @@ import com.arms.api.util.model.enums.IsReqType;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.base.기본_검색_요청;
 import com.arms.elasticsearch.query.base.일반_집계_요청;
+import com.arms.elasticsearch.query.base.하위_집계_요청;
 import com.arms.elasticsearch.query.esquery.EsBoolQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
 import com.arms.elasticsearch.query.factory.일반_검색_쿼리_생성기;
 import com.arms.elasticsearch.query.factory.집계_쿼리_생성기;
 import com.arms.elasticsearch.query.factory.하위_계층_집계_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.하위_비계층_집계_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
 import com.arms.elasticsearch.query.filter.RangeQueryFilter;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
@@ -192,21 +194,13 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                         new TermsQueryFilter("pdServiceVersions", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
                         new RangeQueryFilter("created", monthAgo, now, "fromto")
                 );
-        BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
+        하위_집계_요청 하위_집계_요청 = new 하위_집계_요청(){};
+        하위_집계_요청.set메인그룹필드("created");
+        하위_집계_요청.set하위그룹필드들(List.of("status.status_name.keyword","isReq"));
 
-        DateHistogramAggregationBuilder weeklyAggregationBuilder = AggregationBuilders
-                .dateHistogram("aggregation_by_week")
-                .field("created")
-                .calendarInterval(DateHistogramInterval.WEEK)
-                .subAggregation(AggregationBuilders.terms("statuses").field("status.status_name.keyword"))
-                .subAggregation(AggregationBuilders.terms("requirements").field("isReq"));
+        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(하위_비계층_집계_쿼리_생성기.week(하위_집계_요청,esQuery).생성());
 
-        NativeSearchQueryBuilder nativeSearchQueryBuilder
-                = new NativeSearchQueryBuilder().withQuery(boolQuery).addAggregation(weeklyAggregationBuilder);
-
-        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(nativeSearchQueryBuilder.build());
-
-        List<버킷_집계_결과> aggregationByWeek = 버킷_집계_결과_목록_합계.get검색결과().get("aggregation_by_week");
+        List<버킷_집계_결과> aggregationByWeek = 버킷_집계_결과_목록_합계.get검색결과().get("date_group_by_"+하위_집계_요청.get메인그룹필드());
 
 
         Map<String, 요구사항_지라이슈상태_주별_집계> 검색결과 = aggregationByWeek.stream()
@@ -280,10 +274,10 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
 
     private 요구사항_지라이슈상태_주별_집계 주별데이터생성(버킷_집계_결과 검색_결과) {
 
-        Map<String, Long> statuses = (검색_결과.get하위검색결과().get("statuses")).stream()
+        Map<String, Long> statuses = (검색_결과.get하위검색결과().get("group_by_status.status_name.keyword")).stream()
                 .collect(Collectors.toMap(버킷_집계_결과::get필드명, 버킷_집계_결과::get개수));
 
-        long totalReqCount = Optional.ofNullable(검색_결과.get하위검색결과().get("requirements"))
+        long totalReqCount = Optional.ofNullable(검색_결과.get하위검색결과().get("isReq"))
                 .flatMap(reqs -> reqs.stream()
                         .filter(bucket -> "true".equals(bucket.get필드명()))
                         .findFirst())
@@ -303,61 +297,81 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
     @Override
     public Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> 지라이슈_기준일자별_제품_및_제품버전_집계검색(지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청) {
 
-         String 시작일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get시작일();
-         String 종료일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get종료일();
+        String 시작일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get시작일();
+        String 종료일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get종료일();
 
-         String from = 시작일;
-         String to = 종료일;
+        String from = 시작일;
+        String to = 종료일;
 
-         EsBoolQuery[] esBoolQueries = Stream.of(
-                new MustTermQuery("pdServiceId", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceLink()),
-                new TermsQueryFilter("pdServiceVersions", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
-                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT ? new MustTermQuery("isReq", true) : null,
-                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ? new MustTermQuery("isReq", false) : null,
-                new RangeQueryFilter(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준(), from, to, "fromto")
-         ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
+        EsBoolQuery[] esBoolQueries = Stream.of(
+            new MustTermQuery("pdServiceId", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceLink()),
+            new TermsQueryFilter("pdServiceVersions", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
+            지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT ? new MustTermQuery("isReq", true) : null,
+            지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ? new MustTermQuery("isReq", false) : null,
+            new RangeQueryFilter(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준(), from, to, "fromto")
+        ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
 
-         EsQueryBuilder esQuery = new EsQueryBuilder().bool(esBoolQueries);
-         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
-         });
+        EsQueryBuilder esQuery = new EsQueryBuilder().bool(esBoolQueries);
+        BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
+        });
 
+        하위_집계_요청 하위_집계_요청 = new 하위_집계_요청(){};
+        하위_집계_요청.set메인그룹필드(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준());
 
-        DateHistogramAggregationBuilder dailyAggregationBuilder = AggregationBuilders
-                .dateHistogram("aggregation_by_day")
-                .field(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준())
-                .calendarInterval(DateHistogramInterval.DAY);
+        List<String> 하위그룹필드들 = new ArrayList<>(List.of(지라이슈_일자별_제품_및_제품버전_집계_요청.get메인그룹필드()));
 
+        하위그룹필드들.addAll(지라이슈_일자별_제품_및_제품버전_집계_요청.get하위그룹필드들());
 
-         if (지라이슈_일자별_제품_및_제품버전_집계_요청.get메인그룹필드() != null) {
-             TermsAggregationBuilder 요구사항여부Aggregation = AggregationBuilders
-                     .terms("요구사항여부")
-                     .field(지라이슈_일자별_제품_및_제품버전_집계_요청.get메인그룹필드());
+        하위_집계_요청.set하위그룹필드들(하위그룹필드들);
 
-             if (지라이슈_일자별_제품_및_제품버전_집계_요청.get하위그룹필드들() != null && 지라이슈_일자별_제품_및_제품버전_집계_요청.get하위그룹필드들().size() == 1) {
-                 요구사항여부Aggregation.subAggregation(AggregationBuilders.terms("상태목록").field(지라이슈_일자별_제품_및_제품버전_집계_요청.get하위그룹필드들().get(0)));
-             }
+        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(하위_비계층_집계_쿼리_생성기.day(하위_집계_요청,esQuery).생성());
 
-             dailyAggregationBuilder.subAggregation(요구사항여부Aggregation);
-         }
+        List<버킷_집계_결과> aggregationByDay = 버킷_집계_결과_목록_합계.get검색결과().get("date_group_by_"+지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준());
 
-         NativeSearchQueryBuilder nativeSearchQueryBuilder
-                 = new NativeSearchQueryBuilder().withQuery(boolQuery).addAggregation(dailyAggregationBuilder);
+        Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> 검색결과 = aggregationByDay.stream()
+             .sorted(Comparator.comparing(bucket -> OffsetDateTime.parse(bucket.get필드명()).toLocalDate()))
+             .collect(Collectors.toMap(
+                     entry -> transformDate(entry.get필드명()),
+                     entry-> 일별_생성개수_및_상태_데이터생성(entry,지라이슈_일자별_제품_및_제품버전_집계_요청),
+                     (existingValue, newValue) -> existingValue,
+                     LinkedHashMap::new
+             ));
 
-         버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(nativeSearchQueryBuilder.build());
+        return 검색결과;
+    }
 
-         List<버킷_집계_결과> aggregationByDay = 버킷_집계_결과_목록_합계.get검색결과().get("aggregation_by_day");
+    private 일자별_요구사항_연결된이슈_생성개수_및_상태데이터 일별_생성개수_및_상태_데이터생성(버킷_집계_결과 결과,지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청) {
+        Map<String, Long> 요구사항여부결과 = new HashMap<>();
+        Map<String, Map<String, Long>> 상태목록결과 = new HashMap<>();
 
-         Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> 검색결과 = aggregationByDay.stream()
-                 .sorted(Comparator.comparing(bucket -> OffsetDateTime.parse(bucket.get필드명()).toLocalDate()))
-                 .collect(Collectors.toMap(
-                         entry -> transformDate(entry.get필드명()),
-                         this::일별_생성개수_및_상태_데이터생성,
-                         (existingValue, newValue) -> existingValue,
-                         LinkedHashMap::new
-                 ));
+        결과.get하위검색결과().get("group_by_"+지라이슈_일자별_제품_및_제품버전_집계_요청.get메인그룹필드()).forEach(term -> {
+            String 필드명 = term.get필드명();
+            Long 개수 = term.get개수();
 
-         return 검색결과;
-     }
+            요구사항여부결과.put(필드명, 개수);
+
+            List<버킷_집계_결과> 상태목록
+                = term.get하위검색결과().getOrDefault(
+                    지라이슈_일자별_제품_및_제품버전_집계_요청.get하위그룹필드들().stream().findFirst().orElseGet(()->"")
+                ,Collections.emptyList());
+
+            Map<String, Long> status = 상태목록.stream()
+                .collect(Collectors.toMap(버킷_집계_결과::get필드명, 버킷_집계_결과::get개수, Long::sum));
+
+            if(status != null) {
+                상태목록결과.put(필드명, status);
+            }
+        });
+
+        long 요구사항_개수 = 요구사항여부결과.getOrDefault("true", 0L);
+        long 연결된이슈_개수 = 요구사항여부결과.getOrDefault("false", 0L);
+
+        Map<String, Long> 요구사항_상태목록 = 상태목록결과.getOrDefault("true", null);
+        Map<String, Long> 연결된이슈_상태목록 = 상태목록결과.getOrDefault("false", null);
+
+        return new 일자별_요구사항_연결된이슈_생성개수_및_상태데이터(요구사항_개수, 요구사항_상태목록, 연결된이슈_개수, 연결된이슈_상태목록);
+    }
+
     @Override
     public List<지라이슈_엔티티> 지라이슈_기준일자별_제품_및_제품버전_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청){
 
@@ -378,40 +392,13 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         EsQueryBuilder esQuery = new EsQueryBuilder().bool(esBoolQueries);
         BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
         });
+
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
                 .withQuery(boolQuery)
                 .withSort(SortBuilders.fieldSort(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준()).order(SortOrder.ASC))
                 .withMaxResults(10000);
 
         return 지라이슈_저장소.normalSearch(nativeSearchQueryBuilder.build());
-    }
-    private 일자별_요구사항_연결된이슈_생성개수_및_상태데이터 일별_생성개수_및_상태_데이터생성(버킷_집계_결과 결과) {
-        Map<String, Long> 요구사항여부결과 = new HashMap<>();
-        Map<String, Map<String, Long>> 상태목록결과 = new HashMap<>();
-
-        결과.get하위검색결과().get("요구사항여부").forEach(term -> {
-            String 필드명 = term.get필드명();
-            Long 개수 = term.get개수();
-
-            요구사항여부결과.put(필드명, 개수);
-
-            List<버킷_집계_결과> 상태목록 = Optional.ofNullable(term.get하위검색결과().get("상태목록")).orElse(Collections.emptyList());
-
-            Map<String, Long> status = 상태목록.stream()
-                    .collect(Collectors.toMap(버킷_집계_결과::get필드명, 버킷_집계_결과::get개수, Long::sum));
-
-            if(status != null) {
-                상태목록결과.put(필드명, status);
-            }
-        });
-
-        long 요구사항_개수 = 요구사항여부결과.getOrDefault("true", 0L);
-        long 연결된이슈_개수 = 요구사항여부결과.getOrDefault("false", 0L);
-
-        Map<String, Long> 요구사항_상태목록 = 상태목록결과.getOrDefault("true", null);
-        Map<String, Long> 연결된이슈_상태목록 = 상태목록결과.getOrDefault("false", null);
-
-        return new 일자별_요구사항_연결된이슈_생성개수_및_상태데이터(요구사항_개수, 요구사항_상태목록, 연결된이슈_개수, 연결된이슈_상태목록);
     }
 
     @Override
