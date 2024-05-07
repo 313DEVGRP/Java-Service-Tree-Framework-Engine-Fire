@@ -2,10 +2,12 @@ package com.arms.elasticsearch.query.builder;
 
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.PipelineAggregationBuilder;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class 비계층_하위_집계_빌더 implements 하위_집계_빌더{
+public class 비계층_하위_집계_빌더 implements 하위_집계_빌더<List<AggregationBuilder>>{
 
 
     /**
@@ -22,18 +24,12 @@ public class 비계층_하위_집계_빌더 implements 하위_집계_빌더{
      * @return An {@link AggregationBuilder} that can be used to execute the aggregation.
      */
     @Override
-    public AggregationBuilder createAggregation(List<String> 하위그룹필드, int size) {
-        AggregationBuilder mainAggregation = null;
-        for (String 하위필드명 : 하위그룹필드) {
-            AggregationBuilder agg = AggregationBuilders.terms("group_by_" + 하위필드명)
+    public List<AggregationBuilder> createAggregation(List<String> 하위그룹필드, int size) {
+        return 하위그룹필드.stream()
+            .map(하위필드명->{
+                return AggregationBuilders.terms("group_by_" + 하위필드명)
                     .field(하위필드명)
                     .size(size);
-            if (mainAggregation == null) {
-                mainAggregation = agg;
-            } else {
-                mainAggregation.subAggregation(agg);
-            }
-        }
-        return mainAggregation;
+            }).collect(Collectors.toList());
     }
 }

@@ -1,4 +1,4 @@
-package com.arms.elasticsearch.query.factory.query;
+package com.arms.elasticsearch.query.factory.creator.query;
 
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.base.일반_집계_요청;
@@ -81,24 +81,24 @@ public class 일반_집계_쿼리 implements 집계_쿼리{
 
     @Override
     public void 계층_하위_집계_빌더_적용(){
-        서브_집계_기본틀(new 계층_하위_집계_빌더());
-    }
-
-    @Override
-    public void 형제_하위_집계_빌더_적용(){
-        서브_집계_기본틀(new 비계층_하위_집계_빌더());
-    }
-
-    private void 서브_집계_기본틀(하위_집계_빌더 하위_집계_빌더){
-        Function<하위_집계_빌더, AggregationBuilder> function
-            = a -> a.createAggregation(_하위_그룹_필드들,하위크기);
         Optional.ofNullable(_하위_그룹_필드들)
             .ifPresent(__하위_그룹_필드들->{
                 if(!__하위_그룹_필드들.isEmpty()){
                     termsAggregationBuilder
                         .subAggregation(
-                            function.apply(하위_집계_빌더)
+                            new 계층_하위_집계_빌더().createAggregation(_하위_그룹_필드들,하위크기)
                         );
+                }
+            });
+    }
+
+    @Override
+    public void 형제_하위_집계_빌더_적용(){
+        Optional.ofNullable(_하위_그룹_필드들)
+            .ifPresent(__하위_그룹_필드들->{
+                if(!__하위_그룹_필드들.isEmpty()){
+                    new 비계층_하위_집계_빌더().createAggregation(_하위_그룹_필드들,하위크기)
+                        .forEach(termsAggregationBuilder::subAggregation);
                 }
             });
     }

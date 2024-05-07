@@ -5,7 +5,7 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 
 import java.util.List;
 
-public class 계층_하위_집계_빌더 implements 하위_집계_빌더{
+public class 계층_하위_집계_빌더 implements 하위_집계_빌더<AggregationBuilder>{
 
     @Override
     public AggregationBuilder createAggregation(List<String> 하위그룹필드, int size) {

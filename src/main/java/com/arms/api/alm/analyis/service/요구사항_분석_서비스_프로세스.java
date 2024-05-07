@@ -61,10 +61,10 @@ import com.arms.elasticsearch.query.base.하위_집계_요청;
 import com.arms.elasticsearch.query.esquery.EsBoolQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
-import com.arms.elasticsearch.query.factory.일반_검색_쿼리_생성기;
-import com.arms.elasticsearch.query.factory.집계_쿼리_생성기;
-import com.arms.elasticsearch.query.factory.하위_계층_집계_쿼리_생성기;
-import com.arms.elasticsearch.query.factory.하위_비계층_집계_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.creator.old.일반_검색_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.creator.집계_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.creator.하위_계층_집계_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.creator.하위_비계층_집계_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
 import com.arms.elasticsearch.query.filter.RangeQueryFilter;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
@@ -196,7 +196,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         하위_집계_요청.set메인그룹필드("created");
         하위_집계_요청.set하위그룹필드들(List.of("status.status_name.keyword","isReq"));
 
-        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(하위_비계층_집계_쿼리_생성기.week(하위_집계_요청,esQuery).생성());
+        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(하위_계층_집계_쿼리_생성기.week(하위_집계_요청,esQuery).생성());
 
         List<버킷_집계_결과> aggregationByWeek = 버킷_집계_결과_목록_합계.get검색결과().get("date_group_by_"+하위_집계_요청.get메인그룹필드());
 

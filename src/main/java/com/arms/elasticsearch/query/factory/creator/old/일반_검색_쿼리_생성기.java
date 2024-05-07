@@ -1,4 +1,4 @@
-package com.arms.elasticsearch.query.factory;
+package com.arms.elasticsearch.query.factory.creator.old;
 
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.base.기본_검색_요청;

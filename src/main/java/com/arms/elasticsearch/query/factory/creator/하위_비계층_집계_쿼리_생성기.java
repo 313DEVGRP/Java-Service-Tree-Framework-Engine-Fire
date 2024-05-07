@@ -1,10 +1,10 @@
-package com.arms.elasticsearch.query.factory;
+package com.arms.elasticsearch.query.factory.creator;
 
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.base.하위_집계_요청;
-import com.arms.elasticsearch.query.factory.query.일반_집계_쿼리;
-import com.arms.elasticsearch.query.factory.query.일자별_집계_쿼리;
-import com.arms.elasticsearch.query.factory.query.집계_쿼리;
+import com.arms.elasticsearch.query.factory.creator.query.일반_집계_쿼리;
+import com.arms.elasticsearch.query.factory.creator.query.일자별_집계_쿼리;
+import com.arms.elasticsearch.query.factory.creator.query.집계_쿼리;
 import com.arms.elasticsearch.query.쿼리_생성기;
 
 import lombok.Getter;

@@ -7,7 +7,7 @@ import com.arms.api.util.model.dto.지라이슈_일반_집계_요청;
 import com.arms.api.util.model.dto.지라이슈_제품_및_제품버전_집계_요청;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
-import com.arms.elasticsearch.query.factory.하위_계층_집계_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.creator.하위_계층_집계_쿼리_생성기;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.query.쿼리_생성기;

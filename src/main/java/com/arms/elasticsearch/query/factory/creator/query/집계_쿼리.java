@@ -1,4 +1,4 @@
-package com.arms.elasticsearch.query.factory.query;
+package com.arms.elasticsearch.query.factory.creator.query;
 
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 
