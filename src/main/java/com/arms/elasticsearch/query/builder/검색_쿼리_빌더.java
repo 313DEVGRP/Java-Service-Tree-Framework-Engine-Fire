@@ -28,7 +28,7 @@ public final class 검색_쿼리_빌더 {
 
                 return nativeSearchQueryBuilder;
         } catch (final Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return null;
         }
     }
@@ -56,7 +56,7 @@ public final class 검색_쿼리_빌더 {
 
             return nativeSearchQueryBuilder;
         } catch (final Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return null;
         }
     }
@@ -68,7 +68,7 @@ public final class 검색_쿼리_빌더 {
                 .withQuery(getQueryBuilder(field, date));
 
         } catch (final Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return null;
         }
     }
@@ -91,7 +91,7 @@ public final class 검색_쿼리_빌더 {
             }
             return nativeSearchQueryBuilder;
         } catch (final Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return null;
         }
     }

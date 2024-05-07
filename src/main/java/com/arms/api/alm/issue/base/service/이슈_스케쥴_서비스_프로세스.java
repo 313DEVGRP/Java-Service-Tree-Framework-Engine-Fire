@@ -228,8 +228,9 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
                         .collect(toList());
 
                 벌크_저장_목록.addAll(링크드이슈_서브테스크_목록);
-            } catch (Exception e) {
-                e.printStackTrace();
+            }
+            catch (Exception e) {
+                로그.error(e.getMessage());
             }
         }
         else {
@@ -350,7 +351,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
 
                 증분벌크_저장_목록.addAll(링크드이슈_서브테스크_목록);
             } catch (Exception e) {
-                e.printStackTrace();
+                로그.error(e.getMessage());
             }
         }
         else {
