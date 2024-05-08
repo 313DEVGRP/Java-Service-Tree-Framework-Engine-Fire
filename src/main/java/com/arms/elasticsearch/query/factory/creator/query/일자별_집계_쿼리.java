@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import com.arms.elasticsearch.query.base.하위_집계;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
@@ -25,7 +26,7 @@ import lombok.Getter;
 @Getter
 public class 일자별_집계_쿼리 implements 집계_쿼리 {
 
-    private List<String> _하위_그룹_필드들 = new ArrayList<>();
+    private List<하위_집계> 하위_집계들 = new ArrayList<>();
     private final String 메인그룹필드;
     private final int 크기;
     private final int 하위크기;
@@ -38,7 +39,8 @@ public class 일자별_집계_쿼리 implements 집계_쿼리 {
     private 일자별_집계_쿼리(일반_집계_요청 일반_집계_요청, EsQuery esQuery,DateHistogramInterval dateHistogramInterval){
 
         if(일반_집계_요청 instanceof 하위_집계_요청){
-            this._하위_그룹_필드들 = ((하위_집계_요청)일반_집계_요청).get하위그룹필드들();
+            this.하위_집계들 = Optional.of(((하위_집계_요청) 일반_집계_요청).to_하위_집계_필드들())
+                    .filter(a->!a.isEmpty()).orElseGet(()->(((하위_집계_요청) 일반_집계_요청).get_하위_집계_필드들()));
         }
 
         this.메인그룹필드 = 일반_집계_요청.get메인그룹필드();
@@ -90,12 +92,12 @@ public class 일자별_집계_쿼리 implements 집계_쿼리 {
 
     @Override
     public void 계층_하위_집계_빌더_적용(){
-        Optional.ofNullable(_하위_그룹_필드들)
+        Optional.ofNullable(하위_집계들)
             .ifPresent(__하위_그룹_필드들->{
                 if(!__하위_그룹_필드들.isEmpty()){
                     dateHistogramAggregationBuilder
                         .subAggregation(
-                            new 계층_하위_집계_빌더().createAggregation(_하위_그룹_필드들,하위크기)
+                            new 계층_하위_집계_빌더().createAggregation(__하위_그룹_필드들,하위크기)
                         );
                 }
             });
@@ -103,10 +105,10 @@ public class 일자별_집계_쿼리 implements 집계_쿼리 {
 
     @Override
     public void 형제_하위_집계_빌더_적용(){
-        Optional.ofNullable(_하위_그룹_필드들)
+        Optional.ofNullable(하위_집계들)
             .ifPresent(__하위_그룹_필드들->{
                 if(!__하위_그룹_필드들.isEmpty()){
-                    new 비계층_하위_집계_빌더().createAggregation(_하위_그룹_필드들,하위크기)
+                    new 비계층_하위_집계_빌더().createAggregation(__하위_그룹_필드들,하위크기)
                         .forEach(dateHistogramAggregationBuilder::subAggregation);
                 }
             });
