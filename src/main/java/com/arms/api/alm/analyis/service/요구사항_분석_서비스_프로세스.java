@@ -477,7 +477,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
             List.of(
                 하위_집계.builder()
                         .별칭(요구사항여부?"requirement":"parentRequirement")
-                        .필드명(요구사항여부?"parentRequirement":"parentReqKey")
+                        .필드명(요구사항여부?"key":"parentReqKey")
                         .크기(지라이슈_제품_및_제품버전_집계_요청.get크기())
                         .build(),
                 하위_집계.builder()

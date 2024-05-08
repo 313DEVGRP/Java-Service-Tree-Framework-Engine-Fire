@@ -15,9 +15,6 @@ import org.springframework.data.elasticsearch.client.RestClients;
 import org.springframework.data.elasticsearch.config.AbstractElasticsearchConfiguration;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 
-import javax.annotation.PreDestroy;
-import java.io.IOException;
-
 /**
  * @author Pratik Das
  *
@@ -30,8 +27,6 @@ public class ElasticsearchClientConfig extends AbstractElasticsearchConfiguratio
 
 	@Value("${elasticsearch.url}")
 	public String elasticsearchUrl;
-
-	private RestHighLevelClient restHighLevelClient;
 
 	@Override
 	@Bean
@@ -46,22 +41,8 @@ public class ElasticsearchClientConfig extends AbstractElasticsearchConfiguratio
 				.withSocketTimeout(30000)
 				.build();
 
-		this.restHighLevelClient = RestClients
-									.create(clientConfiguration)
-									.rest();
-
-		return this.restHighLevelClient;
-	}
-
-	@PreDestroy
-	public void closeClient() {
-		if (this.restHighLevelClient != null) {
-			try {
-				this.restHighLevelClient.close();
-			}
-			catch (IOException e) {
-				log.error(e.getMessage());
-			}
-		}
+		return RestClients
+						.create(clientConfiguration)
+						.rest();
 	}
 }
