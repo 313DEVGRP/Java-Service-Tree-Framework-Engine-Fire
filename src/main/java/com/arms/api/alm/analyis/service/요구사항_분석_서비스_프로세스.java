@@ -22,12 +22,8 @@ import com.arms.elasticsearch.버킷_집계_결과;
 import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
@@ -504,15 +500,14 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
     @Override
     public Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>> 요구사항_지라이슈키별_업데이트_목록(List<String> 지라키_목록){
 
-        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        for (String 지라키 : 지라키_목록) {
-            boolQuery.should(QueryBuilders.termQuery("parentReqKey", 지라키));
-            boolQuery.should(QueryBuilders.termQuery("key", 지라키));
-        }
+        String[] names = new String[]{"parentReqKey","key"};
+        EsQuery esQuery = new EsQueryBuilder()
+            .bool(
+                지라키_목록.stream().flatMap(지라키 -> Arrays.stream(names)
+                        .map(name -> new TermsQueryFilter(name, 지라키))
+                        .collect(toList()).stream()).toArray(TermsQueryFilter[]::new)
+            );
 
-        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
-                .withQuery(boolQuery)
-                .withMaxResults(10000);
 
         List<지라이슈_엔티티> 전체결과 = new ArrayList<>();
 
@@ -533,7 +528,8 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
 
             today = today.minusDays(1);
 
-            List<지라이슈_엔티티> 결과 = 지라이슈_저장소.normalSearch(nativeSearchQueryBuilder.build(), 호출할_지라인덱스);
+            List<지라이슈_엔티티> 결과 = 지라이슈_저장소.normalSearch(
+                    일반_검색_쿼리_생성기.of(new 기본_검색_요청(){}, esQuery).생성(), 호출할_지라인덱스);
 
             if (결과 != null && 결과.size() > 0) {
                 전체결과.addAll(결과);
@@ -581,16 +577,8 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                         new TermsQueryFilter("pdServiceVersions", pdServiceVersionLinks),
                         new RangeQueryFilter("updated", yearsAgo, now, "fromto")
                 );
-
-        BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {
-        });
-
-        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder()
-                .withQuery(boolQuery)
-                .withMaxResults(10000);
-
-        String 지라인덱스별칭 = 인덱스자료.이슈_인덱스명;
-        List<지라이슈_엔티티> 전체결과 = 지라이슈_저장소.normalSearch(nativeSearchQueryBuilder.build(), 지라인덱스별칭);
+        List<지라이슈_엔티티> 전체결과
+                = 지라이슈_저장소.normalSearch(일반_검색_쿼리_생성기.of(new 기본_검색_요청(){}, esQuery).생성());
 
         히트맵데이터 히트맵데이터 = new 히트맵데이터();
 
