@@ -5,10 +5,14 @@ import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
 import com.arms.api.util.model.dto.지라이슈_일반_집계_요청;
 import com.arms.api.util.model.dto.지라이슈_제품_및_제품버전_집계_요청;
+import com.arms.api.util.model.enums.IsReqType;
 import com.arms.elasticsearch.query.EsQuery;
+import com.arms.elasticsearch.query.base.하위_집계;
+import com.arms.elasticsearch.query.base.하위_집계_요청;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.factory.creator.하위_계층_집계_쿼리_생성기;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
+import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.query.쿼리_생성기;
 import com.arms.elasticsearch.버킷_집계_결과;
@@ -130,38 +134,51 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
     @Override
     public List<버킷_집계_결과> 제품_요구사항별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
 
+        boolean 요구사항여부 = false;
+        if (지라이슈_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT) {
+            요구사항여부 = true;
+        }
+        else if (지라이슈_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE) {
+            요구사항여부 = false;
+        }
 
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new MustTermQuery("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
-                        new MustTermQuery("isReq", false)/*,
-                        new ExistsQueryFilter("assignee")*/
+                        new MustTermQuery("isReq", 요구사항여부),
+                        new ExistsQueryFilter("assignee")
                 );
 
-        BoolQueryBuilder boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
+        하위_집계_요청 하위_집계_요청 = new 하위_집계_요청() {};
 
-        TermsAggregationBuilder reqAgg;
-        reqAgg = AggregationBuilders
-                .terms("requirement")
-                .field("parentReqKey")
-                .size(지라이슈_제품_및_제품버전_집계_요청.get크기())
-                .subAggregation(
-                        AggregationBuilders.terms("assignees")
-                                .field("assignee.assignee_accountId.keyword")
-                                .order(BucketOrder.count(false))
-                                .size(지라이슈_제품_및_제품버전_집계_요청.get크기())
-                                .subAggregation(AggregationBuilders.terms("displayNames").field("assignee.assignee_displayName.keyword"))
-                                .subAggregation(AggregationBuilders.terms("cReqLink").field("cReqLink"))
-                );
+        하위_집계_요청.set_하위_집계_필드들(
+                List.of(
+                        하위_집계.builder()
+                                .별칭("assignees")
+                                .필드명("assignee.assignee_accountId.keyword")
+                                .크기(지라이슈_제품_및_제품버전_집계_요청.get크기())
+                                .결과_갯수_기준_오름차순(false)
+                                .build(),
+                        하위_집계.builder()
+                                .별칭("displayNames")
+                                .필드명("assignee.assignee_displayName.keyword")
+                                .크기(지라이슈_제품_및_제품버전_집계_요청.get크기())
+                                .build(),
+                        하위_집계.builder()
+                                .별칭("cReqLink")
+                                .필드명("cReqLink")
+                                .크기(지라이슈_제품_및_제품버전_집계_요청.get크기())
+                                .build()
+                )
+        );
 
-        NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(boolQuery)
-                .addAggregation(reqAgg)
-                .build();
 
+        if(요구사항여부){
+            하위_집계_요청.set메인그룹필드("key");
+        }else{
+            하위_집계_요청.set메인그룹필드("parentReqKey");
+        }
+        버킷_집계_결과_목록_합계 _버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(하위_계층_집계_쿼리_생성기.of(하위_집계_요청, esQuery).생성());
 
-        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(searchQuery);
-
-        return 버킷_집계_결과_목록_합계.get검색결과().get("requirement");
-
+        return _버킷_집계_결과_목록_합계.get검색결과().get("group_by_"+하위_집계_요청.get메인그룹필드());
     }
 }
