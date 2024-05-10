@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.elasticsearch.search.aggregations.BucketOrder.count;
+
 public class 비계층_하위_집계_빌더 implements 하위_집계_빌더<List<AggregationBuilder>>{
 
 
@@ -31,6 +33,7 @@ public class 비계층_하위_집계_빌더 implements 하위_집계_빌더<List
             .map(하위필드명->
                     AggregationBuilders.terms(Optional.ofNullable(하위필드명.get별칭()).orElseGet(()->"group_by_"+하위필드명.get필드명()))
                         .field(하위필드명.get필드명())
+                        .order(count(하위필드명.is결과_갯수_기준_오름차순()))
                         .size(size)).collect(Collectors.toList());
     }
 }

@@ -3,9 +3,12 @@ package com.arms.elasticsearch.query.builder;
 import com.arms.elasticsearch.query.base.하위_집계;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.BucketOrder;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.elasticsearch.search.aggregations.BucketOrder.*;
 
 public class 계층_하위_집계_빌더 implements 하위_집계_빌더<AggregationBuilder>{
 
@@ -17,7 +20,9 @@ public class 계층_하위_집계_빌더 implements 하위_집계_빌더<Aggrega
                     .map(하위필드명 ->
                             AggregationBuilders.terms(Optional.ofNullable(하위필드명.get별칭()).orElseGet(()->"group_by_"+하위필드명.get필드명()))
                                 .field(하위필드명.get필드명())
-                                .size(size))
+                                .order(count(하위필드명.is결과_갯수_기준_오름차순()))
+                                .size(size)
+                    )
                     .reduce(null, (agg1, agg2) -> {
                         if (agg1 == null) {
                             return agg2;
@@ -26,13 +31,5 @@ public class 계층_하위_집계_빌더 implements 하위_집계_빌더<Aggrega
                         }
                     });
     }
-
-    public static void main(String[] args) {
-        boolean b = true;
-
-        String s = Optional.of(b).filter(x -> x).map(x -> "트").orElseGet(() -> "크");
-        System.out.println(s);
-    }
-
 
 }
