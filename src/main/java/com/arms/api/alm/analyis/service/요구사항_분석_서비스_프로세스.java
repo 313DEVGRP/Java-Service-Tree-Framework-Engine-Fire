@@ -48,13 +48,13 @@ import static java.util.stream.Collectors.toList;
 public class 요구사항_분석_서비스_프로세스 implements 요구사항_분석_서비스 {
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
-    private 지라이슈_저장소 지라이슈_저장소;
+    private final 지라이슈_저장소 지라이슈_저장소;
 
     @Override
     public 버킷_집계_결과_목록_합계 집계결과_가져오기(쿼리_생성기 쿼리_생성기) {
 
         return 지라이슈_저장소.버킷집계(
-                쿼리_생성기.생성()
+            쿼리_생성기.생성()
         );
     }
 
@@ -217,7 +217,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                 );
 
         Long totalRequirementsCount = Long.valueOf(
-                Optional.ofNullable(지라이슈_저장소.normalSearch(일반_검색_쿼리_생성기.of(new 기본_검색_요청(){}, reqEsQuery).생성()))
+                Optional.ofNullable(지라이슈_저장소.normalSearch(일반_검색_쿼리_생성기.of(new 일반_검색_요청(){}, reqEsQuery).생성()))
                         .map(List::size)
                         .orElse(0)
         );
@@ -361,11 +361,11 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                     .bool(esBoolQueries)
                     .sort(new EsSortQuery(
                         List.of(
-                            기본_정렬_요청.builder().필드(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준()).정렬기준("asc").build()
+                            정렬_필드_지정.builder().필드(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준()).정렬기준("asc").build()
                         )
                     ));
 
-        return 지라이슈_저장소.normalSearch(일반_검색_쿼리_생성기.of(new 기본_검색_요청(){}, esQuery).생성());
+        return 지라이슈_저장소.normalSearch(일반_검색_쿼리_생성기.of(new 일반_검색_요청(){}, esQuery).생성());
     }
 
     @Override
@@ -391,10 +391,10 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                 .bool(esBoolQueries)
                 .sort(new EsSortQuery(
                         List.of(
-                                기본_정렬_요청.builder().필드(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준()).정렬기준("asc").build()
+                                정렬_필드_지정.builder().필드(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준()).정렬기준("asc").build()
                         )
                 ));
-        List<지라이슈_엔티티> 전체결과 = 지라이슈_저장소.normalSearch(일반_검색_쿼리_생성기.of(new 기본_검색_요청(){}, esQuery).생성());
+        List<지라이슈_엔티티> 전체결과 = 지라이슈_저장소.normalSearch(일반_검색_쿼리_생성기.of(new 일반_검색_요청(){}, esQuery).생성());
 
         // 업데이트가 기준일에 일어난 모든 이슈를 조회
         Map<Long, Map<String, Map<String,List<요구사항_별_업데이트_데이터>>>> 조회_결과 = null;
@@ -529,7 +529,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
             today = today.minusDays(1);
 
             List<지라이슈_엔티티> 결과 = 지라이슈_저장소.normalSearch(
-                    일반_검색_쿼리_생성기.of(new 기본_검색_요청(){}, esQuery).생성(), 호출할_지라인덱스);
+                    일반_검색_쿼리_생성기.of(new 일반_검색_요청(){}, esQuery).생성(), 호출할_지라인덱스);
 
             if (결과 != null && 결과.size() > 0) {
                 전체결과.addAll(결과);
@@ -578,7 +578,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                         new RangeQueryFilter("updated", yearsAgo, now, "fromto")
                 );
         List<지라이슈_엔티티> 전체결과
-                = 지라이슈_저장소.normalSearch(일반_검색_쿼리_생성기.of(new 기본_검색_요청(){}, esQuery).생성());
+                = 지라이슈_저장소.normalSearch(일반_검색_쿼리_생성기.of(new 일반_검색_요청(){}, esQuery).생성());
 
         히트맵데이터 히트맵데이터 = new 히트맵데이터();
 

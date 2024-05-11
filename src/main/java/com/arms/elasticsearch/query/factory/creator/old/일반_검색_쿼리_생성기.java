@@ -1,7 +1,7 @@
 package com.arms.elasticsearch.query.factory.creator.old;
 
 import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.base.기본_검색_요청;
+import com.arms.elasticsearch.query.base.일반_검색_요청;
 import com.arms.elasticsearch.query.쿼리_생성기;
 
 import lombok.Getter;
@@ -26,15 +26,15 @@ public class 일반_검색_쿼리_생성기 implements 쿼리_생성기 {
 	private final boolean 페이지_처리_여부;
 	private final EsQuery esQuery;
 
-	private 일반_검색_쿼리_생성기(기본_검색_요청 기본_검색_요청, EsQuery esQuery){
-		this.크기 = 기본_검색_요청.get크기();
-		this.페이지 = 기본_검색_요청.get페이지();
-		this.페이지_처리_여부 = 기본_검색_요청.is페이지_처리_여부();
+	private 일반_검색_쿼리_생성기(일반_검색_요청 일반_검색_요청, EsQuery esQuery){
+		this.크기 = 일반_검색_요청.get크기();
+		this.페이지 = 일반_검색_요청.get페이지();
+		this.페이지_처리_여부 = 일반_검색_요청.is페이지_처리_여부();
 		this.esQuery = esQuery;
 	}
 
-	public static 쿼리_생성기 of(기본_검색_요청 기본_검색_요청, EsQuery esQuery){
-		return new 일반_검색_쿼리_생성기(기본_검색_요청, esQuery);
+	public static 쿼리_생성기 of(일반_검색_요청 일반_검색_요청, EsQuery esQuery){
+		return new 일반_검색_쿼리_생성기(일반_검색_요청, esQuery);
 	}
 
 	@Override

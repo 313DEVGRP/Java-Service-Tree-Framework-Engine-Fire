@@ -26,7 +26,6 @@ public class 공통_집계_쿼리 <T extends ValuesSourceAggregationBuilder<T>> 
     private final NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
     private final BoolQueryBuilder boolQuery;
     private final ValuesSourceAggregationBuilder<T> valuesSourceAggregationBuilder;
-    private final List<FieldSortBuilder> fieldSortBuilders;
 
     protected 공통_집계_쿼리(일반_집계_요청 _일반_집계_요청, EsQuery esQuery, ValuesSourceAggregationBuilder<T> valuesSourceAggregationBuilder){
         this.valuesSourceAggregationBuilder = valuesSourceAggregationBuilder;
@@ -43,7 +42,8 @@ public class 공통_집계_쿼리 <T extends ValuesSourceAggregationBuilder<T>> 
         this.nativeSearchQueryBuilder.addAggregation(
                 this.valuesSourceAggregationBuilder
         );
-        this.fieldSortBuilders =  esQuery.getQuery(new ParameterizedTypeReference<>(){});
+        List<FieldSortBuilder> fieldSortBuilders = esQuery.getQuery(new ParameterizedTypeReference<>() {
+        });
 
         Optional.ofNullable(boolQuery)
                 .ifPresent(query-> this.nativeSearchQueryBuilder.withQuery(boolQuery));

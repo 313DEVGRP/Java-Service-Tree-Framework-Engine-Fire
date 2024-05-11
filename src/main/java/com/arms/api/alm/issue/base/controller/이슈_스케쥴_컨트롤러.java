@@ -1,15 +1,13 @@
 package com.arms.api.alm.issue.base.controller;
 
-import com.arms.api.alm.issue.base.service.이슈_스케쥴_서비스;
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
-import com.arms.elasticsearch.검색조건;
+import com.arms.api.alm.issue.base.service.이슈_스케쥴_서비스;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 @RestController
 @RequestMapping("/engine/jira/{connectId}/issue")
@@ -34,14 +32,6 @@ public class 이슈_스케쥴_컨트롤러 {
         return 이슈_스케쥴_서비스.이슈_조회하기(조회조건_아이디);
     }
 
-    @ResponseBody
-    @RequestMapping(
-            value = {"/search"},
-            method = {RequestMethod.POST}
-    )
-    public List<지라이슈_엔티티> 요구사항이슈_검색(@RequestBody final 검색조건 검색조건) {
-        return 이슈_스케쥴_서비스.이슈_검색하기(검색조건);
-    }
 
 
     /**

@@ -2,7 +2,6 @@ package com.arms.elasticsearch.repository;
 
 import com.arms.elasticsearch.메트릭_집계_결과_목록_합계;
 import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
-import com.arms.elasticsearch.검색조건;
 import org.springframework.data.elasticsearch.core.IndexedObjectInformation;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
@@ -12,7 +11,6 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 import org.springframework.data.repository.NoRepositoryBean;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -38,10 +36,6 @@ public interface 공통저장소<T,ID extends Serializable> extends Elasticsearc
 	<S extends T> S updateSave(S entity, String indexName) ;
 
 	SearchHits<T> search(Query query);
-
-	List<T>  getAllCreatedSince(Date date, Class<T> clazz);
-
-	List<T>  searchCreatedSince(검색조건 dto, Date date, Class<T> clazz);
 
 	boolean 인덱스확인_및_생성_매핑(String 인덱스명);
 

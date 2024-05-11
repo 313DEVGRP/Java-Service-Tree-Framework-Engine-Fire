@@ -57,19 +57,6 @@ public class 요구사항_컨트롤러 {
         return 요구사항_서비스.제품서비스_버전별_상태값_통계(제품서비스_아이디,제품서비스_버전_아이디);
     }
 
-    // Requirement - ReqStatus
-    @ResponseBody
-    @RequestMapping(
-            value = {"/search/{issueKey}/subAndLinks"},
-            method = {RequestMethod.GET}
-    )
-    public List<지라이슈_엔티티> 요구사항_링크드이슈_서브테스크_검색하기(@PathVariable("connectId") Long 지라서버_아이디,
-                                                @PathVariable("issueKey") String 이슈_키,
-                                                @RequestParam("page") int 페이지_번호,
-                                                @RequestParam("size") int 페이지_사이즈 ) {
-
-        return 요구사항_서비스.요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디, 이슈_키, 페이지_번호, 페이지_사이즈);
-    }
 
     @GetMapping("/req-assignees")
     public ResponseEntity<List<버킷_집계_결과>> 제품_요구사항별_담당자_목록(

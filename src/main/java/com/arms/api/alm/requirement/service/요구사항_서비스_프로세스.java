@@ -2,7 +2,6 @@ package com.arms.api.alm.requirement.service;
 
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
-import com.arms.api.util.common.component.서브테스크_조회;
 import com.arms.api.util.model.dto.지라이슈_일반_집계_요청;
 import com.arms.api.util.model.dto.지라이슈_제품_및_제품버전_집계_요청;
 import com.arms.api.util.model.enums.IsReqType;
@@ -36,7 +35,6 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     private 지라이슈_저장소 지라이슈_저장소;
-    private 서브테스크_조회 서브테스크_조회;
 
     @Override
     public Map<String, Long> 제품서비스별_담당자_이름_통계(Long 지라서버_아이디, Long 제품서비스_아이디) {
@@ -104,11 +102,6 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
 
         return 제품서비스_버전별_집계;
 
-    }
-
-    @Override
-    public List<지라이슈_엔티티> 요구사항_링크드이슈_서브테스크_검색하기(Long 서버_아이디, String 이슈_키, int 페이지_번호, int 페이지_사이즈) {
-        return 서브테스크_조회.요구사항_링크드이슈_서브테스크_검색하기(서버_아이디, 이슈_키, 페이지_번호, 페이지_사이즈);
     }
 
     @Override
