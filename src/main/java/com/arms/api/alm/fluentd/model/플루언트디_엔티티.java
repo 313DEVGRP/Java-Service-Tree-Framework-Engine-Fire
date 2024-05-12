@@ -30,7 +30,6 @@ import java.util.Date;
 @JsonTypeName("com.arms.api.engine.models.Fluentd")
 // @JsonTypeName("com.arms.api.index_entity.플루언트디_인덱스")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ElasticSearchIndex
 public class 플루언트디_엔티티 {
 
     @Id
