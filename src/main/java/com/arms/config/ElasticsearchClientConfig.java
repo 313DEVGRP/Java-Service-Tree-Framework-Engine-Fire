@@ -5,6 +5,13 @@ package com.arms.config;
 
 import com.arms.elasticsearch.repository.공통저장소_구현체;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HeaderElement;
+import org.apache.http.HeaderElementIterator;
+import org.apache.http.HttpResponse;
+import org.apache.http.conn.ConnectionKeepAliveStrategy;
+import org.apache.http.message.BasicHeaderElementIterator;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.protocol.HttpContext;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -37,6 +44,7 @@ public class ElasticsearchClientConfig extends AbstractElasticsearchConfiguratio
 				ClientConfiguration
 				.builder()
 				.connectedTo(this.elasticsearchUrl)
+						.withHttpClientConfigurer(clientBuilder-> clientBuilder.setKeepAliveStrategy(connectionKeepAliveStrategy()))
 				.withConnectTimeout(30000)
 				.withSocketTimeout(30000)
 				.build();
@@ -44,5 +52,21 @@ public class ElasticsearchClientConfig extends AbstractElasticsearchConfiguratio
 		return RestClients
 						.create(clientConfiguration)
 						.rest();
+	}
+
+	@Bean(name = "keepAliveStrategy")
+	public ConnectionKeepAliveStrategy connectionKeepAliveStrategy() {
+		return (response, context) -> {
+			HeaderElementIterator it = new BasicHeaderElementIterator(response.headerIterator(HTTP.CONN_KEEP_ALIVE));
+/*			while(it.hasNext()) {
+				HeaderElement he = it.nextElement();
+				String param = he.getName();
+				String value = he.getValue();
+				if(value != null && param.equalsIgnoreCase("timeout")) {
+					return Long.parseLong(value) * 1000;
+				}
+			}*/
+			return 180*1000;
+		};
 	}
 }
