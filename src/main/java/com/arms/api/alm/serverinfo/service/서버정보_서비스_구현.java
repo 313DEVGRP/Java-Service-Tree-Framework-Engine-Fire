@@ -125,7 +125,9 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
                     .collect(Collectors.toList());
         }
 
-        return 서버정보_저장소.saveAll(result);
+        return result.stream().map(r-> 서버정보_저장소.save(r))
+                .collect(Collectors.toList());
+
     }
 
     @Override
