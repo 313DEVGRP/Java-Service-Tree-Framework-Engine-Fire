@@ -6,6 +6,7 @@ import com.arms.api.util.model.dto.검색어_날짜포함_검색_요청;
 import com.arms.api.util.model.dto.검색어_집계_요청;
 import com.arms.api.alm.fluentd.model.플루언트디_엔티티;
 import com.arms.elasticsearch.query.*;
+import com.arms.elasticsearch.query.base.일반_검색_요청;
 import com.arms.elasticsearch.query.base.정렬_필드_지정;
 import com.arms.elasticsearch.query.filter.QueryStringFilter;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustQueryString;
@@ -13,8 +14,10 @@ import com.arms.elasticsearch.query.filter.RangeQueryFilter;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.factory.creator.old.일반_검색_쿼리_생성기;
 import com.arms.elasticsearch.query.factory.creator.하위_계층_집계_쿼리_생성기;
+import com.arms.api.alm.fluentd.repository.*;
 import com.arms.elasticsearch.query.esquery.EsSortQuery;
 
+import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +34,7 @@ import java.util.List;
 public class 플루언트디_서비스_프로세스 implements 플루언트디_서비스{
 
 
-    private com.arms.api.alm.fluentd.repository.플루언트디_저장소 플루언트디_저장소;
+    private 플루언트디_저장소 플루언트디_저장소;
 
     @Override
     public 버킷_집계_결과_목록_합계 전체_집계결과_가져오기(쿼리_생성기 쿼리_생성기) {
@@ -110,5 +113,20 @@ public class 플루언트디_서비스_프로세스 implements 플루언트디_�
 
         버킷_집계_결과_목록_합계 집계_결과 = this.전체_집계결과_가져오기(하위_계층_집계_쿼리_생성기.of(검색어_집계_요청, esQuery));
         return 집계_결과;
+    }
+
+
+    @Override
+    public void 커넥션_상태_유지(){
+        log.info("엘라스틱서치 커넥션 상태 유지");
+        EsQuery esQuery = new EsQueryBuilder()
+                .bool(
+                        new TermsQueryFilter("id", "313")
+                );
+        일반_검색_요청 일반_검색_요청 = new 일반_검색_요청() {
+        };
+        일반_검색_요청.set페이지_처리_여부(false);
+        일반_검색_요청.set크기(1);
+        플루언트디_저장소.normalSearch(일반_검색_쿼리_생성기.of(일반_검색_요청,esQuery).생성());
     }
 }
