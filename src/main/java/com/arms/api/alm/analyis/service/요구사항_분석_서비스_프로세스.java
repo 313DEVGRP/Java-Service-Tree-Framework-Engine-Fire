@@ -319,7 +319,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
 
             List<버킷_집계_결과> 상태목록
                     = term.get하위검색결과().getOrDefault(
-                    지라이슈_일자별_제품_및_제품버전_집계_요청.get하위그룹필드들().stream().findFirst().orElseGet(()->"")
+                    "group_by_" + 지라이슈_일자별_제품_및_제품버전_집계_요청.get하위그룹필드들().stream().findFirst().orElseGet(()->"")
                     ,Collections.emptyList());
 
             Map<String, Long> status = 상태목록.stream()
