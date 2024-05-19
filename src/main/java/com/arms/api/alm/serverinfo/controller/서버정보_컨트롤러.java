@@ -6,6 +6,7 @@ import com.arms.api.alm.serverinfo.service.서버정보_서비스;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,6 +39,7 @@ public class 서버정보_컨트롤러 {
             value = {"/backup/scheduler"},
             method = {RequestMethod.POST}
     )
+    @Async
     public Iterable<서버정보_엔티티> 서버정보백업_스케줄러(ModelMap model, HttpServletRequest request) throws Exception {
 
         로그.info("서버정보백업 스케줄러");
