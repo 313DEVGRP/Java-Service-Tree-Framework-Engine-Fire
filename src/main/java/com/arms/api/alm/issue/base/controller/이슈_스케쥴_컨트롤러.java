@@ -4,6 +4,7 @@ import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.service.이슈_스케쥴_서비스;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,6 +59,7 @@ public class 이슈_스케쥴_컨트롤러 {
     value = {"/index/backup"},
     method = {RequestMethod.POST}
     )
+    @Async
     public boolean 지라이슈_인덱스백업() {
         log.info("지라이슈_인덱스백업 컨트롤러");
 
