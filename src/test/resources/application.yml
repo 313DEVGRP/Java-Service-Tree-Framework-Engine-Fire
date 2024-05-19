@@ -1,0 +1,70 @@
+server:
+  port: 33333
+  address: 0.0.0.0
+  servlet:
+    session:
+      timeout: 7200
+
+logging:
+  config: classpath:logback/logback-dev.xml
+
+springfox:
+  documentation:
+    swagger:
+      v2:
+        path: /engine-fire-api
+    swagger-ui:
+      base-url: /engine-fire-api
+
+spring:
+  application:
+    name: javaServiceTreeFrameworkEngineFire
+  jackson:
+    time-zone: Asia/Seoul
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.actuate.autoconfigure.elasticsearch.ElasticSearchReactiveHealthContributorAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.elasticsearch.ReactiveElasticsearchRepositoriesAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.elasticsearch.ReactiveElasticsearchRestClientAutoConfiguration
+
+
+jira:
+  api:
+    fields:
+      project: project
+      issuetype: issuetype
+      summary: summary
+      description: description
+      reporter: reporter
+      priority: priority
+      duedate: duedate
+    parameter:
+      maxResults: 50
+      fields: fields=project,issuetype,creator,reporter,assignee,labels,priority,status,resolution,resolutiondate,created,updated,worklogs,timespent,summary
+      jql:
+        updated: (updated >= startOfDay(-1) and updated < startOfDay())
+        issue: issue={이슈키}
+        subtask: issue in linkedIssues({이슈키})
+        linkedIssue: parent={이슈키}
+    endpoint:
+      createmeta: /rest/api/3/issue/createmeta/{프로젝트아이디_또는_키}/issuetypes/{이슈유형아이디_또는_키}
+      search: /rest/api/3/search
+      issue:
+        full:
+          detail: ${jira.api.endpoint.search}?jql=${jira.api.parameter.jql.issue}&${jira.api.parameter.fields}
+          subtask: ${jira.api.endpoint.search}?jql=${jira.api.parameter.jql.subtask}&${jira.api.parameter.fields}
+          linkedIssue: ${jira.api.endpoint.search}?jql=${jira.api.parameter.jql.linkedIssue}&${jira.api.parameter.fields}
+        increment:
+          detail: ${jira.api.endpoint.search}?jql=${jira.api.parameter.jql.issue} and ${jira.api.parameter.jql.updated}&${jira.api.parameter.fields}
+          subtask: ${jira.api.endpoint.search}?jql=${jira.api.parameter.jql.subtask} and ${jira.api.parameter.jql.updated}&${jira.api.parameter.fields}
+          linkedIssue: ${jira.api.endpoint.search}?jql=${jira.api.parameter.jql.linkedIssue} and ${jira.api.parameter.jql.updated}&${jira.api.parameter.fields}
+
+redmine:
+  api:
+    endpoint:
+      project: /projects/{아이디}.json
+      issuetype: /trackers.json?tracker_id={아이디}
+      priority: /enumerations/issue_priorities.json?priority_id={아이디}
+      issuestatus: /issue_statuses.json?status_id={아이디}
+      issue: /issues/{아이디}.json
+      priorityList: /enumerations/issue_priorities.json

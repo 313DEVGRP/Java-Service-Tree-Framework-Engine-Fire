@@ -7,19 +7,17 @@ import com.arms.api.alm.issue.base.model.지라프로젝트_데이터;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
 import com.arms.api.alm.issue.status.model.이슈상태_데이터;
 import com.arms.api.alm.utils.지라이슈_생성;
-import com.arms.api.util.common.component.서브테스크_조회;
 import com.arms.api.util.common.constrant.index.인덱스자료;
 import com.arms.api.util.errors.codes.에러코드;
-import com.arms.elasticsearch.query.builder.검색_쿼리_빌더;
-import com.arms.elasticsearch.검색조건;
+import com.arms.elasticsearch.query.EsQuery;
+import com.arms.elasticsearch.query.base.일반_검색_요청;
+import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
+import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
+import com.arms.elasticsearch.query.factory.creator.old.일반_검색_쿼리_생성기;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -60,20 +58,14 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     @Override
     public 지라이슈_엔티티 이슈_조회하기(String 조회조건_아이디) {
 
-        NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(QueryBuilders.termQuery("id", 조회조건_아이디))
-                .build();
-
-        return 지라이슈_저장소.normalSearch(searchQuery).stream()
+        EsQuery esQuery = new EsQueryBuilder()
+            .bool(
+                    new MustTermQuery("id", 조회조건_아이디)
+            );
+        return 지라이슈_저장소.normalSearch(일반_검색_쿼리_생성기.of(new 일반_검색_요청(){}, esQuery).생성()).stream()
                 .findFirst().orElseGet(지라이슈_엔티티::new);
     }
 
-    @Override
-    public List<지라이슈_엔티티> 이슈_검색하기(검색조건 검색조건) {
-        Query query
-                = 검색_쿼리_빌더.buildSearchQuery(검색조건).build();
-        return 지라이슈_저장소.normalSearch(query);
-    }
 
     @Override
     public 지라이슈_엔티티 이슈_검색엔진_저장(Long 지라서버_아이디, String 이슈_키, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception {
@@ -213,7 +205,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
 
             try {
                 List<지라이슈_엔티티> 링크드이슈_서브테스크_목록 = Optional.ofNullable(서브테스크_조회.요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디,
-                                이슈_키, 0, 0))
+                                이슈_키))
                         .orElse(Collections.emptyList())
                         .stream()
                         .map(링크드이슈_서브테스크 -> {
@@ -335,7 +327,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
 
             try {
                 List<지라이슈_엔티티> 링크드이슈_서브테스크_목록 = Optional.ofNullable(서브테스크_조회.요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디,
-                                이슈_키, 0, 0))
+                                이슈_키))
                         .orElse(Collections.emptyList())
                         .stream()
                         .map(링크드이슈_서브테스크 -> {

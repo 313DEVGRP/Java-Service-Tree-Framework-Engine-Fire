@@ -4,10 +4,8 @@ import com.arms.elasticsearch.annotation.ElasticSearchIndex;
 import com.arms.elasticsearch.annotation.Recent;
 import com.arms.elasticsearch.annotation.RollingIndexName;
 import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.builder.검색_쿼리_빌더;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
-import com.arms.elasticsearch.검색조건;
 import com.arms.elasticsearch.메트릭_집계_결과_목록_합계;
 import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import lombok.extern.slf4j.Slf4j;
@@ -77,7 +75,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
             throw new IllegalArgumentException("bulkIndex Document null 오류");
         }
 
-        return operations.bulkIndex(indexQueryList, indexName());
+        return operations.bulkIndex(indexQueryList, 인덱스_명());
     }
 
     @Override
@@ -175,34 +173,6 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
             return Collections.emptyList();
         }
     }
-
-
-
-
-    //현재 디펜던시 없음
-    @Override
-    public List<T>  getAllCreatedSince(final Date date, Class<T> clazz) {
-
-        NativeSearchQueryBuilder query = 검색_쿼리_빌더.buildSearchQuery(
-                "created",
-                date
-        );
-        return this.normalSearch(query.build());
-
-    }
-
-    //현재 디펜던시 없음
-    @Override
-    public List<T>  searchCreatedSince(final 검색조건 dto, final Date date, Class<T> clazz) {
-
-        NativeSearchQueryBuilder query = 검색_쿼리_빌더.buildSearchQuery(
-                dto,
-                date
-        );
-        return this.normalSearch(query.build());
-
-    }
-
 
     //현재 디펜던시 없음
     @Override
@@ -324,7 +294,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         return 결과;
     }
 
-    public IndexCoordinates indexName() {
+    public IndexCoordinates 인덱스_명() {
         Document document = AnnotationUtils.findAnnotation(entityClass, Document.class);
         if(document!=null){
             Method method = methodInfo(entityClass, RollingIndexName.class);
@@ -428,7 +398,7 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
 
         collect
             .forEach((key, value) -> operations.save(value, IndexCoordinates.of(key)));
-        IndexCoordinates indexCoordinates = indexName();
+        IndexCoordinates indexCoordinates = 인덱스_명();
         return operations.save(recentTrueList, indexCoordinates);
     }
 

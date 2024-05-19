@@ -74,11 +74,11 @@ public class 요구사항_분석_컨트롤러 {
                                                      @RequestParam List<Long> pdServiceVersionLinks,
                                                      지라이슈_일반_집계_요청 지라이슈_일반_집계_요청) {
         EsQuery esQuery
-                = new EsQueryBuilder()
+            = new EsQueryBuilder()
                 .bool(
-                        new MustTermQuery("pdServiceId",pdServiceId)
-                        ,new MustTermQuery("isReq", 지라이슈_일반_집계_요청.getIsReq())
-                        ,new TermsQueryFilter("pdServiceVersions",pdServiceVersionLinks)
+                     new MustTermQuery("pdServiceId",pdServiceId)
+                    ,new MustTermQuery("isReq", 지라이슈_일반_집계_요청.getIsReq())
+                    ,new TermsQueryFilter("pdServiceVersions",pdServiceVersionLinks)
                 );
 
         return ResponseEntity.ok(요구사항_분석_서비스.집계결과_가져오기(하위_계층_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery)));
@@ -90,10 +90,10 @@ public class 요구사항_분석_컨트롤러 {
                                                      @RequestParam List<Long> pdServiceVersionLinks,
                                                      지라이슈_일반_집계_요청 지라이슈_일반_집계_요청) {
         EsQuery esQuery
-                = new EsQueryBuilder()
+            = new EsQueryBuilder()
                 .bool(
-                        new MustTermQuery("pdServiceId",pdServiceId)
-                        ,new TermsQueryFilter("pdServiceVersions",pdServiceVersionLinks)
+                     new MustTermQuery("pdServiceId",pdServiceId)
+                    ,new TermsQueryFilter("pdServiceVersions",pdServiceVersionLinks)
                 );
 
         return ResponseEntity.ok(요구사항_분석_서비스.집계결과_가져오기(하위_계층_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery)));
