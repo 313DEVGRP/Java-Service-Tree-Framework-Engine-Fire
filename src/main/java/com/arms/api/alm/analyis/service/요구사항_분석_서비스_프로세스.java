@@ -17,7 +17,7 @@ import com.arms.elasticsearch.query.factory.creator.하위_계층_집계_쿼리_
 import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
 import com.arms.elasticsearch.query.filter.RangeQueryFilter;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
-import com.arms.elasticsearch.query.쿼리_생성기;
+import com.arms.elasticsearch.query.factory.creator.쿼리_생성기;
 import com.arms.elasticsearch.버킷_집계_결과;
 import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import lombok.AllArgsConstructor;
