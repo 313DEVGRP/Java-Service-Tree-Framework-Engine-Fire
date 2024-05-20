@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 @Builder
-public class 정렬_필드_지정 {
+public class 기본_정렬_요청 {
 
 	private String 필드;
 	private String 정렬기준;

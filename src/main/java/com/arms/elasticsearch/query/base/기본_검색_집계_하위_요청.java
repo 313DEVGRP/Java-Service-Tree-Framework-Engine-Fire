@@ -9,12 +9,12 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public abstract class 하위_집계_요청 extends 일반_집계_요청 {
+public abstract class 기본_검색_집계_하위_요청 extends 기본_검색_집계_요청 {
 	private List<String> 하위그룹필드들 = new ArrayList<>();
-	private List<하위_집계> _하위_집계_필드들 = new ArrayList<>();
-	public List<하위_집계> to_하위_집계_필드들(){
+	private List<집계_하위_요청> __집계_하위_요청_필드들 = new ArrayList<>();
+	public List<집계_하위_요청> to_하위_집계_필드들(){
 		return 하위그룹필드들.stream()
-				.map(a-> 하위_집계.builder().필드명(a).build())
+				.map(a-> 집계_하위_요청.builder().하위_필드명(a).build())
 				.collect(Collectors.toList());
 	}
 }

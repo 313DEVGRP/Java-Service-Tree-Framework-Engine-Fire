@@ -10,7 +10,7 @@ import com.arms.api.alm.utils.지라이슈_생성;
 import com.arms.api.util.common.constrant.index.인덱스자료;
 import com.arms.api.util.errors.codes.에러코드;
 import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.base.일반_검색_요청;
+import com.arms.elasticsearch.query.base.기본_검색_요청;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
 import com.arms.elasticsearch.query.factory.creator.old.일반_검색_쿼리_생성기;
@@ -62,7 +62,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
             .bool(
                     new MustTermQuery("id", 조회조건_아이디)
             );
-        return 지라이슈_저장소.normalSearch(일반_검색_쿼리_생성기.of(new 일반_검색_요청(){}, esQuery).생성()).stream()
+        return 지라이슈_저장소.normalSearch(일반_검색_쿼리_생성기.of(new 기본_검색_요청(){}, esQuery).생성()).stream()
                 .findFirst().orElseGet(지라이슈_엔티티::new);
     }
 

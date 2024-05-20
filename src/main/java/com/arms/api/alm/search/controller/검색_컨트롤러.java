@@ -7,7 +7,7 @@ import com.arms.api.alm.issue.base.service.지라이슈_검색_서비스;
 import com.arms.api.util.model.dto.검색어_검색결과;
 import com.arms.api.util.model.dto.검색어_페이징처리_요청;
 import com.arms.api.util.model.dto.검색어_날짜포함_검색_요청;
-import com.arms.api.util.model.dto.검색어_집계_요청;
+import com.arms.api.util.model.dto.검색어_검색__집계_하위_요청;
 import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,7 +95,7 @@ public class 검색_컨트롤러 {
                                                                   @RequestParam(value = "from",required = false) String 시작_날짜,
                                                                   @RequestParam(value = "to",  required = false) String 끝_날짜) {
         log.info("[엘라스틱_지라이슈_대시보드_컨트롤러 :: 검색엔진_플루언트디_로그네임_집계_top5]");
-        검색어_집계_요청 집계_요청 = new 검색어_집계_요청();
+        검색어_검색__집계_하위_요청 집계_요청 = new 검색어_검색__집계_하위_요청();
         집계_요청.set검색어(검색어);
         집계_요청.set시작_날짜(시작_날짜);
         집계_요청.set끝_날짜(끝_날짜);
@@ -114,7 +114,7 @@ public class 검색_컨트롤러 {
                                                                 @RequestParam(value = "from",required = false) String 시작_날짜,
                                                                 @RequestParam(value = "to",  required = false) String 끝_날짜) {
         log.info("[엘라스틱_지라이슈_대시보드_컨트롤러 :: 검색엔진_플루언트디_로그네임_집계_top5]");
-        검색어_집계_요청 집계_요청 = new 검색어_집계_요청();
+        검색어_검색__집계_하위_요청 집계_요청 = new 검색어_검색__집계_하위_요청();
         집계_요청.set검색어(검색어);
         집계_요청.set시작_날짜(시작_날짜);
         집계_요청.set끝_날짜(끝_날짜);

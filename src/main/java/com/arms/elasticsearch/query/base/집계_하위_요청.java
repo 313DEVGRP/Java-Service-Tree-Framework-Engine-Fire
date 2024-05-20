@@ -9,9 +9,9 @@ import lombok.Setter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class 하위_집계 {
-    private String 별칭;
-    private String 필드명;
+public class 집계_하위_요청 {
+    private String 하위_필드명_별칭;
+    private String 하위_필드명;
     @Builder.Default
     private boolean 결과_갯수_기준_오름차순 = false;
     @Builder.Default
