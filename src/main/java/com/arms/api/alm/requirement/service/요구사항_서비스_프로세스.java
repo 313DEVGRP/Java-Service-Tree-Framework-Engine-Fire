@@ -2,11 +2,11 @@ package com.arms.api.alm.requirement.service;
 
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
-import com.arms.api.util.model.dto.지라이슈_일반_집계_요청;
+import com.arms.api.util.model.dto.지라이슈_기본_집계_요청;
 import com.arms.api.util.model.dto.지라이슈_제품_및_제품버전_집계_요청;
 import com.arms.api.util.model.enums.IsReqType;
 import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.base.일반_집계_요청;
+import com.arms.elasticsearch.query.base.기본_집계_요청;
 import com.arms.elasticsearch.query.base.하위_집계;
 import com.arms.elasticsearch.query.base.하위_집계_요청;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
@@ -42,7 +42,7 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
         EsQuery esQuery
             = new EsQueryBuilder().bool(new MustTermQuery("pdServiceId", 제품서비스_아이디));
 
-        일반_집계_요청 일반_집계_요청 = new 일반_집계_요청() {};
+        기본_집계_요청 일반_집계_요청 = new 기본_집계_요청() {};
         일반_집계_요청.set메인그룹필드("assignee.assignee_displayName.keyword");
         일반_집계_요청.set컨텐츠보기여부(false);
 
@@ -84,7 +84,7 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
                          new TermsQueryFilter("pdServiceId", Optional.ofNullable(제품서비스_아이디).filter(a->a!=null&&a>9L).map(a->List.of(a)).orElse(null))
                         ,new TermsQueryFilter("pdServiceVersions", Arrays.stream(버전_아이디들).filter(a->a!=null&&a>9L).collect(toList()))
                 );
-        지라이슈_일반_집계_요청 지라이슈_일반_집계_요청 = new 지라이슈_일반_집계_요청();
+        지라이슈_기본_집계_요청 지라이슈_일반_집계_요청 = new 지라이슈_기본_집계_요청();
         지라이슈_일반_집계_요청.set메인그룹필드("status.status_name.keyword");
         지라이슈_일반_집계_요청.set컨텐츠보기여부(false);
         버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(하위_계층_집계_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery).생성());

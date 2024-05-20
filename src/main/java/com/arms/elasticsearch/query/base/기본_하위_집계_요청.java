@@ -7,7 +7,7 @@ import java.util.List;
 
 @Setter
 @Getter
-public abstract class 메트릭_집계_요청 extends 일반_검색_요청 {
+public abstract class 기본_하위_집계_요청 extends 기본_검색_요청 {
 	private String 메인_그룹_필드;
 	private List<String> 하위_그룹_필드들;
 	private boolean 컨텐츠보기여부;

@@ -72,7 +72,7 @@ public class 요구사항_분석_컨트롤러 {
     @GetMapping("/normal-version/{pdServiceId}")
     public ResponseEntity<버킷_집계_결과_목록_합계> 일반_버전필터_검색(@PathVariable Long pdServiceId,
                                                      @RequestParam List<Long> pdServiceVersionLinks,
-                                                     지라이슈_일반_집계_요청 지라이슈_일반_집계_요청) {
+                                                     지라이슈_기본_집계_요청 지라이슈_일반_집계_요청) {
         EsQuery esQuery
             = new EsQueryBuilder()
                 .bool(
@@ -88,7 +88,7 @@ public class 요구사항_분석_컨트롤러 {
     @GetMapping("/normal-version-only/{pdServiceId}")
     public ResponseEntity<버킷_집계_결과_목록_합계> 일반_버전필터_집계(@PathVariable Long pdServiceId,
                                                      @RequestParam List<Long> pdServiceVersionLinks,
-                                                     지라이슈_일반_집계_요청 지라이슈_일반_집계_요청) {
+                                                     지라이슈_기본_집계_요청 지라이슈_일반_집계_요청) {
         EsQuery esQuery
             = new EsQueryBuilder()
                 .bool(
@@ -104,7 +104,7 @@ public class 요구사항_분석_컨트롤러 {
     public ResponseEntity<버킷_집계_결과_목록_합계> 일반_버전_및_작업자_필터_검색(@PathVariable Long pdServiceId,
                                                             @RequestParam List<Long> pdServiceVersionLinks,
                                                             @RequestParam List<String> mailAddressList,
-                                                            지라이슈_일반_집계_요청 지라이슈_일반_집계_요청) {
+                                                            지라이슈_기본_집계_요청 지라이슈_일반_집계_요청) {
         EsQuery esQuery
                 = new EsQueryBuilder()
                 .bool(  new TermsQueryFilter("assignee.assignee_emailAddress.keyword", mailAddressList),

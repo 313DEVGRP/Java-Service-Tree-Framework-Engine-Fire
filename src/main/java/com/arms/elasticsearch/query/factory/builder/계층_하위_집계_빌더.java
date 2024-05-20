@@ -1,9 +1,8 @@
-package com.arms.elasticsearch.query.builder;
+package com.arms.elasticsearch.query.factory.builder;
 
 import com.arms.elasticsearch.query.base.하위_집계;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.BucketOrder;
 
 import java.util.List;
 import java.util.Optional;

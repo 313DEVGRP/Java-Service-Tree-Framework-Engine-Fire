@@ -1,6 +1,6 @@
 package com.arms.api.alm.dashboard.controller;
 
-import com.arms.api.util.model.dto.지라이슈_일반_집계_요청;
+import com.arms.api.util.model.dto.지라이슈_기본_집계_요청;
 import com.arms.api.util.model.dto.트리맵_집계_요청;
 import com.arms.api.util.model.vo.Worker;
 import com.arms.elasticsearch.query.EsQuery;
@@ -34,7 +34,7 @@ public class 지라이슈_대시보드_컨트롤러 {
 
     // Dashboard
     @GetMapping("/exclusion-isreq-normal/{pdServiceId}")
-    public ResponseEntity<버킷_집계_결과_목록_합계> 요구사항여부제외_일반_검색(@PathVariable Long pdServiceId, 지라이슈_일반_집계_요청 지라이슈_일반_집계_요청) {
+    public ResponseEntity<버킷_집계_결과_목록_합계> 요구사항여부제외_일반_검색(@PathVariable Long pdServiceId, 지라이슈_기본_집계_요청 지라이슈_일반_집계_요청) {
 
         EsQuery esQuery
                 = new EsQueryBuilder()
@@ -46,7 +46,7 @@ public class 지라이슈_대시보드_컨트롤러 {
 
     // Dashboard, Detail_Dashboard
     @GetMapping("/normal/{pdServiceId}")
-    public ResponseEntity<버킷_집계_결과_목록_합계> 일반_검색(@PathVariable Long pdServiceId, 지라이슈_일반_집계_요청 지라이슈_일반_집계_요청) {
+    public ResponseEntity<버킷_집계_결과_목록_합계> 일반_검색(@PathVariable Long pdServiceId, 지라이슈_기본_집계_요청 지라이슈_일반_집계_요청) {
 
         EsQuery esQuery
             = new EsQueryBuilder()

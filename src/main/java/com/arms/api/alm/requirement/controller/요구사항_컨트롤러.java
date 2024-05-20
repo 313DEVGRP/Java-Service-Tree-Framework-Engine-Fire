@@ -3,7 +3,7 @@ package com.arms.api.alm.requirement.controller;
 
 import com.arms.api.alm.requirement.service.요구사항_서비스;
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
-import com.arms.api.util.model.dto.지라이슈_일반_집계_요청;
+import com.arms.api.util.model.dto.지라이슈_기본_집계_요청;
 import com.arms.api.util.model.dto.지라이슈_제품_및_제품버전_집계_요청;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
@@ -28,7 +28,7 @@ public class 요구사항_컨트롤러 {
 
     // Requirement - ReqStatus
     @PostMapping("/requirement-linkedissue/{pdServiceId}")
-    public ResponseEntity<List<지라이슈_엔티티>> 제품별_요구사항_연결이슈_조회(@PathVariable Long pdServiceId, 지라이슈_일반_집계_요청 지라이슈_일반_집계_요청) {
+    public ResponseEntity<List<지라이슈_엔티티>> 제품별_요구사항_연결이슈_조회(@PathVariable Long pdServiceId, 지라이슈_기본_집계_요청 지라이슈_일반_집계_요청) {
 
         EsQuery esQuery
                 = new EsQueryBuilder()

@@ -6,8 +6,8 @@ import com.arms.api.util.model.dto.검색어_날짜포함_검색_요청;
 import com.arms.api.util.model.dto.검색어_집계_요청;
 import com.arms.api.alm.fluentd.model.플루언트디_엔티티;
 import com.arms.elasticsearch.query.*;
-import com.arms.elasticsearch.query.base.일반_검색_요청;
-import com.arms.elasticsearch.query.base.정렬_필드_지정;
+import com.arms.elasticsearch.query.base.기본_검색_요청;
+import com.arms.elasticsearch.query.base.기본_정렬_요청;
 import com.arms.elasticsearch.query.factory.creator.쿼리_생성기;
 import com.arms.elasticsearch.query.filter.QueryStringFilter;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustQueryString;
@@ -57,7 +57,7 @@ public class 플루언트디_서비스_프로세스 implements 플루언트디_�
         EsQuery esQuery = new EsQueryBuilder()
             .sort(new EsSortQuery(
                 List.of(
-                    정렬_필드_지정.builder().필드("@timestamp").정렬기준("desc").build()
+                    기본_정렬_요청.builder().필드("@timestamp").정렬기준("desc").build()
                 )
             ))
             .bool(new MustQueryString(검색어_기본_검색_요청.get검색어()));
@@ -84,7 +84,7 @@ public class 플루언트디_서비스_프로세스 implements 플루언트디_�
                         new QueryStringFilter(검색어_날짜포함_검색_요청.get검색어()))
                 .sort(new EsSortQuery(
                     List.of(
-                            정렬_필드_지정.builder().필드("@timestamp").정렬기준("desc").build()
+                            기본_정렬_요청.builder().필드("@timestamp").정렬기준("desc").build()
                     )
                 ));
         SearchHits<플루언트디_엔티티> 플루언트디_검색결과 = 플루언트디_저장소.search(일반_검색_쿼리_생성기.of(검색어_날짜포함_검색_요청, esQuery).생성());
@@ -124,10 +124,10 @@ public class 플루언트디_서비스_프로세스 implements 플루언트디_�
                 .bool(
                         new TermsQueryFilter("id", "313")
                 );
-        일반_검색_요청 일반_검색_요청 = new 일반_검색_요청() {
+        기본_검색_요청 기본_검색_요청 = new 기본_검색_요청() {
         };
-        일반_검색_요청.set페이지_처리_여부(false);
-        일반_검색_요청.set크기(1);
-        플루언트디_저장소.normalSearch(일반_검색_쿼리_생성기.of(일반_검색_요청,esQuery).생성());
+        기본_검색_요청.set페이지_처리_여부(false);
+        기본_검색_요청.set크기(1);
+        플루언트디_저장소.normalSearch(일반_검색_쿼리_생성기.of(기본_검색_요청,esQuery).생성());
     }
 }

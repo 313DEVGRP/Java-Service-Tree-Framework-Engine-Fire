@@ -6,7 +6,7 @@ import com.arms.api.util.model.dto.검색어_페이징처리_요청;
 import com.arms.api.util.model.dto.검색어_날짜포함_검색_요청;
 import com.arms.api.util.model.dto.검색어_집계_요청;
 import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.base.정렬_필드_지정;
+import com.arms.elasticsearch.query.base.기본_정렬_요청;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.EsQueryString;
 import com.arms.elasticsearch.query.esquery.EsSortQuery;
@@ -65,7 +65,7 @@ public class 지라이슈_검색_서비스_프로세스 implements 지라이슈_
                         new QueryStringFilter(검색어_날짜포함_검색_요청.get검색어()))
                 .sort(new EsSortQuery(
                         List.of(
-                                정렬_필드_지정.builder().필드("@timestamp").정렬기준("desc").build()
+                                기본_정렬_요청.builder().필드("@timestamp").정렬기준("desc").build()
                         )
                 ));
         SearchHits<지라이슈_엔티티> 지라이슈_검색결과= 지라이슈_저장소.search(일반_검색_쿼리_생성기.of(검색어_날짜포함_검색_요청, esQuery).생성());

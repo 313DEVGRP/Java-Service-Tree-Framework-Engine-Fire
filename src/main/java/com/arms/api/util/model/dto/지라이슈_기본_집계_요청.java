@@ -10,7 +10,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class 지라이슈_일반_집계_요청 extends 하위_집계_요청 {
+public class 지라이슈_기본_집계_요청 extends 하위_집계_요청 {
 
 	private IsReqType isReqType;
 	private Boolean isReq;
