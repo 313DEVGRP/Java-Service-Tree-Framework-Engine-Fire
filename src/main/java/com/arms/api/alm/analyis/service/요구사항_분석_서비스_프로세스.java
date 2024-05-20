@@ -59,7 +59,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
     }
 
     @Override
-    public List<버킷_집계_결과> 제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
+    public List<버킷_집계_결과> 제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_검색__집계_하위_요청 지라이슈_제품_및_제품버전_집계_요청) {
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new MustTermQuery("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
                         new MustTermQuery("isReq", 지라이슈_제품_및_제품버전_집계_요청.getIsReqType().isNotAllAndIsReq()),
@@ -139,7 +139,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
 
 
     @Override
-    public Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항_지라이슈상태_주별_집계(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
+    public Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항_지라이슈상태_주별_집계(지라이슈_제품_및_제품버전_검색__집계_하위_요청 지라이슈_제품_및_제품버전_집계_요청) {
         LocalDate now = LocalDate.now(ZoneId.of("UTC"));
         LocalDate monthAgo = now.minusWeeks(4);
 
@@ -159,7 +159,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                         new TermsQueryFilter("pdServiceVersions", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
                         new RangeQueryFilter("created", monthAgo, now, "fromto")
                 );
-        하위_집계_요청 하위_집계_요청 = new 하위_집계_요청(){};
+        기본_검색_집계_하위_요청 하위_집계_요청 = new 기본_검색_집계_하위_요청(){};
         하위_집계_요청.set메인그룹필드("created");
         하위_집계_요청.set하위그룹필드들(List.of("status.status_name.keyword","isReq"));
 
@@ -203,7 +203,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                         new TermsQueryFilter("pdServiceVersions", pdServiceVersionLinks),
                         RangeQueryFilter.of("created").lt(monthAgo)
                 );
-        기본_집계_요청 일반_집계_요청 = new 기본_집계_요청(){};
+        기본_검색_집계_요청 일반_집계_요청 = new 기본_검색_집계_요청(){};
         일반_집계_요청.set메인그룹필드("status.status_name.keyword");
         버킷_집계_결과_목록_합계 searchResponseForTotalIssues = 지라이슈_저장소.버킷집계(집계_쿼리_생성기.of(일반_집계_요청,issueEsQuery).생성());
         Long totalIssuesCount = searchResponseForTotalIssues.get전체합계();
@@ -260,7 +260,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
     }
 
     @Override
-    public Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> 지라이슈_기준일자별_제품_및_제품버전_집계검색(지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청) {
+    public Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> 지라이슈_기준일자별_제품_및_제품버전_집계검색(지라이슈_일자별_제품_및_제품버전_검색__집계_하위_요청 지라이슈_일자별_제품_및_제품버전_집계_요청) {
 
         String 시작일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get시작일();
         String 종료일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get종료일();
@@ -278,7 +278,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
 
         EsQueryBuilder esQuery = new EsQueryBuilder().bool(esBoolQueries);
 
-        하위_집계_요청 하위_집계_요청 = new 하위_집계_요청(){};
+        기본_검색_집계_하위_요청 하위_집계_요청 = new 기본_검색_집계_하위_요청(){};
         하위_집계_요청.set메인그룹필드(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준());
 
         List<String> 하위그룹필드들 = new ArrayList<>();
@@ -307,7 +307,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         return 검색결과;
     }
 
-    private 일자별_요구사항_연결된이슈_생성개수_및_상태데이터 일별_생성개수_및_상태_데이터생성(버킷_집계_결과 결과,지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청) {
+    private 일자별_요구사항_연결된이슈_생성개수_및_상태데이터 일별_생성개수_및_상태_데이터생성(버킷_집계_결과 결과, 지라이슈_일자별_제품_및_제품버전_검색__집계_하위_요청 지라이슈_일자별_제품_및_제품버전_집계_요청) {
         Map<String, Long> 요구사항여부결과 = new HashMap<>();
         Map<String, Map<String, Long>> 상태목록결과 = new HashMap<>();
 
@@ -340,7 +340,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
     }
 
     @Override
-    public List<지라이슈_엔티티> 지라이슈_기준일자별_제품_및_제품버전_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청){
+    public List<지라이슈_엔티티> 지라이슈_기준일자별_제품_및_제품버전_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_검색__집계_하위_요청 지라이슈_일자별_제품_및_제품버전_집계_요청){
 
         String 시작일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get시작일();
         String 종료일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get종료일();
@@ -370,7 +370,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
 
     @Override
     public Map<Long, Map<String, Map<String,List<요구사항_별_업데이트_데이터>>>> 요구사항별_업데이트_능선_데이터(
-            지라이슈_일자별_제품_및_제품버전_집계_요청 지라이슈_일자별_제품_및_제품버전_집계_요청){
+            지라이슈_일자별_제품_및_제품버전_검색__집계_하위_요청 지라이슈_일자별_제품_및_제품버전_집계_요청){
 
         String 시작일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get시작일();
         String 종료일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get종료일();
@@ -450,7 +450,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
     }
 
     @Override
-    public List<버킷_집계_결과> 제품_버전별_요구사항별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청 지라이슈_제품_및_제품버전_집계_요청) {
+    public List<버킷_집계_결과> 제품_버전별_요구사항별_담당자_목록(지라이슈_제품_및_제품버전_검색__집계_하위_요청 지라이슈_제품_및_제품버전_집계_요청) {
 
         boolean 요구사항여부 = false;
         if (지라이슈_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT) {
@@ -467,24 +467,24 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                         new ExistsQueryFilter("assignee")
                 );
 
-        하위_집계_요청 하위_집계_요청 = new 하위_집계_요청() {};
+        기본_검색_집계_하위_요청 하위_집계_요청 = new 기본_검색_집계_하위_요청() {};
 
-        하위_집계_요청.set_하위_집계_필드들(
+        하위_집계_요청.set__집계_하위_요청_필드들(
             List.of(
-                하위_집계.builder()
-                        .별칭(요구사항여부?"requirement":"parentRequirement")
-                        .필드명(요구사항여부?"key":"parentReqKey")
+                집계_하위_요청.builder()
+                        .하위_필드명_별칭(요구사항여부?"requirement":"parentRequirement")
+                        .하위_필드명(요구사항여부?"key":"parentReqKey")
                         .크기(지라이슈_제품_및_제품버전_집계_요청.get크기())
                         .build(),
-                하위_집계.builder()
-                        .별칭("assignees")
-                        .필드명("assignee.assignee_accountId.keyword")
+                집계_하위_요청.builder()
+                        .하위_필드명_별칭("assignees")
+                        .하위_필드명("assignee.assignee_accountId.keyword")
                         .크기(지라이슈_제품_및_제품버전_집계_요청.get크기())
                         .결과_갯수_기준_오름차순(false)
                         .build(),
-                하위_집계.builder()
-                        .별칭("displayNames")
-                        .필드명("assignee.assignee_displayName.keyword")
+                집계_하위_요청.builder()
+                        .하위_필드명_별칭("displayNames")
+                        .하위_필드명("assignee.assignee_displayName.keyword")
                         .크기(지라이슈_제품_및_제품버전_집계_요청.get크기())
                         .build()
             )

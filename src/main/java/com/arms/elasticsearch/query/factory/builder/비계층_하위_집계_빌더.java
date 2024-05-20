@@ -1,6 +1,6 @@
 package com.arms.elasticsearch.query.factory.builder;
 
-import com.arms.elasticsearch.query.base.하위_집계;
+import com.arms.elasticsearch.query.base.집계_하위_요청;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 
@@ -27,11 +27,11 @@ public class 비계층_하위_집계_빌더 implements 하위_집계_빌더<List
      * @return An {@link AggregationBuilder} that can be used to execute the aggregation.
      */
     @Override
-    public List<AggregationBuilder> createAggregation(List<하위_집계> 하위그룹필드, int size) {
+    public List<AggregationBuilder> createAggregation(List<집계_하위_요청> 하위그룹필드, int size) {
         return 하위그룹필드.stream()
             .map(하위필드명->
-                    AggregationBuilders.terms(Optional.ofNullable(하위필드명.get별칭()).orElseGet(()->"group_by_"+하위필드명.get필드명()))
-                        .field(하위필드명.get필드명())
+                    AggregationBuilders.terms(Optional.ofNullable(하위필드명.get하위_필드명_별칭()).orElseGet(()->"group_by_"+하위필드명.get하위_필드명()))
+                        .field(하위필드명.get하위_필드명())
                         .order(count(하위필드명.is결과_갯수_기준_오름차순()))
                         .size(size)).collect(Collectors.toList());
     }

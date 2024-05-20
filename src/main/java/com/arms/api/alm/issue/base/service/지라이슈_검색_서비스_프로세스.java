@@ -4,7 +4,7 @@ import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.util.model.dto.검색어_검색결과;
 import com.arms.api.util.model.dto.검색어_페이징처리_요청;
 import com.arms.api.util.model.dto.검색어_날짜포함_검색_요청;
-import com.arms.api.util.model.dto.검색어_집계_요청;
+import com.arms.api.util.model.dto.검색어_검색__집계_하위_요청;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.base.기본_정렬_요청;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
@@ -78,7 +78,7 @@ public class 지라이슈_검색_서비스_프로세스 implements 지라이슈_
     }
 
     @Override
-    public 버킷_집계_결과_목록_합계 이슈_프로젝트명_집계(검색어_집계_요청 검색어_집계_요청) {
+    public 버킷_집계_결과_목록_합계 이슈_프로젝트명_집계(검색어_검색__집계_하위_요청 검색어_집계_요청) {
         String start_date = null;
         String end_date = null;
         if(검색어_집계_요청.get시작_날짜() != null && !검색어_집계_요청.get시작_날짜().isBlank()) {

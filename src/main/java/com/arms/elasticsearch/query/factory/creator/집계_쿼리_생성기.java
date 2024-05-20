@@ -1,7 +1,7 @@
 package com.arms.elasticsearch.query.factory.creator;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.base.기본_집계_요청;
+import com.arms.elasticsearch.query.base.기본_검색_집계_요청;
 import com.arms.elasticsearch.query.factory.creator.query.일반_집계_쿼리;
 import com.arms.elasticsearch.query.factory.creator.query.집계_쿼리;
 
@@ -16,7 +16,7 @@ public class 집계_쿼리_생성기 implements 쿼리_생성기 {
 		this._집계_쿼리 = _집계_쿼리;
 	}
 
-	public static 쿼리_생성기 of(기본_집계_요청 _일반_집계_쿼리, EsQuery esQuery){
+	public static 쿼리_생성기 of(기본_검색_집계_요청 _일반_집계_쿼리, EsQuery esQuery){
 		return new 집계_쿼리_생성기(일반_집계_쿼리.of(_일반_집계_쿼리,esQuery));
 	}
 

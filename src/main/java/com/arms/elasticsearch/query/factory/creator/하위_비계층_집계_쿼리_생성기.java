@@ -1,7 +1,7 @@
 package com.arms.elasticsearch.query.factory.creator;
 
 import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.base.하위_집계_요청;
+import com.arms.elasticsearch.query.base.기본_검색_집계_하위_요청;
 import com.arms.elasticsearch.query.factory.creator.query.일반_집계_쿼리;
 import com.arms.elasticsearch.query.factory.creator.query.일자별_집계_쿼리;
 import com.arms.elasticsearch.query.factory.creator.query.집계_쿼리;
@@ -20,11 +20,11 @@ public class 하위_비계층_집계_쿼리_생성기 implements 쿼리_생성�
 		this._집계_쿼리 = 집계_쿼리;
 	}
 
-	public static 쿼리_생성기 of(하위_집계_요청 하위_집계_요청, EsQuery esQuery){
+	public static 쿼리_생성기 of(기본_검색_집계_하위_요청 하위_집계_요청, EsQuery esQuery){
 		return new 하위_비계층_집계_쿼리_생성기(일반_집계_쿼리.of(하위_집계_요청, esQuery));
 	}
 
-	public static 쿼리_생성기 week(하위_집계_요청 하위_집계_요청, EsQuery esQuery){
+	public static 쿼리_생성기 week(기본_검색_집계_하위_요청 하위_집계_요청, EsQuery esQuery){
 		return new 하위_비계층_집계_쿼리_생성기(일자별_집계_쿼리.week(하위_집계_요청, esQuery));
 	}
 
@@ -32,7 +32,7 @@ public class 하위_비계층_집계_쿼리_생성기 implements 쿼리_생성�
 		return new 하위_비계층_집계_쿼리_생성기(일자별_집계_쿼리.week(esQuery));
 	}
 
-	public static 쿼리_생성기 day(하위_집계_요청 하위_집계_요청, EsQuery esQuery){
+	public static 쿼리_생성기 day(기본_검색_집계_하위_요청 하위_집계_요청, EsQuery esQuery){
 		return new 하위_비계층_집계_쿼리_생성기(일자별_집계_쿼리.day(하위_집계_요청, esQuery));
 	}
 
