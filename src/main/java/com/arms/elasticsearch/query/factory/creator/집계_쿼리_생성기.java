@@ -4,7 +4,6 @@ import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.base.일반_집계_요청;
 import com.arms.elasticsearch.query.factory.creator.query.일반_집계_쿼리;
 import com.arms.elasticsearch.query.factory.creator.query.집계_쿼리;
-import com.arms.elasticsearch.query.쿼리_생성기;
 
 import lombok.Setter;
 

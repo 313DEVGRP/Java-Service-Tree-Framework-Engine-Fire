@@ -8,6 +8,7 @@ import com.arms.api.alm.fluentd.model.플루언트디_엔티티;
 import com.arms.elasticsearch.query.*;
 import com.arms.elasticsearch.query.base.일반_검색_요청;
 import com.arms.elasticsearch.query.base.정렬_필드_지정;
+import com.arms.elasticsearch.query.factory.creator.쿼리_생성기;
 import com.arms.elasticsearch.query.filter.QueryStringFilter;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustQueryString;
 import com.arms.elasticsearch.query.filter.RangeQueryFilter;
