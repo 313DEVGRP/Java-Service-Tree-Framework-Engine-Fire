@@ -4,8 +4,8 @@ import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.base.기본_검색_집계_요청;
 import com.arms.elasticsearch.query.base.집계_하위_요청;
 import com.arms.elasticsearch.query.base.기본_검색_집계_하위_요청;
-import com.arms.elasticsearch.query.factory.builder.계층_하위_집계_빌더;
-import com.arms.elasticsearch.query.factory.builder.비계층_하위_집계_빌더;
+import com.arms.elasticsearch.query.factory.builder.중첩_집계_포괄_빌더;
+import com.arms.elasticsearch.query.factory.builder.중첩_집계_단일_빌더;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.search.aggregations.support.ValuesSourceAggregationBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
@@ -59,7 +59,7 @@ public class 공통_집계_쿼리 <T extends ValuesSourceAggregationBuilder<T>> 
                 if(!__하위_그룹_필드들.isEmpty()){
                     valuesSourceAggregationBuilder
                         .subAggregation(
-                            new 계층_하위_집계_빌더().createAggregation(__하위_그룹_필드들,하위크기)
+                            new 중첩_집계_포괄_빌더().createAggregation(__하위_그룹_필드들,하위크기)
                         );
                 }
             });
@@ -70,7 +70,7 @@ public class 공통_집계_쿼리 <T extends ValuesSourceAggregationBuilder<T>> 
         Optional.ofNullable(하위_집계들요청)
             .ifPresent(__하위_그룹_필드들->{
                 if(!__하위_그룹_필드들.isEmpty()){
-                    new 비계층_하위_집계_빌더().createAggregation(__하위_그룹_필드들,하위크기)
+                    new 중첩_집계_단일_빌더().createAggregation(__하위_그룹_필드들,하위크기)
                             .forEach(valuesSourceAggregationBuilder::subAggregation);
                 }
             });

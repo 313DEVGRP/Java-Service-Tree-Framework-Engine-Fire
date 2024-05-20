@@ -9,7 +9,7 @@ import java.util.Optional;
 
 import static org.elasticsearch.search.aggregations.BucketOrder.*;
 
-public class 계층_하위_집계_빌더 implements 하위_집계_빌더<AggregationBuilder>{
+public class 중첩_집계_포괄_빌더 implements 중첩_집계_빌더<AggregationBuilder> {
 
     @Override
     public AggregationBuilder createAggregation(List<집계_하위_요청> 하위그룹필드, int size) {

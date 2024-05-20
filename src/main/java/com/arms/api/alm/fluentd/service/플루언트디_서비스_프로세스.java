@@ -14,7 +14,7 @@ import com.arms.elasticsearch.query.esquery.esboolquery.must.MustQueryString;
 import com.arms.elasticsearch.query.filter.RangeQueryFilter;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.factory.creator.old.일반_검색_쿼리_생성기;
-import com.arms.elasticsearch.query.factory.creator.하위_계층_집계_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.creator.중첩_집계_포괄_쿼리_생성기;
 import com.arms.api.alm.fluentd.repository.*;
 import com.arms.elasticsearch.query.esquery.EsSortQuery;
 
@@ -112,7 +112,7 @@ public class 플루언트디_서비스_프로세스 implements 플루언트디_�
                 .bool(new RangeQueryFilter("@timestamp", start_date, end_date,"fromto"),
                       new QueryStringFilter(검색어_집계_요청.get검색어()));
 
-        버킷_집계_결과_목록_합계 집계_결과 = this.전체_집계결과_가져오기(하위_계층_집계_쿼리_생성기.of(검색어_집계_요청, esQuery));
+        버킷_집계_결과_목록_합계 집계_결과 = this.전체_집계결과_가져오기(중첩_집계_포괄_쿼리_생성기.of(검색어_집계_요청, esQuery));
         return 집계_결과;
     }
 

@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 import static org.elasticsearch.search.aggregations.BucketOrder.count;
 
-public class 비계층_하위_집계_빌더 implements 하위_집계_빌더<List<AggregationBuilder>>{
+public class 중첩_집계_단일_빌더 implements 중첩_집계_빌더<List<AggregationBuilder>> {
 
 
     /**
