@@ -1,7 +1,7 @@
 package com.arms.elasticsearch.query.factory.creator.old;
 
 import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.base.삭제_예정_하위_집계_요청;
+import com.arms.elasticsearch.query.base.기본_검색_집계_하위_요청;
 import com.arms.elasticsearch.query.factory.creator.쿼리_생성기;
 
 import lombok.Getter;
@@ -28,27 +28,27 @@ import java.util.function.Function;
 	private final NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
 	private final TermsAggregationBuilder termsAggregationBuilder;
 
-	private 일반_메트릭_집계_쿼리_생성기(삭제_예정_하위_집계_요청 삭제_예정_하위_집계_요청, EsQuery esQuery){
+	private 일반_메트릭_집계_쿼리_생성기(기본_검색_집계_하위_요청 기본_검색_집계_하위_요청, EsQuery esQuery){
 		this.termsAggregationBuilder
-			= AggregationBuilders.terms("group_by_" + 삭제_예정_하위_집계_요청.get메인_그룹_필드())
-				.field(삭제_예정_하위_집계_요청.get메인_그룹_필드());
+			= AggregationBuilders.terms("group_by_" + 기본_검색_집계_하위_요청.get메인그룹필드())
+				.field(기본_검색_집계_하위_요청.get메인그룹필드());
 
 		this.nativeSearchQueryBuilder.addAggregation(
 				this.termsAggregationBuilder
 		);
 
-		Optional.of(삭제_예정_하위_집계_요청.get하위크기()).filter(a->a>0)
+		Optional.of(기본_검색_집계_하위_요청.get하위크기()).filter(a->a>0)
 			.ifPresent(a->{
-				this.termsAggregationBuilder.size(삭제_예정_하위_집계_요청.get하위크기());
+				this.termsAggregationBuilder.size(기본_검색_집계_하위_요청.get하위크기());
 			});
 
-		this.메인_그룹_필드 = 삭제_예정_하위_집계_요청.get메인_그룹_필드();
-		this.그룹_필드들 = 삭제_예정_하위_집계_요청.get하위_그룹_필드들();
+		this.메인_그룹_필드 = 기본_검색_집계_하위_요청.get메인그룹필드();
+		this.그룹_필드들 = 기본_검색_집계_하위_요청.get하위그룹필드들();
 		this.esQuery = esQuery;
 	}
 
-	public static 쿼리_생성기 of(삭제_예정_하위_집계_요청 삭제_예정_하위_집계_요청, EsQuery esQuery){
-		return new 일반_메트릭_집계_쿼리_생성기(삭제_예정_하위_집계_요청, esQuery);
+	public static 쿼리_생성기 of(기본_검색_집계_하위_요청 기본_검색_집계_하위_요청, EsQuery esQuery){
+		return new 일반_메트릭_집계_쿼리_생성기(기본_검색_집계_하위_요청, esQuery);
 	}
 
 	@Override
