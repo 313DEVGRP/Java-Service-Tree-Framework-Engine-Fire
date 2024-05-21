@@ -16,6 +16,4 @@ public class 집계_하위_요청 {
     private boolean 결과_갯수_기준_오름차순 = false;
     @Builder.Default
     private int 크기 = 1000;
-
-
 }

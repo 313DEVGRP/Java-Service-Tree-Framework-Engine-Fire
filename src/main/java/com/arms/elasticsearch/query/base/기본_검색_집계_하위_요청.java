@@ -9,7 +9,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public abstract class 기본_검색_집계_하위_요청 extends 기본_검색_집계_요청 {
+public class 기본_검색_집계_하위_요청 extends 기본_검색_집계_요청 {
 	private List<String> 하위그룹필드들 = new ArrayList<>();
 	private List<집계_하위_요청> __집계_하위_요청_필드들 = new ArrayList<>();
 	public List<집계_하위_요청> to_하위_집계_필드들(){
