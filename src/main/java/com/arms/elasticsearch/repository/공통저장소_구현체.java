@@ -9,6 +9,7 @@ import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.메트릭_집계_결과_목록_합계;
 import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermsQueryBuilder;
@@ -18,6 +19,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.NoSuchIndexException;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.core.*;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
@@ -438,11 +440,17 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
     public SearchHits<T> search(Query query) {
         try{
             return operations.search(query, entityClass);
+        }catch (NoSuchIndexException e){
+            if(e.getMessage()!=null && e.getMessage().contains("no such index")){
+                return null;
+            }
+            throw e;
         }catch (Exception e){
             log.error(e.getMessage());
             throw e;
         }
     }
+
     @Override
     public Set<String> findIndexNamesByAlias(IndexCoordinates indexCoordinates) {
         IndexOperations indexOperations = operations.indexOps(indexCoordinates);
