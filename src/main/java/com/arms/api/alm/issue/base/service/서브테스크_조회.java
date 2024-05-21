@@ -6,7 +6,7 @@ import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.base.기본_검색_요청;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
-import com.arms.elasticsearch.query.factory.creator.old.일반_검색_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.creator.일반_검색_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

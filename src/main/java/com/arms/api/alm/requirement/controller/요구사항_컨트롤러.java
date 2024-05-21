@@ -8,7 +8,7 @@ import com.arms.api.util.model.dto.지라이슈_제품_및_제품버전_검색__
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
-import com.arms.elasticsearch.query.factory.creator.old.일반_검색_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.creator.일반_검색_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.버킷_집계_결과;
 import org.springframework.beans.factory.annotation.Autowired;

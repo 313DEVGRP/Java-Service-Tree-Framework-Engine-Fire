@@ -5,7 +5,7 @@ import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.base.기본_검색_요청;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
-import com.arms.elasticsearch.query.factory.creator.old.일반_검색_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.creator.일반_검색_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.repository.공통저장소;
 import org.springframework.stereotype.Repository;

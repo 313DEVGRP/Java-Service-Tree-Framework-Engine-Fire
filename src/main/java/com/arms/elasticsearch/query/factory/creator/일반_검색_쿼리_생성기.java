@@ -1,8 +1,7 @@
-package com.arms.elasticsearch.query.factory.creator.old;
+package com.arms.elasticsearch.query.factory.creator;
 
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.base.기본_검색_요청;
-import com.arms.elasticsearch.query.factory.creator.쿼리_생성기;
 
 import lombok.Getter;
 import lombok.Setter;

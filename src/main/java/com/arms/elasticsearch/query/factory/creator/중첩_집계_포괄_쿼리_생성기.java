@@ -10,6 +10,7 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 
 @Setter
 public class 중첩_집계_포괄_쿼리_생성기 implements 쿼리_생성기 {
+
 	private final 집계_쿼리 _집계_쿼리;
 
 	private 중첩_집계_포괄_쿼리_생성기(집계_쿼리 _집계_쿼리){
