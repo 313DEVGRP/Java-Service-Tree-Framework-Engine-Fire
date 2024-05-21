@@ -10,8 +10,7 @@ import java.util.stream.Collectors;
 
 import static org.elasticsearch.search.aggregations.BucketOrder.count;
 
-public class 중첩_집계_단일_빌더 implements 중첩_집계_빌더<List<AggregationBuilder>> {
-
+public class 중첩_집계_단일_빌더 {
 
     /**
      * 인자로 받은 하위_그룹필드들 값을 모두 메인 집계 하위에 추가하고 싶은 케이스 대응
@@ -26,7 +25,7 @@ public class 중첩_집계_단일_빌더 implements 중첩_집계_빌더<List<Ag
      * @param size The maximum number of unique sub-group field values to be included in the aggregation.
      * @return An {@link AggregationBuilder} that can be used to execute the aggregation.
      */
-    @Override
+
     public List<AggregationBuilder> createAggregation(List<집계_하위_요청> 하위그룹필드, int size) {
         return 하위그룹필드.stream()
             .map(하위필드명->

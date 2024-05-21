@@ -13,7 +13,7 @@ import com.arms.elasticsearch.query.filter.QueryStringFilter;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustQueryString;
 import com.arms.elasticsearch.query.filter.RangeQueryFilter;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
-import com.arms.elasticsearch.query.factory.creator.old.일반_검색_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.creator.일반_검색_쿼리_생성기;
 import com.arms.elasticsearch.query.factory.creator.중첩_집계_포괄_쿼리_생성기;
 import com.arms.api.alm.fluentd.repository.*;
 import com.arms.elasticsearch.query.esquery.EsSortQuery;

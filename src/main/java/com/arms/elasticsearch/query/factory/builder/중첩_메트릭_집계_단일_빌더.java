@@ -1,0 +1,22 @@
+package com.arms.elasticsearch.query.factory.builder;
+
+import com.arms.elasticsearch.query.base.집계_하위_요청;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class 중첩_메트릭_집계_단일_빌더  {
+
+    public List<AggregationBuilder> createAggregation(List<집계_하위_요청> 하위그룹필드, int size) {
+          return 하위그룹필드.stream()
+                .flatMap(하위필드명 -> Stream.of(
+                      AggregationBuilders.avg("avg_by_" + 하위필드명.get하위_필드명()).field(하위필드명.get하위_필드명())
+                    , AggregationBuilders.max("max_by_" + 하위필드명.get하위_필드명()).field(하위필드명.get하위_필드명())
+                    , AggregationBuilders.min("min_by_" + 하위필드명.get하위_필드명()).field(하위필드명.get하위_필드명()))
+                ).collect(Collectors.toList());
+    }
+
+}

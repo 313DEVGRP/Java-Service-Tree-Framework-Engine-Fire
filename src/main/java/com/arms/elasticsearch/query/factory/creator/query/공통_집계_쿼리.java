@@ -4,6 +4,7 @@ import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.base.기본_검색_집계_요청;
 import com.arms.elasticsearch.query.base.집계_하위_요청;
 import com.arms.elasticsearch.query.base.기본_검색_집계_하위_요청;
+import com.arms.elasticsearch.query.factory.builder.중첩_메트릭_집계_단일_빌더;
 import com.arms.elasticsearch.query.factory.builder.중첩_집계_포괄_빌더;
 import com.arms.elasticsearch.query.factory.builder.중첩_집계_단일_빌더;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -46,10 +47,10 @@ public class 공통_집계_쿼리 <T extends ValuesSourceAggregationBuilder<T>> 
         });
 
         Optional.ofNullable(boolQuery)
-                .ifPresent(query-> this.nativeSearchQueryBuilder.withQuery(boolQuery));
+            .ifPresent(query-> this.nativeSearchQueryBuilder.withQuery(boolQuery));
 
         Optional.ofNullable(fieldSortBuilders)
-                .ifPresent(sorts -> sorts.forEach(nativeSearchQueryBuilder::withSort));
+            .ifPresent(sorts -> sorts.forEach(nativeSearchQueryBuilder::withSort));
     }
 
     @Override
@@ -74,6 +75,18 @@ public class 공통_집계_쿼리 <T extends ValuesSourceAggregationBuilder<T>> 
                             .forEach(valuesSourceAggregationBuilder::subAggregation);
                 }
             });
+    }
+
+    @Override
+    public void 형제_하위_메트릭_집계_빌더_적용() {
+        Optional.ofNullable(하위_집계들요청)
+            .ifPresent(__하위_그룹_필드들->{
+                if(!__하위_그룹_필드들.isEmpty()){
+                    new 중첩_메트릭_집계_단일_빌더().createAggregation(__하위_그룹_필드들,하위크기)
+                            .forEach(valuesSourceAggregationBuilder::subAggregation);
+                }
+            });
+
     }
 
     @Override
