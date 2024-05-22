@@ -6,7 +6,7 @@ import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.base.기본_검색_요청;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
-import com.arms.elasticsearch.query.factory.creator.일반_검색_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.creator.기본_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ public class 서브테스크_조회 {
                 ,new TermsQueryFilter("jira_server_id",서버_아이디)
             );
 
-        return 지라이슈_저장소.normalSearch(일반_검색_쿼리_생성기.of(new 기본_검색_요청() {}, esQuery).생성());
+        return 지라이슈_저장소.normalSearch(기본_쿼리_생성기.기본검색(new 기본_검색_요청() {}, esQuery).생성());
     }
 
 

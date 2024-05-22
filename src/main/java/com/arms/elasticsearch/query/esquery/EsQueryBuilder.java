@@ -4,6 +4,7 @@ import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.filter.RangeQueryFilter;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 
 public class EsQueryBuilder extends EsQuery {
@@ -24,6 +25,16 @@ public class EsQueryBuilder extends EsQuery {
 
 	public EsQueryBuilder queryString(EsQueryString esQueryString){
 		setQuery(new ParameterizedTypeReference<>() {}, esQueryString.queryString());
+		return this;
+	}
+
+	public EsQueryBuilder highlight(EsHighlight esHighlight){
+		setQuery(new ParameterizedTypeReference<>() {}, esHighlight.getHighlight());
+		return this;
+	}
+
+	public EsQueryBuilder highlightAll(){
+		setQuery(new ParameterizedTypeReference<>() {}, new EsHighlight().getHighlight());
 		return this;
 	}
 
