@@ -12,7 +12,7 @@ import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.EsSortQuery;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
 import com.arms.elasticsearch.query.factory.creator.기본_쿼리_생성기;
-import com.arms.elasticsearch.query.factory.creator.중첩_집계_포괄_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.creator.중첩_집계_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
 import com.arms.elasticsearch.query.filter.RangeQueryFilter;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
@@ -75,7 +75,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         지라이슈_제품_및_제품버전_집계_요청.set결과_갯수_기준_오름차순(false);
 
         버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계
-                = 집계결과_가져오기(중첩_집계_포괄_쿼리_생성기.of(지라이슈_제품_및_제품버전_집계_요청, esQuery));
+                = 집계결과_가져오기(중첩_집계_쿼리_생성기.포괄(지라이슈_제품_및_제품버전_집계_요청, esQuery));
 
         List<버킷_집계_결과> 버전검색결과 = 버킷_집계_결과_목록_합계
                 .get검색결과().get("group_by_"+지라이슈_제품_및_제품버전_집계_요청.get메인그룹필드());
@@ -163,7 +163,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         하위_집계_요청.set메인그룹필드("created");
         하위_집계_요청.set하위그룹필드들(List.of("status.status_name.keyword"));
 
-        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(중첩_집계_포괄_쿼리_생성기.week(하위_집계_요청,esQuery).생성());
+        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(중첩_집계_쿼리_생성기.포괄_주별(하위_집계_요청,esQuery).생성());
 
         List<버킷_집계_결과> aggregationByWeek = 버킷_집계_결과_목록_합계.get검색결과().get("date_group_by_"+하위_집계_요청.get메인그룹필드());
 
@@ -292,7 +292,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                 });
 
         하위_집계_요청.set하위그룹필드들(하위그룹필드들);
-        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(중첩_집계_포괄_쿼리_생성기.day(하위_집계_요청,esQuery).생성());
+        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(중첩_집계_쿼리_생성기.포괄_일별(하위_집계_요청,esQuery).생성());
         List<버킷_집계_결과> aggregationByDay = 버킷_집계_결과_목록_합계.get검색결과().get("date_group_by_"+지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준());
 
         Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> 검색결과 = aggregationByDay.stream()
@@ -491,7 +491,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         );
 
         하위_집계_요청.set메인그룹필드("pdServiceVersions");
-        버킷_집계_결과_목록_합계 _버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(중첩_집계_포괄_쿼리_생성기.of(하위_집계_요청, esQuery).생성());
+        버킷_집계_결과_목록_합계 _버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(중첩_집계_쿼리_생성기.포괄(하위_집계_요청, esQuery).생성());
 
         return _버킷_집계_결과_목록_합계.get검색결과().get("group_by_pdServiceVersions");
 
