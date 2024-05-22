@@ -10,11 +10,11 @@ import com.arms.elasticsearch.query.base.기본_정렬_요청;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.EsQueryString;
 import com.arms.elasticsearch.query.esquery.EsSortQuery;
-import com.arms.elasticsearch.query.factory.creator.일반_검색_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.creator.기본_쿼리_생성기;
 import com.arms.elasticsearch.query.factory.creator.중첩_집계_포괄_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.QueryStringFilter;
 import com.arms.elasticsearch.query.filter.RangeQueryFilter;
-import com.arms.elasticsearch.query.factory.creator.쿼리_생성기;
+import com.arms.elasticsearch.query.factory.creator.query.쿼리_생성기;
 import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +42,7 @@ public class 지라이슈_검색_서비스_프로세스 implements 지라이슈_
     @Override
     public 검색어_검색결과<SearchHit<지라이슈_엔티티>> 지라이슈_검색(검색어_페이징처리_요청 검색어_기본_검색_요청) {
         EsQuery esQuery = new EsQueryBuilder().queryString(new EsQueryString(검색어_기본_검색_요청.get검색어()));
-        SearchHits<지라이슈_엔티티> 지라이슈_검색결과= 지라이슈_저장소.search(일반_검색_쿼리_생성기.of(검색어_기본_검색_요청, esQuery).생성());
+        SearchHits<지라이슈_엔티티> 지라이슈_검색결과= 지라이슈_저장소.search(기본_쿼리_생성기.기본검색(검색어_기본_검색_요청, esQuery).생성());
         검색어_검색결과<SearchHit<지라이슈_엔티티>> 검색결과_목록 = new 검색어_검색결과<>();
         검색결과_목록.set검색결과_목록(지라이슈_검색결과.getSearchHits());
         검색결과_목록.set결과_총수(지라이슈_검색결과.getTotalHits());
@@ -68,7 +68,7 @@ public class 지라이슈_검색_서비스_프로세스 implements 지라이슈_
                                 기본_정렬_요청.builder().필드("@timestamp").정렬기준("desc").build()
                         )
                 ));
-        SearchHits<지라이슈_엔티티> 지라이슈_검색결과= 지라이슈_저장소.search(일반_검색_쿼리_생성기.of(검색어_날짜포함_검색_요청, esQuery).생성());
+        SearchHits<지라이슈_엔티티> 지라이슈_검색결과= 지라이슈_저장소.search(기본_쿼리_생성기.기본검색(검색어_날짜포함_검색_요청, esQuery).생성());
         검색어_검색결과<SearchHit<지라이슈_엔티티>> 검색결과_목록 = new 검색어_검색결과<>();
         if(지라이슈_검색결과 != null && !지라이슈_검색결과.isEmpty()) {
             검색결과_목록.set검색결과_목록(지라이슈_검색결과.getSearchHits());

@@ -11,11 +11,11 @@ import com.arms.elasticsearch.query.base.기본_검색_집계_하위_요청;
 import com.arms.elasticsearch.query.base.집계_하위_요청;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
-import com.arms.elasticsearch.query.factory.creator.집계_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.creator.기본_쿼리_생성기;
 import com.arms.elasticsearch.query.factory.creator.중첩_집계_포괄_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
-import com.arms.elasticsearch.query.factory.creator.쿼리_생성기;
+import com.arms.elasticsearch.query.factory.creator.query.쿼리_생성기;
 import com.arms.elasticsearch.버킷_집계_결과;
 import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import lombok.AllArgsConstructor;
@@ -46,10 +46,10 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
         일반_집계_요청.set메인그룹필드("assignee.assignee_displayName.keyword");
         일반_집계_요청.set컨텐츠보기여부(false);
 
-        집계_쿼리_생성기.of(일반_집계_요청,esQuery);
+        기본_쿼리_생성기.집계검색(일반_집계_요청,esQuery);
 
         // 요구사항 vs 연결된이슈&서브테스크 구분안하고 한번에
-        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계( 집계_쿼리_생성기.of(일반_집계_요청,esQuery).생성());
+        버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계( 기본_쿼리_생성기.집계검색(일반_집계_요청,esQuery).생성());
         Long 결과 = 버킷_집계_결과_목록_합계.get전체합계();
         로그.info("검색결과 개수: " + 결과);
 

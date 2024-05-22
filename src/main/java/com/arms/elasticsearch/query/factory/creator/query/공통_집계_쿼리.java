@@ -28,16 +28,16 @@ public class 공통_집계_쿼리 <T extends ValuesSourceAggregationBuilder<T>> 
     private final BoolQueryBuilder boolQuery;
     private final ValuesSourceAggregationBuilder<T> valuesSourceAggregationBuilder;
 
-    protected 공통_집계_쿼리(기본_검색_집계_요청 _일반_집계_요청, EsQuery esQuery, ValuesSourceAggregationBuilder<T> valuesSourceAggregationBuilder){
+    protected 공통_집계_쿼리(기본_검색_집계_요청 기본_검색_집계_요청, EsQuery esQuery, ValuesSourceAggregationBuilder<T> valuesSourceAggregationBuilder){
         this.valuesSourceAggregationBuilder = valuesSourceAggregationBuilder;
 
-        if(_일반_집계_요청 instanceof 기본_검색_집계_하위_요청){
-            this.하위_집계들요청 = Optional.of(((기본_검색_집계_하위_요청) _일반_집계_요청).to_하위_집계_필드들())
-                    .filter(a->!a.isEmpty()).orElseGet(()->(((기본_검색_집계_하위_요청) _일반_집계_요청).get__집계_하위_요청_필드들()));
+        if(기본_검색_집계_요청 instanceof 기본_검색_집계_하위_요청){
+            this.하위_집계들요청 = Optional.of(((기본_검색_집계_하위_요청) 기본_검색_집계_요청).to_하위_집계_필드들())
+                    .filter(a->!a.isEmpty()).orElseGet(()->(((기본_검색_집계_하위_요청) 기본_검색_집계_요청).get__집계_하위_요청_필드들()));
         }
-        this.크기 = _일반_집계_요청.get크기();
-        this.컨텐츠보기여부 = _일반_집계_요청.is컨텐츠보기여부();
-        this.하위크기 = _일반_집계_요청.get하위크기();
+        this.크기 = 기본_검색_집계_요청.get크기();
+        this.컨텐츠보기여부 = 기본_검색_집계_요청.is컨텐츠보기여부();
+        this.하위크기 = 기본_검색_집계_요청.get하위크기();
         this.boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
         this.nativeSearchQueryBuilder.withMaxResults(컨텐츠보기여부 ? 크기 : 0);
         this.nativeSearchQueryBuilder.addAggregation(
@@ -56,11 +56,11 @@ public class 공통_집계_쿼리 <T extends ValuesSourceAggregationBuilder<T>> 
     @Override
     public void 계층_하위_집계_빌더_적용(){
         Optional.ofNullable(하위_집계들요청)
-            .ifPresent(__하위_그룹_필드들->{
-                if(!__하위_그룹_필드들.isEmpty()){
+            .ifPresent(하위_그룹_필드들->{
+                if(!하위_그룹_필드들.isEmpty()){
                     valuesSourceAggregationBuilder
                         .subAggregation(
-                            new 중첩_집계_포괄_빌더().createAggregation(__하위_그룹_필드들,하위크기)
+                            new 중첩_집계_포괄_빌더().createAggregation(하위_그룹_필드들,하위크기)
                         );
                 }
             });
@@ -69,9 +69,9 @@ public class 공통_집계_쿼리 <T extends ValuesSourceAggregationBuilder<T>> 
     @Override
     public void 형제_하위_집계_빌더_적용(){
         Optional.ofNullable(하위_집계들요청)
-            .ifPresent(__하위_그룹_필드들->{
-                if(!__하위_그룹_필드들.isEmpty()){
-                    new 중첩_집계_단일_빌더().createAggregation(__하위_그룹_필드들,하위크기)
+            .ifPresent(하위_그룹_필드들->{
+                if(!하위_그룹_필드들.isEmpty()){
+                    new 중첩_집계_단일_빌더().createAggregation(하위_그룹_필드들,하위크기)
                             .forEach(valuesSourceAggregationBuilder::subAggregation);
                 }
             });
@@ -80,13 +80,12 @@ public class 공통_집계_쿼리 <T extends ValuesSourceAggregationBuilder<T>> 
     @Override
     public void 형제_하위_메트릭_집계_빌더_적용() {
         Optional.ofNullable(하위_집계들요청)
-            .ifPresent(__하위_그룹_필드들->{
-                if(!__하위_그룹_필드들.isEmpty()){
-                    new 중첩_메트릭_집계_단일_빌더().createAggregation(__하위_그룹_필드들,하위크기)
+            .ifPresent(하위_그룹_필드들->{
+                if(!하위_그룹_필드들.isEmpty()){
+                    new 중첩_메트릭_집계_단일_빌더().createAggregation(하위_그룹_필드들,하위크기)
                             .forEach(valuesSourceAggregationBuilder::subAggregation);
                 }
             });
-
     }
 
     @Override

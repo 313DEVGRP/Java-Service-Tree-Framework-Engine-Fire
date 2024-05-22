@@ -8,7 +8,7 @@ import com.arms.api.util.model.dto.지라이슈_제품_및_제품버전_검색__
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
-import com.arms.elasticsearch.query.factory.creator.일반_검색_쿼리_생성기;
+import com.arms.elasticsearch.query.factory.creator.기본_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.버킷_집계_결과;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ public class 요구사항_컨트롤러 {
                         new TermsQueryFilter("pdServiceVersions",지라이슈_일반_집계_요청.getPdServiceVersionLinks())
                 );
 
-        return ResponseEntity.ok(요구사항_서비스.지라이슈_조회(일반_검색_쿼리_생성기.of(지라이슈_일반_집계_요청, esQuery)));
+        return ResponseEntity.ok(요구사항_서비스.지라이슈_조회(기본_쿼리_생성기.집계검색(지라이슈_일반_집계_요청, esQuery)));
     }
 
     // Requirement - ReqStatus, Dashboard, Detail_Dashboard
