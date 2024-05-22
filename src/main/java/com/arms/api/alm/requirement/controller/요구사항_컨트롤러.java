@@ -37,7 +37,7 @@ public class 요구사항_컨트롤러 {
                         new TermsQueryFilter("pdServiceVersions",지라이슈_일반_집계_요청.getPdServiceVersionLinks())
                 );
 
-        return ResponseEntity.ok(요구사항_서비스.지라이슈_조회(기본_쿼리_생성기.집계검색(지라이슈_일반_집계_요청, esQuery)));
+        return ResponseEntity.ok(요구사항_서비스.지라이슈_조회(기본_쿼리_생성기.기본검색(지라이슈_일반_집계_요청, esQuery)));
     }
 
     // Requirement - ReqStatus, Dashboard, Detail_Dashboard
