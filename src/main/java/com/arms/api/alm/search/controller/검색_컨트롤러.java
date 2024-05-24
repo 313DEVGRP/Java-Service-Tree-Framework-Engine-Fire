@@ -78,6 +78,7 @@ public class 검색_컨트롤러 {
                                                 @RequestParam("size") String 크기,
                                                 @RequestParam(value = "from",required = false) String 시작_날짜,
                                                 @RequestParam(value = "to",  required = false) String 끝_날짜) {
+
         log.info("[엘라스틱_지라이슈_대시보드_컨트롤러 :: 검색엔진_지라이슈_검색] :: 검색어 => {}" , 검색어);
         검색어_날짜포함_검색_요청 검색어_날짜포함_검색_요청 = new 검색어_날짜포함_검색_요청();
         검색어_날짜포함_검색_요청.set검색어(검색어);
@@ -85,6 +86,7 @@ public class 검색_컨트롤러 {
         검색어_날짜포함_검색_요청.set크기(Integer.parseInt(크기));
         검색어_날짜포함_검색_요청.set시작_날짜(시작_날짜);
         검색어_날짜포함_검색_요청.set끝_날짜(끝_날짜);
+
         검색어_검색결과<SearchHit<플루언트디_엔티티>> 검색결과_목록 = 플루언트디_서비스.플루언트디_날짜포함_검색(검색어_날짜포함_검색_요청);
         return ResponseEntity.ok(검색결과_목록);
     }
