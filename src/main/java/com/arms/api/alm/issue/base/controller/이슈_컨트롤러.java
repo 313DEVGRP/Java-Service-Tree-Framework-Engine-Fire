@@ -65,12 +65,12 @@ public class 이슈_컨트롤러 {
             value = {"/{issueKeyOrId}"},
             method = {RequestMethod.DELETE}
     )
-    public Map<String,Object> 이슈_삭제_라벨_처리하기(@PathVariable("connectId") Long 연결_아이디,
+    public Map<String,Object> 이슈_삭제하기(@PathVariable("connectId") Long 연결_아이디,
                                             @PathVariable("issueKeyOrId") String 이슈_키_또는_아이디) {
 
-        로그.info("이슈_삭제_라벨_처리하기 :: 연결_아이디 :: {} :: 이슈_키_또는_아이디 :: {}",
+        로그.info("이슈_삭제하기 :: 연결_아이디 :: {} :: 이슈_키_또는_아이디 :: {}",
                                             연결_아이디, 이슈_키_또는_아이디);
-        return 이슈전략_호출.이슈_삭제_라벨_처리하기(연결_아이디, 이슈_키_또는_아이디);
+        return 이슈전략_호출.이슈_삭제하기(연결_아이디, 이슈_키_또는_아이디);
     }
 
     @ResponseBody

@@ -2,6 +2,7 @@ package com.arms.api.alm.utils;
 
 import com.arms.api.alm.issue.base.model.클라우드_이슈생성필드_메타데이터;
 import com.arms.api.util.errors.에러로그_유틸;
+import com.arms.api.util.response.응답처리;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
@@ -109,7 +111,7 @@ public class 지라유틸 {
                 .blockOptional();
     }
 
-    public Optional<Boolean> executePut(WebClient webClient, String uri, Object requestBody) {
+    public 응답처리.ApiResult<?> executePut(WebClient webClient, String uri, Object requestBody) {
 
         Mono<ResponseEntity<Void>> response = webClient.put()
                 .uri(uri)
@@ -117,19 +119,35 @@ public class 지라유틸 {
                 .retrieve()
                 .toEntity(Void.class);
 
-        return response.map(entity -> entity.getStatusCode() == HttpStatus.NO_CONTENT) // 결과가 204인가 확인
-                .blockOptional();
+        return response.map(entity -> {
+                    if (entity.getStatusCode() == HttpStatus.NO_CONTENT) {
+                        return 응답처리.success("OK");
+                    } else {
+                        return 응답처리.error("Fail", HttpStatus.BAD_REQUEST);
+                    }
+                })
+                .onErrorResume(WebClientResponseException.class, e -> Mono.just(응답처리.error(e, e.getStatusCode())))
+                .onErrorResume(Exception.class, e -> Mono.just(응답처리.error(e, HttpStatus.BAD_REQUEST)))
+                .block();
     }
 
-    public Optional<Boolean> executeDelete(WebClient webClient, String uri) {
+    public 응답처리.ApiResult<?> executeDelete(WebClient webClient, String uri) {
 
         Mono<ResponseEntity<Void>> response = webClient.delete()
                 .uri(uri)
                 .retrieve()
                 .toEntity(Void.class);
 
-        return response.map(entity -> entity.getStatusCode() == HttpStatus.NO_CONTENT) // 결과가 204인가 확인
-                .blockOptional();
+        return response.map(entity -> {
+                    if (entity.getStatusCode() == HttpStatus.NO_CONTENT) {
+                        return 응답처리.success("OK");
+                    } else {
+                        return 응답처리.error("Fail", HttpStatus.BAD_REQUEST);
+                    }
+                })
+                .onErrorResume(WebClientResponseException.class, e -> Mono.just(응답처리.error(e, e.getStatusCode())))
+                .onErrorResume(Exception.class, e -> Mono.just(응답처리.error(e, HttpStatus.BAD_REQUEST)))
+                .block();
     }
 
     public static LocalDateTime roundToNearest30Minutes(LocalDateTime dateTime) {
