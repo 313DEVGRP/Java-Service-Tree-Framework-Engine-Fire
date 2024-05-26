@@ -6,6 +6,7 @@ import com.arms.api.alm.utils.지라API_정보;
 import com.arms.api.alm.utils.지라유틸;
 import com.arms.api.util.errors.codes.에러코드;
 import com.arms.api.util.errors.에러로그_유틸;
+import com.arms.api.util.response.응답처리;
 import org.apache.http.client.utils.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -170,19 +171,17 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
             }
 
             수정_데이터.setFields(클라우드_필드_데이터);
-            Optional<Boolean> 응답_결과 = 지라유틸.executePut(webClient, endpoint, 수정_데이터);
 
-            if (응답_결과.isPresent()) {
-                if (응답_결과.get()) {
+            응답처리.ApiResult<?> 응답_결과 = 지라유틸.executePut(webClient, endpoint, 수정_데이터);
 
-                    결과.put("success", true);
-                    결과.put("message", "이슈 수정 성공");
-
-                    return 결과;
-                }
+            if (응답_결과.isSuccess()) {
+                결과.put("success", 응답_결과.isSuccess());
+                결과.put("message", "이슈 수정 성공");
             }
-            결과.put("success", false);
-            결과.put("message", "이슈 수정 실패");
+            else {
+                결과.put("success", 응답_결과.isSuccess());
+                결과.put("message", 응답_결과.getError().getMessage());
+            }
 
             return 결과;
         }
@@ -195,35 +194,32 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
     }
 
     @Override
-    public Map<String, Object> 이슈_삭제_라벨_처리하기(서버정보_데이터 서버정보, String 이슈_키_또는_아이디) {
+    public Map<String, Object> 이슈_삭제하기(서버정보_데이터 서버정보, String 이슈_키_또는_아이디) {
 
         try {
-            Map<String, Object> 반환할_결과맵 = new HashMap<String, Object>();
+            WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
 
-            String 삭제_라벨링 = "이슈_삭제_라벨_처리";
+            boolean 하위이슈_삭제유무 = false;
 
-            지라이슈생성필드_데이터 필드_데이터 = new 지라이슈생성필드_데이터();
-            필드_데이터.setLabels(List.of(삭제_라벨링));
+            String endpoint = "/rest/api/3/issue/" + 이슈_키_또는_아이디 + "?deleteSubtasks=" + 하위이슈_삭제유무;
+            Map<String, Object> 결과 = new HashMap<>();
 
-            지라이슈생성_데이터 지라이슈생성_데이터 = new 지라이슈생성_데이터();
-            지라이슈생성_데이터.setFields(필드_데이터);
+            응답처리.ApiResult<?> 응답_결과 = 지라유틸.executeDelete(webClient, endpoint);
 
-            Map<String, Object> 라벨_처리_결과맵 = this.이슈_수정하기(서버정보, 이슈_키_또는_아이디, 지라이슈생성_데이터);
-
-            if (!((Boolean) 라벨_처리_결과맵.get("success"))) {
-                반환할_결과맵.put("success", false);
-                반환할_결과맵.put("message", "이슈 라벨 닫기 처리 실패");
+            if (응답_결과.isSuccess()) {
+                결과.put("success", 응답_결과.isSuccess());
+                결과.put("message", "이슈 삭제 성공");
             }
             else {
-                반환할_결과맵.put("success", true);
-                반환할_결과맵.put("message", "이슈 라벨 닫기 처리 성공");
+                결과.put("success", 응답_결과.isSuccess());
+                결과.put("message", 응답_결과.getError().getMessage());
             }
 
-            return 반환할_결과맵;
+            return 결과;
         }
         catch (Exception e) {
             String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
-                    "클라우드 지라("+ 서버정보.getUri() +") :: 이슈 키("+ 이슈_키_또는_아이디+ ") :: 이슈_삭제 라벨 처리하기에 실패하였습니다.");
+                    "클라우드 지라(" + 서버정보.getUri() + ") :: 이슈 키(" + 이슈_키_또는_아이디 + ") :: 이슈_수정하기에 실패하였습니다.");
             throw new IllegalArgumentException(에러코드.이슈수정_오류.getErrorMsg() + " :: " + 에러로그);
         }
     }
@@ -265,7 +261,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
 
             지라이슈_데이터 지라이슈_데이터 = 지라유틸.get(webClient, endpoint, 지라이슈_데이터.class).block();
 
-            if(지라이슈_데이터 == null && 지라이슈_데이터.getFields() == null) {
+            if (지라이슈_데이터 == null || 지라이슈_데이터.getFields() == null) {
                 로그.error("클라우드 지라("+ 서버정보.getUri() +") :: 이슈 키("+ 이슈_키_또는_아이디+ ") :: 이슈_상세정보_가져오기에 실패하였습니다.");
                 return null;
             }
@@ -367,47 +363,6 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
                     "클라우드 지라("+ 서버정보.getUri() +") :: 이슈 키("+ 이슈_키_또는_아이디+ ") :: 서브테스크_가져오기에 실패하였습니다.");
             return null;
         }
-    }
-
-    public List<지라이슈워크로그_데이터> 이슈_워크로그_조회(서버정보_데이터 서버정보, String 이슈_키_또는_아이디) {
-
-        WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
-
-        int 검색_시작_지점 = 0;
-        int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
-        boolean isLast = false;
-
-        List<지라이슈워크로그_데이터> 지라이슈워크로그_목록 = null;
-
-        try {
-            while (!isLast) {
-                String endpoint = "/rest/api/3/issue/" + 이슈_키_또는_아이디 + "/worklog?startAt=" + 검색_시작_지점 + "&maxResults=" + 최대_검색수;
-
-                지라이슈전체워크로그_데이터 지라이슈워크로그_조회_결과 = 지라유틸.get(webClient, endpoint, 지라이슈전체워크로그_데이터.class).block();
-
-                if (지라이슈워크로그_조회_결과 == null) {
-                    return Collections.emptyList();
-                }
-                else if (지라이슈워크로그_조회_결과.getWorklogs() == null || 지라이슈워크로그_조회_결과.getWorklogs().size() == 0) {
-                    return Collections.emptyList();
-                }
-
-                지라이슈워크로그_목록.addAll(지라이슈워크로그_조회_결과.getWorklogs());
-
-                if (지라이슈워크로그_조회_결과.getTotal() == 지라이슈워크로그_목록.size()) {
-                    isLast = true;
-                } else {
-                    검색_시작_지점 += 최대_검색수;
-                }
-            }
-        }
-        catch (Exception e) {
-            에러로그_유틸.예외로그출력(e, this.getClass().getName(),
-                    "클라우드 지라("+ 서버정보.getUri() +") :: 이슈 키("+ 이슈_키_또는_아이디+ ") :: 서브테스크_가져오기에 실패하였습니다.");
-            return Collections.emptyList();
-        }
-
-        return 지라이슈워크로그_목록;
     }
 
     public 지라이슈_데이터 증분이슈_상세정보_가져오기(서버정보_데이터 서버정보, String 이슈_키_또는_아이디) {
