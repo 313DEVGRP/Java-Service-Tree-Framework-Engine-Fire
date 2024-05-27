@@ -10,7 +10,7 @@ import com.arms.elasticsearch.query.base.기본_검색_집계_요청;
 import com.arms.elasticsearch.query.base.기본_검색_집계_하위_요청;
 import com.arms.elasticsearch.query.base.집계_하위_요청;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
-import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
+import com.arms.elasticsearch.query.must.TermQueryMust;
 import com.arms.elasticsearch.query.factory.creator.기본_쿼리_생성기;
 import com.arms.elasticsearch.query.factory.creator.중첩_집계_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
@@ -40,7 +40,7 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
     public Map<String, Long> 제품서비스별_담당자_이름_통계(Long 지라서버_아이디, Long 제품서비스_아이디) {
 
         EsQuery esQuery
-            = new EsQueryBuilder().bool(new MustTermQuery("pdServiceId", 제품서비스_아이디));
+            = new EsQueryBuilder().bool(new TermQueryMust("pdServiceId", 제품서비스_아이디));
 
         기본_검색_집계_요청 일반_집계_요청 = new 기본_검색_집계_요청() {};
         일반_집계_요청.set메인그룹필드("assignee.assignee_displayName.keyword");
@@ -116,14 +116,14 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
         }
 
         EsQuery esQuery = new EsQueryBuilder()
-                .bool(new MustTermQuery("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
-                        new MustTermQuery("isReq", 요구사항여부),
+                .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
+                        new TermQueryMust("isReq", 요구사항여부),
                         new ExistsQueryFilter("assignee")
                 );
 
         기본_검색_집계_하위_요청 하위_집계_요청 = new 기본_검색_집계_하위_요청() {};
 
-        하위_집계_요청.set__집계_하위_요청_필드들(
+        하위_집계_요청.set집계_하위_요청_필드들(
                 List.of(
                         집계_하위_요청.builder()
                                 .하위_필드명_별칭("assignees")

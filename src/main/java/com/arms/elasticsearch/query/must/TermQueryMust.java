@@ -1,27 +1,27 @@
-package com.arms.elasticsearch.query.esquery.esboolquery.must;
+package com.arms.elasticsearch.query.must;
 
-import com.arms.elasticsearch.query.esquery.esboolquery.Must;
+import com.arms.elasticsearch.query.Must;
 import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 
-public class MustTermQuery extends Must<TermQueryBuilder> {
+public class TermQueryMust extends Must<TermQueryBuilder> {
 
 	private TermQueryBuilder termQueryBuilder;
 
-	public MustTermQuery(String name, String value){
+	public TermQueryMust(String name, String value){
 		if(name!=null&&value!=null){
 			this.termQueryBuilder = QueryBuilders.termQuery(name, value);
 		}
 	}
 
-	public MustTermQuery(String name, Long value){
+	public TermQueryMust(String name, Long value){
 		if(name!=null&&value!=null){
 			this.termQueryBuilder = QueryBuilders.termQuery(name, value);
 		}
 	}
 
-	public MustTermQuery(String name, Boolean value){
+	public TermQueryMust(String name, Boolean value){
 		if(name!=null&&value!=null){
 			this.termQueryBuilder = QueryBuilders.termQuery(name, value);
 		}

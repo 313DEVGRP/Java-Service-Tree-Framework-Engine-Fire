@@ -4,7 +4,7 @@ import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.base.기본_검색_요청;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
-import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
+import com.arms.elasticsearch.query.must.TermQueryMust;
 import com.arms.elasticsearch.query.factory.creator.기본_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.repository.공통저장소;
@@ -18,7 +18,7 @@ public interface 지라이슈_저장소 extends 공통저장소<지라이슈_엔
     default List<지라이슈_엔티티> findByPdServiceIdAndPdServiceVersionsIn(Long pdServiceLink, Long[] pdServiceVersionLinks){
         EsQuery esQuery = new EsQueryBuilder()
             .bool(
-                new MustTermQuery("pdServiceId", pdServiceLink),
+                new TermQueryMust("pdServiceId", pdServiceLink),
                 new TermsQueryFilter("pdServiceVersions", pdServiceVersionLinks)
             );
         기본_검색_요청 기본_검색_요청 = new 기본_검색_요청() {};
@@ -30,8 +30,8 @@ public interface 지라이슈_저장소 extends 공통저장소<지라이슈_엔
         , Long[] pdServiceVersionLinks){
         EsQuery esQuery = new EsQueryBuilder()
             .bool(
-                new MustTermQuery("isReq", isReq),
-                new MustTermQuery("pdServiceId", pdServiceLink),
+                new TermQueryMust("isReq", isReq),
+                new TermQueryMust("pdServiceId", pdServiceLink),
                 new TermsQueryFilter("pdServiceVersions", pdServiceVersionLinks)
             );
         기본_검색_요청 기본_검색_요청 = new 기본_검색_요청() {};

@@ -5,7 +5,7 @@ import com.arms.api.util.model.dto.트리맵_검색__집계_하위_요청;
 import com.arms.api.util.model.vo.Worker;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
-import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
+import com.arms.elasticsearch.query.must.TermQueryMust;
 import com.arms.elasticsearch.query.factory.creator.중첩_집계_쿼리_생성기;
 import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ public class 지라이슈_대시보드_컨트롤러 {
 
         EsQuery esQuery
                 = new EsQueryBuilder()
-                    .bool(new MustTermQuery("pdServiceId",pdServiceId));
+                    .bool(new TermQueryMust("pdServiceId",pdServiceId));
 
         버킷_집계_결과_목록_합계 집계결과_가져오기 = 지라이슈_대시보드_서비스.집계결과_가져오기(중첩_집계_쿼리_생성기.포괄(지라이슈_일반_집계_요청, esQuery));
         return ResponseEntity.ok(집계결과_가져오기);
@@ -51,8 +51,8 @@ public class 지라이슈_대시보드_컨트롤러 {
         EsQuery esQuery
             = new EsQueryBuilder()
                 .bool(
-                         new MustTermQuery("pdServiceId",pdServiceId)
-                        ,new MustTermQuery("isReq", 지라이슈_일반_집계_요청.getIsReq())
+                         new TermQueryMust("pdServiceId",pdServiceId)
+                        ,new TermQueryMust("isReq", 지라이슈_일반_집계_요청.getIsReq())
                 );
 
         return ResponseEntity.ok(지라이슈_대시보드_서비스.집계결과_가져오기(중첩_집계_쿼리_생성기.포괄(지라이슈_일반_집계_요청, esQuery)));

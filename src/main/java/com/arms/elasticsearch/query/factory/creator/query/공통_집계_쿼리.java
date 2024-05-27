@@ -33,7 +33,7 @@ public class 공통_집계_쿼리 <T extends ValuesSourceAggregationBuilder<T>> 
 
         if(기본_검색_집계_요청 instanceof 기본_검색_집계_하위_요청){
             this.하위_집계들요청 = Optional.of(((기본_검색_집계_하위_요청) 기본_검색_집계_요청).to_하위_집계_필드들())
-                    .filter(a->!a.isEmpty()).orElseGet(()->(((기본_검색_집계_하위_요청) 기본_검색_집계_요청).get__집계_하위_요청_필드들()));
+                    .filter(a->!a.isEmpty()).orElseGet(()->(((기본_검색_집계_하위_요청) 기본_검색_집계_요청).get집계_하위_요청_필드들()));
         }
         this.크기 = 기본_검색_집계_요청.get크기();
         this.컨텐츠보기여부 = 기본_검색_집계_요청.is컨텐츠보기여부();

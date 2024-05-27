@@ -7,7 +7,7 @@ import com.arms.api.alm.analyis.service.요구사항_분석_서비스;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsBoolQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
-import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
+import com.arms.elasticsearch.query.must.TermQueryMust;
 import com.arms.elasticsearch.query.factory.creator.중첩_집계_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
@@ -39,10 +39,10 @@ public class 요구사항_분석_컨트롤러 {
             지라이슈_제품_및_제품버전_검색__집계_하위_요청 검색요청
     ) {
         EsBoolQuery[] esBoolQueries = Stream.of(
-                new MustTermQuery("pdServiceId", 검색요청.getPdServiceLink()),
+                new TermQueryMust("pdServiceId", 검색요청.getPdServiceLink()),
                 new TermsQueryFilter("pdServiceVersions", 검색요청.getPdServiceVersionLinks()),
-                검색요청.getIsReqType() == IsReqType.REQUIREMENT ? new MustTermQuery("isReq", true) : null,
-                검색요청.getIsReqType() == IsReqType.ISSUE ? new MustTermQuery("isReq", false) : null
+                검색요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
+                검색요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null
         ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
 
         EsQuery esQuery = new EsQueryBuilder().bool(esBoolQueries);
@@ -76,8 +76,8 @@ public class 요구사항_분석_컨트롤러 {
         EsQuery esQuery
             = new EsQueryBuilder()
                 .bool(
-                     new MustTermQuery("pdServiceId",pdServiceId)
-                    ,new MustTermQuery("isReq", 지라이슈_일반_집계_요청.getIsReq())
+                     new TermQueryMust("pdServiceId",pdServiceId)
+                    ,new TermQueryMust("isReq", 지라이슈_일반_집계_요청.getIsReq())
                     ,new TermsQueryFilter("pdServiceVersions",pdServiceVersionLinks)
                 );
 
@@ -92,7 +92,7 @@ public class 요구사항_분석_컨트롤러 {
         EsQuery esQuery
             = new EsQueryBuilder()
                 .bool(
-                     new MustTermQuery("pdServiceId",pdServiceId)
+                     new TermQueryMust("pdServiceId",pdServiceId)
                     ,new TermsQueryFilter("pdServiceVersions",pdServiceVersionLinks)
                 );
 
@@ -109,7 +109,7 @@ public class 요구사항_분석_컨트롤러 {
                 = new EsQueryBuilder()
                 .bool(  new TermsQueryFilter("assignee.assignee_emailAddress.keyword", mailAddressList),
                         new TermsQueryFilter("pdServiceVersions",pdServiceVersionLinks),
-                        new MustTermQuery("pdServiceId",pdServiceId)
+                        new TermQueryMust("pdServiceId",pdServiceId)
                 );
 
         return ResponseEntity.ok(요구사항_분석_서비스.집계결과_가져오기(중첩_집계_쿼리_생성기.포괄(지라이슈_일반_집계_요청, esQuery)));
@@ -167,8 +167,8 @@ public class 요구사항_분석_컨트롤러 {
         EsQuery esQuery
                 = new EsQueryBuilder()
                 .bool(
-                        new MustTermQuery("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink())
-                        , new MustTermQuery("isReq", isReq)
+                        new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink())
+                        , new TermQueryMust("isReq", isReq)
                         , new TermsQueryFilter("pdServiceVersions", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks())
                         , new ExistsQueryFilter(resolution)
                 );

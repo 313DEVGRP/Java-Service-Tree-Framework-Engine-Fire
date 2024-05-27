@@ -7,7 +7,7 @@ import com.arms.api.util.model.dto.지라이슈_기본_검색__집계_하위_요
 import com.arms.api.util.model.dto.지라이슈_제품_및_제품버전_검색__집계_하위_요청;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
-import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
+import com.arms.elasticsearch.query.must.TermQueryMust;
 import com.arms.elasticsearch.query.factory.creator.기본_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.버킷_집계_결과;
@@ -33,7 +33,7 @@ public class 요구사항_컨트롤러 {
         EsQuery esQuery
                 = new EsQueryBuilder()
                 .bool(
-                        new MustTermQuery("pdServiceId",pdServiceId),
+                        new TermQueryMust("pdServiceId",pdServiceId),
                         new TermsQueryFilter("pdServiceVersions",지라이슈_일반_집계_요청.getPdServiceVersionLinks())
                 );
 

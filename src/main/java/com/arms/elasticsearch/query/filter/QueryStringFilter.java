@@ -5,6 +5,8 @@ import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 
+import java.util.List;
+
 public class QueryStringFilter extends Filter<QueryStringQueryBuilder> {
 
     private QueryStringQueryBuilder queryBuilder;
@@ -12,6 +14,13 @@ public class QueryStringFilter extends Filter<QueryStringQueryBuilder> {
     public QueryStringFilter(String queryString){
         if(queryString!=null){
             this.queryBuilder = QueryBuilders.queryStringQuery(queryString);
+        }
+    }
+
+    public QueryStringFilter(String queryString, List<String> fields){
+        if(queryString!=null){
+            this.queryBuilder = QueryBuilders.queryStringQuery(queryString);
+
         }
     }
 

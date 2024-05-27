@@ -12,7 +12,7 @@ import com.arms.api.util.errors.codes.에러코드;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.base.기본_검색_요청;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
-import com.arms.elasticsearch.query.esquery.esboolquery.must.MustTermQuery;
+import com.arms.elasticsearch.query.must.TermQueryMust;
 import com.arms.elasticsearch.query.factory.creator.기본_쿼리_생성기;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +60,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
 
         EsQuery esQuery = new EsQueryBuilder()
             .bool(
-                    new MustTermQuery("id", 조회조건_아이디)
+                    new TermQueryMust("id", 조회조건_아이디)
             );
         return 지라이슈_저장소.normalSearch(기본_쿼리_생성기.기본검색(new 기본_검색_요청(){}, esQuery).생성()).stream()
                 .findFirst().orElseGet(지라이슈_엔티티::new);
