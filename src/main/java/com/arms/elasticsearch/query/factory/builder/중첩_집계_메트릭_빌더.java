@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class 중첩_메트릭_집계_단일_빌더  {
+public class 중첩_집계_메트릭_빌더 {
 
     public List<AggregationBuilder> createAggregation(List<집계_하위_요청> 하위그룹필드, int size) {
           return 하위그룹필드.stream()

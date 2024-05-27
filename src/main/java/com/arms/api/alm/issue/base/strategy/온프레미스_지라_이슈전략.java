@@ -21,6 +21,7 @@ import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.api.domain.*;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
+import io.atlassian.util.concurrent.Promise;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -202,63 +203,74 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
         Map<String, Object> 결과 = new HashMap<>();
         지라이슈생성필드_데이터 필드_데이터 = 지라이슈생성_데이터.getFields();
 
+        IssueInputBuilder 입력_생성 = new IssueInputBuilder();
+
+        if (필드_데이터.getSummary() != null) {
+            입력_생성.setSummary(필드_데이터.getSummary());
+        }
+
+        if (필드_데이터.getDescription() != null) {
+            입력_생성.setDescription(필드_데이터.getDescription());
+        }
+
+        if (필드_데이터.getLabels() != null) {
+            입력_생성.setFieldValue("labels", 필드_데이터.getLabels());
+        }
+
+        IssueInput 수정_데이터 = 입력_생성.build();
         try {
+            Promise<Void> 수정결과 = restClient.getIssueClient().updateIssue(이슈_키_또는_아이디, 수정_데이터);
+            수정결과.claim();
 
-            IssueInputBuilder 입력_생성 = new IssueInputBuilder();
-
-            if (필드_데이터.getSummary() != null) {
-                입력_생성.setSummary(필드_데이터.getSummary());
-            }
-
-            if (필드_데이터.getDescription() != null) {
-                입력_생성.setDescription(필드_데이터.getDescription());
-            }
-
-            if (필드_데이터.getLabels() != null) {
-                입력_생성.setFieldValue("labels", 필드_데이터.getLabels());
-            }
-
-            IssueInput 수정_데이터 = 입력_생성.build();
-            restClient.getIssueClient().updateIssue(이슈_키_또는_아이디, 수정_데이터).claim();
             결과.put("success", true);
             결과.put("message", "이슈 수정 성공");
-
-            return 결과;
-
-        } catch (Exception e) {
-            로그.error(" 온프레미스 지라("+ 서버정보.getUri() +") ::  생성 필드 :: "+ 필드_데이터.toString() + ", 이슈 수정하기 중 오류");
+        }
+        catch (Exception e) {
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                    "온프레미스 지라(" + 서버정보.getUri() +") ::  생성 필드 :: "
+                            + 필드_데이터.toString() + ", :: 이슈_수정하기 중 오류 :: " + 이슈_키_또는_아이디);
+            로그.error(에러로그);
 
             결과.put("success", false);
-            결과.put("message", "이슈 수정 실패 : " + e.getMessage());
+            결과.put("message", 에러로그);
         }
 
         return 결과;
     }
 
     @Override
-    public Map<String, Object> 이슈_삭제_라벨_처리하기(서버정보_데이터 서버정보, String 이슈_키_또는_아이디) {
+    public Map<String, Object> 이슈_삭제하기(서버정보_데이터 서버정보, String 이슈_키_또는_아이디) {
 
-        Map<String, Object> 반환할_결과맵 = new HashMap<String, Object>();
-        String 삭제_라벨링 = "이슈_삭제_라벨_처리";
-
-        지라이슈생성필드_데이터 필드_데이터 = new 지라이슈생성필드_데이터();
-        필드_데이터.setLabels(List.of(삭제_라벨링));
-
-        지라이슈생성_데이터 지라이슈생성_데이터 = new 지라이슈생성_데이터();
-        지라이슈생성_데이터.setFields(필드_데이터);
-
-        Map<String, Object> 라벨_처리_결과맵 = this.이슈_수정하기(서버정보, 이슈_키_또는_아이디, 지라이슈생성_데이터);
-
-        if (((Boolean) 라벨_처리_결과맵.get("success"))) {
-            반환할_결과맵.put("success", true);
-            반환할_결과맵.put("message", "이슈 라벨 닫기 처리 성공");
+        JiraRestClient restClient;
+        try {
+            restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(),
+                    서버정보.getUserId(),
+                    서버정보.getPasswordOrToken());
         }
-        else {
-            반환할_결과맵.put("success", false);
-            반환할_결과맵.put("message", "이슈 라벨 닫기 처리 실패 : " + 라벨_처리_결과맵.toString());
+        catch (URISyntaxException | IOException e) {
+            에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                    "온프레미스 지라(" + 서버정보.getUri() + ") :: 이슈_삭제하기 온프레미스_통신기_생성 중 오류");
+            return null;
         }
 
-        return 반환할_결과맵;
+        Map<String, Object> 결과 = new HashMap<String, Object>();
+        try {
+            Promise<Void> 삭제결과 = restClient.getIssueClient().deleteIssue(이슈_키_또는_아이디, false);
+            삭제결과.claim();
+
+            결과.put("success", true);
+            결과.put("message", "이슈 삭제 성공");
+        }
+        catch (Exception e) {
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                    "온프레미스 지라(" + 서버정보.getUri() + ") :: 이슈_삭제하기 중 오류 :: " + 이슈_키_또는_아이디);
+            로그.error(에러로그);
+
+            결과.put("success", false);
+            결과.put("message", 에러로그);
+        }
+
+        return 결과;
     }
 
     public 지라이슈_데이터 지라이슈_데이터로_변환(Issue 지라이슈) {
