@@ -1,4 +1,4 @@
-package com.arms.elasticsearch;
+package com.arms.elasticsearch.query.model.vo;
 
 
 import org.elasticsearch.search.sort.SortOrder;

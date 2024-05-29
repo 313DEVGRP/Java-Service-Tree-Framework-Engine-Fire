@@ -1,4 +1,4 @@
-package com.arms.elasticsearch;
+package com.arms.elasticsearch.query.model.vo;
 
 
 public class 집계_결과_그룹 {

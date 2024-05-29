@@ -1,7 +1,7 @@
-package com.arms.elasticsearch.repository;
+package com.arms.elasticsearch.query.repository;
 
-import com.arms.elasticsearch.메트릭_집계_결과_목록_합계;
-import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
+import com.arms.elasticsearch.query.model.vo.메트릭_집계_결과_목록_합계;
+import com.arms.elasticsearch.query.model.vo.버킷_집계_결과_목록_합계;
 import org.springframework.data.elasticsearch.core.IndexedObjectInformation;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;

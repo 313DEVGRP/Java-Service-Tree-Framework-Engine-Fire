@@ -1,4 +1,4 @@
-package com.arms.elasticsearch.query.base;
+package com.arms.elasticsearch.query.model.dto;
 
 import java.util.ArrayList;
 import java.util.List;

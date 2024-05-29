@@ -1,4 +1,4 @@
-package com.arms.elasticsearch;
+package com.arms.elasticsearch.query.model.vo;
 
 public class 검색조건_페이징 {
     private static final int DEFAULT_SIZE = 100;

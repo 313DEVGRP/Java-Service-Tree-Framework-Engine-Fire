@@ -1,4 +1,4 @@
-package com.arms.elasticsearch.query.base;
+package com.arms.elasticsearch.query.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

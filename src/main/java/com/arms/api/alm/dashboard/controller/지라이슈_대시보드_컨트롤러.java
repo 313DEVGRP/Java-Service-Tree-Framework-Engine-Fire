@@ -7,7 +7,7 @@ import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.must.TermQueryMust;
 import com.arms.elasticsearch.query.factory.creator.중첩_집계_쿼리_생성기;
-import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
+import com.arms.elasticsearch.query.model.vo.버킷_집계_결과_목록_합계;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

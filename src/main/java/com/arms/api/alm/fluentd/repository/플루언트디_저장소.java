@@ -1,7 +1,7 @@
 package com.arms.api.alm.fluentd.repository;
 
 import com.arms.api.alm.fluentd.model.플루언트디_엔티티;
-import com.arms.elasticsearch.repository.공통저장소;
+import com.arms.elasticsearch.query.repository.공통저장소;
 import org.springframework.stereotype.Repository;
 
 @Repository

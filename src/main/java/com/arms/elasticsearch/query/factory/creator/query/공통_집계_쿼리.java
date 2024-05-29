@@ -1,9 +1,9 @@
 package com.arms.elasticsearch.query.factory.creator.query;
 
 import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.base.기본_검색_집계_요청;
-import com.arms.elasticsearch.query.base.집계_하위_요청;
-import com.arms.elasticsearch.query.base.기본_검색_집계_하위_요청;
+import com.arms.elasticsearch.query.model.dto.기본_검색_집계_요청;
+import com.arms.elasticsearch.query.model.dto.집계_하위_요청;
+import com.arms.elasticsearch.query.model.dto.기본_검색_집계_하위_요청;
 import com.arms.elasticsearch.query.factory.builder.중첩_집계_메트릭_빌더;
 import com.arms.elasticsearch.query.factory.builder.중첩_집계_포괄_빌더;
 import com.arms.elasticsearch.query.factory.builder.중첩_집계_단일_빌더;

@@ -1,7 +1,7 @@
 package com.arms.api.util.model.dto;
 
 import com.arms.api.util.model.enums.IsReqType;
-import com.arms.elasticsearch.query.base.기본_검색_집계_하위_요청;
+import com.arms.elasticsearch.query.model.dto.기본_검색_집계_하위_요청;
 import lombok.Getter;
 import lombok.Setter;
 

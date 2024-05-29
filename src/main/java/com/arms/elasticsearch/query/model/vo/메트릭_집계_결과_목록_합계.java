@@ -1,4 +1,4 @@
-package com.arms.elasticsearch;
+package com.arms.elasticsearch.query.model.vo;
 
 import lombok.Getter;
 import org.elasticsearch.search.aggregations.Aggregation;

@@ -1,4 +1,4 @@
-package com.arms.elasticsearch.repository;
+package com.arms.elasticsearch.query.repository;
 
 import com.arms.elasticsearch.annotation.ElasticSearchIndex;
 import com.arms.elasticsearch.annotation.Recent;
@@ -6,10 +6,9 @@ import com.arms.elasticsearch.annotation.RollingIndexName;
 import com.arms.elasticsearch.query.EsQuery;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
-import com.arms.elasticsearch.메트릭_집계_결과_목록_합계;
-import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
+import com.arms.elasticsearch.query.model.vo.메트릭_집계_결과_목록_합계;
+import com.arms.elasticsearch.query.model.vo.버킷_집계_결과_목록_합계;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermsQueryBuilder;

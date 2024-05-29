@@ -4,7 +4,7 @@ package com.arms.api.alm.issue.base.service;
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
 import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.base.기본_검색_요청;
+import com.arms.elasticsearch.query.model.dto.기본_검색_요청;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.factory.creator.기본_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;

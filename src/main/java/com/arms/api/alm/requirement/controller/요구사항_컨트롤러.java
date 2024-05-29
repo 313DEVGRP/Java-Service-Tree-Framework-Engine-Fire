@@ -10,7 +10,7 @@ import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.must.TermQueryMust;
 import com.arms.elasticsearch.query.factory.creator.기본_쿼리_생성기;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
-import com.arms.elasticsearch.버킷_집계_결과;
+import com.arms.elasticsearch.query.model.vo.버킷_집계_결과;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

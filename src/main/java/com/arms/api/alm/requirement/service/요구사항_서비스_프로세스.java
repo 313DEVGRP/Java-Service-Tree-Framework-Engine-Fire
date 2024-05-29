@@ -6,9 +6,9 @@ import com.arms.api.util.model.dto.지라이슈_기본_검색__집계_하위_요
 import com.arms.api.util.model.dto.지라이슈_제품_및_제품버전_검색__집계_하위_요청;
 import com.arms.api.util.model.enums.IsReqType;
 import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.base.기본_검색_집계_요청;
-import com.arms.elasticsearch.query.base.기본_검색_집계_하위_요청;
-import com.arms.elasticsearch.query.base.집계_하위_요청;
+import com.arms.elasticsearch.query.model.dto.기본_검색_집계_요청;
+import com.arms.elasticsearch.query.model.dto.기본_검색_집계_하위_요청;
+import com.arms.elasticsearch.query.model.dto.집계_하위_요청;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.must.TermQueryMust;
 import com.arms.elasticsearch.query.factory.creator.기본_쿼리_생성기;
@@ -16,8 +16,8 @@ import com.arms.elasticsearch.query.factory.creator.중첩_집계_쿼리_생성�
 import com.arms.elasticsearch.query.filter.ExistsQueryFilter;
 import com.arms.elasticsearch.query.filter.TermsQueryFilter;
 import com.arms.elasticsearch.query.factory.creator.query.쿼리_생성기;
-import com.arms.elasticsearch.버킷_집계_결과;
-import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
+import com.arms.elasticsearch.query.model.vo.버킷_집계_결과;
+import com.arms.elasticsearch.query.model.vo.버킷_집계_결과_목록_합계;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;

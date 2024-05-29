@@ -10,7 +10,7 @@ import com.arms.api.alm.utils.지라이슈_생성;
 import com.arms.api.util.common.constrant.index.인덱스자료;
 import com.arms.api.util.errors.codes.에러코드;
 import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.base.기본_검색_요청;
+import com.arms.elasticsearch.query.model.dto.기본_검색_요청;
 import com.arms.elasticsearch.query.esquery.EsQueryBuilder;
 import com.arms.elasticsearch.query.must.TermQueryMust;
 import com.arms.elasticsearch.query.factory.creator.기본_쿼리_생성기;

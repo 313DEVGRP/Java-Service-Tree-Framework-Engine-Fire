@@ -1,7 +1,7 @@
 package com.arms.elasticsearch.query.esquery;
 
 import com.arms.elasticsearch.query.EsQuery;
-import com.arms.elasticsearch.query.base.기본_정렬_요청;
+import com.arms.elasticsearch.query.model.dto.기본_정렬_요청;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;

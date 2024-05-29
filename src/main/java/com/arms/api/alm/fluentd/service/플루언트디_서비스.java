@@ -5,7 +5,7 @@ import com.arms.api.util.model.dto.검색어_날짜포함_검색_요청;
 import com.arms.api.util.model.dto.검색어_검색_집계_하위_요청;
 import com.arms.api.alm.fluentd.model.플루언트디_엔티티;
 import com.arms.elasticsearch.query.factory.creator.query.쿼리_생성기;
-import com.arms.elasticsearch.버킷_집계_결과_목록_합계;
+import com.arms.elasticsearch.query.model.vo.버킷_집계_결과_목록_합계;
 import org.springframework.data.elasticsearch.core.SearchHit;
 
 public interface 플루언트디_서비스 {

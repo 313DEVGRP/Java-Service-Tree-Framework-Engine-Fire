@@ -1,6 +1,6 @@
 package com.arms.elasticsearch.query.factory.builder;
 
-import com.arms.elasticsearch.query.base.집계_하위_요청;
+import com.arms.elasticsearch.query.model.dto.집계_하위_요청;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 
