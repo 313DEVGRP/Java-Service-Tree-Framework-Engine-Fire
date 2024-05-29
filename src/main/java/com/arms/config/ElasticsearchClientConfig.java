@@ -3,7 +3,7 @@
  */
 package com.arms.config;
 
-import com.arms.elasticsearch.query.repository.공통저장소_구현체;
+import com.arms.egovframework.javaservice.esframework.repository.공통저장소_구현체;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HeaderElementIterator;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;

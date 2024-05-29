@@ -1,6 +1,6 @@
 package com.arms.api.util.model.dto;
 
-import com.arms.elasticsearch.query.model.dto.기본_검색_집계_하위_요청;
+import com.arms.egovframework.javaservice.esframework.model.dto.기본_검색_집계_하위_요청;
 import lombok.Getter;
 import lombok.Setter;
 

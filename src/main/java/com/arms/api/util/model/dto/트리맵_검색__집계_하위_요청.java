@@ -4,7 +4,7 @@ package com.arms.api.util.model.dto;
 import java.util.List;
 
 import com.arms.api.util.model.enums.IsReqType;
-import com.arms.elasticsearch.query.model.dto.기본_검색_집계_하위_요청;
+import com.arms.egovframework.javaservice.esframework.model.dto.기본_검색_집계_하위_요청;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

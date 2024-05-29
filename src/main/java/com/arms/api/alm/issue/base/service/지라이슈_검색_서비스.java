@@ -4,8 +4,8 @@ import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.util.model.dto.검색어_검색결과;
 import com.arms.api.util.model.dto.검색어_날짜포함_검색_요청;
 import com.arms.api.util.model.dto.검색어_검색_집계_하위_요청;
-import com.arms.elasticsearch.query.factory.creator.query.쿼리_생성기;
-import com.arms.elasticsearch.query.model.vo.버킷_집계_결과_목록_합계;
+import com.arms.egovframework.javaservice.esframework.factory.creator.query.쿼리_생성기;
+import com.arms.egovframework.javaservice.esframework.model.vo.버킷_집계_결과_목록_합계;
 import org.springframework.data.elasticsearch.core.SearchHit;
 
 public interface 지라이슈_검색_서비스 {

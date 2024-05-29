@@ -1,6 +1,6 @@
 package com.arms.config;
 
-import com.arms.elasticsearch.annotation.ElasticSearchIndex;
+import com.arms.egovframework.javaservice.esframework.annotation.ElasticSearchIndex;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;

@@ -1,9 +1,9 @@
 package com.arms.api.alm.issue.base.model;
 
 import com.arms.api.util.common.constrant.index.인덱스자료;
-import com.arms.elasticsearch.annotation.ElasticSearchIndex;
-import com.arms.elasticsearch.annotation.Recent;
-import com.arms.elasticsearch.annotation.RollingIndexName;
+import com.arms.egovframework.javaservice.esframework.annotation.ElasticSearchIndex;
+import com.arms.egovframework.javaservice.esframework.annotation.Recent;
+import com.arms.egovframework.javaservice.esframework.annotation.RollingIndexName;
 import com.fasterxml.jackson.annotation.*;
 import lombok.*;
 import org.springframework.data.annotation.Id;

@@ -7,7 +7,7 @@ import com.arms.api.alm.issue.base.service.지라이슈_검색_서비스;
 import com.arms.api.util.model.dto.검색어_검색결과;
 import com.arms.api.util.model.dto.검색어_날짜포함_검색_요청;
 import com.arms.api.util.model.dto.검색어_검색_집계_하위_요청;
-import com.arms.elasticsearch.query.model.vo.버킷_집계_결과_목록_합계;
+import com.arms.egovframework.javaservice.esframework.model.vo.버킷_집계_결과_목록_합계;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.SearchHit;

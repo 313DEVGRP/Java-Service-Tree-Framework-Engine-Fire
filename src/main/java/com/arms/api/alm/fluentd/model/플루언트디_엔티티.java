@@ -2,7 +2,7 @@ package com.arms.api.alm.fluentd.model;
 
 
 import com.arms.api.util.common.constrant.index.인덱스자료;
-import com.arms.elasticsearch.annotation.RollingIndexName;
+import com.arms.egovframework.javaservice.esframework.annotation.RollingIndexName;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
