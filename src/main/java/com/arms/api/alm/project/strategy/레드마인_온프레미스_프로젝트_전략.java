@@ -15,9 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Objects;
-
-import static java.util.stream.Collectors.toList;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class 레드마인_온프레미스_프로젝트_전략 implements 프로젝트_전략 {
@@ -41,7 +42,7 @@ public class 레드마인_온프레미스_프로젝트_전략 implements 프로�
         프로젝트_데이터 프로젝트_데이터;
         try {
             Project 프로젝트 = 레드마인_매니저.getProjectManager().getProjectById(Integer.parseInt(프로젝트_키_또는_아이디));
-            프로젝트_데이터 = 지라프로젝트_데이터형_변환(프로젝트, 서버정보.getUri());
+            프로젝트_데이터 = 프로젝트_데이터형_변환(프로젝트, null, 서버정보.getUri());
         }
         catch (RedmineException e) {
             에러로그_유틸.예외로그출력(e, this.getClass().getName(),  "프로젝트_상세정보_가져오기");
@@ -67,24 +68,38 @@ public class 레드마인_온프레미스_프로젝트_전략 implements 프로�
                     + 에러코드.프로젝트_조회_오류.getErrorMsg() + " :: " +e.getMessage());
         }
 
-        List<프로젝트_데이터> 지라프로젝트_목록 = 프로젝트_목록.stream().map(프로젝트 -> {
-                프로젝트_데이터 프로젝트_데이터 = 지라프로젝트_데이터형_변환(프로젝트, 서버정보.getUri());
-                return 프로젝트_데이터;
-            })
-            .filter(Objects::nonNull)
-            .collect(toList());
+        Map<Integer, Project> 프로젝트맵 = 프로젝트_목록.stream()
+                .collect(Collectors.toMap(Project::getId, Function.identity()));
+
+        List<프로젝트_데이터> 지라프로젝트_목록 = 프로젝트맵.values().stream()
+                .map(프로젝트 -> {
+                    String 전체_프로젝트명 = 상위_프로젝트명_설정(프로젝트, 프로젝트맵);
+                    return 프로젝트_데이터형_변환(프로젝트, 전체_프로젝트명, 서버정보.getUri());
+                })
+                .collect(Collectors.toList());
 
         return 지라프로젝트_목록;
     }
 
-    private 프로젝트_데이터 지라프로젝트_데이터형_변환(Project 프로젝트, String 서버정보경로) {
+    private 프로젝트_데이터 프로젝트_데이터형_변환(Project 프로젝트, String 전체_프로젝트명, String 서버정보경로) {
         프로젝트_데이터 프로젝트_데이터 = new 프로젝트_데이터();
 
         프로젝트_데이터.setId(String.valueOf(프로젝트.getId()));
-        프로젝트_데이터.setName(프로젝트.getName());
+        프로젝트_데이터.setName(Optional.ofNullable(전체_프로젝트명).orElse(프로젝트.getName()));
         프로젝트_데이터.setKey(String.valueOf(프로젝트.getId()));
         프로젝트_데이터.setSelf(레드마인유틸.서버정보경로_체크(서버정보경로) + 레드마인API_정보.아이디_대체하기(레드마인API_정보.getEndpoint().getProject(), String.valueOf(프로젝트.getId())));
 
         return 프로젝트_데이터;
+    }
+
+    public String 상위_프로젝트명_설정(Project project, Map<Integer, Project> projectMap) {
+        // 부모 프로젝트 ID 유무 확인
+        return Optional.ofNullable(project.getParentId())
+                .map(parentId ->
+                        // 있다면 재귀함수 호출로 상위 프로젝트의 Name을 가져와서 설정, 상위 프로젝트 구분자를 위한 '&nbsp;-&nbsp;' 처리
+                        상위_프로젝트명_설정(projectMap.get(parentId), projectMap) + "&nbsp;-&nbsp;" + project.getName()
+                )
+                // 부모 프로젝트가 없다면 프로젝트명 설정
+                .orElse(project.getName());
     }
 }
