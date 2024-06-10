@@ -127,6 +127,10 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
             생성이슈.setDueDate(필드_데이터.getDueDate());
         }
 
+        if (필드_데이터.getStatus() != null && 필드_데이터.getStatus().getId() != null) {
+            생성이슈.setStatusId(Integer.valueOf(필드_데이터.getStatus().getId()));
+        }
+
         try {
             생성이슈 = 생성이슈.create();
         }
@@ -160,6 +164,10 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
                 수정이슈.setDescription(내용);
             }
 
+            if (필드_데이터.getStatus() != null && 필드_데이터.getStatus().getId() != null) {
+                수정이슈.setStatusId(Integer.valueOf(필드_데이터.getStatus().getId()));
+            }
+
             수정이슈.update();
 
             결과.put("success", true);
@@ -169,6 +177,38 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
             String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
                     "레드마인_온프레미스 ["+ 서버정보.getUri() +"] :: 이슈_키_또는_아이디 :: "
                             + 이슈_키_또는_아이디+ " :: 수정데이터 :: " + 필드_데이터.toString() + "이슈_수정하기 오류");
+            로그.error(에러로그);
+
+            결과.put("success", false);
+            결과.put("message", 에러로그);
+        }
+
+        return 결과;
+    }
+
+    @Override
+    public Map<String, Object> 이슈_상태_변경하기(서버정보_데이터 서버정보, String 이슈_키_또는_아이디, String 상태_아이디) {
+
+        RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+
+        Map<String, Object> 결과 = new HashMap<>();
+
+        try {
+            Issue 수정이슈 = 레드마인_매니저.getIssueManager().getIssueById(Integer.parseInt(이슈_키_또는_아이디));
+
+            if (상태_아이디 != null) {
+                수정이슈.setStatusId(Integer.valueOf(상태_아이디));
+            }
+
+            수정이슈.update();
+
+            결과.put("success", true);
+            결과.put("message", "이슈 상태 변경 성공");
+        }
+        catch (RedmineException e) {
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                    "레드마인_온프레미스 [" + 서버정보.getUri() + "] :: 이슈_키_또는_아이디 :: "
+                            + 이슈_키_또는_아이디 + " :: 수정데이터 :: " + 상태_아이디 + "이슈_상태_변경하기 오류");
             로그.error(에러로그);
 
             결과.put("success", false);
