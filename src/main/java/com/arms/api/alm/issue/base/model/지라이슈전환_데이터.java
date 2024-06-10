@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class 클라우드_지라이슈전환_데이터 {
+public class 지라이슈전환_데이터 {
 
     private List<Transition> transitions;
     private Transition transition;
