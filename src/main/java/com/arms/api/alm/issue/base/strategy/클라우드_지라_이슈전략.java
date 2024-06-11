@@ -7,6 +7,8 @@ import com.arms.api.alm.utils.지라유틸;
 import com.arms.api.util.errors.codes.에러코드;
 import com.arms.api.util.errors.에러로그_유틸;
 import com.arms.api.util.response.응답처리;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,8 +178,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
 
             Optional.ofNullable(필드_데이터.getStatus())
                     .map(상태_데이터 -> 상태_데이터.getId())
-                    .map(이슈상태_아이디 -> 이슈전환_아이디_조회하기(서버정보, 이슈_키_또는_아이디, 이슈상태_아이디))
-                    .ifPresent(이슈전환_아이디 -> 수정_데이터.setTransition(new 지라이슈전환_데이터.Transition(이슈전환_아이디)));
+                    .map(이슈상태_아이디 -> 이슈_상태_변경하기(서버정보, 이슈_키_또는_아이디, 이슈상태_아이디));
 
             수정_데이터.setFields(클라우드_필드_데이터);
 
@@ -205,6 +206,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
     @Override
     public Map<String, Object> 이슈_상태_변경하기(서버정보_데이터 서버정보, String 이슈_키_또는_아이디, String 상태_아이디) {
 
+        String 이슈전환_아이디 = null;
         try {
             WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
 
@@ -212,7 +214,8 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
             Map<String, Object> 결과 = new HashMap<>();
 
             // Transition 조회
-            String 이슈전환_아이디 = 이슈전환_아이디_조회하기(서버정보, 이슈_키_또는_아이디, 상태_아이디);
+            이슈전환_아이디 = 이슈전환_아이디_조회하기(서버정보, 이슈_키_또는_아이디, 상태_아이디);
+            로그.info("이슈전환_아이디: " + 이슈전환_아이디);
 
             // 이슈 상태 변경
             if (이슈전환_아이디 != null) {
@@ -224,10 +227,13 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
                         .transition(전환)
                         .build();
 
-                응답처리.ApiResult<?> 응답_결과 = 지라유틸.executePut(webClient, endpoint, 수정_데이터);
+                ObjectMapper objectMapper = new ObjectMapper();
+                String json = objectMapper.writeValueAsString(수정_데이터);
+                로그.info("이슈 전환 json: " + json);
+                Optional<Boolean> 응답_결과 = 지라유틸.executePost(webClient, endpoint, 수정_데이터);
 
-                결과.put("success", 응답_결과.isSuccess());
-                결과.put("message", 응답_결과.isSuccess() ? "이슈 상태 변경 성공" : 응답_결과.getError().getMessage());
+                결과.put("success", 응답_결과.orElse(false));
+                결과.put("message", 응답_결과.map(success -> success ? "이슈 상태 변경 성공" : "이슈 상태 변경 실패").orElse("이슈 상태 변경 실패"));
 
             } else {
                 결과.put("success", false);
@@ -238,7 +244,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
 
         } catch (Exception e) {
             String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
-                    "클라우드 지라(" + 서버정보.getUri() + ") :: 이슈 키(" + 이슈_키_또는_아이디 + ") :: 상태 아이디(" + 상태_아이디 + ") :: 이슈_상태_변경하기에 실패하였습니다.");
+                    "클라우드 지라(" + 서버정보.getUri() + ") :: 이슈 키(" + 이슈_키_또는_아이디 + ") :: 상태 아이디(" + 상태_아이디 + ") :: 전환 아이디(" + 이슈전환_아이디 + ") :: 이슈_상태_변경하기에 실패하였습니다.");
             throw new IllegalArgumentException(에러코드.이슈전환_오류.getErrorMsg() + " :: " + 에러로그);
         }
     }
@@ -256,7 +262,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
                     .map(지라이슈전환_데이터::getTransitions)
                     .orElse(Collections.emptyList()).stream()
                     .filter(데이터 -> {
-                        if (데이터.getTo() != null && 데이터.getTo().getId() != null) {
+                        if (데이터.getTo() != null && !StringUtils.isBlank(데이터.getTo().getId())) {
                             return 상태_아이디.equals(데이터.getTo().getId());
                         }
                         return false;

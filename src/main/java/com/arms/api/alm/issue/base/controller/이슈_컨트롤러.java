@@ -63,7 +63,7 @@ public class 이슈_컨트롤러 {
     @ResponseBody
     @RequestMapping(
             value = {"/{issueKeyOrId}/{statusId}"},
-            method = {RequestMethod.PUT}
+            method = {RequestMethod.POST}
     )
     public Map<String,Object> 이슈_상태_변경하기(@PathVariable("connectId") Long 연결_아이디,
                                       @PathVariable("issueKeyOrId") String 이슈_키_또는_아이디,

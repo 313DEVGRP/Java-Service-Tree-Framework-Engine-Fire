@@ -16,6 +16,7 @@ import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
 import com.atlassian.jira.rest.client.api.domain.input.TransitionInput;
 import io.atlassian.util.concurrent.Promise;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -248,10 +249,12 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
             return null;
         }
 
-        Map<String, Object> 결과 = new HashMap<String, Object>();
+        Map<String, Object> 결과 = new HashMap<>();
+        String 이슈전환_아이디 = null;
+
         try {
             Issue 지라이슈 = restClient.getIssueClient().getIssue(이슈_키_또는_아이디).claim();
-            String 이슈전환_아이디 = 이슈전환_아이디_조회하기(서버정보, 이슈_키_또는_아이디, 상태_아이디);
+            이슈전환_아이디 = 이슈전환_아이디_조회하기(서버정보, 이슈_키_또는_아이디, 상태_아이디);
 
             if (이슈전환_아이디 != null) {
                 TransitionInput transitionInput = new TransitionInput(Integer.parseInt(이슈전환_아이디));
@@ -265,17 +268,15 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
                 결과.put("success", false);
                 결과.put("message", "변경할 이슈 상태가 존재하지 않습니다.");
             }
+
+            return 결과;
+
         }
         catch (Exception e) {
             String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
-                    "온프레미스 지라(" + 서버정보.getUri() + ") :: 이슈_상태_변경하기 중 오류 :: " + 이슈_키_또는_아이디);
-            로그.error(에러로그);
-
-            결과.put("success", false);
-            결과.put("message", 에러로그);
+                    "온프레미스 지라(" + 서버정보.getUri() + ") :: 이슈 키(" + 이슈_키_또는_아이디 + ") :: 상태 아이디(" + 상태_아이디 + ") :: 전환 아이디(" + 이슈전환_아이디 + ") :: 이슈_상태_변경하기에 실패하였습니다.");
+            throw new IllegalArgumentException(에러코드.이슈전환_오류.getErrorMsg() + " :: " + 에러로그);
         }
-
-        return 결과;
     }
 
     public String 이슈전환_아이디_조회하기(서버정보_데이터 서버정보, String 이슈_키_또는_아이디, String 상태_아이디) {
@@ -291,7 +292,7 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
                     .map(지라이슈전환_데이터::getTransitions)
                     .orElse(Collections.emptyList()).stream()
                     .filter(데이터 -> {
-                        if (데이터.getTo() != null && 데이터.getTo().getId() != null) {
+                        if (데이터.getTo() != null && !StringUtils.isBlank(데이터.getTo().getId())) {
                             return 상태_아이디.equals(데이터.getTo().getId());
                         }
                         return false;

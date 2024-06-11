@@ -14,6 +14,4 @@ public class 클라우드_지라이슈생성_데이터 {
 
     private 클라우드_지라이슈필드_데이터 fields;
 
-    private 지라이슈전환_데이터.Transition transition;
-
 }

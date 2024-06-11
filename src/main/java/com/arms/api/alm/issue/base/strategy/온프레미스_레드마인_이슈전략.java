@@ -131,7 +131,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
             생성이슈.setDueDate(필드_데이터.getDueDate());
         }
 
-        if (상태_데이터 != null && !상태_데이터.getId().isEmpty()) {
+        if (상태_데이터 != null && !StringUtils.isBlank(상태_데이터.getId())) {
             if (이슈_상태_검증하기(서버정보, 상태_데이터.getId())) {
                 생성이슈.setStatusId(Integer.parseInt(상태_데이터.getId()));
             }
@@ -171,7 +171,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
                 수정이슈.setDescription(내용);
             }
 
-            if (상태_데이터 != null && !상태_데이터.getId().isEmpty()) {
+            if (상태_데이터 != null && !StringUtils.isBlank(상태_데이터.getId())) {
                 if (이슈_상태_검증하기(서버정보, 상태_데이터.getId())) {
                     수정이슈.setStatusId(Integer.parseInt(상태_데이터.getId()));
                 }
