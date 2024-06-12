@@ -171,6 +171,10 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
 
             로그.error(에러로그);
             throw new IllegalArgumentException(에러코드.이슈생성_오류.getErrorMsg() + 에러로그);
+        } else {
+            Optional.ofNullable(필드_데이터.getStatus())
+                    .map(상태_데이터 -> 상태_데이터.getId())
+                    .map(이슈상태_아이디 -> 이슈_상태_변경하기(서버정보, String.valueOf(생성된_이슈.getId()), 이슈상태_아이디));
         }
 
         지라이슈_데이터 반환할_지라이슈_데이터 = new 지라이슈_데이터();
@@ -212,6 +216,10 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
         if (필드_데이터.getLabels() != null) {
             입력_생성.setFieldValue("labels", 필드_데이터.getLabels());
         }
+
+        Optional.ofNullable(필드_데이터.getStatus())
+                .map(상태_데이터 -> 상태_데이터.getId())
+                .map(이슈상태_아이디 -> 이슈_상태_변경하기(서버정보, 이슈_키_또는_아이디, 이슈상태_아이디));
 
         IssueInput 수정_데이터 = 입력_생성.build();
         try {

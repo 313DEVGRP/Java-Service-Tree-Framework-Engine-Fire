@@ -129,9 +129,11 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
             로그.info("클라우드 지라 프로젝트 : {}, 이슈유형 : {}, 생성 필드 : {}, 이슈 생성하기"
                     , 프로젝트_아이디, 이슈유형_아이디, 입력_데이터.toString());
 
-            Optional.ofNullable(이슈생성필드_데이터.getStatus())
-                    .map(상태_데이터 -> 상태_데이터.getId())
-                    .map(이슈상태_아이디 -> 이슈_상태_변경하기(서버정보, 반환할_지라이슈_데이터.getId(), 이슈상태_아이디));
+            if (반환할_지라이슈_데이터 != null) {
+                Optional.ofNullable(이슈생성필드_데이터.getStatus())
+                        .map(상태_데이터 -> 상태_데이터.getId())
+                        .map(이슈상태_아이디 -> 이슈_상태_변경하기(서버정보, 반환할_지라이슈_데이터.getId(), 이슈상태_아이디));
+            }
         }
         catch (Exception e) {
             String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
