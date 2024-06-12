@@ -7,7 +7,6 @@ import com.arms.api.alm.utils.지라유틸;
 import com.arms.api.util.errors.codes.에러코드;
 import com.arms.api.util.errors.에러로그_유틸;
 import com.arms.api.util.response.응답처리;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.DateUtils;
 import org.slf4j.Logger;
@@ -217,7 +216,6 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
 
             // Transition 조회
             이슈전환_아이디 = 이슈전환_아이디_조회하기(서버정보, 이슈_키_또는_아이디, 상태_아이디);
-            로그.info("이슈전환_아이디: " + 이슈전환_아이디);
 
             // 이슈 상태 변경
             if (이슈전환_아이디 != null) {
@@ -229,9 +227,6 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
                         .transition(전환)
                         .build();
 
-                ObjectMapper objectMapper = new ObjectMapper();
-                String json = objectMapper.writeValueAsString(수정_데이터);
-                로그.info("이슈 전환 json: " + json);
                 Optional<Boolean> 응답_결과 = 지라유틸.executePost(webClient, endpoint, 수정_데이터);
 
                 결과.put("success", 응답_결과.orElse(false));
