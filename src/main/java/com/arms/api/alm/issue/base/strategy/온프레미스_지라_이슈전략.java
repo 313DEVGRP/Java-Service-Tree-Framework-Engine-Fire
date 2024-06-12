@@ -193,7 +193,7 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
             restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(),
                                                                 서버정보.getUserId(),
                                                                 서버정보.getPasswordOrToken());
-        } 
+        }
         catch (URISyntaxException | IOException e) {
             에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
                     "온프레미스 지라(" + 서버정보.getUri() + ") :: 이슈_수정하기 온프레미스_통신기_생성 중 오류");
@@ -255,7 +255,8 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
 
         Map<String, Object> 결과 = new HashMap<String, Object>();
         try {
-            Promise<Void> 삭제결과 = restClient.getIssueClient().deleteIssue(이슈_키_또는_아이디, false);
+            boolean 하위이슈_삭제유무 = 지라API_정보.getParameter().isDeleteSubtasks();
+            Promise<Void> 삭제결과 = restClient.getIssueClient().deleteIssue(이슈_키_또는_아이디, 하위이슈_삭제유무);
             삭제결과.claim();
 
             결과.put("success", true);

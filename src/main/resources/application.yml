@@ -39,6 +39,7 @@ jira:
       priority: priority
       duedate: duedate
     parameter:
+      deleteSubtasks: true  # 지라(온, 클) subtasks 삭제 O(true), X(false)
       maxResults: 50
       fields: fields=project,issuetype,creator,reporter,assignee,labels,priority,status,resolution,resolutiondate,created,updated,worklogs,timespent,summary
       jql:

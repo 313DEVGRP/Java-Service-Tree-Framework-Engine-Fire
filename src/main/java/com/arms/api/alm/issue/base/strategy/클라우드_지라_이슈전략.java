@@ -203,8 +203,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
         try {
             WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
 
-            boolean 하위이슈_삭제유무 = false;
-
+            boolean 하위이슈_삭제유무 = 지라API_정보.getParameter().isDeleteSubtasks();
             String endpoint = "/rest/api/3/issue/" + 이슈_키_또는_아이디 + "?deleteSubtasks=" + 하위이슈_삭제유무;
             Map<String, Object> 결과 = new HashMap<>();
 
