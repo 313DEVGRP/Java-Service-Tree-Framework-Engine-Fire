@@ -233,6 +233,9 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
                 결과.put("message", 응답_결과.map(success -> success ? "이슈 상태 변경 성공" : "이슈 상태 변경 실패").orElse("이슈 상태 변경 실패"));
 
             } else {
+                String 에러로그 = "클라우드 지라(" + 서버정보.getUri() + ") :: 이슈 키(" + 이슈_키_또는_아이디 + ") :: 상태 아이디(" + 상태_아이디 + ") :: 해당 업무 흐름으로 변경이 불가능 합니다.";
+                로그.error(에러로그);
+
                 결과.put("success", false);
                 결과.put("message", "변경할 이슈 상태가 존재하지 않습니다.");
             }
