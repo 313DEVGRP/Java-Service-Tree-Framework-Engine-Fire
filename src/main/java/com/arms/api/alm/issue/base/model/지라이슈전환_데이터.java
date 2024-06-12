@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class 클라우드_지라이슈전환_데이터 {
+public class 지라이슈전환_데이터 {
 
     private List<Transition> transitions;
     private Transition transition;
@@ -24,11 +24,15 @@ public class 클라우드_지라이슈전환_데이터 {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class Transition{
+    public static class Transition {
         String id;
+        클라우드_지라이슈상태_정보 to;
 
-        클라우드_지라이슈_전환_설명 to;
+        public Transition(String id) {
+            this.id = id;
+        }
     }
+
     @Getter
     @Setter
     @Builder
@@ -36,7 +40,7 @@ public class 클라우드_지라이슈전환_데이터 {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class 클라우드_지라이슈_전환_설명{
+    public static class 클라우드_지라이슈상태_정보 {
         String id;
         String name;
     }

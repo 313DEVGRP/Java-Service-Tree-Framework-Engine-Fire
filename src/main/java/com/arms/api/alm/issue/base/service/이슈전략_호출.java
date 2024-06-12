@@ -140,6 +140,33 @@ public class 이슈전략_호출 {
 
     }
 
+    public Map<String,Object> 이슈_상태_변경하기(Long 연결_아이디, String 이슈_키_또는_아이디, String 상태_아이디) {
+
+        if (연결_아이디 == null) {
+            로그.error("이슈 상태 변경하기 Error: 연결_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
+            throw new IllegalArgumentException("이슈 상태 변경하기 Error: 연결_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
+        }
+
+        if (이슈_키_또는_아이디 == null || 이슈_키_또는_아이디.isEmpty()) {
+            로그.error("이슈 상태 변경하기 Error 이슈_키_또는_아이디가 없습니다.");
+            throw new IllegalArgumentException(에러코드.파라미터_NULL_오류.getErrorMsg() + " :: 이슈 상태 변경하기 Error 이슈_키_또는_아이디가 없습니다.");
+        }
+
+        if (상태_아이디 == null || 상태_아이디.isEmpty()) {
+            로그.error("이슈 상태 변경하기 Error 상태 아이디가 없습니다.");
+            throw new IllegalArgumentException("이슈 상태 변경하기 Error 상태 아이디가 없습니다.");
+        }
+
+        서버정보_데이터 서버정보 = 서버정보_서비스.서버정보_검증(연결_아이디);
+
+        이슈전략_등록_및_실행 이슈전략_등록_및_실행 = this.이슈전략_확인(서버정보);
+        Map<String,Object> 상태변경_결과
+                = 이슈전략_등록_및_실행.이슈_상태_변경하기(서버정보, 이슈_키_또는_아이디, 상태_아이디);
+
+        return 상태변경_결과;
+
+    }
+
     public Map<String,Object> 이슈_삭제하기(Long 연결_아이디, String 이슈_키_또는_아이디) {
 
         if (연결_아이디 == null) {

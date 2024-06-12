@@ -1,32 +1,28 @@
 package com.arms.api.alm.issue.base.strategy;
 
-import com.arms.api.alm.issue.base.model.지라사용자_데이터;
-import com.arms.api.alm.issue.base.model.지라이슈워크로그_데이터;
+import com.arms.api.alm.issue.base.model.*;
+import com.arms.api.alm.issue.priority.model.이슈우선순위_데이터;
 import com.arms.api.alm.issue.resolution.model.이슈해결책_데이터;
 import com.arms.api.alm.issue.status.model.이슈상태_데이터;
 import com.arms.api.alm.issue.type.model.이슈유형_데이터;
-import com.arms.api.alm.issue.priority.model.이슈우선순위_데이터;
-import com.arms.api.alm.issue.base.model.지라이슈_데이터;
-import com.arms.api.alm.issue.base.model.지라이슈생성_데이터;
-import com.arms.api.alm.issue.base.model.지라이슈생성필드_데이터;
-import com.arms.api.alm.issue.base.model.지라이슈필드_데이터;
-import com.arms.api.alm.issue.base.model.지라프로젝트_데이터;
-import com.arms.api.util.errors.에러로그_유틸;
-import com.arms.api.alm.utils.지라API_정보;
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
-import com.arms.api.util.errors.codes.에러코드;
-import com.arms.api.alm.serverinfo.service.서버정보_서비스;
+import com.arms.api.alm.utils.지라API_정보;
 import com.arms.api.alm.utils.지라유틸;
+import com.arms.api.util.errors.codes.에러코드;
+import com.arms.api.util.errors.에러로그_유틸;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.api.domain.*;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
+import com.atlassian.jira.rest.client.api.domain.input.TransitionInput;
 import io.atlassian.util.concurrent.Promise;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -175,6 +171,10 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
 
             로그.error(에러로그);
             throw new IllegalArgumentException(에러코드.이슈생성_오류.getErrorMsg() + 에러로그);
+        } else {
+            Optional.ofNullable(필드_데이터.getStatus())
+                    .map(상태_데이터 -> 상태_데이터.getId())
+                    .map(이슈상태_아이디 -> 이슈_상태_변경하기(서버정보, String.valueOf(생성된_이슈.getId()), 이슈상태_아이디));
         }
 
         지라이슈_데이터 반환할_지라이슈_데이터 = new 지라이슈_데이터();
@@ -217,6 +217,10 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
             입력_생성.setFieldValue("labels", 필드_데이터.getLabels());
         }
 
+        Optional.ofNullable(필드_데이터.getStatus())
+                .map(상태_데이터 -> 상태_데이터.getId())
+                .map(이슈상태_아이디 -> 이슈_상태_변경하기(서버정보, 이슈_키_또는_아이디, 이슈상태_아이디));
+
         IssueInput 수정_데이터 = 입력_생성.build();
         try {
             Promise<Void> 수정결과 = restClient.getIssueClient().updateIssue(이슈_키_또는_아이디, 수정_데이터);
@@ -236,6 +240,83 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
         }
 
         return 결과;
+    }
+
+    @Override
+    public Map<String, Object> 이슈_상태_변경하기(서버정보_데이터 서버정보, String 이슈_키_또는_아이디, String 상태_아이디) {
+
+        JiraRestClient restClient;
+        try {
+            restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(),
+                    서버정보.getUserId(),
+                    서버정보.getPasswordOrToken());
+        }
+        catch (URISyntaxException | IOException e) {
+            에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                    "온프레미스 지라(" + 서버정보.getUri() + ") :: 이슈_상태_변경하기 온프레미스_통신기_생성 중 오류");
+            return null;
+        }
+
+        Map<String, Object> 결과 = new HashMap<>();
+        String 이슈전환_아이디 = null;
+
+        try {
+            Issue 지라이슈 = restClient.getIssueClient().getIssue(이슈_키_또는_아이디).claim();
+            이슈전환_아이디 = 이슈전환_아이디_조회하기(서버정보, 이슈_키_또는_아이디, 상태_아이디);
+
+            if (이슈전환_아이디 != null) {
+                TransitionInput transitionInput = new TransitionInput(Integer.parseInt(이슈전환_아이디));
+                Promise<Void> 변경결과 = restClient.getIssueClient().transition(지라이슈, transitionInput);
+                변경결과.claim();
+
+                결과.put("success", true);
+                결과.put("message", "이슈 상태 변경 성공");
+
+            } else {
+                String 에러로그 = "온프레미스 지라(" + 서버정보.getUri() + ") :: 이슈 키(" + 이슈_키_또는_아이디 + ") :: 상태 아이디(" + 상태_아이디 + ") :: 해당 업무 흐름으로 변경이 불가능 합니다.";
+                로그.error(에러로그);
+
+                결과.put("success", false);
+                결과.put("message", "변경할 이슈 상태가 존재하지 않습니다.");
+            }
+
+            return 결과;
+
+        }
+        catch (Exception e) {
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                    "온프레미스 지라(" + 서버정보.getUri() + ") :: 이슈 키(" + 이슈_키_또는_아이디 + ") :: 상태 아이디(" + 상태_아이디 + ") :: 전환 아이디(" + 이슈전환_아이디 + ") :: 이슈_상태_변경하기에 실패하였습니다.");
+            throw new IllegalArgumentException(에러코드.이슈전환_오류.getErrorMsg() + " :: " + 에러로그);
+        }
+    }
+
+    public String 이슈전환_아이디_조회하기(서버정보_데이터 서버정보, String 이슈_키_또는_아이디, String 상태_아이디) {
+
+        try {
+            WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
+
+            String endpoint = "/rest/api/2/issue/" + 이슈_키_또는_아이디 + "/transitions";
+
+            지라이슈전환_데이터 이슈전환_데이터 = 지라유틸.get(webClient, endpoint, 지라이슈전환_데이터.class).block();
+
+            return Optional.ofNullable(이슈전환_데이터)
+                    .map(지라이슈전환_데이터::getTransitions)
+                    .orElse(Collections.emptyList()).stream()
+                    .filter(데이터 -> {
+                        if (데이터.getTo() != null && !StringUtils.isBlank(데이터.getTo().getId())) {
+                            return 상태_아이디.equals(데이터.getTo().getId());
+                        }
+                        return false;
+                    })
+                    .findFirst()
+                    .map(지라이슈전환_데이터.Transition::getId)
+                    .orElse(null);
+
+        } catch (Exception e) {
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                    "온프레미스 지라(" + 서버정보.getUri() + ") :: 이슈 키(" + 이슈_키_또는_아이디 + ") :: 상태 아이디(" + 상태_아이디 + ") :: 이슈전환_아이디_조회하기에 실패하였습니다.");
+            throw new IllegalArgumentException(에러코드.이슈전환_조회_오류.getErrorMsg() + " :: " + 에러로그);
+        }
     }
 
     @Override
