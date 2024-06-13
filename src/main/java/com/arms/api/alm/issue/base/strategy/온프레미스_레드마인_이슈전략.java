@@ -3,9 +3,9 @@ package com.arms.api.alm.issue.base.strategy;
 import com.arms.api.alm.issue.base.model.*;
 import com.arms.api.alm.issue.priority.model.이슈우선순위_데이터;
 import com.arms.api.alm.issue.status.model.이슈상태_데이터;
+import com.arms.api.alm.issue.status.strategy.온프레미스_레드마인_이슈상태_전략;
 import com.arms.api.alm.issue.type.model.이슈유형_데이터;
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
-import com.arms.api.alm.serverinfo.service.서버정보_서비스;
 import com.arms.api.alm.utils.레드마인API_정보;
 import com.arms.api.alm.utils.레드마인유틸;
 import com.arms.api.util.errors.codes.에러코드;
@@ -18,6 +18,7 @@ import com.taskadapter.redmineapi.bean.Issue;
 import com.taskadapter.redmineapi.bean.IssueRelation;
 import com.taskadapter.redmineapi.bean.Tracker;
 import com.taskadapter.redmineapi.bean.User;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,9 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         this.레드마인유틸 = 레드마인유틸;
         this.레드마인API_정보 = 레드마인API_정보;
     }
+
+    @Autowired
+    private 온프레미스_레드마인_이슈상태_전략 온프레미스_레드마인_이슈상태_전략;
 
     @Override
     public List<지라이슈_데이터> 이슈_목록_가져오기(서버정보_데이터 서버정보, String 프로젝트_키_또는_아이디) {
@@ -92,7 +96,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         지라프로젝트_데이터 프로젝트_데이터 = 필드_데이터.getProject();
         이슈유형_데이터 이슈유형_데이터 = 필드_데이터.getIssuetype();
         이슈우선순위_데이터 우선순위_데이터 = 필드_데이터.getPriority();
-
+        이슈상태_데이터 상태_데이터 = 필드_데이터.getStatus();
 
         if (프로젝트_데이터 == null) {
             String 에러로그 = "레드마인_온프레미스 ["+ 서버정보.getUri() +"] :: 생성 데이터 :: 프로젝트_데이터 Null :: 이슈_생성하기 오류";
@@ -127,6 +131,12 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
             생성이슈.setDueDate(필드_데이터.getDueDate());
         }
 
+        if (상태_데이터 != null && !StringUtils.isBlank(상태_데이터.getId())) {
+            if (이슈_상태_검증하기(서버정보, 상태_데이터.getId())) {
+                생성이슈.setStatusId(Integer.parseInt(상태_데이터.getId()));
+            }
+        }
+
         try {
             생성이슈 = 생성이슈.create();
         }
@@ -149,6 +159,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         지라이슈생성필드_데이터 필드_데이터 = 지라이슈생성_데이터.getFields();
         String 제목 = 필드_데이터.getSummary();
         String 내용 = 필드_데이터.getDescription();
+        이슈상태_데이터 상태_데이터 = 필드_데이터.getStatus();
 
         try {
             Issue 수정이슈 = 레드마인_매니저.getIssueManager().getIssueById(Integer.parseInt(이슈_키_또는_아이디));
@@ -158,6 +169,12 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
             }
             if (내용 != null) {
                 수정이슈.setDescription(내용);
+            }
+
+            if (상태_데이터 != null && !StringUtils.isBlank(상태_데이터.getId())) {
+                if (이슈_상태_검증하기(서버정보, 상태_데이터.getId())) {
+                    수정이슈.setStatusId(Integer.parseInt(상태_데이터.getId()));
+                }
             }
 
             수정이슈.update();
@@ -176,6 +193,63 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         }
 
         return 결과;
+    }
+
+    @Override
+    public Map<String, Object> 이슈_상태_변경하기(서버정보_데이터 서버정보, String 이슈_키_또는_아이디, String 상태_아이디) {
+
+        RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+
+        Map<String, Object> 결과 = new HashMap<>();
+
+        try {
+            Issue 수정이슈 = 레드마인_매니저.getIssueManager().getIssueById(Integer.parseInt(이슈_키_또는_아이디));
+
+            boolean 상태_아이디_확인 = 이슈_상태_검증하기(서버정보, 상태_아이디);
+
+            if (상태_아이디_확인) {
+                수정이슈.setStatusId(Integer.parseInt(상태_아이디));
+                수정이슈.update();
+                결과.put("success", true);
+                결과.put("message", "이슈 상태 변경 성공");
+            } else {
+                String 에러로그 = "레드마인_온프레미스 [" + 서버정보.getUri() + "] :: 이슈 키[" + 이슈_키_또는_아이디 + "] :: 상태 아이디[" + 상태_아이디 + "] :: 해당 업무 흐름으로 변경이 불가능 합니다.";
+                로그.error(에러로그);
+
+                결과.put("success", false);
+                결과.put("message", "유효하지 않은 상태 아이디 (" + 상태_아이디 + ")");
+            }
+
+        }
+        catch (RedmineException e) {
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                    "레드마인_온프레미스 [" + 서버정보.getUri() + "] :: 이슈_키_또는_아이디 :: "
+                            + 이슈_키_또는_아이디 + " :: 수정데이터 :: " + 상태_아이디 + "이슈_상태_변경하기 오류");
+            로그.error(에러로그);
+
+            결과.put("success", false);
+            결과.put("message", 에러로그);
+        }
+
+        return 결과;
+    }
+
+    public boolean 이슈_상태_검증하기(서버정보_데이터 서버정보, String 상태_아이디) {
+
+        boolean 상태_아이디_확인 = false;
+
+        List<이슈상태_데이터> 상태목록 = 온프레미스_레드마인_이슈상태_전략.이슈상태_목록_가져오기(서버정보);
+
+        if (상태목록 != null) {
+            for (이슈상태_데이터 상태_데이터 : 상태목록) {
+                if (StringUtils.equals(상태_데이터.getId(), 상태_아이디)) {
+                    상태_아이디_확인 = true;
+                    break;
+                }
+            }
+        }
+
+        return 상태_아이디_확인;
     }
 
     @Override
