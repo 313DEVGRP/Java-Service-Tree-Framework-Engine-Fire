@@ -667,32 +667,4 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
 
         return 클라우드_지라이슈필드_데이터;
     }
-
-    public Optional<Boolean> 이슈상태_변경( WebClient webClient ,String 이슈_키_또는_아이디,String 요구사항_상태_아이디) throws Exception {
-
-        String 이슈상태_변환아이디 = 이슈상태_변환아이디_반환(webClient,  이슈_키_또는_아이디, 요구사항_상태_아이디 );
-
-        String endpoint = "/rest/api/3/issue/" + 이슈_키_또는_아이디 + "/transitions";
-
-        지라이슈전환_데이터 transition = new 지라이슈전환_데이터();
-
-        지라이슈전환_데이터.Transition 변환할_상태 = 지라이슈전환_데이터.Transition.builder().id(이슈상태_변환아이디).build();
-        transition.setTransition(변환할_상태);
-
-        Optional<Boolean> 응답_결과 = 지라유틸.executePost(webClient, endpoint, transition);
-
-        return 응답_결과;
-    }
-    public String 이슈상태_변환아이디_반환(WebClient webClient, String 이슈_키_또는_아이디,String 요구사항_상태_아이디) throws Exception{
-
-        String endpoint = "/rest/api/3/issue/" + 이슈_키_또는_아이디+"/transitions";
-
-        지라이슈전환_데이터 이슈전환_데이터 =  지라유틸.get(webClient, endpoint, 지라이슈전환_데이터.class).block();
-
-        return 이슈전환_데이터.getTransitions().stream()
-                .filter(데이터 -> 데이터.getTo().getId().equals(요구사항_상태_아이디))
-                .findFirst()
-                .map(지라이슈전환_데이터.Transition::getId)
-                .orElse(null);
-    }
 }
