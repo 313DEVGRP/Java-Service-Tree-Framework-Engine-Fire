@@ -30,6 +30,8 @@ public class 지라API_정보 {
     @Getter
     @Setter
     public static class Parameter {
+
+        private boolean deleteSubtasks;
         private int maxResults;
         private String fields;
         private Jql jql;

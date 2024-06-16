@@ -1,10 +1,11 @@
 package com.arms.api.alm.serverinfo.service;
 
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
-import com.arms.api.alm.serverinfo.repository.서버정보_저장소;
 import com.arms.api.alm.serverinfo.model.서버정보_엔티티;
+import com.arms.api.alm.serverinfo.repository.서버정보_저장소;
+import com.arms.api.msa_communicate.dto.JiraServerPureEntity;
+import com.arms.api.msa_communicate.백엔드통신기;
 import com.arms.api.util.errors.codes.에러코드;
-
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -15,13 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import com.arms.api.msa_communicate.백엔드통신기;
 
 @Slf4j
 @Service("서버정보_서비스")
@@ -78,56 +75,27 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
     @Override
     public Iterable<서버정보_엔티티> 서버정보백업_스케줄러() {
 
-//        boolean 인덱스확인 = 지라이슈_저장소.인덱스확인_및_생성_매핑(인덱스자료.서버정보_인덱스명);
-//
-//        if (!인덱스확인) {
-//            throw new IllegalArgumentException(에러코드.서버인덱스_NULL_오류.getErrorMsg());
-//        }
+        ResponseEntity<List<JiraServerPureEntity>> 결과 = 백엔드통신기.서버정보_가져오기();
+        List<JiraServerPureEntity> 서버정보목록 = 결과.getBody();
 
-        ResponseEntity<?> 결과 = 백엔드통신기.지라서버정보_가져오기();
-
-        Object body = 결과.getBody();
-        HashMap<String, Object> 서버정보맵 = null;
-
-        if (body instanceof HashMap) {
-            서버정보맵 = (HashMap<String, Object>) body;
-        } else {
-            throw new IllegalArgumentException("서버 응답이 올바르지 않습니다.");
-        }
-
-        Object 성공유무 = 서버정보맵.get("success");
-
-        if (성공유무 == null) {
-            throw new IllegalArgumentException(에러코드.서버정보_조회_오류.getErrorMsg());
-        }
-        else if ((boolean) 성공유무 != true) {
-            throw new IllegalArgumentException(에러코드.서버정보_조회_오류.getErrorMsg());
-        }
-        else if (서버정보맵.get("response") == null) {
-            throw new IllegalArgumentException(에러코드.서버정보_조회_오류.getErrorMsg());
-        }
-
-        List<LinkedHashMap> 서버정보목록 = (List<LinkedHashMap>) 서버정보맵.get("response");
-
-        List<서버정보_엔티티> result = null;
+        List<서버정보_엔티티> 저장된_서버정보_목록 = null;
         if (서버정보목록 != null && !서버정보목록.isEmpty()) {
-            result = 서버정보목록.stream()
+            저장된_서버정보_목록 = 서버정보목록.stream()
                     .map(서버정보 -> {
                         서버정보_엔티티 서버정보_엔티티 = new 서버정보_엔티티();
-                        서버정보_엔티티.setUri((String) 서버정보.get("c_jira_server_base_url"));
-                        서버정보_엔티티.setType((String) 서버정보.get("c_jira_server_type"));
-                        서버정보_엔티티.setUserId((String) 서버정보.get("c_jira_server_connect_id"));
-                        서버정보_엔티티.setPasswordOrToken((String) 서버정보.get("c_jira_server_connect_pw"));
-                        서버정보_엔티티.setConnectId((String) 서버정보.get("c_jira_server_etc"));
+                        서버정보_엔티티.setUri(서버정보.getC_jira_server_base_url());
+                        서버정보_엔티티.setType(서버정보.getC_jira_server_type());
+                        서버정보_엔티티.setUserId(서버정보.getC_jira_server_connect_id());
+                        서버정보_엔티티.setPasswordOrToken(서버정보.getC_jira_server_connect_pw());
+                        서버정보_엔티티.setConnectId(서버정보.getC_jira_server_etc());
 
-                        return 서버정보_엔티티;
+                        서버정보_엔티티 저장한_서버정보_엔티티 = 서버정보_저장소.save(서버정보_엔티티);
+                        return 저장한_서버정보_엔티티;
                     })
                     .collect(Collectors.toList());
         }
 
-        return result.stream().map(r-> 서버정보_저장소.save(r))
-                .collect(Collectors.toList());
-
+        return 저장된_서버정보_목록;
     }
 
     @Override

@@ -44,7 +44,7 @@ public class 온프레미스_지라_이슈유형_전략 implements 이슈유형_
 
                 이슈유형_데이터.setId(온프레미스_이슈_유형.getId().toString());
                 이슈유형_데이터.setName(온프레미스_이슈_유형.getName());
-                이슈유형_데이터.setSelf(온프레미스_이슈_유형.getName());
+                이슈유형_데이터.setSelf(String.valueOf(온프레미스_이슈_유형.getSelf()));
                 이슈유형_데이터.setSubtask(온프레미스_이슈_유형.isSubtask());
                 이슈유형_데이터.setDescription(온프레미스_이슈_유형.getDescription());
 
