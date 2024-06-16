@@ -131,7 +131,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
             if (반환할_지라이슈_데이터 != null) {
                 Optional.ofNullable(이슈생성필드_데이터.getStatus())
                         .map(상태_데이터 -> 상태_데이터.getId())
-                        .map(이슈상태_아이디 -> 이슈_상태_변경하기(서버정보, 반환할_지라이슈_데이터.getId(), 이슈상태_아이디));
+                        .ifPresent(이슈상태_아이디 -> 이슈_상태_변경하기(서버정보, 반환할_지라이슈_데이터.getId(), 이슈상태_아이디));
             }
         }
         catch (Exception e) {
@@ -179,7 +179,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
 
             Optional.ofNullable(필드_데이터.getStatus())
                     .map(상태_데이터 -> 상태_데이터.getId())
-                    .map(이슈상태_아이디 -> 이슈_상태_변경하기(서버정보, 이슈_키_또는_아이디, 이슈상태_아이디));
+                    .ifPresent(이슈상태_아이디 -> 이슈_상태_변경하기(서버정보, 이슈_키_또는_아이디, 이슈상태_아이디));
 
             수정_데이터.setFields(클라우드_필드_데이터);
 
@@ -227,12 +227,18 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
                         .transition(전환)
                         .build();
 
-                Optional<Boolean> 응답_결과 = 지라유틸.executePost(webClient, endpoint, 수정_데이터);
+                응답처리.ApiResult<?> 응답_결과 = 지라유틸.executePost(webClient, endpoint, 수정_데이터);
 
-                결과.put("success", 응답_결과.orElse(false));
-                결과.put("message", 응답_결과.map(success -> success ? "이슈 상태 변경 성공" : "이슈 상태 변경 실패").orElse("이슈 상태 변경 실패"));
-
-            } else {
+                if (응답_결과.isSuccess()) {
+                    결과.put("success", 응답_결과.isSuccess());
+                    결과.put("message", "이슈 상태 변경 성공");
+                }
+                else {
+                    결과.put("success", 응답_결과.isSuccess());
+                    결과.put("message", 응답_결과.getError().getMessage());
+                }
+            }
+            else {
                 String 에러로그 = "클라우드 지라(" + 서버정보.getUri() + ") :: 이슈 키(" + 이슈_키_또는_아이디 + ") :: 상태 아이디(" + 상태_아이디 + ") :: 해당 업무 흐름으로 변경이 불가능 합니다.";
                 로그.error(에러로그);
 
@@ -242,7 +248,8 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
 
             return 결과;
 
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
                     "클라우드 지라(" + 서버정보.getUri() + ") :: 이슈 키(" + 이슈_키_또는_아이디 + ") :: 상태 아이디(" + 상태_아이디 + ") :: 전환 아이디(" + 이슈전환_아이디 + ") :: 이슈_상태_변경하기에 실패하였습니다.");
             throw new IllegalArgumentException(에러코드.이슈전환_오류.getErrorMsg() + " :: " + 에러로그);

@@ -171,10 +171,11 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
 
             로그.error(에러로그);
             throw new IllegalArgumentException(에러코드.이슈생성_오류.getErrorMsg() + 에러로그);
-        } else {
+        }
+        else {
             Optional.ofNullable(필드_데이터.getStatus())
                     .map(상태_데이터 -> 상태_데이터.getId())
-                    .map(이슈상태_아이디 -> 이슈_상태_변경하기(서버정보, String.valueOf(생성된_이슈.getId()), 이슈상태_아이디));
+                    .ifPresent(이슈상태_아이디 -> 이슈_상태_변경하기(서버정보, String.valueOf(생성된_이슈.getId()), 이슈상태_아이디));
         }
 
         지라이슈_데이터 반환할_지라이슈_데이터 = new 지라이슈_데이터();
@@ -219,7 +220,7 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
 
         Optional.ofNullable(필드_데이터.getStatus())
                 .map(상태_데이터 -> 상태_데이터.getId())
-                .map(이슈상태_아이디 -> 이슈_상태_변경하기(서버정보, 이슈_키_또는_아이디, 이슈상태_아이디));
+                .ifPresent(이슈상태_아이디 -> 이슈_상태_변경하기(서버정보, 이슈_키_또는_아이디, 이슈상태_아이디));
 
         IssueInput 수정_데이터 = 입력_생성.build();
         try {
@@ -271,8 +272,8 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
 
                 결과.put("success", true);
                 결과.put("message", "이슈 상태 변경 성공");
-
-            } else {
+            }
+            else {
                 String 에러로그 = "온프레미스 지라(" + 서버정보.getUri() + ") :: 이슈 키(" + 이슈_키_또는_아이디 + ") :: 상태 아이디(" + 상태_아이디 + ") :: 해당 업무 흐름으로 변경이 불가능 합니다.";
                 로그.error(에러로그);
 
