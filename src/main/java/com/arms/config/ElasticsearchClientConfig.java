@@ -19,6 +19,8 @@ import org.springframework.data.elasticsearch.client.RestClients;
 import org.springframework.data.elasticsearch.config.AbstractElasticsearchConfiguration;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 
+import javax.annotation.PreDestroy;
+
 /**
  * @author Pratik Das
  *
@@ -31,6 +33,8 @@ public class ElasticsearchClientConfig extends AbstractElasticsearchConfiguratio
 
 	@Value("${elasticsearch.url}")
 	public String elasticsearchUrl;
+
+	private RestHighLevelClient client;
 
 	@Override
 	@Bean
@@ -46,23 +50,25 @@ public class ElasticsearchClientConfig extends AbstractElasticsearchConfiguratio
 				.withSocketTimeout(30000)
 				.build();
 
-		return RestClients
-						.create(clientConfiguration)
-						.rest();
+		this.client = RestClients.create(clientConfiguration).rest();
+		return this.client;
+	}
+
+	@PreDestroy
+	public void closeClient() {
+		try {
+			if (client != null) {
+				client.close();
+			}
+		} catch (Exception e) {
+			log.error("Error closing Elasticsearch client: ", e);
+		}
 	}
 
 	@Bean(name = "keepAliveStrategy")
 	public ConnectionKeepAliveStrategy connectionKeepAliveStrategy() {
 		return (response, context) -> {
 			HeaderElementIterator it = new BasicHeaderElementIterator(response.headerIterator(HTTP.CONN_KEEP_ALIVE));
-/*			while(it.hasNext()) {
-				HeaderElement he = it.nextElement();
-				String param = he.getName();
-				String value = he.getValue();
-				if(value != null && param.equalsIgnoreCase("timeout")) {
-					return Long.parseLong(value) * 1000;
-				}
-			}*/
 			return 180*1000;
 		};
 	}

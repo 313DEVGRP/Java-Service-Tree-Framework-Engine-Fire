@@ -131,14 +131,13 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
             생성이슈.setDueDate(필드_데이터.getDueDate());
         }
 
-        if (상태_데이터 != null && !StringUtils.isBlank(상태_데이터.getId())) {
-            if (이슈_상태_검증하기(서버정보, 상태_데이터.getId())) {
-                생성이슈.setStatusId(Integer.parseInt(상태_데이터.getId()));
-            }
-        }
-
         try {
             생성이슈 = 생성이슈.create();
+
+            if (생성이슈 != null &&
+                    상태_데이터 != null && !StringUtils.isBlank(상태_데이터.getId())) {
+                이슈_상태_변경하기(서버정보, String.valueOf(생성이슈.getId()), 상태_데이터.getId());
+            }
         }
         catch (RedmineException e) {
             String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
@@ -172,9 +171,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
             }
 
             if (상태_데이터 != null && !StringUtils.isBlank(상태_데이터.getId())) {
-                if (이슈_상태_검증하기(서버정보, 상태_데이터.getId())) {
-                    수정이슈.setStatusId(Integer.parseInt(상태_데이터.getId()));
-                }
+                이슈_상태_변경하기(서버정보, 이슈_키_또는_아이디, 상태_데이터.getId());
             }
 
             수정이슈.update();
@@ -217,7 +214,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
                 로그.error(에러로그);
 
                 결과.put("success", false);
-                결과.put("message", "유효하지 않은 상태 아이디 (" + 상태_아이디 + ")");
+                결과.put("message", "변경할 이슈 상태가 존재하지 않습니다.");
             }
 
         }
