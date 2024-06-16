@@ -99,7 +99,7 @@ public class 지라유틸 {
                 .bodyToMono(responseType);
     }
 
-    public Optional<Boolean> executePost(WebClient webClient, String uri, Object requestBody) {
+    public 응답처리.ApiResult<?> executePost(WebClient webClient, String uri, Object requestBody) {
 
         Mono<ResponseEntity<Void>> response = webClient.post()
                 .uri(uri)
@@ -107,8 +107,16 @@ public class 지라유틸 {
                 .retrieve()
                 .toEntity(Void.class);
 
-        return response.map(entity -> entity.getStatusCode() == HttpStatus.NO_CONTENT) // 결과가 204인가 확인
-                .blockOptional();
+        return response.map(entity -> {
+                    if (entity.getStatusCode() == HttpStatus.NO_CONTENT) {
+                        return 응답처리.success("OK");
+                    } else {
+                        return 응답처리.error("Fail", HttpStatus.BAD_REQUEST);
+                    }
+                })
+                .onErrorResume(WebClientResponseException.class, e -> Mono.just(응답처리.error(e, e.getStatusCode())))
+                .onErrorResume(Exception.class, e -> Mono.just(응답처리.error(e, HttpStatus.BAD_REQUEST)))
+                .block();
     }
 
     public 응답처리.ApiResult<?> executePut(WebClient webClient, String uri, Object requestBody) {
