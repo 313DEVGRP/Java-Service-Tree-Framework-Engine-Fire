@@ -170,11 +170,11 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
                 수정이슈.setDescription(내용);
             }
 
+            수정이슈.update();
+
             if (상태_데이터 != null && !StringUtils.isBlank(상태_데이터.getId())) {
                 이슈_상태_변경하기(서버정보, 이슈_키_또는_아이디, 상태_데이터.getId());
             }
-
-            수정이슈.update();
 
             결과.put("success", true);
             결과.put("message", "이슈 수정 성공");
