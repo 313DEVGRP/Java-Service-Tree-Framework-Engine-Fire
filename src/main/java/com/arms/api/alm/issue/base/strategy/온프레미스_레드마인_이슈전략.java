@@ -202,11 +202,12 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         try {
             Issue 수정이슈 = 레드마인_매니저.getIssueManager().getIssueById(Integer.parseInt(이슈_키_또는_아이디));
 
-            boolean 상태_아이디_확인 = 이슈_상태_검증하기(서버정보, 상태_아이디);
+            수정이슈.setStatusId(Integer.parseInt(상태_아이디));
+            수정이슈.update();
 
-            if (상태_아이디_확인) {
-                수정이슈.setStatusId(Integer.parseInt(상태_아이디));
-                수정이슈.update();
+            boolean 상태_변경_확인 = 이슈_상태_검증하기(서버정보, 이슈_키_또는_아이디, 상태_아이디);
+
+            if (상태_변경_확인) {
                 결과.put("success", true);
                 결과.put("message", "이슈 상태 변경 성공");
             } else {
@@ -231,22 +232,24 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         return 결과;
     }
 
-    public boolean 이슈_상태_검증하기(서버정보_데이터 서버정보, String 상태_아이디) {
+    public boolean 이슈_상태_검증하기(서버정보_데이터 서버정보, String 이슈_키_또는_아이디, String 상태_아이디) {
 
-        boolean 상태_아이디_확인 = false;
+        RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
-        List<이슈상태_데이터> 상태목록 = 온프레미스_레드마인_이슈상태_전략.이슈상태_목록_가져오기(서버정보);
+        try {
+            Issue 수정한_이슈 = 레드마인_매니저.getIssueManager().getIssueById(Integer.parseInt(이슈_키_또는_아이디));
 
-        if (상태목록 != null) {
-            for (이슈상태_데이터 상태_데이터 : 상태목록) {
-                if (StringUtils.equals(상태_데이터.getId(), 상태_아이디)) {
-                    상태_아이디_확인 = true;
-                    break;
-                }
-            }
+            return Optional.ofNullable(수정한_이슈)
+                    .map(Issue::getStatusId)
+                    .map(현재상태 -> StringUtils.equals(상태_아이디, String.valueOf(현재상태)))
+                    .orElse(false);
         }
-
-        return 상태_아이디_확인;
+        catch (RedmineException e) {
+            에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                    "레드마인_온프레미스 ["+ 서버정보.getUri() +"] :: 이슈_키_또는_아이디 :: "
+                            + 이슈_키_또는_아이디 + " :: 이슈_상태_검증하기 오류");
+            return false;
+        }
     }
 
     @Override
