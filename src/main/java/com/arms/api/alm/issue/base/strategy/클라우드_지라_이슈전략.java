@@ -113,7 +113,6 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
         /* ***
          * 프로젝트 와 이슈 유형에 따라 이슈 생성 시 들어가는 fields의 내용을 확인하는 부분
          *** */
-
         Map<String, 클라우드_이슈생성필드_메타데이터.필드_메타데이터> 필드_메타데이터_목록
                 = 지라유틸.필드_메타데이터_확인하기(webClient, 프로젝트_아이디, 이슈유형_아이디);
         클라우드_지라이슈필드_데이터 클라우드_필드_데이터 = this.필드검증_및_추가하기(이슈생성필드_데이터, 필드_메타데이터_목록, 서버정보, 프로젝트_아이디, 이슈유형_아이디);
@@ -127,12 +126,6 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
             반환할_지라이슈_데이터 = 지라유틸.post(webClient, endpoint, 입력_데이터, 지라이슈_데이터.class).block();
             로그.info("클라우드 지라 프로젝트 : {}, 이슈유형 : {}, 생성 필드 : {}, 이슈 생성하기"
                     , 프로젝트_아이디, 이슈유형_아이디, 입력_데이터.toString());
-
-            if (반환할_지라이슈_데이터 != null) {
-                Optional.ofNullable(이슈생성필드_데이터.getStatus())
-                        .map(상태_데이터 -> 상태_데이터.getId())
-                        .ifPresent(이슈상태_아이디 -> 이슈_상태_변경하기(서버정보, 반환할_지라이슈_데이터.getId(), 이슈상태_아이디));
-            }
         }
         catch (Exception e) {
             String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
@@ -145,7 +138,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
             String 에러로그 = "클라우드 지라(" + 서버정보.getUri() + ") ::  프로젝트 :: "+프로젝트_아이디+
                     " :: 이슈유형 :: " + 이슈유형_아이디+ " :: 생성 필드 :: "+ 입력_데이터.toString() + ", 이슈 생성하기 데이터가 NULL 입니다.";
             로그.error(에러로그);
-            return null;
+            throw new IllegalArgumentException(에러로그);
         }
 
         return 반환할_지라이슈_데이터;
@@ -176,10 +169,6 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
             if (필드_데이터.getLabels() != null) {
                 클라우드_필드_데이터.setLabels(필드_데이터.getLabels());
             }
-
-            Optional.ofNullable(필드_데이터.getStatus())
-                    .map(상태_데이터 -> 상태_데이터.getId())
-                    .ifPresent(이슈상태_아이디 -> 이슈_상태_변경하기(서버정보, 이슈_키_또는_아이디, 이슈상태_아이디));
 
             수정_데이터.setFields(클라우드_필드_데이터);
 
