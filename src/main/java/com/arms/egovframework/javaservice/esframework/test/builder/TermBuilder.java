@@ -1,19 +1,21 @@
 package com.arms.egovframework.javaservice.esframework.test.builder;
 
+
+import java.util.function.Consumer;
+
 public class TermBuilder {
 
-    private final FilterBuilder filterBuilder;
 
     public TermBuilder(FilterBuilder filterBuilder) {
-        this.filterBuilder = filterBuilder;
     }
 
-    public TermBuilder field(String name){
+    public TermBuilder(TermConjunctionBuilder termConjunctionBuilder) {
+//        this.filterBuilder = filterBuilder;
+    }
+
+    public TermBuilder term(Consumer<FieldBuilder> termConsumer){
         return this;
     }
 
-    public FilterBuilder value(String name){
-        return filterBuilder;
-    }
 
 }
