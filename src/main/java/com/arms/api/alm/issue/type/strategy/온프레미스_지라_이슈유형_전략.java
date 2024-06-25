@@ -57,59 +57,17 @@ public class 온프레미스_지라_이슈유형_전략 implements 이슈유형_
         catch (InterruptedException e) {
             Thread.currentThread().interrupt(); // 스레드를 다시 interrupt
 
-            에러로그_유틸.예외로그출력(e, this.getClass().getName(),
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
                     "온프레미스 지라("+ 서버정보.getConnectId() +") :: 이슈유형_목록_가져오기에 실패하였습니다.");
-            return Collections.emptyList();
+            throw new IllegalArgumentException(에러로그);
         }
         catch (Exception e) {
-            에러로그_유틸.예외로그출력(e, this.getClass().getName(),
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
                     "온프레미스 지라("+ 서버정보.getConnectId() +") :: 이슈유형_목록_가져오기에 실패하였습니다.");
-            return Collections.emptyList();
+            throw new IllegalArgumentException(에러로그);
         }
-
     }
 
     @Override
-    public List<이슈유형_데이터> 프로젝트별_이슈유형_목록_가져오기(서버정보_데이터 서버정보, String 프로젝트_아이디) {
-
-        if (프로젝트_아이디 == null || 프로젝트_아이디.isEmpty()) {
-            throw new IllegalArgumentException("프로젝트_아이디 :: " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
-
-        try {
-            JiraRestClient restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(),
-                                                                            서버정보.getUserId(),
-                                                                            서버정보.getPasswordOrToken());
-
-            Iterable<IssueType> 온프레미스_이슈_유형_목록 = restClient.getMetadataClient().getIssueTypes().get();
-            List<이슈유형_데이터> 반환할_이슈_유형_목록 = new ArrayList<>();
-
-            for (IssueType 온프레미스_이슈_유형 : 온프레미스_이슈_유형_목록) {
-                이슈유형_데이터 이슈유형_데이터 = new 이슈유형_데이터();
-
-                이슈유형_데이터.setId(온프레미스_이슈_유형.getId().toString());
-                이슈유형_데이터.setName(온프레미스_이슈_유형.getName());
-                이슈유형_데이터.setSelf(온프레미스_이슈_유형.getName());
-                이슈유형_데이터.setSubtask(온프레미스_이슈_유형.isSubtask());
-                이슈유형_데이터.setDescription(온프레미스_이슈_유형.getDescription());
-
-                반환할_이슈_유형_목록.add(이슈유형_데이터);
-            }
-
-            return 반환할_이슈_유형_목록;
-
-        }
-        catch (InterruptedException e) {
-            Thread.currentThread().interrupt(); // 스레드를 다시 interrupt
-
-            에러로그_유틸.예외로그출력(e, this.getClass().getName(),
-                    "온프레미스 지라("+ 서버정보.getConnectId() +") :: 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록_가져오기에 실패하였습니다.");
-            return Collections.emptyList();
-        }
-        catch (Exception e) {
-            에러로그_유틸.예외로그출력(e, this.getClass().getName(),
-                    "온프레미스 지라("+ 서버정보.getConnectId() +") :: 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록_가져오기에 실패하였습니다.");
-            return Collections.emptyList();
-        }
-    }
+    public List<이슈유형_데이터> 프로젝트별_이슈유형_목록_가져오기(서버정보_데이터 서버정보, String 프로젝트_아이디) { return null; }
 }

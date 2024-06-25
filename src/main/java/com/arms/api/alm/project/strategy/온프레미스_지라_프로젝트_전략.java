@@ -3,7 +3,7 @@ package com.arms.api.alm.project.strategy;
 import com.arms.api.alm.project.model.프로젝트_데이터;
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
 import com.arms.api.alm.utils.지라유틸;
-import com.arms.api.util.errors.codes.에러코드;
+import com.arms.api.util.errors.에러로그_유틸;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.api.domain.BasicProject;
 import org.slf4j.Logger;
@@ -38,19 +38,14 @@ public class 온프레미스_지라_프로젝트_전략 implements 프로젝트_
                                                         .getProject(프로젝트_키_또는_아이디)
                                                         .claim();
 
-            프로젝트_데이터 반환할_프로젝트_데이터 = new 프로젝트_데이터();
-            반환할_프로젝트_데이터.setSelf(온프레미스_지라프로젝트.getSelf().toString());
-            반환할_프로젝트_데이터.setId(온프레미스_지라프로젝트.getId().toString());
-            반환할_프로젝트_데이터.setKey(온프레미스_지라프로젝트.getKey());
-            반환할_프로젝트_데이터.setName(온프레미스_지라프로젝트.getName());
-
-            return 반환할_프로젝트_데이터;
-
-        } catch (Exception e) {
-            로그.error("온프레미스 프로젝트 정보 가져오기에 실패하였습니다." +e.getMessage());
-            throw new IllegalArgumentException(에러코드.요청한_데이터가_유효하지않음.getErrorMsg());
+            return 프로젝트_데이터형_변환(온프레미스_지라프로젝트);
         }
-
+        catch (Exception e) {
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                    "[ 온프레미스 지라 :: 연결_아이디 :: "+ 서버정보.getConnectId() +
+                            " :: 프로젝트 :: " + 프로젝트_키_또는_아이디 + " ] 프로젝트_상세정보_가져오기");
+            throw new IllegalArgumentException(에러로그);
+        }
     }
 
     @Override
@@ -68,21 +63,32 @@ public class 온프레미스_지라_프로젝트_전략 implements 프로젝트_
             List<프로젝트_데이터> 반환할_지라프로젝트_목록 = new ArrayList<>();
 
             for (BasicProject project : 모든_온프레미스_프로젝트) {
-
-                프로젝트_데이터 온프레미스_지라프로젝트 = new 프로젝트_데이터();
-                온프레미스_지라프로젝트.setSelf(project.getSelf().toString());
-                온프레미스_지라프로젝트.setId(project.getId().toString());
-                온프레미스_지라프로젝트.setKey(project.getKey());
-                온프레미스_지라프로젝트.setName(project.getName());
-
-                반환할_지라프로젝트_목록.add(온프레미스_지라프로젝트);
+                프로젝트_데이터 프로젝트_데이터 = 프로젝트_데이터형_변환(project);
+                if (프로젝트_데이터 != null) {
+                    반환할_지라프로젝트_목록.add(프로젝트_데이터);
+                }
             }
 
             return 반환할_지라프로젝트_목록;
-
-        } catch (Exception e) {
-            로그.error("온프레미스 프로젝트 전체 목록 가져오기에 실패하였습니다." +e.getMessage());
-            throw new IllegalArgumentException(에러코드.프로젝트_조회_오류.getErrorMsg());
         }
+        catch (Exception e) {
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                    "[ 온프레미스 지라 :: 연결_아이디 :: "+ 서버정보.getConnectId() + " ] 프로젝트_목록_가져오기");
+            throw new IllegalArgumentException(에러로그);
+        }
+    }
+
+    private 프로젝트_데이터 프로젝트_데이터형_변환(BasicProject 온프레미스_지라프로젝트) {
+        if (온프레미스_지라프로젝트 == null) {
+            return null;
+        }
+
+        프로젝트_데이터 반환할_프로젝트_데이터 = new 프로젝트_데이터();
+        반환할_프로젝트_데이터.setSelf(온프레미스_지라프로젝트.getSelf().toString());
+        반환할_프로젝트_데이터.setId(온프레미스_지라프로젝트.getId().toString());
+        반환할_프로젝트_데이터.setKey(온프레미스_지라프로젝트.getKey());
+        반환할_프로젝트_데이터.setName(온프레미스_지라프로젝트.getName());
+
+        return 반환할_프로젝트_데이터;
     }
 }

@@ -45,9 +45,9 @@ public class 레드마인_온프레미스_프로젝트_전략 implements 프로�
             프로젝트_데이터 = 프로젝트_데이터형_변환(프로젝트, null, 서버정보.getUri());
         }
         catch (RedmineException e) {
-            에러로그_유틸.예외로그출력(e, this.getClass().getName(),  "프로젝트_상세정보_가져오기");
-            throw new IllegalArgumentException(this.getClass().getName() + " :: "
-                    + 에러코드.프로젝트_조회_오류.getErrorMsg() + " :: " +e.getMessage());
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                                                    "프로젝트_상세정보_가져오기");
+            throw new IllegalArgumentException(에러로그);
         }
 
         return 프로젝트_데이터;
@@ -63,9 +63,9 @@ public class 레드마인_온프레미스_프로젝트_전략 implements 프로�
             프로젝트_목록 = 레드마인_매니저.getProjectManager().getProjects();
         }
         catch (RedmineException e) {
-            에러로그_유틸.예외로그출력(e, this.getClass().getName(),  "프로젝트_목록_가져오기");
-            throw new IllegalArgumentException(this.getClass().getName() + " :: "
-                    + 에러코드.프로젝트_조회_오류.getErrorMsg() + " :: " +e.getMessage());
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                                                "프로젝트_목록_가져오기");
+            throw new IllegalArgumentException(에러로그);
         }
 
         Map<Integer, Project> 프로젝트맵 = 프로젝트_목록.stream()
@@ -82,6 +82,10 @@ public class 레드마인_온프레미스_프로젝트_전략 implements 프로�
     }
 
     private 프로젝트_데이터 프로젝트_데이터형_변환(Project 프로젝트, String 전체_프로젝트명, String 서버정보경로) {
+        if (프로젝트 == null) {
+            return null;
+        }
+
         프로젝트_데이터 프로젝트_데이터 = new 프로젝트_데이터();
 
         프로젝트_데이터.setId(String.valueOf(프로젝트.getId()));
