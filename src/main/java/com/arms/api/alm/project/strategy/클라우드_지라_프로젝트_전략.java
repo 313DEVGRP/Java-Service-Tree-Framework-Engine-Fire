@@ -39,20 +39,15 @@ public class 클라우드_지라_프로젝트_전략 implements 프로젝트_전
             WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(),
                     서버정보.getPasswordOrToken());
 
-            프로젝트_데이터 반환할_프로젝트_데이터 = 지라유틸.get(webClient, endpoint,
-                    프로젝트_데이터.class).block();
-
-            if (반환할_프로젝트_데이터 == null) {
-                로그.error("클라우드 프로젝트 정보 가져오기에 실패하였습니다.");
-                throw new IllegalArgumentException(에러코드.프로젝트_조회_오류.getErrorMsg());
-            }
+            프로젝트_데이터 반환할_프로젝트_데이터 = 지라유틸.get(webClient, endpoint, 프로젝트_데이터.class).block();
 
             return 반환할_프로젝트_데이터;
-
         }
         catch (Exception e) {
-            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(), "프로젝트_상세정보_가져오기");
-            throw new IllegalArgumentException("클라우드 프로젝트 정보 가져오기에 실패하였습니다 :: " + 에러로그);
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                    "[ 클라우드 지라 :: 연결_아이디 :: "+ 서버정보.getConnectId() +
+                                    " :: 프로젝트 :: " + 프로젝트_키_또는_아이디 + " ] 프로젝트_상세정보_가져오기");
+            throw new IllegalArgumentException(에러로그);
         }
     }
 
@@ -94,11 +89,11 @@ public class 클라우드_지라_프로젝트_전략 implements 프로젝트_전
             }
 
             return 반환할_프로젝트_데이터_목록;
-
         }
         catch (Exception e) {
-            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(), "연결_아이디 :: "+ 서버정보.getConnectId() +" 프로젝트_목록_가져오기");
-            throw new IllegalArgumentException(에러코드.프로젝트_조회_오류.getErrorMsg()+ " :: " + 에러로그);
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                    "[ 클라우드 지라 :: 연결_아이디 :: "+ 서버정보.getConnectId() +" ] 프로젝트_목록_가져오기");
+            throw new IllegalArgumentException(에러로그);
         }
     }
 }

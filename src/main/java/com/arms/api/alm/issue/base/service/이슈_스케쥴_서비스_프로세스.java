@@ -137,38 +137,38 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     @Override
     public int 이슈_링크드이슈_서브테스크_벌크로_추가하기(Long 지라서버_아이디, String 이슈_키 , String 프로젝트키_또는_아이디, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception {
 
-                        if (지라서버_아이디 == null) {
-                            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
-                            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
-                        }
+        if (지라서버_아이디 == null) {
+            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
+            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
+        }
 
-                        if (이슈_키 == null || 이슈_키.isEmpty()) {
-                            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-                            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-                        }
+        if (이슈_키 == null || 이슈_키.isEmpty()) {
+            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+        }
 
-                        if (프로젝트키_또는_아이디 == null || 프로젝트키_또는_아이디.isEmpty()) {
-                            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 프로젝트키_또는_아이디 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-                            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 프로젝트키_또는_아이디 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-                        }
+        if (프로젝트키_또는_아이디 == null || 프로젝트키_또는_아이디.isEmpty()) {
+            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 프로젝트키_또는_아이디 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 프로젝트키_또는_아이디 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+        }
 
-                        if (제품서비스_아이디 == null || 제품서비스_버전들 == null) {
-                            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 제품서비스_아이디 또는 제품서비스_버전 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-                            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 제품서비스_아이디 또는 제품서비스_버전 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-                        }
+        if (제품서비스_아이디 == null || 제품서비스_버전들 == null) {
+            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 제품서비스_아이디 또는 제품서비스_버전 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 제품서비스_아이디 또는 제품서비스_버전 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+        }
 
-                        if (cReqLink == null) {
-                            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error cReqLink " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-                            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error cReqLink " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-                        }
+        if (cReqLink == null) {
+            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error cReqLink " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error cReqLink " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+        }
 
-                        List<지라이슈_엔티티> 벌크_저장_목록 = new ArrayList<지라이슈_엔티티>();
+        List<지라이슈_엔티티> 벌크_저장_목록 = new ArrayList<지라이슈_엔티티>();
 
-                        지라이슈_데이터 반환된_이슈 = Optional.ofNullable(이슈전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키))
-                                .map(이슈 -> {
-                                    벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink));
-                    return 이슈;
-                }).orElse(null);
+        지라이슈_데이터 반환된_이슈 = Optional.ofNullable(이슈전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키))
+                                                        .map(이슈 -> {
+                                                            벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink));
+                                            return 이슈;
+                                        }).orElse(null);
 
         if (반환된_이슈 == null) {
 
