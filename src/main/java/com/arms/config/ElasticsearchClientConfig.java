@@ -50,7 +50,13 @@ public class ElasticsearchClientConfig extends AbstractElasticsearchConfiguratio
 				.withSocketTimeout(30000)
 				.build();
 
-		this.client = RestClients.create(clientConfiguration).rest();
+		try {
+			this.client = RestClients.create(clientConfiguration).rest();
+		} catch (Exception e) {
+			log.error("Error creating Elasticsearch client: ", e);
+			throw new RuntimeException("Failed to create Elasticsearch client", e);
+		}
+
 		return this.client;
 	}
 
