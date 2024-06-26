@@ -52,23 +52,19 @@ public class ElasticsearchClientConfig extends AbstractElasticsearchConfiguratio
 				.build();
 
 
-		try {
-			this.client = RestClients.create(clientConfiguration).rest();
-			// 클라이언트 사용 코드
-			return this.client;
-		} catch (Exception e) {
+		try (RestHighLevelClient client = RestClients.create(clientConfiguration).rest()) {
+			// Use the ElasticsearchRestClient instance here
+			// Example: client.performRequest(...)
+			this.client = client;
+		} catch (IOException e) {
+			// Handle exceptions
 			log.error("Error creating Elasticsearch client: ", e);
-			throw new RuntimeException("Failed to create Elasticsearch client", e);
 		} finally {
-			// Ensure client is closed in all cases
-			if (this.client != null) {
-				try {
-					this.client.close();
-				} catch (IOException e) {
-					log.error("Error closing Elasticsearch client: ", e);
-				}
-			}
+			// Any cleanup code can go here, but since you're using try-with-resources,
+			// you don't need to manually close the client here.
+			log.info("엘라스틱서치 연결 설정을 시도했습니다.");
 		}
+		return this.client;
 	}
 
 	@PreDestroy
