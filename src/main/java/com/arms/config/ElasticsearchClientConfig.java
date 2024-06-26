@@ -20,6 +20,7 @@ import org.springframework.data.elasticsearch.config.AbstractElasticsearchConfig
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 
 import javax.annotation.PreDestroy;
+import java.io.IOException;
 
 /**
  * @author Pratik Das
@@ -50,7 +51,19 @@ public class ElasticsearchClientConfig extends AbstractElasticsearchConfiguratio
 				.withSocketTimeout(30000)
 				.build();
 
-		this.client = RestClients.create(clientConfiguration).rest();
+
+		try (RestHighLevelClient temp = RestClients.create(clientConfiguration).rest()) {
+			// Use the ElasticsearchRestClient instance here
+			// Example: client.performRequest(...)
+			this.client = temp;
+		} catch (IOException e) {
+			// Handle exceptions
+			log.error("Error creating Elasticsearch client: ", e);
+		} finally {
+			// Any cleanup code can go here, but since you're using try-with-resources,
+			// you don't need to manually close the client here.
+			log.info("엘라스틱서치 연결 설정을 시도했습니다.");
+		}
 		return this.client;
 	}
 
