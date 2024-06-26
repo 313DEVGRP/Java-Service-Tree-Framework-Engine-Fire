@@ -20,6 +20,7 @@ import org.springframework.data.elasticsearch.config.AbstractElasticsearchConfig
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 
 import javax.annotation.PreDestroy;
+import java.io.IOException;
 
 /**
  * @author Pratik Das
@@ -50,14 +51,24 @@ public class ElasticsearchClientConfig extends AbstractElasticsearchConfiguratio
 				.withSocketTimeout(30000)
 				.build();
 
+
 		try {
 			this.client = RestClients.create(clientConfiguration).rest();
+			// 클라이언트 사용 코드
+			return this.client;
 		} catch (Exception e) {
 			log.error("Error creating Elasticsearch client: ", e);
 			throw new RuntimeException("Failed to create Elasticsearch client", e);
+		} finally {
+			// Ensure client is closed in all cases
+			if (this.client != null) {
+				try {
+					this.client.close();
+				} catch (IOException e) {
+					log.error("Error closing Elasticsearch client: ", e);
+				}
+			}
 		}
-
-		return this.client;
 	}
 
 	@PreDestroy
