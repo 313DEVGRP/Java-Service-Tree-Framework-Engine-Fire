@@ -46,18 +46,15 @@ public class 온프레미스_레드마인_이슈우선순위_전략 implements �
         온프레미스_레드마인_우선순위_데이터 온프레미스_레드마인_우선순위_데이터;
         try {
             온프레미스_레드마인_우선순위_데이터 = 레드마인유틸.get(webClient, endpoint, 온프레미스_레드마인_우선순위_데이터.class).block();
-        } catch (Exception e) {
-            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "우선순위_목록_가져오기");
-            throw new IllegalArgumentException(this.getClass().getName() + " :: "
-                    + 에러코드.이슈우선순위_조회_오류.getErrorMsg() + " :: " +e.getMessage());
         }
-
-        if (온프레미스_레드마인_우선순위_데이터 == null) {
-            return Collections.emptyList();
+        catch (Exception e) {
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                                                    "우선순위_목록_가져오기");
+            throw new IllegalArgumentException(에러로그);
         }
 
         지라이슈우선순위_목록 = Optional.ofNullable(온프레미스_레드마인_우선순위_데이터.getIssue_priorities())
-                .orElse(Collections.emptyList())
+                .orElse(null)
                 .stream()
                 .map(우선순위 -> {
                     if (우선순위.isActive()) {
