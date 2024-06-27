@@ -62,6 +62,10 @@ public class 중첩_집계_쿼리_생성기 implements 쿼리_생성기 {
 		집계_쿼리.중첩_집계_단일_빌더_적용();
 	}
 
+	public void 중첩_메트릭_집계_단일_빌더_적용(){
+		집계_쿼리.중첩_메트릭_집계_단일_빌더_적용();
+	}
+
 	@Override
 	public NativeSearchQuery 생성() {
 		return 집계_쿼리.생성();
