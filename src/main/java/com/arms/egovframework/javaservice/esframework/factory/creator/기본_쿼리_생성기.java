@@ -10,7 +10,7 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 
 @Setter
 @Getter
-public class 기본_쿼리_생성기 implements com.arms.egovframework.javaservice.esframework.factory.creator.query.쿼리_생성기 {
+public class 기본_쿼리_생성기 implements 쿼리_생성기 {
 
 	private final 쿼리_생성기 쿼리_생성기;
 
