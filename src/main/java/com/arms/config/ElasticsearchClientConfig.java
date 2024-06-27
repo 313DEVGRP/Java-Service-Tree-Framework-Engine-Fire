@@ -38,7 +38,7 @@ public class ElasticsearchClientConfig extends AbstractElasticsearchConfiguratio
 
 	@Override
 	@Bean
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings({"deprecation","java:S2095"})
 	public RestHighLevelClient elasticsearchClient() {
 
 		final ClientConfiguration clientConfiguration =
