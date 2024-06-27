@@ -71,7 +71,7 @@ public class 플루언트디_서비스_프로세스 implements 플루언트디_�
             )
             .sort(new EsSortQuery(
                 List.of(
-                    기본_정렬_요청.builder().필드("@timestamp").정렬기준("desc").build()
+                    기본_정렬_요청.builder().필드("@timestamp").정렬_기준("desc").build()
                 )
             ));
 

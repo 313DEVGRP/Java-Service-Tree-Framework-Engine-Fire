@@ -15,7 +15,7 @@ public class EsSortQuery extends EsQuery {
 
 	public EsSortQuery(List<기본_정렬_요청> 기본정렬_요청들){
 		this.fieldSortBuilderList = 기본정렬_요청들.stream()
-			.map(일반_검색_요청 -> SortBuilders.fieldSort(일반_검색_요청.get필드()).order(SortOrder.fromString(일반_검색_요청.get정렬기준())))
+			.map(일반_검색_요청 -> SortBuilders.fieldSort(일반_검색_요청.get필드()).order(SortOrder.fromString(일반_검색_요청.get정렬_기준())))
 			.collect(Collectors.toList());
 	};
 

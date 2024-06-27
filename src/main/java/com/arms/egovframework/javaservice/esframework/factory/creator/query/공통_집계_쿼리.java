@@ -36,8 +36,8 @@ public class 공통_집계_쿼리 <T extends ValuesSourceAggregationBuilder<T>> 
                     .filter(a->!a.isEmpty()).orElseGet(()->(((기본_검색_집계_하위_요청) 기본_검색_집계_요청).get집계_하위_요청_필드들()));
         }
         this.크기 = 기본_검색_집계_요청.get크기();
-        this.컨텐츠보기여부 = 기본_검색_집계_요청.is컨텐츠보기여부();
-        this.하위크기 = 기본_검색_집계_요청.get하위크기();
+        this.컨텐츠보기여부 = 기본_검색_집계_요청.is컨텐츠_보기_여부();
+        this.하위크기 = 기본_검색_집계_요청.get하위_크기();
         this.boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
         this.nativeSearchQueryBuilder.withMaxResults(컨텐츠보기여부 ? 크기 : 0);
         this.nativeSearchQueryBuilder.addAggregation(
