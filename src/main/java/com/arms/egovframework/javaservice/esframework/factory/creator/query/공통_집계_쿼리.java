@@ -54,7 +54,7 @@ public class 공통_집계_쿼리 <T extends ValuesSourceAggregationBuilder<T>> 
     }
 
     @Override
-    public void 계층_하위_집계_빌더_적용(){
+    public void 중첩_집계_포괄_빌더_적용(){
         Optional.ofNullable(하위_집계들요청)
             .ifPresent(하위_그룹_필드들->{
                 if(!하위_그룹_필드들.isEmpty()){
@@ -67,7 +67,7 @@ public class 공통_집계_쿼리 <T extends ValuesSourceAggregationBuilder<T>> 
     }
 
     @Override
-    public void 형제_하위_집계_빌더_적용(){
+    public void 중첩_집계_단일_빌더_적용(){
         Optional.ofNullable(하위_집계들요청)
             .ifPresent(하위_그룹_필드들->{
                 if(!하위_그룹_필드들.isEmpty()){
