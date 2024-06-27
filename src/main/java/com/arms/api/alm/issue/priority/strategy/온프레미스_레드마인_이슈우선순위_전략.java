@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -40,7 +41,6 @@ public class 온프레미스_레드마인_이슈우선순위_전략 implements �
 
         WebClient webClient = 레드마인유틸.레드마인_웹클라이언트_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
-        List<이슈우선순위_데이터> 지라이슈우선순위_목록;
         String endpoint = 레드마인API_정보.getEndpoint().getPriorityList();
 
         온프레미스_레드마인_우선순위_데이터 온프레미스_레드마인_우선순위_데이터;
@@ -53,17 +53,18 @@ public class 온프레미스_레드마인_이슈우선순위_전략 implements �
             throw new IllegalArgumentException(에러로그);
         }
 
-        지라이슈우선순위_목록 = Optional.ofNullable(온프레미스_레드마인_우선순위_데이터.getIssue_priorities())
-                .orElse(null)
-                .stream()
-                .map(우선순위 -> {
-                    if (우선순위.isActive()) {
-                        return 레드마인_웹클라이언트_이슈우선순위_데이터형_변환(우선순위, 서버정보.getUri());
-                    }
-                    return null;
-                })
-                .filter(Objects::nonNull)
-                .collect(toList());
+        List<이슈우선순위_데이터> 지라이슈우선순위_목록 = null;
+        if (온프레미스_레드마인_우선순위_데이터 != null && 온프레미스_레드마인_우선순위_데이터.getIssue_priorities() != null) {
+            지라이슈우선순위_목록 = 온프레미스_레드마인_우선순위_데이터.getIssue_priorities().stream()
+                    .map(우선순위 -> {
+                        if (우선순위.isActive()) {
+                            return 레드마인_웹클라이언트_이슈우선순위_데이터형_변환(우선순위, 서버정보.getUri());
+                        }
+                        return null;
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        }
 
         return 지라이슈우선순위_목록;
     }
