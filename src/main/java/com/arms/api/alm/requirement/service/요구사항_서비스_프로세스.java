@@ -43,8 +43,8 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
             = new EsQueryBuilder().bool(new TermQueryMust("pdServiceId", 제품서비스_아이디));
 
         기본_검색_집계_요청 일반_집계_요청 = new 기본_검색_집계_요청() {};
-        일반_집계_요청.set메인그룹필드("assignee.assignee_displayName.keyword");
-        일반_집계_요청.set컨텐츠보기여부(false);
+        일반_집계_요청.set메인_그룹_필드("assignee.assignee_displayName.keyword");
+        일반_집계_요청.set컨텐츠_보기_여부(false);
 
         기본_쿼리_생성기.집계검색(일반_집계_요청,esQuery);
 
@@ -85,8 +85,8 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
                         ,new TermsQueryFilter("pdServiceVersions", Arrays.stream(버전_아이디들).filter(a->a!=null&&a>9L).collect(toList()))
                 );
         지라이슈_기본_검색__집계_하위_요청 지라이슈_일반_집계_요청 = new 지라이슈_기본_검색__집계_하위_요청();
-        지라이슈_일반_집계_요청.set메인그룹필드("status.status_name.keyword");
-        지라이슈_일반_집계_요청.set컨텐츠보기여부(false);
+        지라이슈_일반_집계_요청.set메인_그룹_필드("status.status_name.keyword");
+        지라이슈_일반_집계_요청.set컨텐츠_보기_여부(false);
         버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(중첩_집계_쿼리_생성기.포괄(지라이슈_일반_집계_요청, esQuery).생성());
 
         List<버킷_집계_결과> 상태값통계 = 버킷_집계_결과_목록_합계.get검색결과().get("group_by_status.status_name.keyword");
@@ -146,12 +146,12 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
 
 
         if(요구사항여부){
-            하위_집계_요청.set메인그룹필드("key");
+            하위_집계_요청.set메인_그룹_필드("key");
         }else{
-            하위_집계_요청.set메인그룹필드("parentReqKey");
+            하위_집계_요청.set메인_그룹_필드("parentReqKey");
         }
         버킷_집계_결과_목록_합계 _버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(중첩_집계_쿼리_생성기.포괄(하위_집계_요청, esQuery).생성());
 
-        return _버킷_집계_결과_목록_합계.get검색결과().get("group_by_"+하위_집계_요청.get메인그룹필드());
+        return _버킷_집계_결과_목록_합계.get검색결과().get("group_by_"+하위_집계_요청.get메인_그룹_필드());
     }
 }

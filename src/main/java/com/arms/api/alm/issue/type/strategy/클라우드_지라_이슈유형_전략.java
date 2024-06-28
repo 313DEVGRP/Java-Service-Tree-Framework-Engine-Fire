@@ -13,7 +13,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -43,14 +42,9 @@ public class 클라우드_지라_이슈유형_전략 implements 이슈유형_전
                                                 new ParameterizedTypeReference<List<이슈유형_데이터>>() {}).block();
         }
         catch (Exception e) {
-            에러로그_유틸.예외로그출력(e, this.getClass().getName(),
-                    "클라우드 지라("+ 서버정보.getConnectId() +") :: 이슈유형_목록_가져오기에 실패하였습니다.");
-            return Collections.emptyList();
-        }
-
-        if (이슈_유형_목록 == null) {
-            로그.error("클라우드 전역 이슈 유형 목록이 없습니다.");
-            return Collections.emptyList();
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                    "클라우드 지라("+ 서버정보.getConnectId() +") :: 이슈유형_목록가져오기에 실패하였습니다.");
+            throw new IllegalArgumentException(에러로그);
         }
 
         return 이슈_유형_목록;
@@ -73,14 +67,9 @@ public class 클라우드_지라_이슈유형_전략 implements 이슈유형_전
                     new ParameterizedTypeReference<List<이슈유형_데이터>>() {}).block();
         }
         catch (Exception e) {
-            에러로그_유틸.예외로그출력(e, this.getClass().getName(),
+            String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
                     "클라우드 지라("+ 서버정보.getConnectId() +") :: 프로젝트 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록_가져오기에 실패하였습니다.");
-            return Collections.emptyList();
-        }
-
-        if (이슈_유형_목록 == null) {
-            로그.error("클라우드 지라("+ 서버정보.getConnectId() +") :: 프로젝트 아이디 아이디("+ 프로젝트_아이디 +")별_이슈유형_목록이 Null입니다.");
-            return Collections.emptyList();
+            throw new IllegalArgumentException(에러로그);
         }
 
         return 이슈_유형_목록;

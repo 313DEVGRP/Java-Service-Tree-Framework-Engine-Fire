@@ -15,8 +15,8 @@ public class 기본_집계_쿼리 extends 공통_집계_쿼리<TermsAggregationB
         super(
                 기본_검색_집계_요청
             ,esQuery
-            ,AggregationBuilders.terms("group_by_" + 기본_검색_집계_요청.get메인그룹필드())
-                .field(기본_검색_집계_요청.get메인그룹필드())
+            ,AggregationBuilders.terms("group_by_" + 기본_검색_집계_요청.get메인_그룹_필드())
+                .field(기본_검색_집계_요청.get메인_그룹_필드())
                 .order(BucketOrder.count(기본_검색_집계_요청.is결과_갯수_기준_오름차순()))
                 .size(기본_검색_집계_요청.get크기())
         );
