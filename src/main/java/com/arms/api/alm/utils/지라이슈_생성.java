@@ -128,6 +128,7 @@ public class 지라이슈_생성 {
                 .key(지라이슈_데이터.getKey())
                 .self(지라이슈_데이터.getSelf())
                 .parentReqKey(부모_요구사항_키)
+                .upperKey(지라이슈_데이터.getUpperKey())
                 .isReq(요구사항유형_여부)
                 .project(프로젝트)
                 .issuetype(이슈유형)
