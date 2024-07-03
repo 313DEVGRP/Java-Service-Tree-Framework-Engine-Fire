@@ -1,0 +1,23 @@
+spring:
+  config:
+    active:
+      on-profile: stg
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+elasticsearch:
+  url: es-coordinating:9200
+
+arms:
+  backend-core:
+    url: http://backend-core:31313
+logging:
+  level:
+    web: debug
+
+slack:
+  service-name: ${spring.application.name}
+  token: xoxb-6506875664277-6522692878945-HskjLlwVilRWrFqfWdyI2E4y
+  profile: ${spring.profiles.active}
+  url: https://slack.com/
