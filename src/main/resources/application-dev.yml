@@ -8,7 +8,11 @@ spring:
 
 elasticsearch:
   url: www.313.co.kr:9292
+#  url: www.313.co.kr:9200
 
 arms:
   backend-core:
     url: http://127.0.0.1:31313
+logging:
+  level:
+    web: debug

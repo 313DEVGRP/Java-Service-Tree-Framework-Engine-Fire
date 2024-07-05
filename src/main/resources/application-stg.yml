@@ -1,7 +1,7 @@
 spring:
   config:
     active:
-      on-profile: live
+      on-profile: stg
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
@@ -14,7 +14,7 @@ arms:
     url: http://backend-core:31313
 logging:
   level:
-    web: info
+    web: debug
 
 slack:
   service-name: ${spring.application.name}
