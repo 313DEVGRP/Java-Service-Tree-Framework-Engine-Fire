@@ -14,7 +14,7 @@ arms:
     url: http://backend-core:31313
 logging:
   level:
-    web: debug
+    web: info
 
 slack:
   service-name: ${spring.application.name}
