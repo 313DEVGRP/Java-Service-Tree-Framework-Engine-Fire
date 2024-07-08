@@ -21,9 +21,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.StreamSupport;
 
@@ -99,7 +101,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
         }
 
         지라이슈_엔티티 저장할_이슈인덱스 = 지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 반환된_이슈, true,
-                "", 제품서비스_아이디, 제품서비스_버전들, cReqLink);
+                "", 제품서비스_아이디, 제품서비스_버전들, cReqLink,"");
 
         return 이슈_추가하기(저장할_이슈인덱스);
     }
@@ -166,9 +168,13 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
 
         지라이슈_데이터 반환된_이슈 = Optional.ofNullable(이슈전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키))
                                                         .map(이슈 -> {
-                                                            벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink));
+                                                            벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink,""));
                                             return 이슈;
                                         }).orElse(null);
+
+        LocalDate 이슈_삭제일 = LocalDate.now().minusDays(1);
+        DateTimeFormatter 년월일_포맷 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String 이슈_삭제일_년월일 = 이슈_삭제일.format(년월일_포맷);
 
         if (반환된_이슈 == null) {
 
@@ -189,55 +195,67 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
             지라프로젝트_데이터 지라프로젝트_데이터 = new 지라프로젝트_데이터();
             지라프로젝트_데이터.setKey(프로젝트키_또는_아이디);
 
-            이슈상태_데이터 이슈상태_데이터 = new 이슈상태_데이터();
-            이슈상태_데이터.setId("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
-            이슈상태_데이터.setSelf("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
-            이슈상태_데이터.setName("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
-            이슈상태_데이터.setDescription("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
-
             지라이슈필드_데이터 지라이슈필드_데이터 = new 지라이슈필드_데이터();
 
             지라이슈필드_데이터.setProject(지라프로젝트_데이터);
-            지라이슈필드_데이터.setStatus(이슈상태_데이터);
 
             반환된_이슈.setFields(지라이슈필드_데이터);
-            벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 반환된_이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink));
+            벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 반환된_이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink,""));
 
             try {
-                List<지라이슈_엔티티> 링크드이슈_서브테스크_목록 = Optional.ofNullable(서브테스크_조회.요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디,
-                                이슈_키))
+                List<지라이슈_엔티티> 링크드이슈_목록 = Optional.ofNullable(서브테스크_조회.요구사항_링크드이슈_검색하기(지라서버_아이디,이슈_키))
                         .orElse(Collections.emptyList())
                         .stream()
-                        .map(링크드이슈_서브테스크 -> {
-                            if (링크드이슈_서브테스크.getStatus() != null) {
-                                링크드이슈_서브테스크.getStatus().setId("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
-                                링크드이슈_서브테스크.getStatus().setName("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
-                                링크드이슈_서브테스크.getStatus().setSelf("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
-                                링크드이슈_서브테스크.getStatus().setDescription("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
-                            }
-                            return 링크드이슈_서브테스크;
+                        .map(링크드이슈 -> {
+                            링크드이슈.setParentReqKey("");
+                            링크드이슈.setConnectType("");
+                            return 링크드이슈;
                         })
                         .collect(toList());
 
-                벌크_저장_목록.addAll(링크드이슈_서브테스크_목록);
+                벌크_저장_목록.addAll(링크드이슈_목록);
+
+                List<지라이슈_엔티티> 서브테스크_목록 = Optional.ofNullable(서브테스크_조회.요구사항_서브테스크_검색하기(지라서버_아이디,이슈_키))
+                        .orElse(Collections.emptyList())
+                        .stream()
+                        .map(서브테스크 -> {
+                            서브테스크.setConnectType("subtask");
+                            서브테스크.setDeleted(이슈_삭제일_년월일);
+                            return 서브테스크;
+                        })
+                        .collect(toList());
+
+                벌크_저장_목록.addAll(서브테스크_목록);
             }
             catch (Exception e) {
                 로그.error(e.getMessage());
             }
         }
         else {
-            List<지라이슈_데이터> 이슈링크_또는_서브테스크_목록 = new ArrayList<지라이슈_데이터>();
+            List<지라이슈_데이터> ALM이슈링크_목록 = new ArrayList<지라이슈_데이터>();
+            List<지라이슈_데이터> ALM서브테스크_목록 = new ArrayList<지라이슈_데이터>();
 
             Optional.ofNullable(이슈전략_호출.이슈링크_가져오기(지라서버_아이디, 이슈_키))
-                    .ifPresent(이슈링크_목록 -> 이슈링크_또는_서브테스크_목록.addAll(이슈링크_목록));
+                    .ifPresent(이슈링크_목록 -> ALM이슈링크_목록.addAll(이슈링크_목록));
 
             Optional.ofNullable(이슈전략_호출.서브테스크_가져오기(지라서버_아이디, 이슈_키))
-                    .ifPresent(서브테스크_목록 -> 이슈링크_또는_서브테스크_목록.addAll(서브테스크_목록));
+                    .ifPresent(서브테스크_목록 -> ALM서브테스크_목록.addAll(서브테스크_목록));
 
-            if (이슈링크_또는_서브테스크_목록 != null && 이슈링크_또는_서브테스크_목록.size() >= 1) {
-                List<지라이슈_엔티티> 변환된_이슈_목록 = 이슈링크_또는_서브테스크_목록.stream().map(이슈링크또는서브테스크 -> {
-                            지라이슈_엔티티 변환된_이슈 = 지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 이슈링크또는서브테스크,
-                                    false, 이슈_키, 제품서비스_아이디, 제품서비스_버전들, cReqLink);
+            if (ALM이슈링크_목록 != null && ALM이슈링크_목록.size() >= 1) {
+                List<지라이슈_엔티티> 변환된_이슈_목록 = ALM이슈링크_목록.stream().map(ALM이슈링크 -> {
+                            지라이슈_엔티티 변환된_이슈 = 지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, ALM이슈링크,
+                                    false, 이슈_키, 제품서비스_아이디, 제품서비스_버전들, cReqLink,"linked");
+                            벌크_저장_목록.add(변환된_이슈);
+                            return 변환된_이슈;
+                        })
+                        .filter(Objects::nonNull)
+                        .collect(toList());
+            }
+
+            if (ALM서브테스크_목록 != null && ALM서브테스크_목록.size() >= 1) {
+                List<지라이슈_엔티티> 변환된_이슈_목록 = ALM서브테스크_목록.stream().map(ALM서브테스크 -> {
+                            지라이슈_엔티티 변환된_이슈 = 지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, ALM서브테스크,
+                                    false, 이슈_키, 제품서비스_아이디, 제품서비스_버전들, cReqLink,"subtask");
                             벌크_저장_목록.add(변환된_이슈);
                             return 변환된_이슈;
                         })
@@ -287,15 +305,20 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
         지라이슈_데이터 반환된_이슈 = Optional.ofNullable(이슈전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키))
                 .map(이슈 -> {
                     if (전일_업데이트여부(이슈.getFields().getUpdated())) {
-                        증분벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink));
+                        증분벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink,null));
                     }
                     return 이슈;
                 }).orElse(null);
+
+        LocalDate 이슈_삭제일 = LocalDate.now().minusDays(1);
+        DateTimeFormatter 년월일_포맷 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String 이슈_삭제일_년월일 = 이슈_삭제일.format(년월일_포맷);
 
         if (반환된_이슈 == null) {
             /**
              * ALM 서버 조회 후 반환된 데이터가 Null -> 1. 삭제되어 조회가 안 되는 경우 2. 서버에서 에러가 터진 경우
              * ES 데이터에 있는지 조회 후 암스에서 관리하지 않는 요구사항으로 처리하는 로직
+             * 서버에서 에러가 터져 삭제 및 연결 해제 표기된 내용은 삭제 스케줄러 작동시 ALM과 ES 데이터를 확인해 복구 및 삭제 한다
              **/
             String 조회조건_아이디 = 지라서버_아이디 + "_" + 프로젝트키_또는_아이디 + "_" + 이슈_키;
             지라이슈_엔티티 조회결과 = this.이슈_조회하기(조회조건_아이디);
@@ -310,55 +333,95 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
             지라프로젝트_데이터 지라프로젝트_데이터 = new 지라프로젝트_데이터();
             지라프로젝트_데이터.setKey(프로젝트키_또는_아이디);
 
-            이슈상태_데이터 이슈상태_데이터 = new 이슈상태_데이터();
-            이슈상태_데이터.setId("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
-            이슈상태_데이터.setSelf("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
-            이슈상태_데이터.setName("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
-            이슈상태_데이터.setDescription("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
-
             지라이슈필드_데이터 지라이슈필드_데이터 = new 지라이슈필드_데이터();
 
             지라이슈필드_데이터.setProject(지라프로젝트_데이터);
-            지라이슈필드_데이터.setStatus(이슈상태_데이터);
 
             반환된_이슈.setFields(지라이슈필드_데이터);
-
-            증분벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 반환된_이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink));
+            지라이슈_엔티티 삭제된_요구사항 = 지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 반환된_이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink,null);
+            삭제된_요구사항.setDeleted(이슈_삭제일_년월일);
+            증분벌크_저장_목록.add(삭제된_요구사항);
 
             try {
-                List<지라이슈_엔티티> 링크드이슈_서브테스크_목록 = Optional.ofNullable(서브테스크_조회.요구사항_링크드이슈_서브테스크_검색하기(지라서버_아이디,
-                                이슈_키))
+                // 요구사항이 삭제된 경우 연결이슈는 삭제되지 않고 연결이 해제됨으로, parentKey와 connectType을 초기화
+                List<지라이슈_엔티티> 링크드이슈_목록 = Optional.ofNullable(서브테스크_조회.요구사항_링크드이슈_검색하기(지라서버_아이디,이슈_키))
                         .orElse(Collections.emptyList())
                         .stream()
-                        .map(링크드이슈_서브테스크 -> {
-                            if (링크드이슈_서브테스크.getStatus() != null) {
-                                링크드이슈_서브테스크.getStatus().setId("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
-                                링크드이슈_서브테스크.getStatus().setName("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
-                                링크드이슈_서브테스크.getStatus().setSelf("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
-                                링크드이슈_서브테스크.getStatus().setDescription("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다.");
-                            }
-                            return 링크드이슈_서브테스크;
+                        .map(링크드이슈 -> {
+                            링크드이슈.setParentReqKey("");
+                            링크드이슈.setConnectType("");
+                            return 링크드이슈;
                         })
                         .collect(toList());
 
-                증분벌크_저장_목록.addAll(링크드이슈_서브테스크_목록);
+                증분벌크_저장_목록.addAll(링크드이슈_목록);
+                // 요구사항이 삭제된 경우 하위이슈는 관리하지 않음으로 삭제처리 진행
+                List<지라이슈_엔티티> 서브테스크_목록 = Optional.ofNullable(서브테스크_조회.요구사항_서브테스크_검색하기(지라서버_아이디,이슈_키))
+                        .orElse(Collections.emptyList())
+                        .stream()
+                        .map(서브테스크 -> {
+                            서브테스크.setConnectType("subtask");
+                            서브테스크.setDeleted(이슈_삭제일_년월일);
+                            return 서브테스크;
+                        })
+                        .collect(toList());
+
+                증분벌크_저장_목록.addAll(서브테스크_목록);
+
             } catch (Exception e) {
                 로그.error(e.getMessage());
             }
         }
         else {
-            List<지라이슈_데이터> 이슈링크_또는_서브테스크_목록 = new ArrayList<>();
+            List<지라이슈_데이터> ALM증분이슈링크_목록 = new ArrayList<>();
+            List<지라이슈_데이터> ALM증분서브테스크_목록 = new ArrayList<>();
+            List<지라이슈_데이터> ALM서브테스크_목록 = new ArrayList<>();
 
+            /* ALM 업데이트 이력 조회 */
             Optional.ofNullable(이슈전략_호출.증분이슈링크_가져오기(지라서버_아이디, 이슈_키))
-                    .ifPresent(이슈링크_목록 -> 이슈링크_또는_서브테스크_목록.addAll(이슈링크_목록));
+                    .ifPresent(이슈링크_목록 -> ALM증분이슈링크_목록.addAll(이슈링크_목록));
 
-            Optional.ofNullable(이슈전략_호출.증분서브테스크_가져오기(지라서버_아이디, 이슈_키))
-                    .ifPresent(서브테스크_목록 -> 이슈링크_또는_서브테스크_목록.addAll(서브테스크_목록));
+            Optional.ofNullable(이슈전략_호출.증분서브테스크_가져오기(지라서버_아이디, 이슈_키)) 
+                    .ifPresent(서브테스크_목록 -> ALM증분서브테스크_목록.addAll(서브테스크_목록));
 
-            if (이슈링크_또는_서브테스크_목록 != null && 이슈링크_또는_서브테스크_목록.size() >= 1) {
-                List<지라이슈_엔티티> 변환된_이슈_목록 = 이슈링크_또는_서브테스크_목록.stream().map(이슈링크또는서브테스크 -> {
-                            지라이슈_엔티티 변환된_이슈 = 지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 이슈링크또는서브테스크,
-                                    false, 이슈_키, 제품서비스_아이디, 제품서비스_버전들, cReqLink);
+            /* ALM에서 하위이슈를 삭제(조회가 안된)한 경우 */
+            Optional.ofNullable(이슈전략_호출.서브테스크_가져오기(지라서버_아이디, 이슈_키))
+                    .ifPresent(서브테스크_목록 -> ALM서브테스크_목록.addAll(서브테스크_목록));
+
+            List<지라이슈_엔티티> es에_저장된_서브테스크_목록 = 서브테스크_조회.요구사항_서브테스크_검색하기(지라서버_아이디,이슈_키);
+
+            if (es에_저장된_서브테스크_목록 != null && !es에_저장된_서브테스크_목록.isEmpty()){
+
+                List<String> ALM에서_조회한_서브테스크_키_목록 = ALM서브테스크_목록.stream()
+                        .map(지라이슈_데이터::getKey)
+                        .collect(toList());
+
+                List<지라이슈_엔티티> 삭제된_서브테스크_목록 = es에_저장된_서브테스크_목록.stream()
+                        .filter(지라이슈_엔티티 -> !ALM에서_조회한_서브테스크_키_목록.contains(지라이슈_엔티티.getKey()))
+                        .map(지라이슈_엔티티 -> {
+                            지라이슈_엔티티.setDeleted(이슈_삭제일_년월일);
+                            return 지라이슈_엔티티;
+                        })
+                        .collect(toList());
+
+                증분벌크_저장_목록.addAll(삭제된_서브테스크_목록);
+            }
+
+            /* ALM에서 업데이트 이력이 존재하는 경우 */
+            // 이슈 링크
+            if (ALM증분이슈링크_목록 != null && ALM증분이슈링크_목록.size() >= 1) {
+                List<지라이슈_엔티티> 변환된_이슈_목록 = ALM증분이슈링크_목록.stream().map(이슈링크 -> {
+                            지라이슈_엔티티 변환된_이슈 = 지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 이슈링크,false, 이슈_키, 제품서비스_아이디, 제품서비스_버전들, cReqLink,"linked");
+                            증분벌크_저장_목록.add(변환된_이슈);
+                            return 변환된_이슈;
+                        })
+                        .filter(Objects::nonNull)
+                        .collect(toList());
+            }
+            // 서브 테스크
+            if (ALM증분서브테스크_목록 != null && ALM증분서브테스크_목록.size() >= 1) {
+                List<지라이슈_엔티티> 변환된_이슈_목록 = ALM증분서브테스크_목록.stream().map(서브테스크 -> {
+                            지라이슈_엔티티 변환된_이슈 = 지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 서브테스크,false, 이슈_키, 제품서비스_아이디, 제품서비스_버전들, cReqLink,"subtask");
                             증분벌크_저장_목록.add(변환된_이슈);
                             return 변환된_이슈;
                         })
