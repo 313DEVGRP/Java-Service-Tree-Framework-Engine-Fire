@@ -68,6 +68,11 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
                 .findFirst().orElseGet(지라이슈_엔티티::new);
     }
 
+    @Override
+    public String ALM이슈_도큐먼트삭제(String 인덱스_이름, String 도큐먼트_아이디){
+        return 지라이슈_저장소.deleteDocumentById(인덱스_이름, 도큐먼트_아이디);
+    }
+
 
     @Override
     public 지라이슈_엔티티 이슈_검색엔진_저장(Long 지라서버_아이디, String 이슈_키, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception {

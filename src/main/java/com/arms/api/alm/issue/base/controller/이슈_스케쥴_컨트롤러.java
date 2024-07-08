@@ -117,4 +117,18 @@ public class 이슈_스케쥴_컨트롤러 {
         return 이슈_스케쥴_서비스.증분이슈_링크드이슈_서브테스크_벌크추가(지라서버_아이디, 이슈_키, 프로젝트키_또는_아이디, 제품서비스_아이디, 제품서비스_버전_아이디들, cReqLink);
     }
 
+    @ResponseBody
+    @RequestMapping(
+            value = {"/document"},
+            method = {RequestMethod.DELETE}
+    )
+    public String ALM이슈_도큐먼트삭제(
+            @RequestParam("indexName") String 인덱스_이름,
+            @RequestParam("documentId") String 도큐먼트_아이디,
+            ModelMap model, HttpServletRequest request) throws Exception {
+
+        log.info(":: [ALM이슈_도큐먼트삭제] ::인덱스 {}, 도큐먼트 아이디 ", 인덱스_이름,도큐먼트_아이디);
+
+        return 이슈_스케쥴_서비스.ALM이슈_도큐먼트삭제(인덱스_이름,도큐먼트_아이디);
+    }
 }
