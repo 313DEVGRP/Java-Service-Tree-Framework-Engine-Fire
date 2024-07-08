@@ -48,4 +48,6 @@ public interface 공통저장소<T,ID extends Serializable> extends Elasticsearc
     Set<String> findIndexNamesByAlias(IndexCoordinates indexCoordinates);
 
 	boolean deleteIndex(IndexCoordinates indexCoordinates);
+
+	String deleteDocumentById(String indexName, String id);
 }

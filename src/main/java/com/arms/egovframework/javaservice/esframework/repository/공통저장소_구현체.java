@@ -462,6 +462,9 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         IndexOperations indexOperations = operations.indexOps(indexCoordinates);
         return indexOperations.delete();
     }
-
-
+    @Override
+    public String deleteDocumentById(String indexName, String id) {
+        IndexCoordinates indexCoordinates = IndexCoordinates.of(indexName);
+        return operations.delete(id, indexCoordinates);
+    }
 }
