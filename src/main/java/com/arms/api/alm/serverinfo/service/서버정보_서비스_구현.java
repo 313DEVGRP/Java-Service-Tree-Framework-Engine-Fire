@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -73,7 +74,7 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
     }
 
     @Override
-    public Iterable<서버정보_엔티티> 서버정보백업_스케줄러() {
+    public CompletableFuture<Iterable<서버정보_엔티티>> 서버정보백업_스케줄러() {
 
         ResponseEntity<List<JiraServerPureEntity>> 결과 = 백엔드통신기.서버정보_가져오기();
         List<JiraServerPureEntity> 서버정보목록 = 결과.getBody();
@@ -95,7 +96,7 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
                     .collect(Collectors.toList());
         }
 
-        return 저장된_서버정보_목록;
+        return CompletableFuture.completedFuture(저장된_서버정보_목록);
     }
 
     @Override

@@ -11,6 +11,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/engine/serverinfo")
@@ -40,7 +41,7 @@ public class 서버정보_컨트롤러 {
             method = {RequestMethod.POST}
     )
     @Async
-    public Iterable<서버정보_엔티티> 서버정보백업_스케줄러(ModelMap model, HttpServletRequest request) throws Exception {
+    public CompletableFuture<Iterable<서버정보_엔티티>> 서버정보백업_스케줄러(ModelMap model, HttpServletRequest request) throws Exception {
 
         로그.info("서버정보백업 스케줄러");
 
