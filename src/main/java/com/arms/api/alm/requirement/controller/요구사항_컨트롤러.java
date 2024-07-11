@@ -65,5 +65,17 @@ public class 요구사항_컨트롤러 {
         return ResponseEntity.ok(요구사항_서비스.제품_요구사항별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청));
     }
 
+    // 현황관리 - 요구사항 상세 이슈 조회 모달에 사용
+    @GetMapping("/reqIssueAndItsSubtasks")
+    public ResponseEntity<List<지라이슈_엔티티>> 요구사항_하위이슈_연결이슈_조회(
+            @RequestParam("pdServiceId") Long pdServiceLink,
+            @RequestParam("pdServiceVersions") Long[] pdServiceVersionLinks,
+            @RequestParam("jiraServerId") String jiraServerId, // ALM서버 아이디
+            @RequestParam("issueKey") String issueKey) {
+
+        return ResponseEntity.ok(요구사항_서비스.요구사항이슈_연결하위이슈_조회(pdServiceLink, pdServiceVersionLinks, jiraServerId, issueKey));
+
+    }
+
 }
 

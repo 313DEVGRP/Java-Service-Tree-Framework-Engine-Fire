@@ -6,6 +6,7 @@ import com.arms.api.util.model.dto.지라이슈_기본_검색__집계_하위_요
 import com.arms.api.util.model.dto.지라이슈_제품_및_제품버전_검색__집계_하위_요청;
 import com.arms.api.util.model.enums.IsReqType;
 import com.arms.egovframework.javaservice.esframework.EsQuery;
+import com.arms.egovframework.javaservice.esframework.model.dto.기본_검색_요청;
 import com.arms.egovframework.javaservice.esframework.model.dto.기본_검색_집계_요청;
 import com.arms.egovframework.javaservice.esframework.model.dto.기본_검색_집계_하위_요청;
 import com.arms.egovframework.javaservice.esframework.model.dto.집계_하위_요청;
@@ -74,6 +75,35 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
         return 지라이슈_저장소.normalSearch(
                 쿼리_생성기.생성()
         );
+    }
+
+    @Override
+    public List<지라이슈_엔티티> 요구사항이슈_연결하위이슈_조회(Long 제품서비스_아이디, Long[] 버전_아이디, String 지라서버아이디, String 이슈키) {
+        EsQuery esQuery_req = new EsQueryBuilder()
+                .bool(
+                        new TermQueryMust("pdServiceId", 제품서비스_아이디),
+                        new TermsQueryFilter("pdServiceVersions", 버전_아이디),
+                        new TermQueryMust("key", 이슈키)
+                );
+        EsQuery esQuery_subtask = new EsQueryBuilder()
+                .bool(
+                new TermQueryMust("pdServiceId", 제품서비스_아이디),
+                new TermsQueryFilter("pdServiceVersions", 버전_아이디),
+                new TermQueryMust("parentReqKey", 이슈키)
+        );
+        List<지라이슈_엔티티> 요구사항이슈 = 지라이슈_저장소.normalSearch(기본_쿼리_생성기.기본검색(new 기본_검색_요청() {
+        }, esQuery_req).생성());
+        List<지라이슈_엔티티> 하위이슈 = 지라이슈_저장소.normalSearch(기본_쿼리_생성기.기본검색(new 기본_검색_요청() {
+        }, esQuery_subtask).생성());
+
+        List<지라이슈_엔티티> 이슈_검색결과 = new ArrayList<>();
+        if(!요구사항이슈.isEmpty()) {
+            이슈_검색결과.addAll(요구사항이슈);
+        }
+        if(!하위이슈.isEmpty()) {
+            이슈_검색결과.addAll(하위이슈);
+        }
+        return 이슈_검색결과;
     }
 
     @Override
