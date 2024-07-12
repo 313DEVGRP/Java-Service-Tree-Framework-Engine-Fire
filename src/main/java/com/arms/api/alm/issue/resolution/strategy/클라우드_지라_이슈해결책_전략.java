@@ -41,7 +41,7 @@ public class 클라우드_지라_이슈해결책_전략 implements 이슈해결�
             int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
             boolean checkLast = false;
 
-            List<이슈해결책_데이터> 반환할_이슈해결책_데이터_목록 = new ArrayList<이슈해결책_데이터>();
+            List<이슈해결책_데이터> 반환할_이슈해결책_데이터_목록 = new ArrayList<>();
 
             while(!checkLast) {
                 String endpoint = "/rest/api/3/resolution/search?maxResults="+ 최대_검색수 + "&startAt=" + startAt;
@@ -49,12 +49,12 @@ public class 클라우드_지라_이슈해결책_전략 implements 이슈해결�
                                                             클라우드_지라이슈해결책_데이터.class).block();
 
                 if (지라이슈해결책_조회_결과 == null) {
-                    로그.error("클라우드 지라 이슈 해결책 목록이 Null입니다.");
-                    throw new IllegalArgumentException(에러코드.이슈해결책_조회_오류.getErrorMsg());
+                    로그.error("클라우드 지라 이슈 해결책 목록 조회 결과가 NULL입니다.");
+                    return null;
                 }
                 else if (지라이슈해결책_조회_결과.getValues() == null || 지라이슈해결책_조회_결과.getValues().size() == 0) {
                     로그.error("클라우드 지라 이슈 해결책 목록이 없습니다.");
-                    throw new IllegalArgumentException(에러코드.이슈해결책_조회_오류.getErrorMsg());
+                    return null;
                 }
 
                 반환할_이슈해결책_데이터_목록.addAll(지라이슈해결책_조회_결과.getValues());
@@ -71,8 +71,8 @@ public class 클라우드_지라_이슈해결책_전략 implements 이슈해결�
         }
         catch (Exception e) {
             String 에러로그 = 에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
-                    "클라우드 지라("+ 서버정보.getConnectId() +") :: 이슈해결책_목록_가져오기에 실패하였습니다.");
-            throw new IllegalArgumentException(에러코드.이슈해결책_조회_오류.getErrorMsg() + " :: " + 에러로그);
+                    "클라우드 지라("+ 서버정보.getConnectId() +") :: 이슈해결책_목록_가져오기");
+            throw new IllegalArgumentException(에러로그);
         }
     }
 

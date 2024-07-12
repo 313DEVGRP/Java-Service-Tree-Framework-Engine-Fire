@@ -6,7 +6,7 @@ import com.arms.egovframework.javaservice.esframework.EsQuery;
 import com.arms.egovframework.javaservice.esframework.model.dto.기본_검색_집계_요청;
 import com.arms.egovframework.javaservice.esframework.model.dto.집계_하위_요청;
 import com.arms.egovframework.javaservice.esframework.model.dto.기본_검색_집계_하위_요청;
-import com.arms.egovframework.javaservice.esframework.factory.builder.중첩_집계_메트릭_빌더;
+import com.arms.egovframework.javaservice.esframework.factory.builder.중첩_메트릭_집계_단일_빌더;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.search.aggregations.support.ValuesSourceAggregationBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
@@ -36,8 +36,8 @@ public class 공통_집계_쿼리 <T extends ValuesSourceAggregationBuilder<T>> 
                     .filter(a->!a.isEmpty()).orElseGet(()->(((기본_검색_집계_하위_요청) 기본_검색_집계_요청).get집계_하위_요청_필드들()));
         }
         this.크기 = 기본_검색_집계_요청.get크기();
-        this.컨텐츠보기여부 = 기본_검색_집계_요청.is컨텐츠보기여부();
-        this.하위크기 = 기본_검색_집계_요청.get하위크기();
+        this.컨텐츠보기여부 = 기본_검색_집계_요청.is컨텐츠_보기_여부();
+        this.하위크기 = 기본_검색_집계_요청.get하위_크기();
         this.boolQuery = esQuery.getQuery(new ParameterizedTypeReference<>() {});
         this.nativeSearchQueryBuilder.withMaxResults(컨텐츠보기여부 ? 크기 : 0);
         this.nativeSearchQueryBuilder.addAggregation(
@@ -54,7 +54,7 @@ public class 공통_집계_쿼리 <T extends ValuesSourceAggregationBuilder<T>> 
     }
 
     @Override
-    public void 계층_하위_집계_빌더_적용(){
+    public void 중첩_집계_포괄_빌더_적용(){
         Optional.ofNullable(하위_집계들요청)
             .ifPresent(하위_그룹_필드들->{
                 if(!하위_그룹_필드들.isEmpty()){
@@ -67,7 +67,7 @@ public class 공통_집계_쿼리 <T extends ValuesSourceAggregationBuilder<T>> 
     }
 
     @Override
-    public void 형제_하위_집계_빌더_적용(){
+    public void 중첩_집계_단일_빌더_적용(){
         Optional.ofNullable(하위_집계들요청)
             .ifPresent(하위_그룹_필드들->{
                 if(!하위_그룹_필드들.isEmpty()){
@@ -78,11 +78,11 @@ public class 공통_집계_쿼리 <T extends ValuesSourceAggregationBuilder<T>> 
     }
 
     @Override
-    public void 형제_하위_메트릭_집계_빌더_적용() {
+    public void 중첩_메트릭_집계_단일_빌더_적용() {
         Optional.ofNullable(하위_집계들요청)
             .ifPresent(하위_그룹_필드들->{
                 if(!하위_그룹_필드들.isEmpty()){
-                    new 중첩_집계_메트릭_빌더().createAggregation(하위_그룹_필드들,하위크기)
+                    new 중첩_메트릭_집계_단일_빌더().createAggregation(하위_그룹_필드들,하위크기)
                             .forEach(valuesSourceAggregationBuilder::subAggregation);
                 }
             });

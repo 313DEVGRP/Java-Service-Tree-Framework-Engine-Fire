@@ -14,8 +14,8 @@ public class 일자별_집계_쿼리 extends 공통_집계_쿼리<DateHistogramA
         super(
              기본_검색_집계_요청
             ,esQuery
-            ,new DateHistogramAggregationBuilder("date_group_by_" + 기본_검색_집계_요청.get메인그룹필드())
-                .field(기본_검색_집계_요청.get메인그룹필드())
+            ,new DateHistogramAggregationBuilder("date_group_by_" + 기본_검색_집계_요청.get메인_그룹_필드())
+                .field(기본_검색_집계_요청.get메인_그룹_필드())
                 .calendarInterval(dateHistogramInterval)
                 .minDocCount(0)
         );

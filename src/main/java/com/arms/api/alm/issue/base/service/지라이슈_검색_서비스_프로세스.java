@@ -55,7 +55,7 @@ public class 지라이슈_검색_서비스_프로세스 implements 지라이슈_
             )
             .sort(new EsSortQuery(
                 List.of(
-                    기본_정렬_요청.builder().필드("@timestamp").정렬기준("desc").build()
+                    기본_정렬_요청.builder().필드("@timestamp").정렬_기준("desc").build()
                 )
             ));
         SearchHits<지라이슈_엔티티> 지라이슈_검색결과= 지라이슈_저장소.search(기본_쿼리_생성기.기본검색(검색어_날짜포함_검색_요청, esQuery).생성());

@@ -66,9 +66,9 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                         new ExistsQueryFilter("assignee")
                 );
 
-        지라이슈_제품_및_제품버전_집계_요청.set메인그룹필드("pdServiceVersions");
+        지라이슈_제품_및_제품버전_집계_요청.set메인_그룹_필드("pdServiceVersions");
 
-        지라이슈_제품_및_제품버전_집계_요청.set하위그룹필드들(
+        지라이슈_제품_및_제품버전_집계_요청.set하위_그룹_필드들(
                 List.of("assignee.assignee_accountId.keyword","assignee.assignee_displayName.keyword")
         );
 
@@ -78,7 +78,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                 = 집계결과_가져오기(중첩_집계_쿼리_생성기.포괄(지라이슈_제품_및_제품버전_집계_요청, esQuery));
 
         List<버킷_집계_결과> 버전검색결과 = 버킷_집계_결과_목록_합계
-                .get검색결과().get("group_by_"+지라이슈_제품_및_제품버전_집계_요청.get메인그룹필드());
+                .get검색결과().get("group_by_"+지라이슈_제품_및_제품버전_집계_요청.get메인_그룹_필드());
 
         List<String> filteredVersionIds
                 = Arrays.stream(지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks())
@@ -160,12 +160,12 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                         new RangeQueryFilter("created", monthAgo, now, "fromto")
                 );
         기본_검색_집계_하위_요청 하위_집계_요청 = new 기본_검색_집계_하위_요청(){};
-        하위_집계_요청.set메인그룹필드("created");
-        하위_집계_요청.set하위그룹필드들(List.of("status.status_name.keyword"));
+        하위_집계_요청.set메인_그룹_필드("created");
+        하위_집계_요청.set하위_그룹_필드들(List.of("status.status_name.keyword"));
 
         버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(중첩_집계_쿼리_생성기.포괄_주별(하위_집계_요청,esQuery).생성());
 
-        List<버킷_집계_결과> aggregationByWeek = 버킷_집계_결과_목록_합계.get검색결과().get("date_group_by_"+하위_집계_요청.get메인그룹필드());
+        List<버킷_집계_결과> aggregationByWeek = 버킷_집계_결과_목록_합계.get검색결과().get("date_group_by_"+하위_집계_요청.get메인_그룹_필드());
 
 
         Map<String, 요구사항_지라이슈상태_주별_집계> 검색결과 = aggregationByWeek.stream()
@@ -204,7 +204,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                         RangeQueryFilter.of("created").lt(monthAgo)
                 );
         기본_검색_집계_요청 일반_집계_요청 = new 기본_검색_집계_요청(){};
-        일반_집계_요청.set메인그룹필드("status.status_name.keyword");
+        일반_집계_요청.set메인_그룹_필드("status.status_name.keyword");
         버킷_집계_결과_목록_합계 searchResponseForTotalIssues = 지라이슈_저장소.버킷집계(기본_쿼리_생성기.집계검색(일반_집계_요청,issueEsQuery).생성());
         Long totalIssuesCount = searchResponseForTotalIssues.get전체합계();
 
@@ -279,19 +279,19 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         EsQueryBuilder esQuery = new EsQueryBuilder().bool(esBoolQueries);
 
         기본_검색_집계_하위_요청 하위_집계_요청 = new 기본_검색_집계_하위_요청(){};
-        하위_집계_요청.set메인그룹필드(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준());
+        하위_집계_요청.set메인_그룹_필드(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준());
 
         List<String> 하위그룹필드들 = new ArrayList<>();
 
-        Optional.ofNullable(지라이슈_일자별_제품_및_제품버전_집계_요청.get메인그룹필드())
+        Optional.ofNullable(지라이슈_일자별_제품_및_제품버전_집계_요청.get메인_그룹_필드())
                 .ifPresent(element->{
                     하위그룹필드들.add(element);
-                    지라이슈_일자별_제품_및_제품버전_집계_요청.get하위그룹필드들()
+                    지라이슈_일자별_제품_및_제품버전_집계_요청.get하위_그룹_필드들()
                             .stream().findFirst()
                             .ifPresent(하위그룹필드들::add);
                 });
 
-        하위_집계_요청.set하위그룹필드들(하위그룹필드들);
+        하위_집계_요청.set하위_그룹_필드들(하위그룹필드들);
         버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(중첩_집계_쿼리_생성기.포괄_일별(하위_집계_요청,esQuery).생성());
         List<버킷_집계_결과> aggregationByDay = 버킷_집계_결과_목록_합계.get검색결과().get("date_group_by_"+지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준());
 
@@ -311,7 +311,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         Map<String, Long> 요구사항여부결과 = new HashMap<>();
         Map<String, Map<String, Long>> 상태목록결과 = new HashMap<>();
 
-        결과.get하위검색결과().get("group_by_"+지라이슈_일자별_제품_및_제품버전_집계_요청.get메인그룹필드()).forEach(term -> {
+        결과.get하위검색결과().get("group_by_"+지라이슈_일자별_제품_및_제품버전_집계_요청.get메인_그룹_필드()).forEach(term -> {
             String 필드명 = term.get필드명();
             Long 개수 = term.get개수();
 
@@ -319,7 +319,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
 
             List<버킷_집계_결과> 상태목록
                     = term.get하위검색결과().getOrDefault(
-                    "group_by_" + 지라이슈_일자별_제품_및_제품버전_집계_요청.get하위그룹필드들().stream().findFirst().orElseGet(()->"")
+                    "group_by_" + 지라이슈_일자별_제품_및_제품버전_집계_요청.get하위_그룹_필드들().stream().findFirst().orElseGet(()->"")
                     ,Collections.emptyList());
 
             Map<String, Long> status = 상태목록.stream()
@@ -361,7 +361,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                     .bool(esBoolQueries)
                     .sort(new EsSortQuery(
                         List.of(
-                            기본_정렬_요청.builder().필드(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준()).정렬기준("asc").build()
+                            기본_정렬_요청.builder().필드(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준()).정렬_기준("asc").build()
                         )
                     ));
 
@@ -391,7 +391,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                 .bool(esBoolQueries)
                 .sort(new EsSortQuery(
                         List.of(
-                                기본_정렬_요청.builder().필드(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준()).정렬기준("asc").build()
+                                기본_정렬_요청.builder().필드(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준()).정렬_기준("asc").build()
                         )
                 ));
         List<지라이슈_엔티티> 전체결과 = 지라이슈_저장소.normalSearch(기본_쿼리_생성기.기본검색(new 기본_검색_요청(){}, esQuery).생성());
@@ -490,7 +490,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
             )
         );
 
-        하위_집계_요청.set메인그룹필드("pdServiceVersions");
+        하위_집계_요청.set메인_그룹_필드("pdServiceVersions");
         버킷_집계_결과_목록_합계 _버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(중첩_집계_쿼리_생성기.포괄(하위_집계_요청, esQuery).생성());
 
         return _버킷_집계_결과_목록_합계.get검색결과().get("group_by_pdServiceVersions");
