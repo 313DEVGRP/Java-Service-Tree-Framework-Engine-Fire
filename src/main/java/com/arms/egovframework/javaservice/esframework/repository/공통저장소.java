@@ -3,6 +3,7 @@ package com.arms.egovframework.javaservice.esframework.repository;
 import com.arms.egovframework.javaservice.esframework.model.vo.메트릭_집계_결과_목록_합계;
 import com.arms.egovframework.javaservice.esframework.model.vo.버킷_집계_결과_목록_합계;
 import org.springframework.data.elasticsearch.core.IndexedObjectInformation;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
@@ -30,6 +31,8 @@ public interface 공통저장소<T,ID extends Serializable> extends Elasticsearc
 	List<T> normalRecentTrueAll();
 
 	List<T> normalSearch(Query query);
+
+	List<SearchHit<T>> normalSearchAll(Query query);
 
 	List<T> normalSearch(Query query, String newIndex);
 
