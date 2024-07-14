@@ -9,6 +9,7 @@ import com.arms.api.alm.utils.지라이슈_생성;
 import com.arms.api.util.common.constrant.index.인덱스자료;
 import com.arms.api.util.errors.codes.에러코드;
 import com.arms.egovframework.javaservice.esframework.EsQuery;
+import com.arms.egovframework.javaservice.esframework.filter.RangeQueryFilter;
 import com.arms.egovframework.javaservice.esframework.model.dto.기본_검색_요청;
 import com.arms.egovframework.javaservice.esframework.esquery.EsQueryBuilder;
 import com.arms.egovframework.javaservice.esframework.must.TermQueryMust;
@@ -17,6 +18,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -514,77 +516,50 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     }
 
     @Override
-    public int ALM에서_삭제된_데이터_ES에서삭제(Long 지라서버_아이디, String 이슈_키, String 프로젝트키_또는_아이디, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception{
-        if (지라서버_아이디 == null) {
-            로그.error("삭제된_ALM데이터_삭제 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
-            throw new IllegalArgumentException("삭제된_ALM데이터_삭제 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
-        }
+    public int ALM에서_삭제된_데이터_ES에서삭제() throws Exception {
+        try {
+            LocalDate 스케줄러_동작일 = LocalDate.now();
+            LocalDate 삭제_대상 = 스케줄러_동작일.minusDays(2);
+            DateTimeFormatter 날짜형식 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            String 삭제_대상일자 = 삭제_대상.format(날짜형식);
 
-        if (이슈_키 == null || 이슈_키.isEmpty()) {
-            로그.error("삭제된_ALM데이터_삭제 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("삭제된_ALM데이터_삭제 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
+            List<SearchHit<지라이슈_엔티티>> 삭제대상_목록 = 삭제대상이슈_조회하기(삭제_대상일자);
 
-        if (프로젝트키_또는_아이디 == null || 프로젝트키_또는_아이디.isEmpty()) {
-            로그.error("삭제된_ALM데이터_삭제 Error 프로젝트_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("삭제된_ALM데이터_삭제 Error 프로젝트_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
-
-        if (제품서비스_아이디 == null || 제품서비스_버전들 == null) {
-            로그.error("삭제된_ALM데이터_삭제 Error 제품서비스_아이디 또는 제품서비스_버전 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("삭제된_ALM데이터_삭제 Error 제품서비스_아이디 또는 제품서비스_버전 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
-
-        if (cReqLink == null) {
-            로그.error("삭제된_ALM데이터_삭제 Error cReqLink " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("삭제된_ALM데이터_삭제 Error cReqLink " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
-
-        지라이슈_데이터 ALM에서_조회된_요구사항 = 이슈전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키);
-
-        String 조회조건_아이디 = 지라서버_아이디 + "_" + 프로젝트키_또는_아이디 + "_" + 이슈_키;
-        지라이슈_엔티티 ES에서_조회된_요구사항 = this.이슈_조회하기(조회조건_아이디);
-
-
-
-
-
-
-       /* // 요구사항
-        // ES와 ALM 둘다 있는 경우 (서버 오류로 삭제 처리한 경우로 삭제 flag 제거)
-        if(ALM에서_조회된_요구사항 != null && ES에서_조회된_요구사항 != null){
-            ES에서_조회된_요구사항.setDeleted("");
-            this.이슈_추가하기(ES에서_조회된_요구사항);
-        }
-        // ES 에는 있지만 ALM 에는 없는 경우 (삭제 flag 일수 확인하여 해당 도큐먼트 제거)
-        else if (ALM에서_조회된_요구사항 == null && ES에서_조회된_요구사항 != null) {
-            String 삭제일 = ES에서_조회된_요구사항.getDeleted();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate 삭제된_날짜 = LocalDate.parse(삭제일, formatter);
-            LocalDate 오늘 = LocalDate.now();
-            // 오늘 날짜가 삭제된 일자보다 2일 지난 경우를 확인
-            if (ChronoUnit.DAYS.between(삭제된_날짜, 오늘) > 2) {
-                로그.info(" :: ALM에서_삭제된_데이터_ES에서삭제() :: id : {} 삭제",ES에서_조회된_요구사항.getId());
-                // 해당 조건을 만족하는 로직을 여기에 작성
-                this.ALM이슈_도큐먼트삭제(,ES에서_조회된_요구사항.getId());
+            if (삭제대상_목록 == null || 삭제대상_목록.isEmpty()) {
+                return 0;
             }
 
+            삭제대상_목록.stream()
+                    .forEach(도큐먼트 -> {
+                        try {
+                            ALM이슈_도큐먼트삭제(도큐먼트.getIndex(), 도큐먼트.getId());
+                        } catch (Exception e) {
+                            로그.error("도큐먼트 삭제 중 오류 발생: 인덱스={}, 아이디={}", 도큐먼트.getIndex(), 도큐먼트.getId(), e);
+                        }
+                    });
+
+            return 1;
+        } catch (Exception e) {
+            로그.error("ALM에서 삭제된 데이터를 ES에서 삭제하는 도중 오류가 발생했습니다.", e);
+            throw new Exception("ALM에서 삭제된 데이터를 ES에서 삭제하는 도중 오류가 발생했습니다.", e);
         }
-        // ES 에는 없고 ALM에는 조회되는 경우 (증분 및 벌크 스케줄러가 돌기전 or 잘못 삭제 -> es에 다시 생성)
-        *//*else if () {
+    }
 
-        }*/
+    @Override
+    public List<SearchHit<지라이슈_엔티티>> 삭제대상이슈_조회하기(String 삭제_대상일자) {
+
+        if (삭제_대상일자 == null || 삭제_대상일자 == null) {
+            로그.error("삭제대상이슈_조회하기 Error 삭제_대상일자 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+            throw new IllegalArgumentException("삭제대상이슈_조회하기 Error 삭제_대상일자 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+        }
+
+        EsQuery esQuery = new EsQueryBuilder()
+                .bool(
 
 
-
-        // 하위이슈
-        // ES와 ALM 둘다 있는 경우 (서버 오류로 삭제 처리한 경우로 삭제 flag 제거)
-
-        // ES 에는 있지만 ALM 에는 없는 경우 (삭제 flag 일수 확인하여 해당 도큐먼트 제거)
-
-        // ES 에는 없고 ALM에는 조회되는 경우 (증분 및 벌크 스케줄러가 돌기전 or 잘못 삭제 -> es에 다시 생성)
-
-        return 1;
+                        new RangeQueryFilter("deleted", 삭제_대상일자,삭제_대상일자,"fromto")
+                );
+        return 지라이슈_저장소.normalSearchAll(기본_쿼리_생성기.기본검색(new 기본_검색_요청(){}, esQuery).생성());
     }
 
 }
