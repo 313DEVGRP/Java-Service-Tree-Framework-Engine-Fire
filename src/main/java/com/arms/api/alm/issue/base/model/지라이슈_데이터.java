@@ -16,6 +16,8 @@ public class 지라이슈_데이터 {
 
     private String key;
 
+    private String upperKey;
+
     private String self;
 
     private 지라이슈필드_데이터 fields;

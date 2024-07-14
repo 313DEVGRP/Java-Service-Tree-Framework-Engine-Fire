@@ -15,7 +15,7 @@ public class 지라이슈_생성 {
             Long 지라서버_아이디, 지라이슈_데이터 지라이슈_데이터,
             boolean 요구사항유형_여부, String 부모_요구사항_키,
             Long 제품서비스_아이디, Long[] 제품서비스_버전들,
-            Long cReqLink
+            Long cReqLink, String connectType
     ) {
 
         지라이슈_엔티티.프로젝트 프로젝트 = Optional.ofNullable(지라이슈_데이터.getFields().getProject())
@@ -128,6 +128,7 @@ public class 지라이슈_생성 {
                 .key(지라이슈_데이터.getKey())
                 .self(지라이슈_데이터.getSelf())
                 .parentReqKey(부모_요구사항_키)
+                .upperKey(지라이슈_데이터.getUpperKey())
                 .isReq(요구사항유형_여부)
                 .project(프로젝트)
                 .issuetype(이슈유형)
@@ -147,6 +148,7 @@ public class 지라이슈_생성 {
                 .pdServiceId(제품서비스_아이디)
                 .pdServiceVersions(제품서비스_버전들)
                 .cReqLink(cReqLink)
+                .connectType(connectType)
                 .build();
 
         이슈.generateId();

@@ -32,5 +32,30 @@ public class 서브테스크_조회 {
         return 지라이슈_저장소.normalSearch(기본_쿼리_생성기.기본검색(new 기본_검색_요청() {}, esQuery).생성());
     }
 
+    public List<지라이슈_엔티티> 요구사항_서브테스크_검색하기(Long 서버_아이디, String 이슈_키) {
+
+        EsQuery esQuery = new EsQueryBuilder()
+                .bool(
+                        new TermsQueryFilter("parentReqKey",이슈_키)
+                        ,new TermsQueryFilter("jira_server_id",서버_아이디)
+                        ,new TermsQueryFilter("connectType","subtask")
+                );
+
+        return 지라이슈_저장소.normalSearch(기본_쿼리_생성기.기본검색(new 기본_검색_요청() {}, esQuery).생성());
+    }
+
+
+    public List<지라이슈_엔티티> 요구사항_링크드이슈_검색하기(Long 서버_아이디, String 이슈_키) {
+
+        EsQuery esQuery = new EsQueryBuilder()
+                .bool(
+                        new TermsQueryFilter("parentReqKey",이슈_키)
+                        ,new TermsQueryFilter("jira_server_id",서버_아이디)
+                        ,new TermsQueryFilter("connectType","linked")
+                );
+
+        return 지라이슈_저장소.normalSearch(기본_쿼리_생성기.기본검색(new 기본_검색_요청() {}, esQuery).생성());
+    }
+
 
 }
