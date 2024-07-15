@@ -184,4 +184,16 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
 
         return _버킷_집계_결과_목록_합계.get검색결과().get("group_by_"+하위_집계_요청.get메인_그룹_필드());
     }
+
+    @Override
+    public List<지라이슈_엔티티> 제품_버전별_삭제된_이슈조회(Long 제품서비스_아이디, Long[] 버전_아이디들){
+
+        EsQuery esQuery = new EsQueryBuilder()
+                .bool(new TermQueryMust("pdServiceId",제품서비스_아이디),
+                        new TermsQueryFilter("pdServiceVersions", Arrays.stream(버전_아이디들).filter(a->a!=null&&a>9L).collect(toList())),
+                        new ExistsQueryFilter("deleted")
+                );
+
+        return 지라이슈_저장소.normalSearch(기본_쿼리_생성기.기본검색(new 기본_검색_요청() { }, esQuery).생성());
+    }
 }
