@@ -337,6 +337,13 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
     public List<지라이슈_데이터> 서브테스크_가져오기(서버정보_데이터 서버정보, String 이슈_키_또는_아이디) {
 
         RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+        List<지라이슈_데이터> 하위이슈_목록 = new ArrayList<>();
+        서브테스크_가져오기_재귀(레드마인_매니저, 서버정보.getUri(), 이슈_키_또는_아이디, 하위이슈_목록);
+
+        return 하위이슈_목록;
+    }
+
+    public void 서브테스크_가져오기_재귀(RedmineManager 레드마인_매니저, String 서버URI, String 이슈_키_또는_아이디, List<지라이슈_데이터> 하위이슈_목록) {
 
         Params params = new Params()
                 .add("parent_id", 이슈_키_또는_아이디)
@@ -348,24 +355,24 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
         }
         catch (RedmineException e) {
             에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
-                    "레드마인_온프레미스 ["+ 서버정보.getUri() +"] :: 이슈_키_또는_아이디 :: "
+                    "레드마인_온프레미스 ["+ 서버URI +"] :: 이슈_키_또는_아이디 :: "
                             + 이슈_키_또는_아이디+ " :: 서브테스크_가져오기 오류");
+            return;
         }
 
         if (조회된_하위이슈_목록 == null || 조회된_하위이슈_목록.isEmpty()) {
-            로그.info("레드마인_온프레미스 ["+ 서버정보.getUri() +"] :: 이슈_키_또는_아이디 :: "
+            로그.info("레드마인_온프레미스 ["+ 서버URI +"] :: 이슈_키_또는_아이디 :: "
                     + 이슈_키_또는_아이디 + " :: 서브테스크 이슈 데이터가 없습니다.");
-            return null;
+            return;
         }
 
-        List<지라이슈_데이터> 하위이슈_목록 = 조회된_하위이슈_목록.stream().map(이슈 -> {
-                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터형_변환(레드마인_매니저, 이슈, 서버정보.getUri());
-                    return 지라이슈_데이터;
-                })
-                .filter(Objects::nonNull)
-                .collect(toList());
-
-        return 하위이슈_목록;
+        for (Issue 이슈 : 조회된_하위이슈_목록) {
+            지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터형_변환(레드마인_매니저, 이슈, 이슈_키_또는_아이디, 서버URI);
+            if (지라이슈_데이터 != null) {
+                하위이슈_목록.add(지라이슈_데이터);
+                서브테스크_가져오기_재귀(레드마인_매니저, 서버URI, String.valueOf(이슈.getId()), 하위이슈_목록);
+            }
+        }
     }
 
     @Override
@@ -480,10 +487,26 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
     }
 
     private 지라이슈_데이터 지라이슈_데이터형_변환(RedmineManager 레드마인_매니저, Issue 이슈, String 서버정보경로) {
+        return 지라이슈_데이터형_변환(레드마인_매니저, 이슈, null, 서버정보경로);
+    }
+
+    private 지라이슈_데이터 지라이슈_데이터형_변환(RedmineManager 레드마인_매니저, Issue 이슈, String 부모_이슈키_또는_아이디, String 서버정보경로) {
 
         지라이슈_데이터 지라이슈_데이터 = new 지라이슈_데이터();
         지라이슈필드_데이터 지라이슈필드_데이터 = new 지라이슈필드_데이터();
         String 기본경로 = 레드마인유틸.서버정보경로_체크(서버정보경로);
+
+        공통_데이터_설정(레드마인_매니저, 이슈, 지라이슈_데이터, 지라이슈필드_데이터, 기본경로);
+
+        Optional.ofNullable(부모_이슈키_또는_아이디)
+                .ifPresent(아이디 -> 지라이슈_데이터.setUpperKey(아이디));
+
+        지라이슈_데이터.setFields(지라이슈필드_데이터);
+
+        return 지라이슈_데이터;
+    }
+
+    private void 공통_데이터_설정(RedmineManager 레드마인_매니저, Issue 이슈, 지라이슈_데이터 지라이슈_데이터, 지라이슈필드_데이터 지라이슈필드_데이터, String 기본경로) {
 
         Optional.ofNullable(이슈.getId())
                 .map(아이디 -> String.valueOf(아이디))
@@ -556,10 +579,6 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
                 .ifPresent(지라이슈필드_데이터::setResolutiondate);
 
         지라이슈필드_데이터.setSummary(이슈.getSubject());
-
-        지라이슈_데이터.setFields(지라이슈필드_데이터);
-
-        return 지라이슈_데이터;
     }
 
     private String 날짜변환(Date 원본_날짜) {

@@ -4,11 +4,13 @@ import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.service.이슈_스케쥴_서비스;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @RestController
 @RequestMapping("/engine/jira/{connectId}/issue")
@@ -117,4 +119,46 @@ public class 이슈_스케쥴_컨트롤러 {
         return 이슈_스케쥴_서비스.증분이슈_링크드이슈_서브테스크_벌크추가(지라서버_아이디, 이슈_키, 프로젝트키_또는_아이디, 제품서비스_아이디, 제품서비스_버전_아이디들, cReqLink);
     }
 
+    @ResponseBody
+    @RequestMapping(
+            value = {"/document"},
+            method = {RequestMethod.DELETE}
+    )
+    public String ALM이슈_도큐먼트삭제(
+            @RequestParam("indexName") String 인덱스_이름,
+            @RequestParam("documentId") String 도큐먼트_아이디,
+            ModelMap model, HttpServletRequest request) throws Exception {
+
+        log.info(":: [ALM이슈_도큐먼트삭제] ::인덱스 {}, 도큐먼트 아이디 ", 인덱스_이름,도큐먼트_아이디);
+
+        return 이슈_스케쥴_서비스.ALM이슈_도큐먼트삭제(인덱스_이름,도큐먼트_아이디);
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/delete/document"},
+            method = {RequestMethod.GET}
+    )
+    public List<SearchHit<지라이슈_엔티티>> 삭제대상이슈_조회하기(
+            @RequestParam("delete") String 삭제일,
+            ModelMap model, HttpServletRequest request) throws Exception {
+
+        log.info(":: [삭제대상이슈_조회하기] ::삭제 대상 기준 {}", 삭제일);
+
+        return 이슈_스케쥴_서비스.삭제대상이슈_조회하기(삭제일);
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/delete"},
+            method = {RequestMethod.DELETE}
+    )
+    public int 이슈도큐먼트_삭제스케줄러(
+            ModelMap model, HttpServletRequest request) throws Exception {
+
+        log.info(":: [이슈도큐먼트_삭제스케줄러] ::");
+
+        return 이슈_스케쥴_서비스.ALM에서_삭제된_데이터_ES에서삭제();
+
+    }
 }
