@@ -128,6 +128,21 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         }
     }
 
+    public List<SearchHit<T>> normalSearchAll(Query query) {
+        try {
+            return operations.search(query, entityClass).getSearchHits();
+        } catch (NoSuchIndexException e) {
+            String errorMessage = e.getMessage();
+            if (errorMessage != null && errorMessage.contains("no such index")) {
+                return null;
+            }
+            throw e;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw e;
+        }
+    }
+
     private NativeSearchQuery recentQueryMerge(NativeSearchQuery query) {
 
         String recentFieldName = fieldInfo(entityClass, Recent.class).getName();
