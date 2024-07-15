@@ -96,7 +96,7 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
                     .collect(Collectors.toList());
         }
 
-        return CompletableFuture.completedFuture(저장된_서버정보_목록);
+        return  CompletableFuture.completedFuture(저장된_서버정보_목록);
     }
 
     @Override
