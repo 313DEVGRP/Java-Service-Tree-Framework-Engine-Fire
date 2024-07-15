@@ -76,6 +76,13 @@ public class 요구사항_컨트롤러 {
         return ResponseEntity.ok(요구사항_서비스.요구사항이슈_연결하위이슈_조회(pdServiceLink, pdServiceVersionLinks, jiraServerId, issueKey));
 
     }
+    @GetMapping("/deletedIssueList")
+    public ResponseEntity<List<지라이슈_엔티티>> 제품_버전별_삭제된_이슈조회(
+            @RequestParam("pdServiceId") Long pdServiceLink,
+            @RequestParam("pdServiceVersions") Long[] pdServiceVersionLinks) {
 
+        return ResponseEntity.ok(요구사항_서비스.제품_버전별_삭제된_이슈조회(pdServiceLink, pdServiceVersionLinks));
+
+    }
 }
 
