@@ -6,11 +6,13 @@ import com.arms.api.alm.serverinfo.service.서버정보_서비스;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -64,4 +66,13 @@ public class 서버정보_컨트롤러 {
         return 서버정보_서비스.서버정보_삭제하기(서버정보_데이터);
     }
 
+    @ResponseBody
+    @RequestMapping(
+            value = {"/serverTypeMap"},
+            method = {RequestMethod.GET}
+    )
+    public ResponseEntity<Map<String, String>> 서버_연결아이디_유형정보_맵_조회() {
+        Map<String, String> 서버_연결아이디_유형_맵 = 서버정보_서비스.서버_연결아이디_유형_맵();
+        return ResponseEntity.ok(서버_연결아이디_유형_맵);
+    }
 }
