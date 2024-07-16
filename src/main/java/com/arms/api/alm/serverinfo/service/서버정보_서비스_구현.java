@@ -6,6 +6,8 @@ import com.arms.api.alm.serverinfo.repository.서버정보_저장소;
 import com.arms.api.msa_communicate.dto.JiraServerPureEntity;
 import com.arms.api.msa_communicate.백엔드통신기;
 import com.arms.api.util.errors.codes.에러코드;
+import com.arms.egovframework.javaservice.esframework.factory.creator.기본_쿼리_생성기;
+import com.arms.egovframework.javaservice.esframework.model.dto.기본_검색_요청;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -16,7 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -150,5 +154,17 @@ public class 서버정보_서비스_구현 implements 서버정보_서비스 {
         서버정보_데이터 서버정보_데이터 = modelMapper.map(서버정보_엔티티, 서버정보_데이터.class);
 
         return 서버정보_데이터;
+    }
+
+    @Override
+    public Map<String, String> 서버_연결아이디_유형_맵() {
+        List<서버정보_엔티티> 서버정보_엔티티_목록 = 서버정보_저장소.normalSearchAll();
+
+        Map<String, String> ALM서버_연결아이디_유형정보_맵 = new HashMap<>();
+        for (서버정보_엔티티 entity : 서버정보_엔티티_목록) {
+            String 연결_아이디 = entity.getConnectId();
+            ALM서버_연결아이디_유형정보_맵.put(연결_아이디, entity.getType());
+        }
+        return ALM서버_연결아이디_유형정보_맵;
     }
 }
