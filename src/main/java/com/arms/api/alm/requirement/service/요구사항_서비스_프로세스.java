@@ -78,6 +78,20 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
     }
 
     @Override
+    public List<지라이슈_엔티티> 함께_생성된_요구사항_이슈목록(Long 제품서비스_아이디, Long[] 버전_아이디, Long 요구사항_아이디) {
+        EsQuery esQuery = new EsQueryBuilder()
+                .bool(
+                        new TermQueryMust("pdServiceId", 제품서비스_아이디),
+                        new TermQueryMust("isReq", true),
+                        new TermQueryMust("cReqLink", 요구사항_아이디),
+                        new TermsQueryFilter("pdServiceVersions", 버전_아이디)
+                );
+        List<지라이슈_엔티티> 함께_생성된_요구사항_목록 = 지라이슈_저장소.normalSearch(기본_쿼리_생성기.기본검색(new 기본_검색_요청() {
+        }, esQuery).생성());
+        return 함께_생성된_요구사항_목록;
+    }
+
+    @Override
     public List<지라이슈_엔티티> 요구사항이슈_연결하위이슈_조회(Long 제품서비스_아이디, Long[] 버전_아이디, String 지라서버아이디, String 이슈키) {
         EsQuery esQuery_req = new EsQueryBuilder()
                 .bool(
