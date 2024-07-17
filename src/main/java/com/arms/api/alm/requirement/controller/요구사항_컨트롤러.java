@@ -3,8 +3,8 @@ package com.arms.api.alm.requirement.controller;
 
 import com.arms.api.alm.requirement.service.요구사항_서비스;
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
-import com.arms.api.util.model.dto.지라이슈_기본_검색__집계_하위_요청;
-import com.arms.api.util.model.dto.지라이슈_제품_및_제품버전_검색__집계_하위_요청;
+import com.arms.api.util.model.dto.지라이슈_기본_검색_집계_하위_요청;
+import com.arms.api.util.model.dto.지라이슈_제품_및_제품버전_검색_집계_하위_요청;
 import com.arms.egovframework.javaservice.esframework.EsQuery;
 import com.arms.egovframework.javaservice.esframework.esquery.EsQueryBuilder;
 import com.arms.egovframework.javaservice.esframework.must.TermQueryMust;
@@ -28,7 +28,7 @@ public class 요구사항_컨트롤러 {
 
     // Requirement - ReqStatus
     @PostMapping("/requirement-linkedissue/{pdServiceId}")
-    public ResponseEntity<List<지라이슈_엔티티>> 제품별_요구사항_연결이슈_조회(@PathVariable Long pdServiceId, 지라이슈_기본_검색__집계_하위_요청 지라이슈_일반_집계_요청) {
+    public ResponseEntity<List<지라이슈_엔티티>> 제품별_요구사항_연결이슈_조회(@PathVariable Long pdServiceId, 지라이슈_기본_검색_집계_하위_요청 지라이슈_일반_집계_요청) {
 
         EsQuery esQuery
                 = new EsQueryBuilder()
@@ -60,7 +60,7 @@ public class 요구사항_컨트롤러 {
 
     @GetMapping("/req-assignees")
     public ResponseEntity<List<버킷_집계_결과>> 제품_요구사항별_담당자_목록(
-            지라이슈_제품_및_제품버전_검색__집계_하위_요청 지라이슈_제품_및_제품버전_집계_요청
+            지라이슈_제품_및_제품버전_검색_집계_하위_요청 지라이슈_제품_및_제품버전_집계_요청
     ) {
         return ResponseEntity.ok(요구사항_서비스.제품_요구사항별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청));
     }

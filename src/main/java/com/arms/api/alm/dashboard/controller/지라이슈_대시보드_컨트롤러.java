@@ -1,7 +1,7 @@
 package com.arms.api.alm.dashboard.controller;
 
-import com.arms.api.util.model.dto.지라이슈_기본_검색__집계_하위_요청;
-import com.arms.api.util.model.dto.트리맵_검색__집계_하위_요청;
+import com.arms.api.util.model.dto.지라이슈_기본_검색_집계_하위_요청;
+import com.arms.api.util.model.dto.트리맵_검색_집계_하위_요청;
 import com.arms.api.util.model.vo.Worker;
 import com.arms.egovframework.javaservice.esframework.EsQuery;
 import com.arms.egovframework.javaservice.esframework.esquery.EsQueryBuilder;
@@ -29,14 +29,14 @@ public class 지라이슈_대시보드_컨트롤러 {
     // Dashboard
     @PostMapping("/assignees-requirements-involvements")
     public ResponseEntity<List<Worker>> 작업자_별_요구사항_별_관여도_apache(
-            @RequestBody 트리맵_검색__집계_하위_요청 트리맵_집계_요청
+            @RequestBody 트리맵_검색_집계_하위_요청 트리맵_집계_요청
     ) {
         return ResponseEntity.ok(지라이슈_대시보드_서비스.작업자_별_요구사항_별_관여도(트리맵_집계_요청));
     }
 
     // Dashboard
     @GetMapping("/exclusion-isreq-normal/{pdServiceId}")
-    public ResponseEntity<버킷_집계_결과_목록_합계> 요구사항여부제외_일반_검색(@PathVariable Long pdServiceId, 지라이슈_기본_검색__집계_하위_요청 지라이슈_일반_집계_요청) {
+    public ResponseEntity<버킷_집계_결과_목록_합계> 요구사항여부제외_일반_검색(@PathVariable Long pdServiceId, 지라이슈_기본_검색_집계_하위_요청 지라이슈_일반_집계_요청) {
 
         EsQuery esQuery
                 = new EsQueryBuilder()
@@ -48,7 +48,7 @@ public class 지라이슈_대시보드_컨트롤러 {
 
     // Dashboard, Detail_Dashboard
     @GetMapping("/normal/{pdServiceId}")
-    public ResponseEntity<버킷_집계_결과_목록_합계> 일반_검색(@PathVariable Long pdServiceId, 지라이슈_기본_검색__집계_하위_요청 지라이슈_일반_집계_요청) {
+    public ResponseEntity<버킷_집계_결과_목록_합계> 일반_검색(@PathVariable Long pdServiceId, 지라이슈_기본_검색_집계_하위_요청 지라이슈_일반_집계_요청) {
 
         EsQuery esQuery
             = new EsQueryBuilder()
@@ -63,7 +63,7 @@ public class 지라이슈_대시보드_컨트롤러 {
     @GetMapping("/pdService-version-req/{pdServiceId}")
     public ResponseEntity<버킷_집계_결과_목록_합계> 제품_버전_요구사항_이슈_집계(@PathVariable Long pdServiceId,
                                                      @RequestParam List<Long> pdServiceVersionLinks,
-                                                     지라이슈_기본_검색__집계_하위_요청 지라이슈_일반_집계_요청) {
+                                                     지라이슈_기본_검색_집계_하위_요청 지라이슈_일반_집계_요청) {
         EsQuery esQuery
                 = new EsQueryBuilder()
                 .bool(

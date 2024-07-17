@@ -36,7 +36,7 @@ public class 요구사항_분석_컨트롤러 {
     // 대시보드, 디테일_대시보드, 범위분석, 리소스분석,
     @GetMapping("/aggregation/flat")
     public ResponseEntity<버킷_집계_결과_목록_합계> flatAggregation(
-            지라이슈_제품_및_제품버전_검색__집계_하위_요청 검색요청
+            지라이슈_제품_및_제품버전_검색_집계_하위_요청 검색요청
     ) {
         EsBoolQuery[] esBoolQueries = Stream.of(
                 new TermQueryMust("pdServiceId", 검색요청.getPdServiceLink()),
@@ -54,7 +54,7 @@ public class 요구사항_분석_컨트롤러 {
 
     @GetMapping("/requirements-jira-issue-statuses")
     public ResponseEntity<Map<String, 요구사항_지라이슈상태_주별_집계>> 요구사항이슈월별집계(
-            지라이슈_제품_및_제품버전_검색__집계_하위_요청 지라이슈_제품_및_제품버전_집계_요청
+            지라이슈_제품_및_제품버전_검색_집계_하위_요청 지라이슈_제품_및_제품버전_집계_요청
     ) {
         return ResponseEntity.ok(요구사항_분석_서비스.요구사항_지라이슈상태_주별_집계(지라이슈_제품_및_제품버전_집계_요청));
     }
@@ -62,7 +62,7 @@ public class 요구사항_분석_컨트롤러 {
     // Dashboard, Detail_Dashboard, Analysis Resource
     @GetMapping("/version-assignees")
     public ResponseEntity<List<버킷_집계_결과>> 제품별_버전_및_작업자(
-            지라이슈_제품_및_제품버전_검색__집계_하위_요청 지라이슈_제품_및_제품버전_집계_요청
+            지라이슈_제품_및_제품버전_검색_집계_하위_요청 지라이슈_제품_및_제품버전_집계_요청
     ) {
         return ResponseEntity.ok(요구사항_분석_서비스.제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청));
     }
@@ -72,7 +72,7 @@ public class 요구사항_분석_컨트롤러 {
     @GetMapping("/normal-version/{pdServiceId}")
     public ResponseEntity<버킷_집계_결과_목록_합계> 일반_버전필터_검색(@PathVariable Long pdServiceId,
                                                      @RequestParam List<Long> pdServiceVersionLinks,
-                                                     지라이슈_기본_검색__집계_하위_요청 지라이슈_일반_집계_요청) {
+                                                     지라이슈_기본_검색_집계_하위_요청 지라이슈_일반_집계_요청) {
         EsQuery esQuery
             = new EsQueryBuilder()
                 .bool(
@@ -88,7 +88,7 @@ public class 요구사항_분석_컨트롤러 {
     @GetMapping("/normal-version-only/{pdServiceId}")
     public ResponseEntity<버킷_집계_결과_목록_합계> 일반_버전필터_집계(@PathVariable Long pdServiceId,
                                                      @RequestParam List<Long> pdServiceVersionLinks,
-                                                     지라이슈_기본_검색__집계_하위_요청 지라이슈_일반_집계_요청) {
+                                                     지라이슈_기본_검색_집계_하위_요청 지라이슈_일반_집계_요청) {
         EsQuery esQuery
             = new EsQueryBuilder()
                 .bool(
@@ -104,12 +104,13 @@ public class 요구사항_분석_컨트롤러 {
     public ResponseEntity<버킷_집계_결과_목록_합계> 일반_버전_및_작업자_필터_검색(@PathVariable Long pdServiceId,
                                                             @RequestParam List<Long> pdServiceVersionLinks,
                                                             @RequestParam List<String> mailAddressList,
-                                                            지라이슈_기본_검색__집계_하위_요청 지라이슈_일반_집계_요청) {
-        EsQuery esQuery
-                = new EsQueryBuilder()
-                .bool(  new TermsQueryFilter("assignee.assignee_emailAddress.keyword", mailAddressList),
-                        new TermsQueryFilter("pdServiceVersions",pdServiceVersionLinks),
-                        new TermQueryMust("pdServiceId",pdServiceId)
+                                                            지라이슈_기본_검색_집계_하위_요청 지라이슈_일반_집계_요청) {
+
+        EsQuery esQuery = new EsQueryBuilder()
+            .bool(
+                    new TermsQueryFilter("assignee.assignee_emailAddress.keyword", mailAddressList),
+                    new TermsQueryFilter("pdServiceVersions",pdServiceVersionLinks),
+                    new TermQueryMust("pdServiceId",pdServiceId)
                 );
 
         return ResponseEntity.ok(요구사항_분석_서비스.집계결과_가져오기(중첩_집계_쿼리_생성기.포괄(지라이슈_일반_집계_요청, esQuery)));
@@ -129,7 +130,7 @@ public class 요구사항_분석_컨트롤러 {
     @GetMapping("/standard-daily/jira-issue")
     public ResponseEntity<Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터>>
     기준일자별_제품_및_제품버전목록_요구사항_및_연결된이슈_집계(
-            지라이슈_일자별_제품_및_제품버전_검색__집계_하위_요청 지라이슈_일자별_제품_및_제품버전_집계_요청){
+            지라이슈_일자별_제품_및_제품버전_검색_집계_하위_요청 지라이슈_일자별_제품_및_제품버전_집계_요청){
 
         return ResponseEntity.ok(요구사항_분석_서비스.지라이슈_기준일자별_제품_및_제품버전_집계검색(지라이슈_일자별_제품_및_제품버전_집계_요청));
     }
@@ -138,7 +139,7 @@ public class 요구사항_분석_컨트롤러 {
     @GetMapping("/standard-daily/updated-jira-issue")
     public ResponseEntity<List<지라이슈_엔티티>>
     기준일자별_제품_및_제품버전목록_업데이트된_이슈조회(
-            지라이슈_일자별_제품_및_제품버전_검색__집계_하위_요청 지라이슈_일자별_제품_및_제품버전_집계_요청){
+            지라이슈_일자별_제품_및_제품버전_검색_집계_하위_요청 지라이슈_일자별_제품_및_제품버전_집계_요청){
 
         return ResponseEntity.ok(요구사항_분석_서비스.지라이슈_기준일자별_제품_및_제품버전_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_집계_요청));
     }
@@ -147,14 +148,14 @@ public class 요구사항_분석_컨트롤러 {
     @ResponseBody
     @GetMapping("/standard-daily/updated-ridgeline")
     public Map<Long, Map<String, Map<String,List<요구사항_별_업데이트_데이터>>>>  기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회(
-            지라이슈_일자별_제품_및_제품버전_검색__집계_하위_요청 지라이슈_일자별_제품_및_제품버전_집계_요청) {
+            지라이슈_일자별_제품_및_제품버전_검색_집계_하위_요청 지라이슈_일자별_제품_및_제품버전_집계_요청) {
 
         return 요구사항_분석_서비스.요구사항별_업데이트_능선_데이터(지라이슈_일자별_제품_및_제품버전_집계_요청);
     }
 
     // Analysis Time
     @GetMapping("/normal-version/resolution")
-    public ResponseEntity<버킷_집계_결과_목록_합계> 일반_버전필터_해결책유무_검색(지라이슈_제품_및_제품버전_검색__집계_하위_요청 지라이슈_제품_및_제품버전_집계_요청,
+    public ResponseEntity<버킷_집계_결과_목록_합계> 일반_버전필터_해결책유무_검색(지라이슈_제품_및_제품버전_검색_집계_하위_요청 지라이슈_제품_및_제품버전_집계_요청,
                                                            @RequestParam(required = false) String resolution) {
 
         Boolean isReq = Optional.ofNullable(지라이슈_제품_및_제품버전_집계_요청.getIsReqType())
@@ -179,7 +180,7 @@ public class 요구사항_분석_컨트롤러 {
     // Analysis Cost
     @GetMapping("/version-req-assignees")
     public ResponseEntity<List<버킷_집계_결과>> 제품별_버전_및_요구사항별_작업자(
-            지라이슈_제품_및_제품버전_검색__집계_하위_요청 지라이슈_제품_및_제품버전_집계_요청
+            지라이슈_제품_및_제품버전_검색_집계_하위_요청 지라이슈_제품_및_제품버전_집계_요청
     ) {
         return ResponseEntity.ok(요구사항_분석_서비스.제품_버전별_요구사항별_담당자_목록(지라이슈_제품_및_제품버전_집계_요청));
     }
