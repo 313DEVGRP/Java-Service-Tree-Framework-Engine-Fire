@@ -1,4 +1,4 @@
-package com.arms.api.util.model.dto;
+package com.arms.api.util.model.dto.response;
 
 import lombok.Getter;
 import lombok.Setter;

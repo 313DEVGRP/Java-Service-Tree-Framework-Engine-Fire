@@ -1,9 +1,12 @@
 package com.arms.api.alm.analyis.controller;
 
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
-import com.arms.api.util.model.dto.*;
+import com.arms.api.util.model.dto.response.*;
 import com.arms.api.util.model.enums.IsReqType;
 import com.arms.api.alm.analyis.service.요구사항_분석_서비스;
+import com.arms.api.util.model.dto.request.지라이슈_기본_검색_집계_하위_요청;
+import com.arms.api.util.model.dto.request.지라이슈_일자별_제품_및_제품버전_검색_집계_하위_요청;
+import com.arms.api.util.model.dto.request.지라이슈_제품_및_제품버전_검색_집계_하위_요청;
 import com.arms.egovframework.javaservice.esframework.EsQuery;
 import com.arms.egovframework.javaservice.esframework.esquery.EsBoolQuery;
 import com.arms.egovframework.javaservice.esframework.esquery.EsQueryBuilder;

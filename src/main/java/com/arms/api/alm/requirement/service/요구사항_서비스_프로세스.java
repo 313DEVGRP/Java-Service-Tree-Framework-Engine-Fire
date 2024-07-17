@@ -2,8 +2,8 @@ package com.arms.api.alm.requirement.service;
 
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
-import com.arms.api.util.model.dto.지라이슈_기본_검색_집계_하위_요청;
-import com.arms.api.util.model.dto.지라이슈_제품_및_제품버전_검색_집계_하위_요청;
+import com.arms.api.util.model.dto.request.지라이슈_기본_검색_집계_하위_요청;
+import com.arms.api.util.model.dto.request.지라이슈_제품_및_제품버전_검색_집계_하위_요청;
 import com.arms.api.util.model.enums.IsReqType;
 import com.arms.egovframework.javaservice.esframework.EsQuery;
 import com.arms.egovframework.javaservice.esframework.model.dto.기본_검색_요청;

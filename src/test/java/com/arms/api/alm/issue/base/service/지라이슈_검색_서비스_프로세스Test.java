@@ -1,6 +1,6 @@
 package com.arms.api.alm.issue.base.service;
 
-import com.arms.api.util.model.dto.검색어_날짜포함_검색_요청;
+import com.arms.api.util.model.dto.request.검색어_날짜포함_검색_요청;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

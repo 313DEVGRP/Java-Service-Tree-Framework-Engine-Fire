@@ -1,4 +1,4 @@
-package com.arms.api.util.model.dto;
+package com.arms.api.util.model.dto.request;
 
 import com.arms.egovframework.javaservice.esframework.model.dto.기본_검색_요청;
 import lombok.Getter;

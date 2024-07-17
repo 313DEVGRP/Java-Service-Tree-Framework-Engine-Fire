@@ -1,7 +1,7 @@
 package com.arms.api.alm.dashboard.controller;
 
-import com.arms.api.util.model.dto.지라이슈_기본_검색_집계_하위_요청;
-import com.arms.api.util.model.dto.트리맵_검색_집계_하위_요청;
+import com.arms.api.util.model.dto.request.지라이슈_기본_검색_집계_하위_요청;
+import com.arms.api.util.model.dto.request.트리맵_검색_집계_하위_요청;
 import com.arms.api.util.model.vo.Worker;
 import com.arms.egovframework.javaservice.esframework.EsQuery;
 import com.arms.egovframework.javaservice.esframework.esquery.EsQueryBuilder;

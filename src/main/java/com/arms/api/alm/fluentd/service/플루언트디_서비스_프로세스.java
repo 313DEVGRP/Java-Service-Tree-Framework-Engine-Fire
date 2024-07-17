@@ -1,8 +1,8 @@
 package com.arms.api.alm.fluentd.service;
 
-import com.arms.api.util.model.dto.검색어_검색결과;
-import com.arms.api.util.model.dto.검색어_날짜포함_검색_요청;
-import com.arms.api.util.model.dto.검색어_검색_집계_하위_요청;
+import com.arms.api.util.model.dto.response.검색어_검색결과;
+import com.arms.api.util.model.dto.request.검색어_날짜포함_검색_요청;
+import com.arms.api.util.model.dto.request.검색어_검색_집계_하위_요청;
 import com.arms.api.alm.fluentd.model.플루언트디_엔티티;
 import com.arms.egovframework.javaservice.esframework.EsQuery;
 import com.arms.egovframework.javaservice.esframework.model.dto.기본_검색_요청;
