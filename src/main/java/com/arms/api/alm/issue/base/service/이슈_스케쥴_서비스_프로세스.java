@@ -559,9 +559,8 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
                     .collect(toList());
 
             // 해당 이슈 증분 데이터 포함 모든 도큐먼트 일괄 삭제
-            ALM이슈_일괄_도큐먼트삭제(삭제대상_아이디_목록);
+            return ALM이슈_일괄_도큐먼트삭제(삭제대상_아이디_목록);
 
-            return 삭제대상_아이디_목록.size();
         } catch (Exception e) {
             로그.error("ALM에서 삭제된 데이터를 ES에서 삭제하는 도중 오류가 발생했습니다.", e);
             throw new Exception("ALM에서 삭제된 데이터를 ES에서 삭제하는 도중 오류가 발생했습니다.", e);
@@ -585,16 +584,20 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
         return 지라이슈_저장소.normalSearchAll(기본_쿼리_생성기.기본검색(new 기본_검색_요청(){}, esQuery).생성());
     }
 
-    private void ALM이슈_일괄_도큐먼트삭제(List<String> 삭제대상_아이디_목록) {
-        삭제대상_아이디_목록.forEach(삭제대상_아이디 -> {
+    private int ALM이슈_일괄_도큐먼트삭제(List<String> 삭제대상_아이디_목록) {
+        int deletedCount = 0;
+        for (String 삭제대상_아이디 : 삭제대상_아이디_목록) {
             try {
-                모든인덱스에있는_이슈_조회하기(삭제대상_아이디)
-                        .stream()
-                        .forEach(도큐먼트 -> ALM이슈_도큐먼트삭제(도큐먼트.getIndex(), 도큐먼트.getId()));
+                List<SearchHit<지라이슈_엔티티>> 도큐먼트_목록 = 모든인덱스에있는_이슈_조회하기(삭제대상_아이디);
+                for (SearchHit<지라이슈_엔티티> 도큐먼트 : 도큐먼트_목록) {
+                    ALM이슈_도큐먼트삭제(도큐먼트.getIndex(), 도큐먼트.getId());
+                    deletedCount++;
+                }
             } catch (Exception e) {
                 로그.error("도큐먼트 일괄 삭제 중 오류 발생.", e);
             }
-        });
+        }
+        return deletedCount;
     }
 
     private List<지라이슈_엔티티> 삭제된_ALM_이슈링크_ES_데이터_반환(List<지라이슈_데이터> ALM이슈링크_목록, List<지라이슈_엔티티> es에_저장된_이슈링크_목록 , String 이슈_삭제_년월일){
