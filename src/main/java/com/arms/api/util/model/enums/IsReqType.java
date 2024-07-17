@@ -1,26 +1,34 @@
 package com.arms.api.util.model.enums;
 
 public enum IsReqType {
-    ALL,
+
     REQUIREMENT,
     ISSUE;
 
-    public Boolean isReq(){
-        if (this==REQUIREMENT){
+    public static Boolean isReqOrGetNull(IsReqType isReqType){
+        if(isReqType == null){
+            return null;
+        }
+        if (isReqType==REQUIREMENT){
             return true;
         };
         return false;
     }
 
-    public Boolean isAll(){
-        if (this==ALL){
-            return true;
+    public static Boolean isReq(IsReqType isReqType){
+        if(isReqType == null){
+            return false;
         }
+        if (isReqType==REQUIREMENT){
+            return true;
+        };
         return false;
     }
 
-    public Boolean isNotAllAndIsReq(){
-        return !isAll()&&isReq();
+    public static Boolean isIssue(IsReqType isReqType){
+        return !isReq(isReqType);
     }
+
+
 
 }

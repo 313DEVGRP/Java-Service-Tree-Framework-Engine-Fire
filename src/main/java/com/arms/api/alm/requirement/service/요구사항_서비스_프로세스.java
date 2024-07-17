@@ -152,10 +152,11 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
     public List<버킷_집계_결과> 제품_요구사항별_담당자_목록(지라이슈_제품_및_제품버전_검색_집계_하위_요청 지라이슈_제품_및_제품버전_집계_요청) {
 
         boolean 요구사항여부 = false;
-        if (지라이슈_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT) {
+
+        if (IsReqType.isReq(지라이슈_제품_및_제품버전_집계_요청.getIsReqType())) {
             요구사항여부 = true;
         }
-        else if (지라이슈_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE) {
+        else if (IsReqType.isIssue(지라이슈_제품_및_제품버전_집계_요청.getIsReqType())) {
             요구사항여부 = false;
         }
 

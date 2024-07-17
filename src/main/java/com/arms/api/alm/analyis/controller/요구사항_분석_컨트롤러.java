@@ -28,6 +28,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static com.arms.api.util.model.enums.IsReqType.*;
+
 @RestController
 @RequestMapping("/engine/jira/dashboard")
 @Slf4j
@@ -44,8 +46,7 @@ public class 요구사항_분석_컨트롤러 {
         EsBoolQuery[] esBoolQueries = Stream.of(
                 new TermQueryMust("pdServiceId", 검색요청.getPdServiceLink()),
                 new TermsQueryFilter("pdServiceVersions", 검색요청.getPdServiceVersionLinks()),
-                검색요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
-                검색요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null
+                new TermQueryMust("isReq", isReqOrGetNull(검색요청.getIsReqType()))
         ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
 
         EsQuery esQuery = new EsQueryBuilder().bool(esBoolQueries);
@@ -163,8 +164,8 @@ public class 요구사항_분석_컨트롤러 {
 
         Boolean isReq = Optional.ofNullable(지라이슈_제품_및_제품버전_집계_요청.getIsReqType())
                 .map(IsReqType::name)
-                .map(name -> name.equals(IsReqType.REQUIREMENT.name()) ? Boolean.TRUE
-                        : name.equals(IsReqType.ISSUE.name()) ? Boolean.FALSE
+                .map(name -> name.equals(REQUIREMENT.name()) ? Boolean.TRUE
+                        : name.equals(ISSUE.name()) ? Boolean.FALSE
                         : null)
                 .orElse(null);
 
