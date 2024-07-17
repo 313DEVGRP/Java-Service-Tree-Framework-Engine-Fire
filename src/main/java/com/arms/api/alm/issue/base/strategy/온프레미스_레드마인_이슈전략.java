@@ -29,6 +29,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -454,36 +455,27 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
     public List<지라이슈_데이터> 증분서브테스크_가져오기(서버정보_데이터 서버정보, String 이슈_키_또는_아이디) {
 
         RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+        List<지라이슈_데이터> 하위이슈_목록 = new ArrayList<>();
+        서브테스크_가져오기_재귀(레드마인_매니저, 서버정보.getUri(), 이슈_키_또는_아이디, 하위이슈_목록);
 
-        Params params = new Params()
-                .add("parent_id", 이슈_키_또는_아이디)
-                .add("status_id", "*")
-                .add("updated_on", "><" + 어제날짜_얻기() + "|" + 어제날짜_얻기());
+        LocalDate 어제날짜 = 어제날짜_얻기();
 
-        List<Issue> 조회된_하위이슈_목록 = null;
-        try {
-            조회된_하위이슈_목록 = 레드마인_매니저.getIssueManager().getIssues(params).getResults();
-        }
-        catch (RedmineException e) {
-            에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
-                    "레드마인_온프레미스 ["+ 서버정보.getUri() +"] :: 이슈_키_또는_아이디 :: "
-                            + 이슈_키_또는_아이디+ " :: 증분서브테스크_가져오기 오류");
-        }
-
-        if (조회된_하위이슈_목록 == null || 조회된_하위이슈_목록.isEmpty()) {
-            로그.info("레드마인_온프레미스 ["+ 서버정보.getUri() +"] :: 이슈_키_또는_아이디 :: "
-                    + 이슈_키_또는_아이디+ "는 업데이트된 서브테스크 이슈가 없습니다.");
-            return null;
-        }
-
-        List<지라이슈_데이터> 하위이슈_목록 = 조회된_하위이슈_목록.stream().map(이슈 -> {
-                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터형_변환(레드마인_매니저, 이슈, 서버정보.getUri());
-                    return 지라이슈_데이터;
+        // 업데이트된 이슈들만 필터링
+        List<지라이슈_데이터> 업데이트된_하위이슈_목록 = 하위이슈_목록.stream()
+                .filter(이슈 -> {
+                    String 업데이트 = 이슈.getFields().getUpdated();
+                    try {
+                        ZonedDateTime 업데이트_날짜 = ZonedDateTime.parse(업데이트, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                        LocalDate 업데이트_날짜_로컬 = 업데이트_날짜.toLocalDate();
+                        return 업데이트_날짜_로컬 != null && !업데이트_날짜_로컬.isBefore(어제날짜);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return false; // 파싱에 실패한 경우 필터링에서 제외
+                    }
                 })
-                .filter(Objects::nonNull)
-                .collect(toList());
+                .collect(Collectors.toList());
 
-        return 하위이슈_목록;
+        return 업데이트된_하위이슈_목록;
     }
 
     private 지라이슈_데이터 지라이슈_데이터형_변환(RedmineManager 레드마인_매니저, Issue 이슈, String 서버정보경로) {
