@@ -542,45 +542,59 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     @Override
     public int 삭제된_ALM_이슈_Document_삭제() throws Exception {
         try {
+            // 스케줄러 동작일 기준 2일전 
             LocalDate 스케줄러_동작일 = LocalDate.now();
             LocalDate 삭제_대상 = 스케줄러_동작일.minusDays(2);
             DateTimeFormatter 날짜형식 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             String 삭제_대상일자 = 삭제_대상.format(날짜형식);
-
-            List<SearchHit<지라이슈_엔티티>> 삭제대상_목록 = 삭제대상이슈_조회하기(삭제_대상일자);
+            // 해당일에 삭제된 이슈 조회
+            List<지라이슈_엔티티> 삭제대상_목록 = 삭제대상이슈_조회하기(삭제_대상일자);
 
             if (삭제대상_목록 == null || 삭제대상_목록.isEmpty()) {
                 return 0;
             }
 
-            삭제대상_목록.stream()
-                    .forEach(도큐먼트 -> {
-                        try {
-                            ALM이슈_도큐먼트삭제(도큐먼트.getIndex(), 도큐먼트.getId());
-                        } catch (Exception e) {
-                            로그.error("도큐먼트 삭제 중 오류 발생: 인덱스={}, 아이디={}", 도큐먼트.getIndex(), 도큐먼트.getId(), e);
-                        }
-                    });
+            List<String> 삭제대상_아이디_목록 = 삭제대상_목록.stream()
+                    .map(지라이슈_엔티티::getId)
+                    .collect(toList());
 
-            return 1;
+            // 해당 이슈 증분 데이터 포함 모든 도큐먼트 일괄 삭제
+            ALM이슈_일괄_도큐먼트삭제(삭제대상_아이디_목록);
+
+            return 삭제대상_아이디_목록.size();
         } catch (Exception e) {
             로그.error("ALM에서 삭제된 데이터를 ES에서 삭제하는 도중 오류가 발생했습니다.", e);
             throw new Exception("ALM에서 삭제된 데이터를 ES에서 삭제하는 도중 오류가 발생했습니다.", e);
         }
     }
-
-    private List<SearchHit<지라이슈_엔티티>> 삭제대상이슈_조회하기(String 삭제_대상일자) {
-
-        if (삭제_대상일자 == null || 삭제_대상일자 == null) {
-            로그.error("삭제대상이슈_조회하기 Error 삭제_대상일자 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("삭제대상이슈_조회하기 Error 삭제_대상일자 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
+    private List<지라이슈_엔티티> 삭제대상이슈_조회하기(String 삭제_대상일자) {
 
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(
                     new RangeQueryFilter("deleted", 삭제_대상일자,삭제_대상일자,"fromto")
                 );
+        return 지라이슈_저장소.normalSearch(기본_쿼리_생성기.기본검색(new 기본_검색_요청(){}, esQuery).생성());
+    }
+    @Override
+    public List<SearchHit<지라이슈_엔티티>> 모든인덱스에있는_이슈_조회하기(String 조회조건_아이디) {
+
+        EsQuery esQuery = new EsQueryBuilder()
+                .bool(
+                        new TermQueryMust("id", 조회조건_아이디)
+                );
         return 지라이슈_저장소.normalSearchAll(기본_쿼리_생성기.기본검색(new 기본_검색_요청(){}, esQuery).생성());
+    }
+
+    private void ALM이슈_일괄_도큐먼트삭제(List<String> 삭제대상_아이디_목록) {
+        삭제대상_아이디_목록.forEach(삭제대상_아이디 -> {
+            try {
+                모든인덱스에있는_이슈_조회하기(삭제대상_아이디)
+                        .stream()
+                        .forEach(도큐먼트 -> ALM이슈_도큐먼트삭제(도큐먼트.getIndex(), 도큐먼트.getId()));
+            } catch (Exception e) {
+                로그.error("도큐먼트 일괄 삭제 중 오류 발생.", e);
+            }
+        });
     }
 
     private List<지라이슈_엔티티> 삭제된_ALM_이슈링크_ES_데이터_반환(List<지라이슈_데이터> ALM이슈링크_목록, List<지라이슈_엔티티> es에_저장된_이슈링크_목록 , String 이슈_삭제_년월일){
