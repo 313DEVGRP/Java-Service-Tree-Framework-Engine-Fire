@@ -3,8 +3,10 @@ package com.arms.api.alm.analyis.service;
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
 import com.arms.api.util.common.constrant.index.인덱스자료;
-import com.arms.api.util.model.dto.*;
+import com.arms.api.util.model.dto.response.*;
 import com.arms.api.util.model.enums.IsReqType;
+import com.arms.api.util.model.dto.request.지라이슈_일자별_제품_및_제품버전_검색_집계_하위_요청;
+import com.arms.api.util.model.dto.request.지라이슈_제품_및_제품버전_검색_집계_하위_요청;
 import com.arms.egovframework.javaservice.esframework.model.dto.*;
 import com.arms.egovframework.javaservice.esframework.EsQuery;
 import com.arms.egovframework.javaservice.esframework.esquery.EsBoolQuery;
@@ -39,6 +41,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.arms.api.util.model.enums.IsReqType.isReqOrGetNull;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
@@ -58,10 +61,10 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
     }
 
     @Override
-    public List<버킷_집계_결과> 제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_검색__집계_하위_요청 지라이슈_제품_및_제품버전_집계_요청) {
+    public List<버킷_집계_결과> 제품_버전별_담당자_목록(지라이슈_제품_및_제품버전_검색_집계_하위_요청 지라이슈_제품_및_제품버전_집계_요청) {
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new TermQueryMust("pdServiceId", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceLink()),
-                        new TermQueryMust("isReq", 지라이슈_제품_및_제품버전_집계_요청.getIsReqType().isNotAllAndIsReq()),
+                        new TermQueryMust("isReq", isReqOrGetNull(지라이슈_제품_및_제품버전_집계_요청.getIsReqType())),
                         new TermsQueryFilter("pdServiceVersions", 지라이슈_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
                         new ExistsQueryFilter("assignee")
                 );
@@ -138,7 +141,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
 
 
     @Override
-    public Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항_지라이슈상태_주별_집계(지라이슈_제품_및_제품버전_검색__집계_하위_요청 지라이슈_제품_및_제품버전_집계_요청) {
+    public Map<String, 요구사항_지라이슈상태_주별_집계> 요구사항_지라이슈상태_주별_집계(지라이슈_제품_및_제품버전_검색_집계_하위_요청 지라이슈_제품_및_제품버전_집계_요청) {
         LocalDate now = LocalDate.now(ZoneId.of("UTC"));
         LocalDate monthAgo = now.minusWeeks(4);
 
@@ -260,7 +263,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
     }
 
     @Override
-    public Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> 지라이슈_기준일자별_제품_및_제품버전_집계검색(지라이슈_일자별_제품_및_제품버전_검색__집계_하위_요청 지라이슈_일자별_제품_및_제품버전_집계_요청) {
+    public Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> 지라이슈_기준일자별_제품_및_제품버전_집계검색(지라이슈_일자별_제품_및_제품버전_검색_집계_하위_요청 지라이슈_일자별_제품_및_제품버전_집계_요청) {
 
         String 시작일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get시작일();
         String 종료일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get종료일();
@@ -271,8 +274,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         EsBoolQuery[] esBoolQueries = Stream.of(
                 new TermQueryMust("pdServiceId", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceLink()),
                 new TermsQueryFilter("pdServiceVersions", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
-                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
-                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null,
+                new TermQueryMust("isReq", isReqOrGetNull(지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType())),
                 new RangeQueryFilter(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준(), from, to, "fromto")
         ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
 
@@ -307,7 +309,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         return 검색결과;
     }
 
-    private 일자별_요구사항_연결된이슈_생성개수_및_상태데이터 일별_생성개수_및_상태_데이터생성(버킷_집계_결과 결과, 지라이슈_일자별_제품_및_제품버전_검색__집계_하위_요청 지라이슈_일자별_제품_및_제품버전_집계_요청) {
+    private 일자별_요구사항_연결된이슈_생성개수_및_상태데이터 일별_생성개수_및_상태_데이터생성(버킷_집계_결과 결과, 지라이슈_일자별_제품_및_제품버전_검색_집계_하위_요청 지라이슈_일자별_제품_및_제품버전_집계_요청) {
         Map<String, Long> 요구사항여부결과 = new HashMap<>();
         Map<String, Map<String, Long>> 상태목록결과 = new HashMap<>();
 
@@ -340,7 +342,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
     }
 
     @Override
-    public List<지라이슈_엔티티> 지라이슈_기준일자별_제품_및_제품버전_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_검색__집계_하위_요청 지라이슈_일자별_제품_및_제품버전_집계_요청){
+    public List<지라이슈_엔티티> 지라이슈_기준일자별_제품_및_제품버전_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_검색_집계_하위_요청 지라이슈_일자별_제품_및_제품버전_집계_요청){
 
         String 시작일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get시작일();
         String 종료일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get종료일();
@@ -351,8 +353,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         EsBoolQuery[] esBoolQueries = Stream.of(
                 new TermQueryMust("pdServiceId", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceLink()),
                 new TermsQueryFilter("pdServiceVersions", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
-                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
-                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null,
+                new TermQueryMust("isReq", isReqOrGetNull(지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType())),
                 new RangeQueryFilter(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준(), from, to, "fromto")
         ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
 
@@ -370,7 +371,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
 
     @Override
     public Map<Long, Map<String, Map<String,List<요구사항_별_업데이트_데이터>>>> 요구사항별_업데이트_능선_데이터(
-            지라이슈_일자별_제품_및_제품버전_검색__집계_하위_요청 지라이슈_일자별_제품_및_제품버전_집계_요청){
+            지라이슈_일자별_제품_및_제품버전_검색_집계_하위_요청 지라이슈_일자별_제품_및_제품버전_집계_요청){
 
         String 시작일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get시작일();
         String 종료일 = 지라이슈_일자별_제품_및_제품버전_집계_요청.get종료일();
@@ -381,8 +382,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         EsBoolQuery[] esBoolQueries = Stream.of(
                 new TermQueryMust("pdServiceId", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceLink()),
                 new TermsQueryFilter("pdServiceVersions", 지라이슈_일자별_제품_및_제품버전_집계_요청.getPdServiceVersionLinks()),
-                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT ? new TermQueryMust("isReq", true) : null,
-                지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ? new TermQueryMust("isReq", false) : null,
+                new TermQueryMust("isReq", isReqOrGetNull(지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType())),
                 new RangeQueryFilter(지라이슈_일자별_제품_및_제품버전_집계_요청.get일자기준(), from, to, "fromto")
         ).filter(Objects::nonNull).toArray(EsBoolQuery[]::new);
 
@@ -399,7 +399,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         // 업데이트가 기준일에 일어난 모든 이슈를 조회
         Map<Long, Map<String, Map<String,List<요구사항_별_업데이트_데이터>>>> 조회_결과 = null;
 
-        if (지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE ) {
+        if (IsReqType.isReq(지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType())) {
 
             조회_결과= 전체결과.stream()
                     .map(this::요구사항_별_업데이트_데이터)
@@ -411,7 +411,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                                     Collectors.groupingBy(요구사항_별_업데이트_데이터::getParentReqKey))));
 
         }
-        else if(지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT){
+        else if (IsReqType.isIssue(지라이슈_일자별_제품_및_제품버전_집계_요청.getIsReqType())) {
 
             조회_결과= 전체결과.stream()
                     .map(this::요구사항_별_업데이트_데이터)
@@ -450,13 +450,14 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
     }
 
     @Override
-    public List<버킷_집계_결과> 제품_버전별_요구사항별_담당자_목록(지라이슈_제품_및_제품버전_검색__집계_하위_요청 지라이슈_제품_및_제품버전_집계_요청) {
+    public List<버킷_집계_결과> 제품_버전별_요구사항별_담당자_목록(지라이슈_제품_및_제품버전_검색_집계_하위_요청 지라이슈_제품_및_제품버전_집계_요청) {
 
         boolean 요구사항여부 = false;
-        if (지라이슈_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT) {
+
+        if (IsReqType.isReq(지라이슈_제품_및_제품버전_집계_요청.getIsReqType())) {
             요구사항여부 = true;
         }
-        else if (지라이슈_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE) {
+        else if (IsReqType.isIssue(지라이슈_제품_및_제품버전_집계_요청.getIsReqType())) {
             요구사항여부 = false;
         }
 

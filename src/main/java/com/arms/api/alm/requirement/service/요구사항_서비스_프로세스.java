@@ -2,8 +2,8 @@ package com.arms.api.alm.requirement.service;
 
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
-import com.arms.api.util.model.dto.지라이슈_기본_검색__집계_하위_요청;
-import com.arms.api.util.model.dto.지라이슈_제품_및_제품버전_검색__집계_하위_요청;
+import com.arms.api.util.model.dto.request.지라이슈_기본_검색_집계_하위_요청;
+import com.arms.api.util.model.dto.request.지라이슈_제품_및_제품버전_검색_집계_하위_요청;
 import com.arms.api.util.model.enums.IsReqType;
 import com.arms.egovframework.javaservice.esframework.EsQuery;
 import com.arms.egovframework.javaservice.esframework.model.dto.기본_검색_요청;
@@ -128,7 +128,7 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
                          new TermsQueryFilter("pdServiceId", Optional.ofNullable(제품서비스_아이디).filter(a->a!=null&&a>9L).map(a->List.of(a)).orElse(null))
                         ,new TermsQueryFilter("pdServiceVersions", Arrays.stream(버전_아이디들).filter(a->a!=null&&a>9L).collect(toList()))
                 );
-        지라이슈_기본_검색__집계_하위_요청 지라이슈_일반_집계_요청 = new 지라이슈_기본_검색__집계_하위_요청();
+        지라이슈_기본_검색_집계_하위_요청 지라이슈_일반_집계_요청 = new 지라이슈_기본_검색_집계_하위_요청();
         지라이슈_일반_집계_요청.set메인_그룹_필드("status.status_name.keyword");
         지라이슈_일반_집계_요청.set컨텐츠_보기_여부(false);
         버킷_집계_결과_목록_합계 버킷_집계_결과_목록_합계 = 지라이슈_저장소.버킷집계(중첩_집계_쿼리_생성기.포괄(지라이슈_일반_집계_요청, esQuery).생성());
@@ -149,13 +149,14 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
     }
 
     @Override
-    public List<버킷_집계_결과> 제품_요구사항별_담당자_목록(지라이슈_제품_및_제품버전_검색__집계_하위_요청 지라이슈_제품_및_제품버전_집계_요청) {
+    public List<버킷_집계_결과> 제품_요구사항별_담당자_목록(지라이슈_제품_및_제품버전_검색_집계_하위_요청 지라이슈_제품_및_제품버전_집계_요청) {
 
         boolean 요구사항여부 = false;
-        if (지라이슈_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.REQUIREMENT) {
+
+        if (IsReqType.isReq(지라이슈_제품_및_제품버전_집계_요청.getIsReqType())) {
             요구사항여부 = true;
         }
-        else if (지라이슈_제품_및_제품버전_집계_요청.getIsReqType() == IsReqType.ISSUE) {
+        else if (IsReqType.isIssue(지라이슈_제품_및_제품버전_집계_요청.getIsReqType())) {
             요구사항여부 = false;
         }
 

@@ -1,4 +1,4 @@
-package com.arms.api.util.model.dto;
+package com.arms.api.util.model.dto.request;
 
 
 import java.util.List;
@@ -16,9 +16,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class 트리맵_검색__집계_하위_요청 extends 기본_검색_집계_하위_요청 {
+public class 트리맵_검색_집계_하위_요청 extends 기본_검색_집계_하위_요청 {
     private Long pdServiceLink;
     private Long[] pdServiceVersionLinks;
-    private List<com.arms.api.util.model.dto.제품버전목록> 제품버전목록;
+    private List<com.arms.api.util.model.dto.response.제품버전목록> 제품버전목록;
     private IsReqType isReqType;
 }

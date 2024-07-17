@@ -2,8 +2,8 @@ package com.arms.api.alm.dashboard.service;
 
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
-import com.arms.api.util.model.dto.제품버전목록;
-import com.arms.api.util.model.dto.트리맵_검색__집계_하위_요청;
+import com.arms.api.util.model.dto.response.제품버전목록;
+import com.arms.api.util.model.dto.request.트리맵_검색_집계_하위_요청;
 import com.arms.api.util.model.vo.TaskList;
 import com.arms.api.util.model.vo.Worker;
 import com.arms.egovframework.javaservice.esframework.factory.creator.query.쿼리_생성기;
@@ -32,7 +32,7 @@ public class 지라이슈_대시보드_서비스_프로세스 implements 지라�
     }
 
     @Override
-    public List<Worker> 작업자_별_요구사항_별_관여도(트리맵_검색__집계_하위_요청 트리맵_집계_요청) {
+    public List<Worker> 작업자_별_요구사항_별_관여도(트리맵_검색_집계_하위_요청 트리맵_집계_요청) {
         Map<String, Worker> contributionMap = new HashMap<>();
 
         List<제품버전목록> 제품버전목록데이터 = 트리맵_집계_요청.get제품버전목록();
