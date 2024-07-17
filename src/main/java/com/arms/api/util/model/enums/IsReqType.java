@@ -1,12 +1,12 @@
 package com.arms.api.util.model.enums;
 
 public enum IsReqType {
-
+    ALL,
     REQUIREMENT,
     ISSUE;
 
     public static Boolean isReqOrGetNull(IsReqType isReqType){
-        if(isReqType == null){
+        if(isReqType == null || isReqType == ALL){
             return null;
         }
         if (isReqType==REQUIREMENT){
