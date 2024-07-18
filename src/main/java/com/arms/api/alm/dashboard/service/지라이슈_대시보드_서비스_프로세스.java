@@ -2,6 +2,7 @@ package com.arms.api.alm.dashboard.service;
 
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
+import com.arms.api.alm.issue.base.service.지라이슈_서비스;
 import com.arms.api.util.model.dto.response.제품버전목록;
 import com.arms.api.util.model.dto.request.트리맵_검색_집계_하위_요청;
 import com.arms.api.util.model.vo.TaskList;
@@ -23,6 +24,8 @@ public class 지라이슈_대시보드_서비스_프로세스 implements 지라�
 
     private 지라이슈_저장소 지라이슈_저장소;
 
+    private 지라이슈_서비스 지라이슈_서비스;
+
     @Override
     public 버킷_집계_결과_목록_합계 집계결과_가져오기(쿼리_생성기 쿼리_생성기) {
 
@@ -37,13 +40,14 @@ public class 지라이슈_대시보드_서비스_프로세스 implements 지라�
 
         List<제품버전목록> 제품버전목록데이터 = 트리맵_집계_요청.get제품버전목록();
        
-        List<지라이슈_엔티티> requirementIssues = 지라이슈_저장소.findByIsReqAndPdServiceIdAndPdServiceVersionsIn(true, 트리맵_집계_요청.getPdServiceLink(), 트리맵_집계_요청.getPdServiceVersionLinks());
+        List<지라이슈_엔티티> requirementIssues = 지라이슈_서비스
+                .지라이슈_조회(true, 트리맵_집계_요청.getPdServiceLink(), 트리맵_집계_요청.getPdServiceVersionLinks());
 
         // 요구사항의 키를 모두 추출
         List<String> allReqKeys = requirementIssues.stream().map(지라이슈_엔티티::getKey).collect(Collectors.toList());
 
         // 모든 하위 태스크를 한 번에 로드
-        List<지라이슈_엔티티> allSubTasks = 지라이슈_저장소.findByParentReqKeyIn(allReqKeys);
+        List<지라이슈_엔티티> allSubTasks = 지라이슈_서비스.지라이슈_조회(allReqKeys);
 
         // 하위 태스크를 부모 키로 그룹화
         Map<String, List<지라이슈_엔티티>> subTasksByParent = allSubTasks.stream()

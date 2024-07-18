@@ -124,8 +124,7 @@ public class 이슈_스케쥴_컨트롤러 {
             value = {"/documents"},
             method = {RequestMethod.DELETE}
     )
-    public int 삭제된_ALM_이슈_Document_삭제(
-            ModelMap model, HttpServletRequest request) throws Exception {
+    public int 삭제된_ALM_이슈_Document_삭제() throws Exception {
 
         log.info(":: [삭제된_ALM_이슈_Document_삭제] ::");
 

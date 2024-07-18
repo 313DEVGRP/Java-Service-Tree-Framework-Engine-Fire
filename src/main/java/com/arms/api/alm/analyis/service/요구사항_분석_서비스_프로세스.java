@@ -2,6 +2,7 @@ package com.arms.api.alm.analyis.service;
 
 import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
+import com.arms.api.alm.issue.base.service.지라이슈_서비스;
 import com.arms.api.util.common.constrant.index.인덱스자료;
 import com.arms.api.util.model.dto.response.*;
 import com.arms.api.util.model.enums.IsReqType;
@@ -52,6 +53,8 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
 
     private final 지라이슈_저장소 지라이슈_저장소;
 
+    private final 지라이슈_서비스 지라이슈_서비스;
+
     @Override
     public 버킷_집계_결과_목록_합계 집계결과_가져오기(쿼리_생성기 쿼리_생성기) {
 
@@ -93,9 +96,11 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
                 .collect(toList());
     }
 
+
     @Override
+
     public List<요구사항_버전_이슈_키_상태_작업자수> 버전별_요구사항_상태_및_관여_작업자수_내용(Long pdServiceLink, Long[] pdServiceVersionLinks){
-        List<지라이슈_엔티티> 요구사항_이슈_목록 = 지라이슈_저장소.findByIsReqAndPdServiceIdAndPdServiceVersionsIn(true, pdServiceLink, pdServiceVersionLinks);
+        List<지라이슈_엔티티> 요구사항_이슈_목록 = 지라이슈_서비스.지라이슈_조회(true, pdServiceLink, pdServiceVersionLinks);
         List<지라이슈_엔티티> 담당자_존재_요구사항_이슈_목록 = 요구사항_이슈_목록.stream()
                 .filter(지라이슈 -> 지라이슈.getAssignee() != null)
                 .collect(toList());
@@ -104,7 +109,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         // 담당자 있는 요구사항_이슈의 키만 뽑기
         List<String> 담당자_존재_요구사항_이슈_키 = 담당자_존재_요구사항_이슈_목록.stream()
                 .map(지라이슈_엔티티::getKey).collect(Collectors.toList());
-        List<지라이슈_엔티티> allSubTasks = 지라이슈_저장소.findByParentReqKeyIn(담당자_존재_요구사항_이슈_키);
+        List<지라이슈_엔티티> allSubTasks = 지라이슈_서비스.지라이슈_조회(담당자_존재_요구사항_이슈_키);
 
         //담당자가 있는 연결이슈만, 요구사항_이슈키에 매핑
         Map<String, List<지라이슈_엔티티>> 요구사항이슈_담당자있는_하위이슈들 = allSubTasks.stream()
@@ -565,7 +570,7 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
 
     @Override
     public List<지라이슈_엔티티> 제품서비스_버전목록으로_조회(Long pdServiceLink, Long[] pdServiceVersionLinks) {
-        return 지라이슈_저장소.findByPdServiceIdAndPdServiceVersionsIn(pdServiceLink, pdServiceVersionLinks);
+        return 지라이슈_서비스.지라이슈_조회(pdServiceLink, pdServiceVersionLinks);
     }
 
     @Override
