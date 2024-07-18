@@ -18,9 +18,10 @@ import java.util.Set;
 @NoRepositoryBean
 public interface 공통저장소<T,ID extends Serializable> extends ElasticsearchRepository<T,ID> {
 
-
 	메트릭_집계_결과_목록_합계 전체메트릭집계(Query query);
+
 	버킷_집계_결과_목록_합계 버킷집계(Query query) ;
+
 	버킷_집계_결과_목록_합계 전체버킷집계(Query query);
 
 	List<IndexedObjectInformation> bulkIndex(List<IndexQuery> indexQueryList);
