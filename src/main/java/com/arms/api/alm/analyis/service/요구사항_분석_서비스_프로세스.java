@@ -42,7 +42,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.arms.api.util.model.enums.IsReqType.isReqOrGetNull;
+import static com.arms.api.util.model.enums.IsReqType.*;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
@@ -452,6 +452,28 @@ public class 요구사항_분석_서비스_프로세스 implements 요구사항_
         String subDate = date.substring(0,10);
         LocalDate localDate = LocalDate.parse(subDate);
         return DateTimeFormatter.ofPattern("yyyy-MM-dd").format(localDate);
+    }
+
+    @Override
+    public 버킷_집계_결과_목록_합계 현황관리_연결이슈_하위이슈_집계(지라이슈_제품_및_제품버전_검색_집계_하위_요청 종합_집계_요청, Long 요구사항_링크) {
+        Boolean isReq = Optional.ofNullable(종합_집계_요청.getIsReqType())
+                .map(IsReqType::name)
+                .map(name -> name.equals(REQUIREMENT.name()) ? Boolean.TRUE
+                        : name.equals(ISSUE.name()) ? Boolean.FALSE
+                        : null)
+                .orElse(null);
+
+        EsQuery esQuery = new EsQueryBuilder()
+                .bool(
+                        new TermQueryMust("pdServiceId", 종합_집계_요청.getPdServiceLink()),
+                        new TermQueryMust("isReq", isReq),
+                        new TermsQueryFilter("pdServiceVersions", 종합_집계_요청.getPdServiceVersionLinks()),
+                        new TermQueryMust("cReqLink", 요구사항_링크)
+                );
+
+
+        버킷_집계_결과_목록_합계 집계_결과 = this.집계결과_가져오기(중첩_집계_쿼리_생성기.포괄(종합_집계_요청, esQuery));
+        return 집계_결과;
     }
 
     @Override

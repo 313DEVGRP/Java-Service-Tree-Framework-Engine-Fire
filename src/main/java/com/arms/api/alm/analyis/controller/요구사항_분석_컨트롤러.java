@@ -217,6 +217,16 @@ public class 요구사항_분석_컨트롤러 {
         return 요구사항_분석_서비스.히트맵_제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
     }
 
+    @GetMapping("/reqStatus/aggsOfLinkedIssueAndSubtasks")
+    public ResponseEntity<?> 현황관리_연결이슈_하위이슈_집계조회(
+            지라이슈_제품_및_제품버전_검색_집계_하위_요청 종합_집계_요청, @RequestParam("cReqLink") Long 요구사항_링크) {
+
+        log.info("요구사항 분석 컨트롤러 :: 현황관리_연결이슈_하위이슈_집계조회");
+
+        버킷_집계_결과_목록_합계 현황관리_연결이슈_하위이슈_집계 = 요구사항_분석_서비스.현황관리_연결이슈_하위이슈_집계(종합_집계_요청, 요구사항_링크);
+
+        return ResponseEntity.ok(현황관리_연결이슈_하위이슈_집계);
+    }
 
 
 }
