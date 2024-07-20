@@ -50,12 +50,11 @@ public class 온프레미스_지라_이슈상태_전략 implements 이슈상태_
             }
 
             return 반환할_이슈상태_데이터_목록;
-
         }
         catch (Exception e) {
-            에러로그_유틸.예외로그출력(e, this.getClass().getName(),
+            String 에러로그 =  에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
                     "온프레미스 지라("+ 서버정보.getConnectId() +") :: 이슈상태_목록_가져오기에 실패하였습니다.");
-            return Collections.emptyList();
+            throw new IllegalArgumentException(에러로그);
         }
     }
 
