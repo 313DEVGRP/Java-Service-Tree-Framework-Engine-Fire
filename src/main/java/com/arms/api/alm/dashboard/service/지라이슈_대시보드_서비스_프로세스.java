@@ -17,6 +17,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.*;
+
 @Slf4j
 @Service("지라이슈_대시보드_서비스")
 @AllArgsConstructor
@@ -44,7 +46,7 @@ public class 지라이슈_대시보드_서비스_프로세스 implements 지라�
                 .지라이슈_조회(true, 트리맵_집계_요청.getPdServiceLink(), 트리맵_집계_요청.getPdServiceVersionLinks());
 
         // 요구사항의 키를 모두 추출
-        List<String> allReqKeys = requirementIssues.stream().map(지라이슈_엔티티::getKey).collect(Collectors.toList());
+        List<String> allReqKeys = requirementIssues.stream().map(지라이슈_엔티티::getKey).collect(toList());
 
         // 모든 하위 태스크를 한 번에 로드
         List<지라이슈_엔티티> allSubTasks = 지라이슈_서비스.지라이슈_조회(allReqKeys);
@@ -52,7 +54,11 @@ public class 지라이슈_대시보드_서비스_프로세스 implements 지라�
         // 하위 태스크를 부모 키로 그룹화
         Map<String, List<지라이슈_엔티티>> subTasksByParent = allSubTasks.stream()
                 .filter(subtask -> subtask.getAssignee() != null)
-                .collect(Collectors.groupingBy(지라이슈_엔티티::getParentReqKey));
+                .flatMap(subtask ->
+                            Arrays.stream(subtask.getParentReqKeys())
+                                .map(key -> new AbstractMap.SimpleEntry<>(key, subtask)))
+                .collect(groupingBy(a -> a.getKey(), mapping(a -> a.getValue(), toList())));
+
 
         requirementIssues.stream().forEach(reqIssue -> {
             String key = reqIssue.getKey();
@@ -66,7 +72,7 @@ public class 지라이슈_대시보드_서비스_프로세스 implements 지라�
                             .orElse(null)
                     )
                     .filter(Objects::nonNull)
-                    .collect(Collectors.joining(", "));
+                    .collect(joining(", "));
 
             Optional.ofNullable(subTasksByParent.get(key)).orElse(Collections.emptyList()).stream().forEach(subtask -> {
                 String assigneeId = subtask.getAssignee().getAccountId();
@@ -97,7 +103,7 @@ public class 지라이슈_대시보드_서비스_프로세스 implements 지라�
         return contributionMap.values().stream()
                 .sorted((w1, w2) -> w2.getData().get("totalInvolvedCount").compareTo(w1.getData().get("totalInvolvedCount")))
                 .limit(트리맵_집계_요청.get크기() > 0 ? 트리맵_집계_요청.get크기() : Long.MAX_VALUE)
-                .collect(Collectors.toList());
+                .collect(toList());
 
     }
 
