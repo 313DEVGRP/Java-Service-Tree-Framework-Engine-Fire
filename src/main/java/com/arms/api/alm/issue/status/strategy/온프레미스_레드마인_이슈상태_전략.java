@@ -46,9 +46,9 @@ public class 온프레미스_레드마인_이슈상태_전략 implements 이슈�
             이슈상태_목록 = 레드마인_매니저.getIssueManager().getStatuses();
         }
         catch (RedmineException e) {
-            에러로그_유틸.예외로그출력(e, this.getClass().getName(), "이슈상태_목록_가져오기");
-            throw new IllegalArgumentException(this.getClass().getName() + " :: "
-                    + 에러코드.이슈상태_조회_오류.getErrorMsg() + " :: " +e.getMessage());
+            String 에러로그 =  에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                    "온프레미스 레드마인("+ 서버정보.getConnectId() +") :: 이슈상태_목록_가져오기에 실패하였습니다.");
+            throw new IllegalArgumentException(에러로그);
         }
 
         지라이슈상태_목록 = 이슈상태_목록.stream().map(이슈유형 -> {
