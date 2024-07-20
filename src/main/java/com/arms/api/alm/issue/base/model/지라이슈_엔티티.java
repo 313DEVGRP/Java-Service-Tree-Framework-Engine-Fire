@@ -73,11 +73,11 @@ public class 지라이슈_엔티티 {
     @Field(type = FieldType.Text, name = "self")
     private String self;
 
-    @Field(type = FieldType.Keyword, name = "parentReqKey")
-    private String parentReqKey;
+    @Field(type = FieldType.Keyword, name = "parentReqKeys")
+    private String[] parentReqKeys;
 
     @Field(type = FieldType.Keyword, name = "upperKey")
-    private String upperKey;
+    private String[] upperKey;
 
     @Field(type = FieldType.Boolean, name = "isReq")
     private Boolean isReq;
