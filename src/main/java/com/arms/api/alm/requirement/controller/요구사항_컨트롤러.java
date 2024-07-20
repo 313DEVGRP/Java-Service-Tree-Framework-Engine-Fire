@@ -95,7 +95,10 @@ public class 요구사항_컨트롤러 {
             @RequestParam("pdServiceVersions") Long[] pdServiceVersionLinks) {
 
         return ResponseEntity.ok(요구사항_서비스.제품_버전별_삭제된_이슈조회(pdServiceLink, pdServiceVersionLinks));
-
+    }
+    @PutMapping("/deleteWithdrawal")
+    public ResponseEntity<?> 이슈_삭제철회(@RequestBody List<지라이슈_엔티티>  삭제_철회대상_목록) throws Exception {
+        return ResponseEntity.ok(요구사항_서비스.이슈_삭제철회(삭제_철회대상_목록));
     }
 }
 

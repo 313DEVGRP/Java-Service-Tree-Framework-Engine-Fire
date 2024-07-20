@@ -8,6 +8,7 @@ import com.arms.api.util.common.constrant.index.인덱스자료;
 import com.arms.api.util.errors.codes.에러코드;
 import com.arms.egovframework.javaservice.esframework.EsQuery;
 import com.arms.egovframework.javaservice.esframework.filter.RangeQueryFilter;
+import com.arms.egovframework.javaservice.esframework.filter.TermsQueryFilter;
 import com.arms.egovframework.javaservice.esframework.model.dto.기본_검색_요청;
 import com.arms.egovframework.javaservice.esframework.esquery.EsQueryBuilder;
 import com.arms.egovframework.javaservice.esframework.must.TermQueryMust;
@@ -24,7 +25,6 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.StreamSupport;
 
@@ -192,11 +192,14 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
             String 조회조건_아이디 = 지라서버_아이디 + "_" + 프로젝트키_또는_아이디 + "_" + 이슈_키;
             지라이슈_엔티티 조회결과 = this.이슈_조회하기(조회조건_아이디); // ES에 저장된 요구사항 도큐먼트 데이터
 
-            if (조회결과 == null) { // ES에도 해당 정보가 없는 경우
+            if (조회결과 == null || 조회결과.getId() == null) { // ES에도 해당 정보가 없는 경우
                 return 0;
             }
+            지라이슈_엔티티.삭제 삭제데이터= new 지라이슈_엔티티.삭제();
+            삭제데이터.setDeleted_date(이슈_삭제_년월일);
+            삭제데이터.setIsDeleted(true);
 
-            조회결과.setDeleted(이슈_삭제_년월일);
+            조회결과.setDeleted(삭제데이터);
             조회결과.setParentReqKey(null);
             조회결과.setConnectType(null);
             벌크_저장_목록.add(조회결과);
@@ -217,7 +220,11 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
                         .orElse(Collections.emptyList())
                         .stream()
                         .map(서브테스크 -> {
-                            서브테스크.setDeleted(이슈_삭제_년월일);
+                            지라이슈_엔티티.삭제 서브테스크_삭제데이터= new 지라이슈_엔티티.삭제();
+                            서브테스크_삭제데이터.setDeleted_date(이슈_삭제_년월일);
+                            서브테스크_삭제데이터.setIsDeleted(true);
+
+                            서브테스크.setDeleted(서브테스크_삭제데이터);
                             return 서브테스크;
                         })
                         .collect(toList());
@@ -366,11 +373,15 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
             String 조회조건_아이디 = 지라서버_아이디 + "_" + 프로젝트키_또는_아이디 + "_" + 이슈_키;
             지라이슈_엔티티 조회결과 = this.이슈_조회하기(조회조건_아이디);
 
-            if (조회결과 == null) {
+            if (조회결과 == null || 조회결과.getId() == null) {
                 return 0;
             }
 
-            조회결과.setDeleted(이슈_삭제_년월일);
+            지라이슈_엔티티.삭제 삭제데이터= new 지라이슈_엔티티.삭제();
+            삭제데이터.setDeleted_date(이슈_삭제_년월일);
+            삭제데이터.setIsDeleted(true);
+
+            조회결과.setDeleted(삭제데이터);
             조회결과.setParentReqKey(null);
             조회결과.setConnectType(null);
             증분벌크_저장_목록.add(조회결과);
@@ -393,7 +404,12 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
                         .stream()
                         .map(서브테스크 -> {
                             서브테스크.setConnectType("subtask");
-                            서브테스크.setDeleted(이슈_삭제_년월일);
+
+                            지라이슈_엔티티.삭제 서브테스크_삭제데이터= new 지라이슈_엔티티.삭제();
+                            서브테스크_삭제데이터.setDeleted_date(이슈_삭제_년월일);
+                            서브테스크_삭제데이터.setIsDeleted(true);
+
+                            서브테스크.setDeleted(서브테스크_삭제데이터);
                             return 서브테스크;
                         })
                         .collect(toList());
@@ -542,7 +558,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     @Override
     public int 삭제된_ALM_이슈_Document_삭제() throws Exception {
         try {
-            // 스케줄러 동작일 기준 2일전 
+            // 스케줄러 동작일 기준 2일전
             LocalDate 스케줄러_동작일 = LocalDate.now();
             LocalDate 삭제_대상 = 스케줄러_동작일.minusDays(2);
             DateTimeFormatter 날짜형식 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -570,7 +586,8 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
 
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(
-                    new RangeQueryFilter("deleted", 삭제_대상일자,삭제_대상일자,"fromto")
+                        new RangeQueryFilter("deleted.deleted_date", 삭제_대상일자,삭제_대상일자,"fromto"),
+                        new TermsQueryFilter("deleted.deleted_isDeleted","true")
                 );
         return 지라이슈_저장소.normalSearch(기본_쿼리_생성기.기본검색(new 기본_검색_요청(){}, esQuery).생성());
     }
@@ -609,7 +626,8 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
         List<지라이슈_엔티티> 삭제된_링크드이슈_목록 = es에_저장된_이슈링크_목록.stream()
                 .filter(지라이슈_엔티티 -> !ALM에서_조회한_링크드이슈_키_목록.contains(지라이슈_엔티티.getKey()))
                 .map(지라이슈_엔티티 -> {
-                    지라이슈_엔티티.setDeleted(이슈_삭제_년월일);
+                    지라이슈_엔티티.setParentReqKey(null);
+                    지라이슈_엔티티.setConnectType(null);
                     return 지라이슈_엔티티;
                 })
                 .collect(toList());
@@ -626,7 +644,18 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
         List<지라이슈_엔티티> 삭제된_서브테스크_목록 = es에_저장된_서브테스크_목록.stream()
                 .filter(지라이슈_엔티티 -> !ALM에서_조회한_서브테스크_키_목록.contains(지라이슈_엔티티.getKey()))
                 .map(지라이슈_엔티티 -> {
-                    지라이슈_엔티티.setDeleted(이슈_삭제_년월일);
+                    // 기존 삭제 데이터를 가져오거나 새로 생성
+                    지라이슈_엔티티.삭제 삭제데이터 = 지라이슈_엔티티.getDeleted();
+                    if (삭제데이터 == null) {
+                        삭제데이터 = new 지라이슈_엔티티.삭제();
+                    }
+
+                    // 기존 삭제 데이터가 복구된 상태가 아닌 경우에만 삭제 처리
+                    if (삭제데이터.getIsDeleted()) {
+                        삭제데이터.setDeleted_date(이슈_삭제_년월일);
+                        삭제데이터.setIsDeleted(true);
+                    }
+                    지라이슈_엔티티.setDeleted(삭제데이터);
                     return 지라이슈_엔티티;
                 })
                 .collect(toList());

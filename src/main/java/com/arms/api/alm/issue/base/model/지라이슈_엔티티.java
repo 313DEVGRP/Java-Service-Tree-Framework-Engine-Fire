@@ -127,8 +127,8 @@ public class 지라이슈_엔티티 {
     @Field(type = FieldType.Date, name = "updated")
     private String updated;
 
-    @Field(type = FieldType.Date, name = "deleted")
-    private String deleted;
+
+    private 지라이슈_엔티티.삭제 deleted;
 
 //    @Field(type = FieldType.Nested)
     private List<지라이슈_엔티티.워크로그> worklogs;
@@ -147,7 +147,23 @@ public class 지라이슈_엔티티 {
 
     @Field(type = FieldType.Long, name = "pdServiceVersions")
     private Long[] pdServiceVersions;
+    @Getter
+    @Setter
+    @Builder
+    @ToString
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @EqualsAndHashCode
+    public static class 삭제 {
+        @Field(type = FieldType.Boolean, name = "deleted_isDeleted")
+        @JsonProperty("deleted_isDeleted")
+        private Boolean isDeleted;
 
+        @Field(type = FieldType.Date, name = "deleted_date")
+        @JsonProperty("deleted_date")
+        private String deleted_date;
+    }
     @Getter
     @Setter
     @Builder

@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
 
@@ -206,9 +207,39 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(new TermQueryMust("pdServiceId",제품서비스_아이디),
                         new TermsQueryFilter("pdServiceVersions", Arrays.stream(버전_아이디들).filter(a->a!=null&&a>9L).collect(toList())),
-                        new ExistsQueryFilter("deleted")
+                        new TermsQueryFilter("deleted.deleted_isDeleted","true")
                 );
 
         return 지라이슈_저장소.normalSearch(기본_쿼리_생성기.기본검색(new 기본_검색_요청() { }, esQuery).생성());
     }
+    @Override
+    public int 이슈_삭제철회(List<지라이슈_엔티티> 삭제_철회대상_목록) throws Exception {
+        try {
+            List<지라이슈_엔티티> 철회업데이트 = Optional.ofNullable(삭제_철회대상_목록)
+                    .orElse(Collections.emptyList())
+                    .stream()
+                    .map(지라이슈_엔티티 -> {
+                        지라이슈_엔티티.getDeleted().setIsDeleted(false);
+                        return 지라이슈_엔티티;
+                    })
+                    .collect(toList());
+
+            Iterable<지라이슈_엔티티> 지라이슈s = 지라이슈_저장소.saveAll(철회업데이트);
+
+            int count = StreamSupport.stream(지라이슈s.spliterator(), false).collect(toList()).size();
+
+            if (count == 0) {
+                log.info("이슈 삭제 철회 작업에서 업데이트된 엔티티가 없습니다.");
+            } else {
+                log.info("이슈 삭제 철회 작업에서 {}개의 엔티티가 업데이트되었습니다.", count);
+            }
+
+            return count;
+
+        } catch (Exception e) {
+            log.error("이슈 삭제 철회 작업 중 오류 발생", e);
+            throw new Exception("이슈 삭제 철회 작업 중 오류가 발생했습니다.");
+        }
+    }
+
 }
