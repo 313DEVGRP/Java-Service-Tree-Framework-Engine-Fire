@@ -637,28 +637,39 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
 
     private List<지라이슈_엔티티> 삭제된_ALM_하위이슈_ES_데이터_반환(List<지라이슈_데이터> ALM서브테스크_목록, List<지라이슈_엔티티> es에_저장된_서브테스크_목록, String 이슈_삭제_년월일){
 
-        List<String> ALM에서_조회한_서브테스크_키_목록 = ALM서브테스크_목록.stream()
-                .map(지라이슈_데이터::getKey)
-                .collect(toList());
+        List<String> ALM에서_조회한_서브테스크_키_목록;
+
+        // ALM서브테스크_목록이 null이거나 비어있으면 빈 리스트로 초기화
+        if (ALM서브테스크_목록 == null || ALM서브테스크_목록.isEmpty()) {
+            ALM에서_조회한_서브테스크_키_목록 = new ArrayList<>(); // 빈 리스트 생성
+        } else {
+            ALM에서_조회한_서브테스크_키_목록 = ALM서브테스크_목록.stream()
+                    .map(지라이슈_데이터::getKey)
+                    .collect(toList());
+        }
 
         List<지라이슈_엔티티> 삭제된_서브테스크_목록 = es에_저장된_서브테스크_목록.stream()
-                .filter(지라이슈_엔티티 -> !ALM에서_조회한_서브테스크_키_목록.contains(지라이슈_엔티티.getKey()))
                 .map(지라이슈_엔티티 -> {
-                    // 기존 삭제 데이터를 가져오거나 새로 생성
                     지라이슈_엔티티.삭제 삭제데이터 = 지라이슈_엔티티.getDeleted();
+
                     if (삭제데이터 == null) {
                         삭제데이터 = new 지라이슈_엔티티.삭제();
                     }
 
-                    // 기존 삭제 데이터가 복구된 상태가 아닌 경우에만 삭제 처리
-                    if (삭제데이터.getIsDeleted()) {
+                    if (삭제데이터.getIsDeleted() != null && !삭제데이터.getIsDeleted()) {
+                        return 지라이슈_엔티티;
+                    }
+
+                    if (ALM서브테스크_목록 == null || ALM서브테스크_목록.isEmpty() || !ALM에서_조회한_서브테스크_키_목록.contains(지라이슈_엔티티.getKey())) {
                         삭제데이터.setDeleted_date(이슈_삭제_년월일);
                         삭제데이터.setIsDeleted(true);
+                        지라이슈_엔티티.setDeleted(삭제데이터);
                     }
-                    지라이슈_엔티티.setDeleted(삭제데이터);
+
                     return 지라이슈_엔티티;
                 })
                 .collect(toList());
+
 
         return 삭제된_서브테스크_목록;
     }
