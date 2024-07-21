@@ -348,12 +348,20 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
     }
 
     public 지라이슈_데이터 지라이슈_데이터로_변환(Issue 지라이슈) {
+        return 지라이슈_데이터로_변환(지라이슈, null);
+    }
+
+    public 지라이슈_데이터 지라이슈_데이터로_변환(Issue 지라이슈, String 이슈_키_또는_아이디) {
         지라이슈_데이터 지라이슈_데이터 = new 지라이슈_데이터();
         지라이슈필드_데이터 지라이슈필드_데이터 = new 지라이슈필드_데이터();
 
         지라이슈_데이터.setId(지라이슈.getId().toString());
         지라이슈_데이터.setKey(지라이슈.getKey());
         지라이슈_데이터.setSelf(지라이슈.getSelf().toString());
+
+        if (이슈_키_또는_아이디 != null) {
+            지라이슈_데이터.setUpperKey(이슈_키_또는_아이디);
+        }
 
         // 필드
         // 초기화
@@ -639,7 +647,7 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
                         .searchJql(jql, 최대_검색수, startAt, fields)
                         .get();
                 for (Issue issue : searchResult.getIssues()) {
-                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터로_변환(issue);
+                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터로_변환(issue, 이슈_키_또는_아이디);
                     반환할_이슈링크_목록.add(지라이슈_데이터);
                 }
 
@@ -694,7 +702,7 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
                         .searchJql(jql, 최대_검색수, startAt, fields)
                         .get();
                 for (Issue issue : searchResult.getIssues()) {
-                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터로_변환(issue);
+                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터로_변환(issue, 이슈_키_또는_아이디);
                     반환할_서브테스크_목록.add(지라이슈_데이터);
                 }
 
@@ -808,7 +816,7 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
                         .searchJql(jql, 최대_검색수, startAt, fields)
                         .claim();
                 for (Issue issue : searchResult.getIssues()) {
-                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터로_변환(issue);
+                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터로_변환(issue, 이슈_키_또는_아이디);
                     반환할_이슈링크_목록.add(지라이슈_데이터);
                 }
 
@@ -858,7 +866,7 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
                         .searchJql(jql, 최대_검색수, startAt, fields)
                         .get();
                 for (Issue issue : searchResult.getIssues()) {
-                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터로_변환(issue);
+                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터로_변환(issue, 이슈_키_또는_아이디);
                     반환할_서브테스크_목록.add(지라이슈_데이터);
                 }
 

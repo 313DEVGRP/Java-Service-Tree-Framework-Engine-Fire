@@ -381,6 +381,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
                     return null;
                 }
 
+                이슈링크_조회결과.getIssues().forEach(연결이슈 -> 연결이슈.setUpperKey(이슈_키_또는_아이디));
                 이슈링크_목록.addAll(이슈링크_조회결과.getIssues());
 
                 if (이슈링크_조회결과.getTotal() == 이슈링크_목록.size()) {
@@ -427,6 +428,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
                     return null;
                 }
 
+                서브테스크_조회결과.getIssues().forEach(하위이슈 -> 하위이슈.setUpperKey(이슈_키_또는_아이디));
                 서브테스크_목록.addAll(서브테스크_조회결과.getIssues());
 
                 if (서브테스크_조회결과.getTotal() == 서브테스크_목록.size()) {
@@ -521,6 +523,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
                     return null;
                 }
 
+                이슈링크_조회결과.getIssues().forEach(연결이슈 -> 연결이슈.setUpperKey(이슈_키_또는_아이디));
                 이슈링크_목록.addAll(이슈링크_조회결과.getIssues());
 
                 if (이슈링크_조회결과.getTotal() == 이슈링크_목록.size()) {
@@ -566,6 +569,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
                     return null;
                 }
 
+                서브테스크_조회결과.getIssues().forEach(하위이슈 -> 하위이슈.setUpperKey(이슈_키_또는_아이디));
                 서브테스크_목록.addAll(서브테스크_조회결과.getIssues());
 
                 if (서브테스크_조회결과.getTotal() == 서브테스크_목록.size()) {
