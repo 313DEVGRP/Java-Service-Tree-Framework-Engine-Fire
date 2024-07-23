@@ -82,9 +82,6 @@ public class 지라이슈_엔티티 {
     @Field(type = FieldType.Boolean, name = "isReq")
     private Boolean isReq;
 
-    @Field(type = FieldType.Text, name = "connectType")
-    private String connectType;
-
     @Field(type = FieldType.Auto, name = "etc")
     private Object etc;
 
