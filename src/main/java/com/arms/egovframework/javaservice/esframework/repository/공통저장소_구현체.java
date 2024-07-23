@@ -128,6 +128,31 @@ public class 공통저장소_구현체<T,ID extends Serializable> extends Simple
         }
     }
 
+
+    public List<SearchHit<T>> normalSearchHits(Query query) {
+        if (query == null) {
+            log.error("Failed to build search request");
+            return Collections.emptyList();
+        }
+
+        try {
+
+            ElasticSearchIndex annotation = AnnotationUtils.findAnnotation(entityClass, ElasticSearchIndex.class);
+
+            if(annotation==null){
+                return operations.search(query, entityClass).getSearchHits();
+            }
+
+            NativeSearchQuery searchQuery = recentQueryMerge((NativeSearchQuery)query);
+
+            return operations.search(searchQuery, entityClass).getSearchHits();
+
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return Collections.emptyList();
+        }
+    }
+
     public List<SearchHit<T>> normalSearchAll(Query query) {
         try {
             return operations.search(query, entityClass).getSearchHits();

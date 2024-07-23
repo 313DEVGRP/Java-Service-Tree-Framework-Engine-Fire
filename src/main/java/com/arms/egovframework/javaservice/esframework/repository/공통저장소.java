@@ -33,6 +33,8 @@ public interface 공통저장소<T,ID extends Serializable> extends Elasticsearc
 
 	List<T> normalSearch(Query query);
 
+	List<SearchHit<T>> normalSearchHits(Query query);
+
 	List<SearchHit<T>> normalSearchAll(Query query);
 
 	List<T> normalSearch(Query query, String newIndex);

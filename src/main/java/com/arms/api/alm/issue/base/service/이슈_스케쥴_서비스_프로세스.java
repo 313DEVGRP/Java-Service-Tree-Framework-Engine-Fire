@@ -673,5 +673,82 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
 
         return 삭제된_서브테스크_목록;
     }
+    
+    /*
+    *   recent 필드가 true 인 es 데이터의 각 인덱스 필드를 업데이트 시킴
+    * */
+    @Override
+    public int 서브테스크_상위키_필드업데이트(Long 지라서버_아이디, String 이슈_키 , String 프로젝트키_또는_아이디, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception {
 
+        if (지라서버_아이디 == null) {
+            로그.error("서브테스크_상위키_필드업데이트 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
+            throw new IllegalArgumentException("서브테스크_상위키_필드업데이트 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
+        }
+
+        if (이슈_키 == null || 이슈_키.isEmpty()) {
+            로그.error("서브테스크_상위키_필드업데이트 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+            throw new IllegalArgumentException("서브테스크_상위키_필드업데이트 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+        }
+
+        if (프로젝트키_또는_아이디 == null || 프로젝트키_또는_아이디.isEmpty()) {
+            로그.error("서브테스크_상위키_필드업데이트 Error 프로젝트_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+            throw new IllegalArgumentException("서브테스크_상위키_필드업데이트 Error 프로젝트_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+        }
+
+        if (제품서비스_아이디 == null || 제품서비스_버전들 == null) {
+            로그.error("서브테스크_상위키_필드업데이트 Error 제품서비스_아이디 또는 제품서비스_버전 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+            throw new IllegalArgumentException("서브테스크_상위키_필드업데이트 Error 제품서비스_아이디 또는 제품서비스_버전 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+        }
+
+        if (cReqLink == null) {
+            로그.error("서브테스크_상위키_필드업데이트 Error cReqLink " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+            throw new IllegalArgumentException("서브테스크_상위키_필드업데이트 Error cReqLink " + 에러코드.파라미터_NULL_오류.getErrorMsg());
+        }
+
+        List<지라이슈_데이터> ALM_서브테스크_목록 = 이슈전략_호출.서브테스크_가져오기(지라서버_아이디, 이슈_키); // ALM에서 조회한 서브테스크 목록
+
+        List<SearchHit<지라이슈_엔티티>> ES_서브테크_이슈링크_목록 = 서브테스크_조회.요구사항_링크드이슈_서브테스크_인덱스포함_검색하기(지라서버_아이디, 이슈_키); // ES에서 조회한 서브테스크 및 이슈링크 목록
+
+        Map<String, 지라이슈_데이터> ALM_서브테스크_데이터_맵 = Optional.ofNullable(ALM_서브테스크_목록) // ALM 서브테스크 (키, 데이터) 맵
+                .orElse(Collections.emptyList())
+                .stream()
+                .filter(Objects::nonNull)
+                .filter(item -> item.getKey() != null)
+                .collect(Collectors.toMap(지라이슈_데이터::getKey, Function.identity()));
+
+        List<SearchHit<지라이슈_엔티티>> 업데이트_데이터_목록 = new ArrayList<SearchHit<지라이슈_엔티티>>();
+
+        ES_서브테크_이슈링크_목록.stream().map(서브테스크_이슈링크 ->{
+
+            String ES_이슈_키 = 서브테스크_이슈링크.getContent().getKey();
+
+            if (ALM_서브테스크_데이터_맵.containsKey(ES_이슈_키)) {
+                // ES_서브테크_이슈링크_목록에 ALM에서 조회한 서브 테스크 가 존재한다
+                // ALM의 서브 테스크 데이터에서 upperKey 조회하여 set
+                String 서브테스크_상위키 = ALM_서브테스크_데이터_맵.get(ES_이슈_키).getUpperKey();
+
+                서브테스크_이슈링크.getContent().setUpperKey(서브테스크_상위키);
+
+                업데이트_데이터_목록.add(서브테스크_이슈링크);
+
+            }
+
+            return 서브테스크_이슈링크;
+        }).collect(toList());
+
+        int 업데이트된_개수 = (int) 업데이트_데이터_목록.stream()
+                .filter(도큐먼트_데이터 -> {
+                    try {
+                        // 해당 인덱스의 도큐먼트 데이터를 업데이트 하기위함
+                        지라이슈_저장소.updateSave(도큐먼트_데이터.getContent(), 도큐먼트_데이터.getIndex());
+                        return true; // 성공적으로 업데이트된 경우
+                    } catch (Exception e) {
+                        로그.error("필드 업데이트 중 오류 발생: " + e.getMessage());
+                        return false; // 오류 발생 시 false 반환
+                    }
+                })
+                .count(); // 성공적으로 업데이트된 개수 카운트
+
+        return 업데이트된_개수;
+    }
 }
