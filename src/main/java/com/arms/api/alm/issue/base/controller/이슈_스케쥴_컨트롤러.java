@@ -35,26 +35,6 @@ public class 이슈_스케쥴_컨트롤러 {
     }
 
 
-
-    /**
-     * 2024-03-17 사용 여부 체크 필요
-     */
-    @ResponseBody
-    @RequestMapping(
-            value = {"/loadToES/{issueKey}"},
-            method = {RequestMethod.GET}
-    )
-    public 지라이슈_엔티티 이슈_검색엔진_저장(@PathVariable("connectId") Long 지라서버_아이디,
-                               @PathVariable("issueKey") String 이슈_키,
-                               @RequestParam("pdServiceId") Long 제품서비스_아이디,
-                               @RequestParam("pdServiceVersions") Long[] 제품서비스_버전_아이디들,
-                               @RequestParam("cReqLink") Long cReqLink,
-                               ModelMap model, HttpServletRequest request) throws Exception {
-        log.info("지라 이슈_검색엔진_저장");
-
-        return 이슈_스케쥴_서비스.이슈_검색엔진_저장(지라서버_아이디, 이슈_키, 제품서비스_아이디, 제품서비스_버전_아이디들, cReqLink);
-    }
-
     @ResponseBody
     @RequestMapping(
     value = {"/index/backup"},
