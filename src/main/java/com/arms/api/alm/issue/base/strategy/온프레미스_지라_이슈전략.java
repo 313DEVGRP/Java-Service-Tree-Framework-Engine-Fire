@@ -647,7 +647,7 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
                         .searchJql(jql, 최대_검색수, startAt, fields)
                         .get();
                 for (Issue issue : searchResult.getIssues()) {
-                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터로_변환(issue, 이슈_키_또는_아이디);
+                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터로_변환(issue);
                     반환할_이슈링크_목록.add(지라이슈_데이터);
                 }
 
@@ -816,7 +816,7 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
                         .searchJql(jql, 최대_검색수, startAt, fields)
                         .claim();
                 for (Issue issue : searchResult.getIssues()) {
-                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터로_변환(issue, 이슈_키_또는_아이디);
+                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터로_변환(issue);
                     반환할_이슈링크_목록.add(지라이슈_데이터);
                 }
 

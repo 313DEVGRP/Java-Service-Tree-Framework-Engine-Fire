@@ -327,14 +327,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
             }
 
             Optional.ofNullable(연관이슈_아이디)
-                    .map(이슈_아이디 -> {
-                        지라이슈_데이터 이슈_데이터 = 이슈_상세정보_가져오기(서버정보, 이슈_아이디);
-                        if (이슈_데이터 != null) {
-                            이슈_데이터.setUpperKey(이슈_키_또는_아이디);
-                        }
-                        return 이슈_데이터;
-                    })
-                    .filter(Objects::nonNull)
+                    .map(이슈_아이디 -> 이슈_상세정보_가져오기(서버정보, 이슈_아이디))
                     .ifPresent(이슈_목록::add);
         }
 
@@ -451,14 +444,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
             }
 
             Optional.ofNullable(연관이슈_아이디)
-                    .map(이슈_아이디 -> {
-                        지라이슈_데이터 이슈_데이터 = 증분이슈_상세정보_가져오기(서버정보, 이슈_아이디);
-                        if (이슈_데이터 != null) {
-                            이슈_데이터.setUpperKey(이슈_키_또는_아이디);
-                        }
-                        return 이슈_데이터;
-                    })
-                    .filter(Objects::nonNull)
+                    .map(이슈_아이디 -> 증분이슈_상세정보_가져오기(서버정보, 이슈_아이디))
                     .ifPresent(이슈_목록::add);
         }
 
