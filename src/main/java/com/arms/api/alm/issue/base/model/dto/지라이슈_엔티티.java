@@ -1,4 +1,4 @@
-package com.arms.api.alm.issue.base.model;
+package com.arms.api.alm.issue.base.model.dto;
 
 import com.arms.api.util.common.constrant.index.인덱스자료;
 import com.arms.egovframework.javaservice.esframework.annotation.ElasticSearchIndex;

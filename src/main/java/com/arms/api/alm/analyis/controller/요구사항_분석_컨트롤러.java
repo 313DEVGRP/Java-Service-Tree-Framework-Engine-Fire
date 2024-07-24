@@ -1,6 +1,6 @@
 package com.arms.api.alm.analyis.controller;
 
-import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
+import com.arms.api.alm.issue.base.model.dto.지라이슈_엔티티;
 import com.arms.api.util.model.dto.response.*;
 import com.arms.api.util.model.enums.IsReqType;
 import com.arms.api.alm.analyis.service.요구사항_분석_서비스;

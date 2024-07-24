@@ -1,6 +1,6 @@
 package com.arms.api.alm.issue.base.strategy;
 
-import com.arms.api.alm.issue.base.model.*;
+import com.arms.api.alm.issue.base.model.dto.*;
 import com.arms.api.alm.issue.priority.model.이슈우선순위_데이터;
 import com.arms.api.alm.issue.resolution.model.이슈해결책_데이터;
 import com.arms.api.alm.issue.status.model.이슈상태_데이터;

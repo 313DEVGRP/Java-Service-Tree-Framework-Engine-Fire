@@ -1,8 +1,10 @@
 package com.arms.api.alm.issue.base.service;
 
-import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
+import com.arms.api.alm.issue.base.model.vo.지라이슈_벌크_추가_요청;
+import com.arms.api.alm.issue.base.model.dto.지라이슈_엔티티;
 import org.springframework.data.elasticsearch.core.SearchHit;
 
+import javax.validation.Valid;
 import java.util.List;
 
 public interface 이슈_스케쥴_서비스 {
@@ -21,15 +23,15 @@ public interface 이슈_스케쥴_서비스 {
 
     boolean 지라이슈_인덱스삭제();
 
-    int 이슈_링크드이슈_서브테스크_벌크로_추가하기(Long 지라서버_아이디, String 이슈_키, String 프로젝트키_또는_아이디, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception;
+    int 이슈_링크드이슈_서브테스크_벌크로_추가하기(@Valid 지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) throws Exception;
 
-    int 증분이슈_링크드이슈_서브테스크_벌크추가(Long 지라서버_아이디, String 이슈_키, String 프로젝트키_또는_아이디, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception;
+    int 증분이슈_링크드이슈_서브테스크_벌크추가(@Valid 지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) throws Exception;
 
     int 삭제된_ALM_이슈_Document_삭제() throws Exception;
 
     List<SearchHit<지라이슈_엔티티>> 모든인덱스에있는_이슈_조회하기(String 조회조건_아이디);
 
-    int 서브테스크_상위키_필드업데이트(Long 지라서버_아이디, String 이슈_키, String 프로젝트키_또는_아이디, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception;
+    int 서브테스크_상위키_필드업데이트(@Valid 지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) throws Exception;
 
 
 

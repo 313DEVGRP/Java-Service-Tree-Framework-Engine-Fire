@@ -1,6 +1,6 @@
 package com.arms.api.alm.analyis.service;
 
-import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
+import com.arms.api.alm.issue.base.model.dto.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
 import com.arms.api.alm.issue.base.service.지라이슈_서비스;
 import com.arms.api.util.common.constrant.index.인덱스자료;

@@ -1,6 +1,6 @@
 package com.arms.api.alm.requirement.service;
 
-import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
+import com.arms.api.alm.issue.base.model.dto.지라이슈_엔티티;
 import com.arms.egovframework.javaservice.esframework.factory.creator.query.쿼리_생성기;
 import com.arms.api.util.model.dto.request.지라이슈_제품_및_제품버전_검색_집계_하위_요청;
 import com.arms.egovframework.javaservice.esframework.model.vo.버킷_집계_결과;

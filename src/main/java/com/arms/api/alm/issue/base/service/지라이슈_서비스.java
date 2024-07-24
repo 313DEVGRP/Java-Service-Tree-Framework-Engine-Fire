@@ -1,6 +1,6 @@
 package com.arms.api.alm.issue.base.service;
 
-import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
+import com.arms.api.alm.issue.base.model.dto.지라이슈_엔티티;
 
 import java.util.List;
 

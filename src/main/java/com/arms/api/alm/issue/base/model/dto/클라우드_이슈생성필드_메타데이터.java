@@ -1,4 +1,4 @@
-package com.arms.api.alm.issue.base.model;
+package com.arms.api.alm.issue.base.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;

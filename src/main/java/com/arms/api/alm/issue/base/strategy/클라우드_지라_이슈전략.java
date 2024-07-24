@@ -1,6 +1,6 @@
 package com.arms.api.alm.issue.base.strategy;
 
-import com.arms.api.alm.issue.base.model.*;
+import com.arms.api.alm.issue.base.model.dto.*;
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
 import com.arms.api.alm.utils.지라API_정보;
 import com.arms.api.alm.utils.지라유틸;

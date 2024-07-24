@@ -1,7 +1,7 @@
 package com.arms.api.alm.issue.base.strategy;
 
-import com.arms.api.alm.issue.base.model.지라이슈_데이터;
-import com.arms.api.alm.issue.base.model.지라이슈생성_데이터;
+import com.arms.api.alm.issue.base.model.dto.지라이슈_데이터;
+import com.arms.api.alm.issue.base.model.dto.지라이슈생성_데이터;
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
 
 import java.util.List;

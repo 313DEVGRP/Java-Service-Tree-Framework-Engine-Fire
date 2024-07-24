@@ -1,7 +1,8 @@
 package com.arms.api.alm.issue.base.service;
 
-import com.arms.api.alm.issue.base.model.지라이슈_데이터;
-import com.arms.api.alm.issue.base.model.지라이슈_엔티티;
+import com.arms.api.alm.issue.base.model.dto.지라이슈_데이터;
+import com.arms.api.alm.issue.base.model.vo.지라이슈_벌크_추가_요청;
+import com.arms.api.alm.issue.base.model.dto.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
 import com.arms.api.alm.utils.지라이슈_생성;
 import com.arms.api.util.common.constrant.index.인덱스자료;
@@ -19,7 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
+import javax.validation.Valid;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -35,6 +38,7 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 @Service("지라이슈_스케쥴_서비스")
 @AllArgsConstructor
+@Validated
 public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴_서비스 {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
@@ -142,35 +146,18 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
         return 삭제성공;
     }
     // todo 2024.07.24 ~ 2024.07.26 - linkedIssue filed 변경으로 인한 주석 처리 (서브테스크만 고려)
+    @Validated
     @Override
-    public int 이슈_링크드이슈_서브테스크_벌크로_추가하기(Long 지라서버_아이디, String 이슈_키 , String 프로젝트키_또는_아이디, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception {
+    public int 이슈_링크드이슈_서브테스크_벌크로_추가하기(@Valid 지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) throws Exception {
 
-        if (지라서버_아이디 == null) {
-            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
-            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
-        }
+        List<지라이슈_엔티티> 벌크_저장_목록 = new ArrayList<>();
 
-        if (이슈_키 == null || 이슈_키.isEmpty()) {
-            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
-
-        if (프로젝트키_또는_아이디 == null || 프로젝트키_또는_아이디.isEmpty()) {
-            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 프로젝트키_또는_아이디 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 프로젝트키_또는_아이디 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
-
-        if (제품서비스_아이디 == null || 제품서비스_버전들 == null) {
-            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 제품서비스_아이디 또는 제품서비스_버전 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error 제품서비스_아이디 또는 제품서비스_버전 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
-
-        if (cReqLink == null) {
-            로그.error("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error cReqLink " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("이슈_링크드이슈_서브테스크_벌크로_추가하기 Error cReqLink " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
-
-        List<지라이슈_엔티티> 벌크_저장_목록 = new ArrayList<지라이슈_엔티티>();
+        Long 지라서버_아이디 = 지라이슈_벌크_추가_요청값.get지라서버_아이디();
+        String 이슈_키 = 지라이슈_벌크_추가_요청값.get이슈_키();
+        String 프로젝트키_또는_아이디 = 지라이슈_벌크_추가_요청값.get프로젝트키_또는_아이디();
+        Long 제품서비스_아이디 = 지라이슈_벌크_추가_요청값.get제품서비스_아이디();
+        Long[] 제품서비스_버전들 = 지라이슈_벌크_추가_요청값.get제품서비스_버전들();
+        Long cReqLink = 지라이슈_벌크_추가_요청값.getCReqLink();
 
         지라이슈_데이터 반환된_이슈 = Optional.ofNullable(
                         이슈전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키)) // 요구사항 이슈 조회
@@ -321,34 +308,16 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     }
 
     @Override
-    public int 증분이슈_링크드이슈_서브테스크_벌크추가(Long 지라서버_아이디, String 이슈_키 , String 프로젝트키_또는_아이디, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception {
+    public int 증분이슈_링크드이슈_서브테스크_벌크추가(@Valid 지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) throws Exception {
 
-        if (지라서버_아이디 == null) {
-            로그.error("증분이슈_링크드이슈_서브테스크_벌크추가 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
-            throw new IllegalArgumentException("증분이슈_링크드이슈_서브테스크_벌크추가 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
-        }
+        List<지라이슈_엔티티> 증분벌크_저장_목록 = new ArrayList<>();
 
-        if (이슈_키 == null || 이슈_키.isEmpty()) {
-            로그.error("증분이슈_링크드이슈_서브테스크_벌크추가 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("증분이슈_링크드이슈_서브테스크_벌크추가 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
-
-        if (프로젝트키_또는_아이디 == null || 프로젝트키_또는_아이디.isEmpty()) {
-            로그.error("증분이슈_링크드이슈_서브테스크_벌크추가 Error 프로젝트_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("증분이슈_링크드이슈_서브테스크_벌크추가 Error 프로젝트_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
-
-        if (제품서비스_아이디 == null || 제품서비스_버전들 == null) {
-            로그.error("증분이슈_링크드이슈_서브테스크_벌크추가 Error 제품서비스_아이디 또는 제품서비스_버전 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("증분이슈_링크드이슈_서브테스크_벌크추가 Error 제품서비스_아이디 또는 제품서비스_버전 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
-
-        if (cReqLink == null) {
-            로그.error("증분이슈_링크드이슈_서브테스크_벌크추가 Error cReqLink " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("증분이슈_링크드이슈_서브테스크_벌크추가 Error cReqLink " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
-
-        List<지라이슈_엔티티> 증분벌크_저장_목록 = new ArrayList<지라이슈_엔티티>();
+        Long 지라서버_아이디 = 지라이슈_벌크_추가_요청값.get지라서버_아이디();
+        String 이슈_키 = 지라이슈_벌크_추가_요청값.get이슈_키();
+        String 프로젝트키_또는_아이디 = 지라이슈_벌크_추가_요청값.get프로젝트키_또는_아이디();
+        Long 제품서비스_아이디 = 지라이슈_벌크_추가_요청값.get제품서비스_아이디();
+        Long[] 제품서비스_버전들 = 지라이슈_벌크_추가_요청값.get제품서비스_버전들();
+        Long cReqLink = 지라이슈_벌크_추가_요청값.getCReqLink();
 
         /**
          * 스케줄러 작동 시 암스에서 생성한 요구사항 자체가 전날 업데이트가 일어났는지 확인 시 업데이트가 없을 시 null 반환(삭제된 이슈를 조회할 때 또한)
@@ -677,32 +646,14 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     *   recent 필드가 true 인 es 데이터의 각 인덱스 필드를 업데이트 시킴
     * */
     @Override
-    public int 서브테스크_상위키_필드업데이트(Long 지라서버_아이디, String 이슈_키 , String 프로젝트키_또는_아이디, Long 제품서비스_아이디, Long[] 제품서비스_버전들, Long cReqLink) throws Exception {
+    public int 서브테스크_상위키_필드업데이트(@Valid 지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) throws Exception {
 
-        if (지라서버_아이디 == null) {
-            로그.error("서브테스크_상위키_필드업데이트 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
-            throw new IllegalArgumentException("서브테스크_상위키_필드업데이트 Error: 서버_아이디 " + 에러코드.파라미터_서버_아이디_없음.getErrorMsg());
-        }
-
-        if (이슈_키 == null || 이슈_키.isEmpty()) {
-            로그.error("서브테스크_상위키_필드업데이트 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("서브테스크_상위키_필드업데이트 Error 이슈_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
-
-        if (프로젝트키_또는_아이디 == null || 프로젝트키_또는_아이디.isEmpty()) {
-            로그.error("서브테스크_상위키_필드업데이트 Error 프로젝트_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("서브테스크_상위키_필드업데이트 Error 프로젝트_키 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
-
-        if (제품서비스_아이디 == null || 제품서비스_버전들 == null) {
-            로그.error("서브테스크_상위키_필드업데이트 Error 제품서비스_아이디 또는 제품서비스_버전 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("서브테스크_상위키_필드업데이트 Error 제품서비스_아이디 또는 제품서비스_버전 " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
-
-        if (cReqLink == null) {
-            로그.error("서브테스크_상위키_필드업데이트 Error cReqLink " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-            throw new IllegalArgumentException("서브테스크_상위키_필드업데이트 Error cReqLink " + 에러코드.파라미터_NULL_오류.getErrorMsg());
-        }
+        Long 지라서버_아이디 = 지라이슈_벌크_추가_요청값.get지라서버_아이디();
+        String 이슈_키 = 지라이슈_벌크_추가_요청값.get이슈_키();
+        String 프로젝트키_또는_아이디 = 지라이슈_벌크_추가_요청값.get프로젝트키_또는_아이디();
+        Long 제품서비스_아이디 = 지라이슈_벌크_추가_요청값.get제품서비스_아이디();
+        Long[] 제품서비스_버전들 = 지라이슈_벌크_추가_요청값.get제품서비스_버전들();
+        Long cReqLink = 지라이슈_벌크_추가_요청값.getCReqLink();
 
         List<지라이슈_데이터> ALM_서브테스크_목록 = 이슈전략_호출.서브테스크_가져오기(지라서버_아이디, 이슈_키); // ALM에서 조회한 서브테스크 목록
 

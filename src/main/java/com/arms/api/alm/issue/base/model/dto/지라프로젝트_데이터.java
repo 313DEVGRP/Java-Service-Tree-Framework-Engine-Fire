@@ -1,4 +1,4 @@
-package com.arms.api.alm.issue.base.model;
+package com.arms.api.alm.issue.base.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
@@ -10,8 +10,14 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class 클라우드_지라이슈생성_데이터 {
+public class 지라프로젝트_데이터 {
 
-    private 클라우드_지라이슈필드_데이터 fields;
+    private String self;
+
+    private String id;
+
+    private String key;
+
+    private String name;
 
 }

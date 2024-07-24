@@ -1,4 +1,4 @@
-package com.arms.api.alm.issue.base.model;
+package com.arms.api.alm.issue.base.model.dto;
 
 import com.arms.api.alm.issue.resolution.model.이슈해결책_데이터;
 import com.arms.api.alm.issue.status.model.이슈상태_데이터;
@@ -7,6 +7,7 @@ import com.arms.api.alm.issue.priority.model.이슈우선순위_데이터;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -16,13 +17,15 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class 지라이슈필드_데이터 {
+public class 지라이슈생성필드_데이터 {
 
     private 지라프로젝트_데이터 project;
 
     private 이슈유형_데이터 issuetype;
 
-    private 지라사용자_데이터 creator;
+    private String summary;
+
+    private String description;
 
     private 지라사용자_데이터 reporter;
 
@@ -36,15 +39,7 @@ public class 지라이슈필드_데이터 {
 
     private 이슈해결책_데이터 resolution;
 
-    private String resolutiondate;
+    private Date startDate;
 
-    private String created;
-
-    private String updated;
-
-    private List<지라이슈워크로그_데이터> worklogs;
-
-    private Integer timespent;
-
-    private String summary;
+    private Date dueDate;
 }
