@@ -307,6 +307,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
         return 대량이슈_추가하기(벌크_저장_목록);
     }
 
+    @Validated
     @Override
     public int 증분이슈_링크드이슈_서브테스크_벌크추가(@Valid 지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) throws Exception {
 
@@ -645,6 +646,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     /*
     *   recent 필드가 true 인 es 데이터의 각 인덱스 필드를 업데이트 시킴
     * */
+    @Validated
     @Override
     public int 서브테스크_상위키_필드업데이트(@Valid 지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) throws Exception {
 
