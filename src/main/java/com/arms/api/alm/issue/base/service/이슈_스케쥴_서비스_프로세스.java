@@ -6,7 +6,6 @@ import com.arms.api.alm.issue.base.model.dto.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
 import com.arms.api.alm.utils.지라이슈_생성;
 import com.arms.api.util.common.constrant.index.인덱스자료;
-import com.arms.api.util.errors.codes.에러코드;
 import com.arms.egovframework.javaservice.esframework.EsQuery;
 import com.arms.egovframework.javaservice.esframework.filter.RangeQueryFilter;
 import com.arms.egovframework.javaservice.esframework.filter.TermsQueryFilter;
@@ -67,7 +66,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
 
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(
-                        new TermQueryMust("id", 조회조건_아이디)
+                    new TermQueryMust("id", 조회조건_아이디)
                 );
         return 지라이슈_저장소.normalSearch(기본_쿼리_생성기.기본검색(new 기본_검색_요청(){}, esQuery).생성()).stream()
                 .findFirst().orElseGet(지라이슈_엔티티::new);
@@ -113,47 +112,35 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     @Override
     public int 이슈_링크드이슈_서브테스크_벌크로_추가하기(@Valid 지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) throws Exception {
 
-        List<지라이슈_엔티티> 벌크_저장_목록 = new ArrayList<>();
+        지라이슈_엔티티_컬렉션 지라이슈_엔티티_컬렉션값 = new 지라이슈_엔티티_컬렉션();
 
         Long 지라서버_아이디 = 지라이슈_벌크_추가_요청값.get지라서버_아이디();
         String 이슈_키 = 지라이슈_벌크_추가_요청값.get이슈_키();
-        String 프로젝트키_또는_아이디 = 지라이슈_벌크_추가_요청값.get프로젝트키_또는_아이디();
         Long 제품서비스_아이디 = 지라이슈_벌크_추가_요청값.get제품서비스_아이디();
         Long[] 제품서비스_버전들 = 지라이슈_벌크_추가_요청값.get제품서비스_버전들();
         Long cReqLink = 지라이슈_벌크_추가_요청값.getCReqLink();
 
-        지라이슈_데이터 반환된_이슈 = Optional.ofNullable(
-                        이슈전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키)) // 요구사항 이슈 조회
-                .map(이슈 -> {
-                    벌크_저장_목록.add(
-                            지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 이슈, true, null, 제품서비스_아이디, 제품서비스_버전들, cReqLink)
-                    );
-                    return 이슈;
-                })
-                .orElse(null);
+        지라이슈_데이터 반환된_이슈 = 이슈전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키);
 
         LocalDate 이슈_삭제일 = LocalDate.now().minusDays(1);
         DateTimeFormatter 년월일_포맷 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String 이슈_삭제_년월일 = 이슈_삭제일.format(년월일_포맷);
 
         if (반환된_이슈 == null) {
+
             /**
              * ALM 서버 조회 후 반환된 데이터가 Null -> 1. 삭제되어 조회가 안 되는 경우 2. 서버에서 에러가 터진 경우
              * ES 데이터에 있는지 조회 후 암스에서 관리하지 않는 요구사항으로 처리하는 로직
              **/
-            String 조회조건_아이디 = 지라서버_아이디 + "_" + 프로젝트키_또는_아이디 + "_" + 이슈_키;
-            지라이슈_엔티티 조회결과 = this.이슈_조회하기(조회조건_아이디); // ES에 저장된 요구사항 도큐먼트 데이터
 
-            if (조회결과 == null || 조회결과.getId() == null) { // ES에도 해당 정보가 없는 경우
-                return 0;
-            }
-            지라이슈_엔티티.삭제 삭제데이터= new 지라이슈_엔티티.삭제();
-            삭제데이터.setDeleted_date(이슈_삭제_년월일);
-            삭제데이터.setIsDeleted(true);
+            String 조회조건_아이디 = 지라이슈_벌크_추가_요청값.조회조건_아이디();
+            // ES에도 해당 정보가 없는 경우
 
-            조회결과.setDeleted(삭제데이터);
-            조회결과.setParentReqKey(null);
-            벌크_저장_목록.add(조회결과);
+            지라이슈_엔티티_저장_목록 지라이슈_엔티티_저장_목록값 = new 지라이슈_엔티티_저장_목록();
+
+            지라이슈_엔티티 삭제_지라이슈 = 지라이슈_엔티티_저장_목록값.지라이슈_삭제_적용(this.이슈_조회하기(조회조건_아이디));
+
+            지라이슈_엔티티_컬렉션값.엔티티_목록_추가(삭제_지라이슈);
 
             try {
 
@@ -168,44 +155,34 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
                 벌크_저장_목록.addAll(링크드이슈_목록);*/
 
                 // 하위이슈의 경우 요구사항 이슈가 삭제되었을 때 전부 삭제된다(모든 도큐먼트에 삭제 flag 추가)
-                List<지라이슈_엔티티> 서브테스크_목록 = Optional.ofNullable(서브테스크_조회.요구사항_서브테스크_검색하기(지라서버_아이디,이슈_키))// ES에 저장된 하위 이슈 목록
-                        .orElse(Collections.emptyList())
-                        .stream()
-                        .map(서브테스크 -> {
-                            지라이슈_엔티티.삭제 서브테스크_삭제데이터= new 지라이슈_엔티티.삭제();
-                            서브테스크_삭제데이터.setDeleted_date(이슈_삭제_년월일);
-                            서브테스크_삭제데이터.setIsDeleted(true);
 
-                            서브테스크.setDeleted(서브테스크_삭제데이터);
-                            return 서브테스크;
-                        })
-                        .collect(toList());
-                벌크_저장_목록.addAll(서브테스크_목록);
+                List<지라이슈_엔티티> 요구사항_서브테스크_검색하기
+                    = 서브테스크_조회.요구사항_서브테스크_검색하기(지라서버_아이디, 이슈_키);
+
+                지라이슈_엔티티_컬렉션값.엔티티_목록_리스트_전체_추가(
+                    지라이슈_엔티티_저장_목록값.서브테스크_목록_삭제_적용(요구사항_서브테스크_검색하기)
+                );
             }
             catch (Exception e) {
                 로그.error(e.getMessage());
             }
         }
         else {
+
+            지라이슈_엔티티_컬렉션값.엔티티_목록_추가(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 반환된_이슈, true, null, 제품서비스_아이디, 제품서비스_버전들, cReqLink));
+
             //List<지라이슈_데이터> ALM이슈링크_목록 = new ArrayList<지라이슈_데이터>();
-            List<지라이슈_데이터> ALM서브테스크_목록 = new ArrayList<지라이슈_데이터>();
+            List<지라이슈_데이터> ALM서브테스크_목록 = new ArrayList<>();
+            지라이슈_데이터_컬렉션 지라이슈_데이터_컬렉션값 = new 지라이슈_데이터_컬렉션();
+
+            지라이슈_엔티티 조회결과 = this.이슈_조회하기(지라이슈_벌크_추가_요청값.조회조건_아이디());
 
             //List<지라이슈_엔티티> es에_저장된_이슈링크_목록 = null;
-            List<지라이슈_엔티티> es에_저장된_서브테스크_목록 = null;
-            지라이슈_엔티티 조회결과;
+            List<지라이슈_엔티티> es에_저장된_서브테스크_목록 = 서브테스크_조회.요구사항_서브테스크_검색하기(지라서버_아이디,이슈_키);
 
-            if (지라이슈_저장소.인덱스_존재_확인(인덱스자료.이슈_인덱스명)) {
-                String 조회조건_아이디 = 지라서버_아이디 + "_" + 프로젝트키_또는_아이디 + "_" + 이슈_키;
-                조회결과 = this.이슈_조회하기(조회조건_아이디);
+            List<지라이슈_데이터> 서브테스크_가져오기 = 이슈전략_호출.서브테스크_가져오기(지라서버_아이디, 이슈_키);
 
-                es에_저장된_서브테스크_목록 = 서브테스크_조회.요구사항_서브테스크_검색하기(지라서버_아이디,이슈_키);
-                //es에_저장된_이슈링크_목록 = 서브테스크_조회.요구사항_링크드이슈_검색하기(지라서버_아이디,이슈_키);
-            } else {
-                조회결과 = null;
-            }
-
-            Optional.ofNullable(이슈전략_호출.서브테스크_가져오기(지라서버_아이디, 이슈_키))
-                    .ifPresent(서브테스크_목록 -> ALM서브테스크_목록.addAll(서브테스크_목록));
+            지라이슈_데이터_컬렉션값.데이터_목록_리스트_전체_추가(서브테스크_가져오기);
 
             /*Optional.ofNullable(이슈전략_호출.이슈링크_가져오기(지라서버_아이디, 이슈_키))
                     .ifPresent(이슈링크_목록 -> ALM이슈링크_목록.addAll(이슈링크_목록));*/
@@ -215,7 +192,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
 
                 List<지라이슈_엔티티> 삭제된_서브테스크_목록 = 삭제된_ALM_하위이슈_ES_데이터_반환(ALM서브테스크_목록, es에_저장된_서브테스크_목록, 이슈_삭제_년월일);
 
-                벌크_저장_목록.addAll(삭제된_서브테스크_목록);
+                지라이슈_엔티티_컬렉션값.엔티티_목록_리스트_전체_추가(삭제된_서브테스크_목록);
             }
             // 삭제된 연결이슈 flag 처리
             /*if (es에_저장된_이슈링크_목록 != null && !es에_저장된_이슈링크_목록.isEmpty()){
@@ -228,6 +205,9 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
             /*
              *  ALM에서 연결이슈를 조회해올 때 연결된 이슈가 요구사항 이슈인지 아닌지 확인 필요
              *  => ALM에서 조회한 데이터의 upperKey가 null인 경우 요구사항 아닌 경우 하위 이슈
+             *
+             *  ★ this.이슈_조회하기 의 결과는  null일 수 없다.
+             *  ★ 조회할때 없으면 new Entity()를 하기 때문 id 값이 없으면 신규 엔티티로 판단(isEmpty 메소드 활용)
              * */
             /*if (ALM이슈링크_목록 != null && ALM이슈링크_목록.size() >= 1) {
                 List<지라이슈_엔티티> 변환된_이슈_목록 = ALM이슈링크_목록.stream().map(ALM이슈링크 -> {
@@ -259,7 +239,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
                 List<지라이슈_엔티티> 변환된_이슈_목록 = ALM서브테스크_목록.stream().map(ALM서브테스크 -> {
                             지라이슈_엔티티 변환된_이슈 = 지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, ALM서브테스크,
                                     false, 이슈_키, 제품서비스_아이디, 제품서비스_버전들, cReqLink);
-                            벌크_저장_목록.add(변환된_이슈);
+                            지라이슈_엔티티_컬렉션값.엔티티_목록_추가(변환된_이슈);
                             return 변환된_이슈;
                         })
                         .filter(Objects::nonNull)
@@ -267,7 +247,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
             }
         }
 
-        return 대량이슈_추가하기(벌크_저장_목록);
+        return 대량이슈_추가하기(지라이슈_엔티티_컬렉션값.get지라이슈_엔티티_목록());
     }
 
     @Validated
@@ -605,7 +585,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
 
         return 삭제된_서브테스크_목록;
     }
-    
+
     /*
     *   recent 필드가 true 인 es 데이터의 각 인덱스 필드를 업데이트 시킴
     * */
@@ -615,10 +595,6 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
 
         Long 지라서버_아이디 = 지라이슈_벌크_추가_요청값.get지라서버_아이디();
         String 이슈_키 = 지라이슈_벌크_추가_요청값.get이슈_키();
-        String 프로젝트키_또는_아이디 = 지라이슈_벌크_추가_요청값.get프로젝트키_또는_아이디();
-        Long 제품서비스_아이디 = 지라이슈_벌크_추가_요청값.get제품서비스_아이디();
-        Long[] 제품서비스_버전들 = 지라이슈_벌크_추가_요청값.get제품서비스_버전들();
-        Long cReqLink = 지라이슈_벌크_추가_요청값.getCReqLink();
 
         List<지라이슈_데이터> ALM_서브테스크_목록 = 이슈전략_호출.서브테스크_가져오기(지라서버_아이디, 이슈_키); // ALM에서 조회한 서브테스크 목록
 
