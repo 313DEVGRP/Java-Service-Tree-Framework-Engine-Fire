@@ -484,4 +484,12 @@ public class 지라이슈_엔티티 {
     private String localDate() {
         return String.valueOf(LocalDate.now());
     }
+
+    public boolean isEmpty(){
+        return id.isEmpty();
+    }
+
+    public boolean isNotEmpty(){
+        return !this.isEmpty();
+    }
 }
