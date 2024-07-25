@@ -518,7 +518,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
 
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(
-                        new RangeQueryFilter("deleted.deleted_date", 삭제_대상일자,삭제_대상일자,"fromto"),
+                        new RangeQueryFilter("deleted.deleted_date", null,삭제_대상일자,"lte"),
                         new TermsQueryFilter("deleted.deleted_isDeleted","true")
                 );
         return 지라이슈_저장소.normalSearch(기본_쿼리_생성기.기본검색(new 기본_검색_요청(){}, esQuery).생성());
