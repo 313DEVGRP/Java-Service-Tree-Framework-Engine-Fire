@@ -24,13 +24,13 @@ public interface 이슈_스케쥴_서비스 {
 
     int 이슈_링크드이슈_서브테스크_벌크로_추가하기(@Valid 지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) throws Exception;
 
-    int 증분이슈_링크드이슈_서브테스크_벌크추가(지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) throws Exception;
+    int 증분이슈_링크드이슈_서브테스크_벌크추가(@Valid 지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) throws Exception;
 
     int 삭제된_ALM_이슈_Document_삭제() throws Exception;
 
     List<SearchHit<지라이슈_엔티티>> 모든인덱스에있는_이슈_조회하기(String 조회조건_아이디);
 
-    int 서브테스크_상위키_필드업데이트(지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) throws Exception;
+    int 서브테스크_상위키_필드업데이트(@Valid 지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) throws Exception;
 
 
 
