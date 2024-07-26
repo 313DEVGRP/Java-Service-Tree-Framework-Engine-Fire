@@ -162,11 +162,7 @@ public class 지라이슈_엔티티 {
         private String deleted_date;
     }
 
-    public boolean 삭제_여부(){
-        return this.deleted!=null
-            && this.deleted.isDeleted!=null
-            && this.deleted.isDeleted;
-    }
+
 
     @Getter
     @Setter

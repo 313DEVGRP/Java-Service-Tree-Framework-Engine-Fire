@@ -2,6 +2,7 @@ package com.arms.api.alm.issue.base.service;
 
 import com.arms.api.alm.issue.base.model.dto.지라이슈_데이터;
 import com.arms.api.alm.issue.base.model.dto.지라이슈생성_데이터;
+import com.arms.api.alm.issue.base.model.vo.지라이슈_벌크_추가_요청;
 import com.arms.api.alm.issue.base.strategy.*;
 import com.arms.api.alm.serverinfo.model.enums.서버유형_정보;
 import com.arms.api.alm.serverinfo.model.서버정보_데이터;
@@ -231,6 +232,10 @@ public class 이슈전략_호출 {
 
         return 반환할_이슈링크_목록;
 
+    }
+
+    public List<지라이슈_데이터> 서브테스크_가져오기(지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) {
+        return this.서브테스크_가져오기(지라이슈_벌크_추가_요청값.get지라서버_아이디(),지라이슈_벌크_추가_요청값.get이슈_키());
     }
 
     public List<지라이슈_데이터> 서브테스크_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) {
