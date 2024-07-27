@@ -21,7 +21,7 @@ public class 지라이슈_엔티티_삭제_적용 {
         String 이슈_삭제_년월일 = LocalDate.now()
             .minusDays(1)
             .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        if(지라이슈_엔티티값!=null&&지라이슈_엔티티값.isNotEmpty()){
+        if(지라이슈_엔티티값!=null&&지라이슈_엔티티값.izNotEmpty()){
             지라이슈_엔티티.삭제 삭제데이터 = 지라이슈_엔티티값.getDeleted();
             if (삭제데이터 == null) {
                 삭제데이터 = new 지라이슈_엔티티.삭제();
