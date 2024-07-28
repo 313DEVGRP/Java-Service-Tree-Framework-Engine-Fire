@@ -147,217 +147,38 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     @Override
     public int 증분이슈_링크드이슈_서브테스크_벌크추가(@Valid 지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) throws Exception {
 
-        List<지라이슈_엔티티> 증분벌크_저장_목록 = new ArrayList<>();
+        ALM_수집_데이터_지라이슈_엔티티_동기화 ALM_수집_데이터_지라이슈_엔티티_동기화 = new ALM_수집_데이터_지라이슈_엔티티_동기화(지라이슈_벌크_추가_요청값);
 
-        Long 지라서버_아이디 = 지라이슈_벌크_추가_요청값.get지라서버_아이디();
-        String 이슈_키 = 지라이슈_벌크_추가_요청값.get이슈_키();
-        String 프로젝트키_또는_아이디 = 지라이슈_벌크_추가_요청값.get프로젝트키_또는_아이디();
-        Long 제품서비스_아이디 = 지라이슈_벌크_추가_요청값.get제품서비스_아이디();
-        Long[] 제품서비스_버전들 = 지라이슈_벌크_추가_요청값.get제품서비스_버전들();
-        Long cReqLink = 지라이슈_벌크_추가_요청값.getCReqLink();
+        if (ALM_수집_데이터_지라이슈_엔티티_동기화.get이슈_상세정보_가져오기() == null) {
 
-        /**
-         * 스케줄러 작동 시 암스에서 생성한 요구사항 자체가 전날 업데이트가 일어났는지 확인 시 업데이트가 없을 시 null 반환(삭제된 이슈를 조회할 때 또한)
-         * 따라서 암스 생성 요구사항 상세정보를 JIRA에서 조회 후 어플리케이션 단에서 updated 항목을 검증 후 증분 데이터 판단 후 저장시키는 방법
-         **/
-        // 지라이슈_데이터 반환된_증분_이슈 = Optional.ofNullable(이슈전략_호출.증분이슈_상세정보_가져오기(지라서버_아이디, 이슈_키))
-        지라이슈_데이터 반환된_이슈 = Optional.ofNullable(이슈전략_호출.이슈_상세정보_가져오기(지라서버_아이디, 이슈_키))
-                .map(이슈 -> {
-                    if (전일_업데이트여부(이슈.getFields().getUpdated())) {
-                        증분벌크_저장_목록.add(지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 이슈, true, "", 제품서비스_아이디, 제품서비스_버전들, cReqLink));
-                    }
-                    return 이슈;
-                }).orElse(null);
-
-        LocalDate 이슈_삭제일 = LocalDate.now().minusDays(1); // 스케줄러 동작 전날
-        DateTimeFormatter 년월일_포맷 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String 이슈_삭제_년월일 = 이슈_삭제일.format(년월일_포맷);
-
-        if (반환된_이슈 == null) {
             /**
              * ALM 서버 조회 후 반환된 데이터가 Null -> 1. 삭제되어 조회가 안 되는 경우 2. 서버에서 에러가 터진 경우
              * ES 데이터에 있는지 조회 후 암스에서 관리하지 않는 요구사항으로 처리하는 로직
              **/
-            String 조회조건_아이디 = 지라서버_아이디 + "_" + 프로젝트키_또는_아이디 + "_" + 이슈_키;
-            지라이슈_엔티티 조회결과 = this.이슈_조회하기(조회조건_아이디);
 
-            if (조회결과 == null || 조회결과.getId() == null) {
-                return 0;
-            }
+            // ES에도 해당 정보가 없는 경우
+            ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_요구사항_연결_끊고_삭제_적용(
+                    this.이슈_조회하기(지라이슈_벌크_추가_요청값.조회조건_아이디())
+            );
 
-            지라이슈_엔티티.삭제 삭제데이터= new 지라이슈_엔티티.삭제();
-            삭제데이터.setDeleted_date(이슈_삭제_년월일);
-            삭제데이터.setIsDeleted(true);
+            // 하위이슈의 경우 요구사항 이슈가 삭제되었을 때 전부 삭제된다(모든 도큐먼트에 삭제 flag 추가)
+            ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_일괄_삭제_적용();
 
-            조회결과.setDeleted(삭제데이터);
-            조회결과.setParentReqKey(null);
-            //조회결과.setConnectType(null);
-            증분벌크_저장_목록.add(조회결과);
+        } else {
 
-            try {
-                // 요구사항이 삭제된 경우 연결이슈는 삭제되지 않고 연결이 해제됨으로, parentKey와 connectType을 초기화
-                /*List<지라이슈_엔티티> 링크드이슈_목록 = Optional.ofNullable(서브테스크_조회.요구사항_링크드이슈_검색하기(지라서버_아이디,이슈_키))
-                        .orElse(Collections.emptyList())
-                        .stream()
-                        .map(링크드이슈 -> {
-                            링크드이슈.setConnectType(null);
-                            return 링크드이슈;
-                        })
-                        .collect(toList());
-                증분벌크_저장_목록.addAll(링크드이슈_목록);*/
-                // 요구사항이 삭제된 경우 하위이슈는 관리하지 않음으로 삭제처리 진행
-                List<지라이슈_엔티티> 서브테스크_목록 = Optional.ofNullable(서브테스크_조회.요구사항_서브테스크_검색하기(지라서버_아이디,이슈_키))
-                        .orElse(Collections.emptyList())
-                        .stream()
-                        .map(서브테스크 -> {
+            // 삭제된 하위이슈 flag 처리
+            ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_데이터에_존재하지_않는_지라이슈_엔티티_삭제_적용();
 
-                            지라이슈_엔티티.삭제 서브테스크_삭제데이터= new 지라이슈_엔티티.삭제();
-                            서브테스크_삭제데이터.setDeleted_date(이슈_삭제_년월일);
-                            서브테스크_삭제데이터.setIsDeleted(true);
+            ALM_수집_데이터_지라이슈_엔티티_동기화.증분_지라이슈_엔티티_요구사항_적용();
 
-                            서브테스크.setDeleted(서브테스크_삭제데이터);
-                            return 서브테스크;
-                        })
-                        .collect(toList());
-
-                증분벌크_저장_목록.addAll(서브테스크_목록);
-
-            } catch (Exception e) {
-                로그.error(e.getMessage());
-            }
-        }
-        else {
-            // 1. 요구사항 기준 하위 이슈 및 연결이슈 조회하여 삭제된 이력 관리
-            List<지라이슈_데이터> ALM서브테스크_목록 = new ArrayList<>();
-            List<지라이슈_데이터> ALM이슈링크_목록 = new ArrayList<>();
-
-            List<지라이슈_엔티티> es에_저장된_서브테스크_목록 = null;
-            List<지라이슈_엔티티> es에_저장된_이슈링크_목록 = null;
-
-            지라이슈_엔티티 조회결과;
-
-            if (지라이슈_저장소.인덱스_존재_확인(인덱스자료.이슈_인덱스명)) {
-                /* ALM에서 요구사항의 모든 하위 이슈, 연결 이슈 조회 */
-                Optional.ofNullable(이슈전략_호출.서브테스크_가져오기(지라서버_아이디, 이슈_키))
-                        .ifPresent(서브테스크_목록 -> ALM서브테스크_목록.addAll(서브테스크_목록));
-
-                Optional.ofNullable(이슈전략_호출.이슈링크_가져오기(지라서버_아이디, 이슈_키))
-                        .ifPresent(서브테스크_목록 -> ALM이슈링크_목록.addAll(서브테스크_목록));
-
-                /* es에서 요구사항의 하위 이슈 조회*/
-                es에_저장된_서브테스크_목록 = 서브테스크_조회.요구사항_서브테스크_검색하기(지라서버_아이디,이슈_키);
-
-                String 조회조건_아이디 = 지라서버_아이디 + "_" + 프로젝트키_또는_아이디 + "_" + 이슈_키;
-                조회결과 = this.이슈_조회하기(조회조건_아이디);
-            }else{
-                조회결과 = null;
-            }
-            // 1.1. 삭제된 하위이슈 flag 처리
-            if (es에_저장된_서브테스크_목록 != null && !es에_저장된_서브테스크_목록.isEmpty()){
-
-                List<지라이슈_엔티티> 삭제된_서브테스크_목록 = 삭제된_ALM_하위이슈_ES_데이터_반환(ALM서브테스크_목록, es에_저장된_서브테스크_목록, 이슈_삭제_년월일);
-
-                증분벌크_저장_목록.addAll(삭제된_서브테스크_목록);
-            }
-            // 1.2. 삭제된 연결이슈 flag 처리
-            /*if (es에_저장된_이슈링크_목록 != null && !es에_저장된_이슈링크_목록.isEmpty()){
-
-                List<지라이슈_엔티티> 삭제된_링크드이슈_목록= 삭제된_ALM_이슈링크_ES_데이터_반환(ALM이슈링크_목록, es에_저장된_이슈링크_목록, 이슈_삭제_년월일);
-
-                증분벌크_저장_목록.addAll(삭제된_링크드이슈_목록);
-            }*/
-
-            // 2. 요구사항 기준 증분 이슈 관리
-            List<지라이슈_데이터> ALM증분이슈링크_목록 = new ArrayList<>();
-            List<지라이슈_데이터> ALM증분서브테스크_목록 = new ArrayList<>();
-            /* ALM 업데이트된 연결된 이슈 이력 조회 */
-            /*Optional.ofNullable(이슈전략_호출.증분이슈링크_가져오기(지라서버_아이디, 이슈_키))
-                    .ifPresent(이슈링크_목록 -> ALM증분이슈링크_목록.addAll(이슈링크_목록));*/
-            /* ALM 업데이트된 하위 이슈 이력 조회 */
-            Optional.ofNullable(이슈전략_호출.증분서브테스크_가져오기(지라서버_아이디, 이슈_키))
-                    .ifPresent(서브테스크_목록 -> ALM증분서브테스크_목록.addAll(서브테스크_목록));
-
-            /*if (ALM증분이슈링크_목록 != null && ALM증분이슈링크_목록.size() >= 1) {
-                List<지라이슈_엔티티> 변환된_이슈_목록 = ALM증분이슈링크_목록.stream().map(ALM이슈링크 -> {
-                            지라이슈_엔티티 변환된_이슈 = null;
-                            if(ALM이슈링크.getUpperKey() == null){  // 요구사항 연결 및 암스에서 생성하지 않은 최 상단 이슈가 조회되었을 때 (요구사항에 연결되면 무저건 업데이트가 생김)
-                                if(증분벌크_저장_목록 != null && !증분벌크_저장_목록.isEmpty() &&
-                                        조회결과!=null && Objects.equals(ALM이슈링크.getKey(), 조회결과.getParentReqKey())){
-                                    // 해당 요구사항 정보가 이전의 연결이슈로 조회되어 이미 es에 저장된 경우
-                                    조회결과.setCReqLink(cReqLink);
-                                    조회결과.setIsReq(true);
-                                    조회결과.setParentReqKey(ALM이슈링크.getKey());
-                                    조회결과.setPdServiceVersions(제품서비스_버전들);
-                                    조회결과.setPdServiceId(제품서비스_아이디);
-                                    증분벌크_저장_목록.set(0,조회결과);
-                                }else if(조회결과 == null){
-                                    // 해당 연결된 요구사항및 최초로 es에 저장되는 경우
-                                    변환된_이슈 = 지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, ALM이슈링크,false, 이슈_키, 제품서비스_아이디,제품서비스_버전들,cReqLink);
-                                    증분벌크_저장_목록.add(변환된_이슈);
-                                }
-                            }else{ // 하위 이슈가 연결되었을 때 일반 이슈가 연결되었을 때에는 단방향으로 연결 설정한다
-                                변환된_이슈 = 지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, ALM이슈링크,false, 이슈_키, 제품서비스_아이디, 제품서비스_버전들, cReqLink);
-                                증분벌크_저장_목록.add(변환된_이슈);
-                            }
-                            return 변환된_이슈;
-                        })
-                        .filter(Objects::nonNull)
-                        .collect(toList());
-            }*/
-            // 서브 테스크
-            if (ALM증분서브테스크_목록 != null && ALM증분서브테스크_목록.size() >= 1) {
-                List<지라이슈_엔티티> 변환된_이슈_목록 = ALM증분서브테스크_목록.stream().map(서브테스크 -> {
-                            지라이슈_엔티티 변환된_이슈 = 지라이슈_생성.ELK_데이터로_변환(지라서버_아이디, 서브테스크,false, 이슈_키, 제품서비스_아이디, 제품서비스_버전들, cReqLink);
-                            증분벌크_저장_목록.add(변환된_이슈);
-                            return 변환된_이슈;
-                        })
-                        .filter(Objects::nonNull)
-                        .collect(toList());
-            }
+            ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_엔티티_하위이슈_적용();
         }
 
-        /*
-         * 대량이슈_추가하기 방어코드
-         * */
-        if (증분벌크_저장_목록.size() == 0) {
-            return 0;
-        }
 
-        return 대량이슈_추가하기(증분벌크_저장_목록);
+        return 대량이슈_추가하기(ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_앤티티_저장할_목록_가져오기());
     }
 
-    public boolean 전일_업데이트여부(String dateTimeStr) {
 
-        // 가능한 날짜와 시간 형식 목록
-        String[] possibleFormats = {
-                "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
-                "yyyy-MM-dd'T'HH:mm:ssZ",
-                "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
-                "yyyy-MM-dd'T'HH:mm:ssXXX",
-        };
-
-        ZonedDateTime inputDateTime = null;
-
-        for (String format : possibleFormats) {
-            try {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
-                inputDateTime = ZonedDateTime.parse(dateTimeStr, formatter);
-                break;
-            } catch (DateTimeParseException e) {
-                // 날짜 형식이 일치하지 않을 시 다음 형식으로 시도
-            }
-        }
-
-        if (inputDateTime == null) {
-            로그.error("해당 날짜포맷은 지원하지 않는 포맷입니다.: " + dateTimeStr);
-            return false;
-        }
-
-        ZonedDateTime startOfYesterday = ZonedDateTime.now().minusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
-        ZonedDateTime endOfYesterday = startOfYesterday.withHour(23).withMinute(59).withSecond(59);
-
-        return inputDateTime.isAfter(startOfYesterday) && inputDateTime.isBefore(endOfYesterday);
-    }
 
     @Override
     public int 삭제된_ALM_이슈_Document_삭제() throws Exception {

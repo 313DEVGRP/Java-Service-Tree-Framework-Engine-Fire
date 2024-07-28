@@ -5,15 +5,19 @@ import com.arms.api.alm.issue.base.model.dto.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.model.vo.지라이슈_벌크_추가_요청;
 import com.arms.api.alm.utils.지라이슈_생성;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.arms.config.ApplicationContextProvider.getBean;
 
 
+@Slf4j
 public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
 
 
@@ -96,6 +100,24 @@ public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
         );
     }
 
+    public void 증분_지라이슈_엔티티_요구사항_적용() {
+
+        if(전일_업데이트여부(이슈_상세정보_가져오기.getFields().getUpdated())){
+            this.지라이슈_엔티티_저장_목록.엔티티_목록_추가(지라이슈_생성.ELK_데이터로_변환(
+                            지라이슈_벌크_추가_요청값.get지라서버_아이디()
+                            , 이슈_상세정보_가져오기
+                            , true
+                            , null
+                            , 지라이슈_벌크_추가_요청값.get제품서비스_아이디()
+                            , 지라이슈_벌크_추가_요청값.get제품서비스_버전들()
+                            , 지라이슈_벌크_추가_요청값.getCReqLink()
+                    )
+            );
+        }
+
+
+    }
+
     public void 지라이슈_엔티티_요구사항_적용() {
 
             this.지라이슈_엔티티_저장_목록.엔티티_목록_추가(지라이슈_생성.ELK_데이터로_변환(
@@ -127,5 +149,38 @@ public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
                         );
                 지라이슈_엔티티_저장_목록.엔티티_목록_추가(변환된_이슈);
             });
+    }
+
+    public boolean 전일_업데이트여부(String dateTimeStr) {
+
+        // 가능한 날짜와 시간 형식 목록
+        String[] possibleFormats = {
+                "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+                "yyyy-MM-dd'T'HH:mm:ssZ",
+                "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+                "yyyy-MM-dd'T'HH:mm:ssXXX",
+        };
+
+        ZonedDateTime inputDateTime = null;
+
+        for (String format : possibleFormats) {
+            try {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+                inputDateTime = ZonedDateTime.parse(dateTimeStr, formatter);
+                break;
+            } catch (DateTimeParseException e) {
+                // 날짜 형식이 일치하지 않을 시 다음 형식으로 시도
+            }
+        }
+
+        if (inputDateTime == null) {
+            log.error("해당 날짜포맷은 지원하지 않는 포맷입니다.: " + dateTimeStr);
+            return false;
+        }
+
+        ZonedDateTime startOfYesterday = ZonedDateTime.now().minusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        ZonedDateTime endOfYesterday = startOfYesterday.withHour(23).withMinute(59).withSecond(59);
+
+        return inputDateTime.isAfter(startOfYesterday) && inputDateTime.isBefore(endOfYesterday);
     }
 }
