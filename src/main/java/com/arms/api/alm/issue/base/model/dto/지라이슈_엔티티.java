@@ -489,7 +489,7 @@ public class 지라이슈_엔티티 {
     }
 
     public boolean izEmpty(){
-        return id.isEmpty();
+        return id==null||id.isEmpty();
     }
 
     public boolean izNotEmpty(){
