@@ -27,7 +27,6 @@ public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
 
     private final List<지라이슈_데이터> 지라이슈_데이터_하위이슈_목록;
 
-    @Getter
     private final 지라이슈_데이터 이슈_상세정보_가져오기;
 
     private final 지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값;
@@ -35,7 +34,6 @@ public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
     public List<지라이슈_엔티티> 지라이슈_앤티티_저장할_목록_가져오기(){
         return 지라이슈_엔티티_저장_목록.get지라이슈_엔티티_목록();
     }
-
 
     public ALM_수집_데이터_지라이슈_엔티티_동기화(지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값){
 
@@ -47,6 +45,14 @@ public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
 
         this.이슈_상세정보_가져오기 = getBean(이슈전략_호출.class).이슈_상세정보_가져오기(지라이슈_벌크_추가_요청값);
 
+    }
+
+    public boolean ALM_이슈_정보_없음(){
+        return 이슈_상세정보_가져오기==null;
+    }
+
+    public boolean ALM_이슈_정보_존재(){
+        return !ALM_이슈_정보_없음();
     }
 
     public 지라이슈_엔티티 지라이슈_삭제_적용(지라이슈_엔티티 지라이슈_엔티티값){
@@ -120,7 +126,6 @@ public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
             );
         }
 
-
     }
 
     public void 지라이슈_엔티티_요구사항_적용() {
@@ -156,7 +161,7 @@ public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
             });
     }
 
-    public boolean 전일_업데이트여부(String dateTimeStr) {
+    private boolean 전일_업데이트여부(String dateTimeStr) {
 
         // 가능한 날짜와 시간 형식 목록
         String[] possibleFormats = {
