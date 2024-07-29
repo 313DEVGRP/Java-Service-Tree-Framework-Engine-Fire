@@ -4,22 +4,21 @@ import com.arms.api.alm.issue.base.model.dto.지라이슈_데이터;
 import com.arms.api.alm.issue.base.model.dto.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.model.vo.지라이슈_벌크_추가_요청;
 import com.arms.api.alm.utils.지라이슈_생성;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static com.arms.config.ApplicationContextProvider.getBean;
 
 
 @Slf4j
 public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
-
+    // 지라이슈_데이터 :: FROM ALM
+    // 지라이슈_엔티티 :: FROM Elasticsearch Document
 
     private final 지라이슈_엔티티_컬렉션 지라이슈_엔티티_저장_목록 = new 지라이슈_엔티티_컬렉션(new ArrayList<>());
 
@@ -28,6 +27,8 @@ public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
     private final List<지라이슈_데이터> 지라이슈_데이터_하위이슈_목록;
 
     private final 지라이슈_데이터 이슈_상세정보_가져오기;
+
+    private final String[] 연결이슈_아이디_배열;
 
     private final 지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값;
 
@@ -45,6 +46,8 @@ public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
 
         this.이슈_상세정보_가져오기 = getBean(이슈전략_호출.class).이슈_상세정보_가져오기(지라이슈_벌크_추가_요청값);
 
+        this.연결이슈_아이디_배열 = 연결이슈_아이디_배열_가져오기(지라이슈_벌크_추가_요청값);
+
     }
 
     public static ALM_수집_데이터_지라이슈_엔티티_동기화  ALM_수집_데이터_지라이슈_엔티티_동기화_생성(지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값){
@@ -59,12 +62,12 @@ public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
 
     }
 
-    public boolean ALM_이슈_정보_없음(){
+    public boolean 가져온_ALM_이슈_없음(){
         return 이슈_상세정보_가져오기==null;
     }
 
-    public boolean ALM_이슈_정보_존재(){
-        return !ALM_이슈_정보_없음();
+    public boolean 가져온_ALM_이슈_있음(){
+        return !가져온_ALM_이슈_없음();
     }
 
     public 지라이슈_엔티티 지라이슈_삭제_적용(지라이슈_엔티티 지라이슈_엔티티값){
@@ -124,7 +127,6 @@ public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
      **/
 
     public void 증분_지라이슈_엔티티_요구사항_적용() {
-
         if(전일_업데이트여부(이슈_상세정보_가져오기.getFields().getUpdated())){
             this.지라이슈_엔티티_저장_목록.엔티티_목록_추가(지라이슈_생성.ELK_데이터로_변환(
                             지라이슈_벌크_추가_요청값.get지라서버_아이디()
@@ -134,6 +136,7 @@ public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
                             , 지라이슈_벌크_추가_요청값.get제품서비스_아이디()
                             , 지라이슈_벌크_추가_요청값.get제품서비스_버전들()
                             , 지라이슈_벌크_추가_요청값.getCReqLink()
+                            , 연결이슈_아이디_배열
                     )
             );
         }
@@ -142,35 +145,38 @@ public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
 
     public void 지라이슈_엔티티_요구사항_적용() {
 
-            this.지라이슈_엔티티_저장_목록.엔티티_목록_추가(지라이슈_생성.ELK_데이터로_변환(
-                    지라이슈_벌크_추가_요청값.get지라서버_아이디()
-                    , 이슈_상세정보_가져오기
-                    , true
-                    , null
-                    , 지라이슈_벌크_추가_요청값.get제품서비스_아이디()
-                    , 지라이슈_벌크_추가_요청값.get제품서비스_버전들()
-                    , 지라이슈_벌크_추가_요청값.getCReqLink()
-            )
+        this.지라이슈_엔티티_저장_목록.엔티티_목록_추가(지라이슈_생성.ELK_데이터로_변환(
+                        지라이슈_벌크_추가_요청값.get지라서버_아이디()
+                        , 이슈_상세정보_가져오기
+                        , true
+                        , null
+                        , 지라이슈_벌크_추가_요청값.get제품서비스_아이디()
+                        , 지라이슈_벌크_추가_요청값.get제품서비스_버전들()
+                        , 지라이슈_벌크_추가_요청값.getCReqLink()
+                        , 연결이슈_아이디_배열
+                )
         );
 
     }
 
     public void 지라이슈_엔티티_하위이슈_적용() {
 
-        this.지라이슈_데이터_하위이슈_목록
-            .forEach(ALM서브테스크 -> {
-                지라이슈_엔티티 변환된_이슈 =
-                        지라이슈_생성.ELK_데이터로_변환(
-                            지라이슈_벌크_추가_요청값.get지라서버_아이디()
-                            , ALM서브테스크
-                            ,false
-                            , 지라이슈_벌크_추가_요청값.get이슈_키()
-                            , 지라이슈_벌크_추가_요청값.get제품서비스_아이디()
-                            , 지라이슈_벌크_추가_요청값.get제품서비스_버전들()
-                            , 지라이슈_벌크_추가_요청값.getCReqLink()
-                        );
-                지라이슈_엔티티_저장_목록.엔티티_목록_추가(변환된_이슈);
-            });
+        if (this.지라이슈_데이터_하위이슈_목록 != null && !this.지라이슈_데이터_하위이슈_목록.isEmpty()) {
+            this.지라이슈_데이터_하위이슈_목록
+                    .forEach(ALM서브테스크 -> {
+                        지라이슈_엔티티 변환된_이슈 =
+                                지라이슈_생성.ELK_데이터로_변환(
+                                        지라이슈_벌크_추가_요청값.get지라서버_아이디()
+                                        , ALM서브테스크
+                                        ,false
+                                        , 지라이슈_벌크_추가_요청값.get이슈_키()
+                                        , 지라이슈_벌크_추가_요청값.get제품서비스_아이디()
+                                        , 지라이슈_벌크_추가_요청값.get제품서비스_버전들()
+                                        , 지라이슈_벌크_추가_요청값.getCReqLink()
+                                );
+                        지라이슈_엔티티_저장_목록.엔티티_목록_추가(변환된_이슈);
+                    });
+        }
     }
 
     private boolean 전일_업데이트여부(String dateTimeStr) {
@@ -204,5 +210,43 @@ public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
         ZonedDateTime endOfYesterday = startOfYesterday.withHour(23).withMinute(59).withSecond(59);
 
         return inputDateTime.isAfter(startOfYesterday) && inputDateTime.isBefore(endOfYesterday);
+    }
+
+    private String[] 연결이슈_아이디_배열_가져오기(지라이슈_벌크_추가_요청 요청값) {
+
+        Set<String> 연결이슈_아이디_세트 = new HashSet<>();
+
+        이슈링크_가져오기_재귀(요청값, 요청값.get이슈_키(), 연결이슈_아이디_세트);
+
+        if (연결이슈_아이디_세트.isEmpty()) {
+            return new String[0];
+        } else {
+            return 연결이슈_아이디_세트.toArray(new String[0]);
+        }
+    }
+
+    private void 이슈링크_가져오기_재귀(지라이슈_벌크_추가_요청 요청값, String 현재_이슈_키, Set<String> 연결이슈_아이디_세트) {
+
+        List<지라이슈_데이터> 이슈링크_가져오기 =
+                Optional.ofNullable(ALM_이슈링크_가져오기(요청값.get지라서버_아이디(),요청값.get이슈_키()))
+                        .orElse(Collections.emptyList());
+        if(!이슈링크_가져오기.isEmpty()){
+            for (지라이슈_데이터 ALM_데이터 : 이슈링크_가져오기) {
+                String 조회조건_아이디 = 요청값.get지라서버_아이디()+"_"+ALM_데이터.getFields().getProject().getKey()+"_"+ALM_데이터.getKey();
+
+                if (ALM_데이터.getKey().equals(요청값.get이슈_키()) || 연결이슈_아이디_세트.contains(조회조건_아이디)) {
+                    continue;
+                } else {
+                    연결이슈_아이디_세트.add(조회조건_아이디);
+                }
+
+                // 내부 연결 이슈를 재귀적으로 가져오기
+                이슈링크_가져오기_재귀(요청값, ALM_데이터.getKey(), 연결이슈_아이디_세트);
+            }
+        }
+    }
+
+    private List<지라이슈_데이터> ALM_이슈링크_가져오기(Long 서버아이디, String 이슈키_또는_아이디) {
+        return getBean(이슈전략_호출.class).이슈링크_가져오기(서버아이디, 이슈키_또는_아이디);
     }
 }

@@ -355,6 +355,7 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
         }
     }
 
+    // 연결된 이슈 가져오기.
     public List<지라이슈_데이터> 이슈링크_가져오기(서버정보_데이터 서버정보, String 이슈_키_또는_아이디) {
 
         WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());

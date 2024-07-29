@@ -144,6 +144,10 @@ public class 지라이슈_엔티티 {
 
     @Field(type = FieldType.Long, name = "pdServiceVersions")
     private Long[] pdServiceVersions;
+
+    @Field(type = FieldType.Keyword, name = "linkedIssues")
+    private String[] linkedIssues;
+
     @Getter
     @Setter
     @Builder
