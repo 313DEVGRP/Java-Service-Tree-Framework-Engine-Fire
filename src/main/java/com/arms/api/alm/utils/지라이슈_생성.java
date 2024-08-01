@@ -13,7 +13,7 @@ public class 지라이슈_생성 {
 
     public static 지라이슈_엔티티 ELK_데이터로_변환(
             Long 지라서버_아이디, 지라이슈_데이터 지라이슈_데이터,
-            boolean 요구사항유형_여부, String 부모_요구사항_키,
+            Boolean 요구사항유형_여부, String 부모_요구사항_키,
             Long 제품서비스_아이디, Long[] 제품서비스_버전들,
             Long cReqLink
     ) {
@@ -157,7 +157,7 @@ public class 지라이슈_생성 {
 
     public static 지라이슈_엔티티 ELK_데이터로_변환(
             Long 지라서버_아이디, 지라이슈_데이터 지라이슈_데이터,
-            boolean 요구사항유형_여부, String 부모_요구사항_키,
+            Boolean 요구사항유형_여부, String 부모_요구사항_키,
             Long 제품서비스_아이디, Long[] 제품서비스_버전들,
             Long cReqLink, String[] 연결이슈_아이디들
     ) {

@@ -60,14 +60,19 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     }
 
     @Override
-    public 지라이슈_엔티티 이슈_조회하기(String 조회조건_아이디) {
+    public 지라이슈_엔티티 이슈_조회하기(String 조회조건_아이디){
 
         EsQuery esQuery = new EsQueryBuilder()
                 .bool(
                     new TermQueryMust("id", 조회조건_아이디)
                 );
-        return 지라이슈_저장소.normalSearch(기본_쿼리_생성기.기본검색(new 기본_검색_요청(){}, esQuery).생성()).stream()
-                .findFirst().orElseGet(지라이슈_엔티티::new);
+        List<지라이슈_엔티티> 검색결과 = 지라이슈_저장소.normalSearch(기본_쿼리_생성기.기본검색(new 기본_검색_요청(){}, esQuery).생성());
+
+        if (검색결과 == null || 검색결과.isEmpty()) {
+            return null;
+        }
+
+        return 검색결과.stream().findFirst().orElseGet(지라이슈_엔티티::new);
     }
 
     @Override
@@ -105,7 +110,6 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
 
         return 삭제성공;
     }
-    // todo 2024.07.24 ~ 2024.07.26 - linkedIssue filed 변경으로 인한 주석 처리 (서브테스크만 고려)
     @Validated
     @Override
     public int 이슈_링크드이슈_서브테스크_벌크로_추가하기(@Valid 지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) throws Exception {
@@ -137,6 +141,8 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
             ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_엔티티_요구사항_적용();
 
             ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_엔티티_하위이슈_적용();
+
+            ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_엔티티_연결이슈_적용();
 
         }
 
@@ -175,6 +181,8 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
             ALM_수집_데이터_지라이슈_엔티티_동기화.증분_지라이슈_엔티티_요구사항_적용();
 
             ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_엔티티_하위이슈_적용();
+
+            //ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_엔티티_연결이슈_적용();
         }
 
 
@@ -244,24 +252,6 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
         }
         return deletedCount;
     }
-
-    /*private List<지라이슈_엔티티> 삭제된_ALM_이슈링크_ES_데이터_반환(List<지라이슈_데이터> ALM이슈링크_목록, List<지라이슈_엔티티> es에_저장된_이슈링크_목록 , String 이슈_삭제_년월일){
-
-        List<String> ALM에서_조회한_링크드이슈_키_목록 = ALM이슈링크_목록.stream()
-                .map(지라이슈_데이터::getKey)
-                .collect(toList());
-
-        List<지라이슈_엔티티> 삭제된_링크드이슈_목록 = es에_저장된_이슈링크_목록.stream()
-                .filter(지라이슈_엔티티 -> !ALM에서_조회한_링크드이슈_키_목록.contains(지라이슈_엔티티.getKey()))
-                .map(지라이슈_엔티티 -> {
-                    지라이슈_엔티티.setParentReqKey(null);
-                    지라이슈_엔티티.setConnectType(null);
-                    return 지라이슈_엔티티;
-                })
-                .collect(toList());
-
-        return 삭제된_링크드이슈_목록;
-    }*/
 
     private List<지라이슈_엔티티> 삭제된_ALM_하위이슈_ES_데이터_반환(List<지라이슈_데이터> ALM서브테스크_목록, List<지라이슈_엔티티> es에_저장된_서브테스크_목록, String 이슈_삭제_년월일){
 
