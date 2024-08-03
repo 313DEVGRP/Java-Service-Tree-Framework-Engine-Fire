@@ -14,8 +14,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -217,7 +219,8 @@ public class 이슈전략_호출 {
     }
 
     public List<지라이슈_데이터> 이슈링크_가져오기(지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) {
-        return this.이슈링크_가져오기(지라이슈_벌크_추가_요청값.get지라서버_아이디(),지라이슈_벌크_추가_요청값.get이슈_키());
+        List<지라이슈_데이터> 이슈링크_가져오기 = this.이슈링크_가져오기(지라이슈_벌크_추가_요청값.get지라서버_아이디(), 지라이슈_벌크_추가_요청값.get이슈_키());
+        return Optional.ofNullable(이슈링크_가져오기).orElse(new ArrayList<>());
     }
 
     public List<지라이슈_데이터> 이슈링크_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) {
@@ -243,7 +246,8 @@ public class 이슈전략_호출 {
     }
 
     public List<지라이슈_데이터> 서브테스크_가져오기(지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) {
-        return this.서브테스크_가져오기(지라이슈_벌크_추가_요청값.get지라서버_아이디(),지라이슈_벌크_추가_요청값.get이슈_키());
+        List<지라이슈_데이터> 서브테스크_가져오기 = this.서브테스크_가져오기(지라이슈_벌크_추가_요청값.get지라서버_아이디(), 지라이슈_벌크_추가_요청값.get이슈_키());
+        return Optional.ofNullable(서브테스크_가져오기).orElse(new ArrayList<>());
     }
 
     public List<지라이슈_데이터> 서브테스크_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) {
@@ -289,7 +293,8 @@ public class 이슈전략_호출 {
     }
 
     public List<지라이슈_데이터> 증분이슈링크_가져오기(지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) {
-        return this.증분이슈링크_가져오기(지라이슈_벌크_추가_요청값.get지라서버_아이디(),지라이슈_벌크_추가_요청값.get이슈_키());
+        List<지라이슈_데이터> 증분이슈링크_가져오기 = this.증분이슈링크_가져오기(지라이슈_벌크_추가_요청값.get지라서버_아이디(), 지라이슈_벌크_추가_요청값.get이슈_키());
+        return Optional.ofNullable(증분이슈링크_가져오기).orElse(new ArrayList<>());
     }
 
     public List<지라이슈_데이터> 증분이슈링크_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) {
@@ -315,7 +320,8 @@ public class 이슈전략_호출 {
     }
 
     public List<지라이슈_데이터> 증분서브테스크_가져오기(지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) {
-        return 증분서브테스크_가져오기(지라이슈_벌크_추가_요청값.get지라서버_아이디(),지라이슈_벌크_추가_요청값.get이슈_키());
+        List<지라이슈_데이터> 증분서브테스크_가져오기 = 증분서브테스크_가져오기(지라이슈_벌크_추가_요청값.get지라서버_아이디(), 지라이슈_벌크_추가_요청값.get이슈_키());
+        return Optional.ofNullable(증분서브테스크_가져오기).orElse(new ArrayList<>());
     }
 
     public List<지라이슈_데이터> 증분서브테스크_가져오기(Long 연결_아이디, String 이슈_키_또는_아이디) {
