@@ -1,5 +1,7 @@
 package com.arms.api.alm.issue.base.model.vo;
 
+import com.arms.api.alm.issue.base.model.dto.지라이슈_데이터;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,5 +29,10 @@ public class 지라이슈_벌크_추가_요청 {
     public String 조회조건_아이디(){
         return 지라서버_아이디 + "_" + 프로젝트키_또는_아이디 + "_" + 이슈_키;
     }
+
+    public String 조회조건_아이디(지라이슈_데이터 지라이슈_데이터){
+        return 지라서버_아이디 + "_" + 프로젝트키_또는_아이디 + "_" + 지라이슈_데이터.getId();
+    }
+
 
 }

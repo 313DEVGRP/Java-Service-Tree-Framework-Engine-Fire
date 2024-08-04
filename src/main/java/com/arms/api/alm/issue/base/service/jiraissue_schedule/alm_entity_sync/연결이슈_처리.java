@@ -42,8 +42,7 @@ public class 연결이슈_처리 {
 				.orElse(Collections.emptyList());
 		if (!이슈링크_가져오기.isEmpty()) {
 			for (지라이슈_데이터 ALM_데이터 : 이슈링크_가져오기) {
-				String 조회조건_아이디 = 요청값.get지라서버_아이디()+"_"+ALM_데이터.getFields().getProject().getKey()+"_"+ALM_데이터.getKey();
-				연결이슈_아이디_세트.add(조회조건_아이디);
+				연결이슈_아이디_세트.add(ALM_데이터.조회조건_아이디(요청값));
 			}
 		}
 	}
