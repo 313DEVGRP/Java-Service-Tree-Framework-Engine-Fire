@@ -14,7 +14,7 @@ public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
 
 	private final 지라이슈_데이터 지라이슈_데이터;
 	private final 요구사항이슈_처리 요구사항이슈_처리;
-	private final com.arms.api.alm.issue.base.service.jiraissue_schedule.alm_entity_sync.ALM_수집_데이터_지라이슈_엔티티_동기화_인터페이스 ALM_수집_데이터_지라이슈_엔티티_동기화_인터페이스;
+	private final ALM_수집_데이터_지라이슈_엔티티_동기화_인터페이스 ALM_수집_데이터_지라이슈_엔티티_동기화_인터페이스;
 
 	public ALM_수집_데이터_지라이슈_엔티티_동기화(지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) {
 
