@@ -1,23 +1,30 @@
-package com.arms.api.alm.issue.base.service;
+package com.arms.api.alm.issue.base.service.jiraissue_schedule.alm_entity_sync;
+
+import static com.arms.api.alm.utils.지라유틸.*;
+import static com.arms.config.ApplicationContextProvider.*;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.arms.api.alm.issue.base.model.dto.지라이슈_데이터;
 import com.arms.api.alm.issue.base.model.dto.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.model.vo.지라이슈_벌크_추가_요청;
+import com.arms.api.alm.issue.base.service.jiraissue_schedule.alm_streategy.이슈전략_호출;
+import com.arms.api.alm.issue.base.service.jiraissue_schedule.main.이슈_스케쥴_서비스_프로세스;
+import com.arms.api.alm.issue.base.service.jiraissue_schedule.subtask_repository.서브테스크_조회;
 import com.arms.api.alm.utils.지라이슈_생성;
+
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.arms.config.ApplicationContextProvider.getBean;
-
-
 @Slf4j
-public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
+public class ALM_수집_데이터_증분_지라이슈_엔티티_동기화 {
     // 지라이슈_데이터 :: FROM ALM
     // 지라이슈_엔티티 :: FROM Elasticsearch Document
 
@@ -37,7 +44,7 @@ public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
         return 지라이슈_엔티티_저장_목록.get지라이슈_엔티티_목록();
     }
 
-    private ALM_수집_데이터_지라이슈_엔티티_동기화(지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값
+    public ALM_수집_데이터_증분_지라이슈_엔티티_동기화(지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값
             ,List<지라이슈_데이터> 지라이슈_데이터_하위이슈_목록
             ,List<지라이슈_데이터> 지라이슈_데이터_연결이슈_목록){
 
@@ -50,23 +57,6 @@ public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
         this.지라이슈_데이터_연결이슈_목록 = 지라이슈_데이터_연결이슈_목록;
 
         this.지라이슈_데이터 = getBean(이슈전략_호출.class).이슈_상세정보_가져오기(지라이슈_벌크_추가_요청값);
-
-    }
-
-    public static ALM_수집_데이터_지라이슈_엔티티_동기화  ALM_수집_데이터_지라이슈_엔티티_동기화_생성(지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값){
-
-        return new ALM_수집_데이터_지라이슈_엔티티_동기화(지라이슈_벌크_추가_요청값
-                ,getBean(이슈전략_호출.class).서브테스크_가져오기(지라이슈_벌크_추가_요청값)
-                ,getBean(이슈전략_호출.class).이슈링크_가져오기(지라이슈_벌크_추가_요청값));
-
-    }
-
-    public static ALM_수집_데이터_지라이슈_엔티티_동기화  ALM_수집_데이터_증분_지라이슈_엔티티_동기화_생성(지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값){
-
-        return new ALM_수집_데이터_지라이슈_엔티티_동기화(지라이슈_벌크_추가_요청값
-                ,getBean(이슈전략_호출.class).증분서브테스크_가져오기(지라이슈_벌크_추가_요청값)
-                ,getBean(이슈전략_호출.class).증분이슈링크_가져오기(지라이슈_벌크_추가_요청값));
-
     }
 
     public boolean 가져온_ALM_이슈_없음(){
@@ -134,15 +124,9 @@ public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
     public void 증분_지라이슈_엔티티_요구사항_적용() {
         if(전일_업데이트여부(지라이슈_데이터.getFields().getUpdated())){
             this.지라이슈_엔티티_저장_목록.엔티티_목록_추가(
-                요구사항_이슈()
+                this.요구사항_이슈()
             );
         }
-    }
-
-    public void 지라이슈_엔티티_요구사항_적용() {
-        this.지라이슈_엔티티_저장_목록.엔티티_목록_추가(
-            요구사항_이슈()
-        );
     }
 
     private 지라이슈_엔티티 요구사항_이슈() {
@@ -201,38 +185,7 @@ public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
 
                 });
     }
-    private boolean 전일_업데이트여부(String dateTimeStr) {
 
-        // 가능한 날짜와 시간 형식 목록
-        String[] possibleFormats = {
-                "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
-                "yyyy-MM-dd'T'HH:mm:ssZ",
-                "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
-                "yyyy-MM-dd'T'HH:mm:ssXXX",
-        };
-
-        ZonedDateTime inputDateTime = null;
-
-        for (String format : possibleFormats) {
-            try {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
-                inputDateTime = ZonedDateTime.parse(dateTimeStr, formatter);
-                break;
-            } catch (DateTimeParseException e) {
-                // 날짜 형식이 일치하지 않을 시 다음 형식으로 시도
-            }
-        }
-
-        if (inputDateTime == null) {
-            log.error("해당 날짜포맷은 지원하지 않는 포맷입니다.: " + dateTimeStr);
-            return false;
-        }
-
-        ZonedDateTime startOfYesterday = ZonedDateTime.now().minusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
-        ZonedDateTime endOfYesterday = startOfYesterday.withHour(23).withMinute(59).withSecond(59);
-
-        return inputDateTime.isAfter(startOfYesterday) && inputDateTime.isBefore(endOfYesterday);
-    }
 
     private String[] 연결이슈_아이디_배열_가져오기(지라이슈_벌크_추가_요청 요청값) {
 
