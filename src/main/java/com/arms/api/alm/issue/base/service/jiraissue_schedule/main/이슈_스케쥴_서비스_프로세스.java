@@ -4,6 +4,7 @@ import com.arms.api.alm.issue.base.model.dto.지라이슈_데이터;
 import com.arms.api.alm.issue.base.model.vo.지라이슈_벌크_추가_요청;
 import com.arms.api.alm.issue.base.model.dto.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
+import com.arms.api.alm.issue.base.service.jiraissue_schedule.alm_entity_sync.ALM_수집_데이터_증분_지라이슈_엔티티_동기화;
 import com.arms.api.alm.issue.base.service.jiraissue_schedule.alm_entity_sync.ALM_수집_데이터_지라이슈_엔티티_동기화;
 import com.arms.api.util.common.constrant.index.인덱스자료;
 import com.arms.egovframework.javaservice.esframework.EsQuery;
@@ -29,8 +30,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
-import static com.arms.api.alm.issue.base.service.jiraissue_schedule.alm_entity_sync.ALM_수집_데이터_지라이슈_엔티티_동기화_팩토리.*;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
@@ -106,7 +105,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     @Override
     public int 이슈_링크드이슈_서브테스크_벌크로_추가하기(@Valid 지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) throws Exception {
 
-        ALM_수집_데이터_지라이슈_엔티티_동기화 ALM_수집_데이터_지라이슈_엔티티_동기화 =  ALM_수집_데이터_지라이슈_엔티티_동기화_생성(지라이슈_벌크_추가_요청값);
+        ALM_수집_데이터_지라이슈_엔티티_동기화 ALM_수집_데이터_지라이슈_엔티티_동기화 =  new ALM_수집_데이터_지라이슈_엔티티_동기화(지라이슈_벌크_추가_요청값);
 
         return 대량이슈_추가하기(ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_앤티티_저장할_목록_가져오기());
     }
@@ -115,9 +114,9 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     @Override
     public int 증분이슈_링크드이슈_서브테스크_벌크추가(@Valid 지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) throws Exception {
 
-        ALM_수집_데이터_지라이슈_엔티티_동기화 ALM_수집_데이터_지라이슈_엔티티_동기화 =  ALM_수집_데이터_증분_지라이슈_엔티티_동기화_생성(지라이슈_벌크_추가_요청값);
+        ALM_수집_데이터_증분_지라이슈_엔티티_동기화 ALM_수집_데이터_증분_지라이슈_엔티티_동기화 =  new ALM_수집_데이터_증분_지라이슈_엔티티_동기화(지라이슈_벌크_추가_요청값);
 
-        return 대량이슈_추가하기(ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_앤티티_저장할_목록_가져오기());
+        return 대량이슈_추가하기(ALM_수집_데이터_증분_지라이슈_엔티티_동기화.지라이슈_앤티티_저장할_목록_가져오기());
     }
 
 
