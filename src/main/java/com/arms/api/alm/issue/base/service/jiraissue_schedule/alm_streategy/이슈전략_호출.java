@@ -1,4 +1,4 @@
-package com.arms.api.alm.issue.base.service;
+package com.arms.api.alm.issue.base.service.jiraissue_schedule.alm_streategy;
 
 import com.arms.api.alm.issue.base.model.dto.지라이슈_데이터;
 import com.arms.api.alm.issue.base.model.dto.지라이슈생성_데이터;

@@ -1,9 +1,8 @@
-package com.arms.api.alm.issue.base.service;
+package com.arms.api.alm.issue.base.service.jiraissue_schedule.main;
 
 import com.arms.api.alm.issue.base.model.vo.지라이슈_벌크_추가_요청;
 import com.arms.api.alm.issue.base.model.dto.지라이슈_엔티티;
 import org.springframework.data.elasticsearch.core.SearchHit;
-import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
 import java.util.List;

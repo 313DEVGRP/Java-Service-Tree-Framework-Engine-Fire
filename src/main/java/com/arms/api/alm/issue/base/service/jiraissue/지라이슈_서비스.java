@@ -1,4 +1,4 @@
-package com.arms.api.alm.issue.base.service;
+package com.arms.api.alm.issue.base.service.jiraissue;
 
 import com.arms.api.alm.issue.base.model.dto.지라이슈_엔티티;
 

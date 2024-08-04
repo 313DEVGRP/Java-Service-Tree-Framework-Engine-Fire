@@ -7,7 +7,7 @@ import com.arms.api.alm.issue.base.model.dto.지라이슈전체워크로그_데�
 import com.arms.api.alm.issue.base.model.dto.지라이슈조회_데이터;
 import com.arms.api.alm.issue.base.model.dto.지라이슈필드_데이터;
 import com.arms.api.alm.issue.base.model.dto.지라프로젝트_데이터;
-import com.arms.api.alm.issue.base.service.이슈전략_호출;
+import com.arms.api.alm.issue.base.service.jiraissue_schedule.alm_streategy.이슈전략_호출;
 import com.arms.api.alm.issue.resolution.model.이슈해결책_데이터;
 import com.arms.api.alm.issue.status.model.이슈상태_데이터;
 import com.arms.api.alm.issue.status.model.클라우드_지라이슈상태_데이터;

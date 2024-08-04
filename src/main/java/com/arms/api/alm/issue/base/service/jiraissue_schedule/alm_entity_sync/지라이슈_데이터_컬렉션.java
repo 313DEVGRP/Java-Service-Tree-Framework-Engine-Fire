@@ -1,7 +1,7 @@
-package com.arms.api.alm.issue.base.service;
+package com.arms.api.alm.issue.base.service.jiraissue_schedule.alm_entity_sync;
 
 import com.arms.api.alm.issue.base.model.dto.지라이슈_데이터;
-import com.arms.api.alm.issue.base.model.dto.지라이슈_엔티티;
+
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -34,19 +34,6 @@ public class 지라이슈_데이터_컬렉션 {
                 .stream()
                 .filter(지라이슈_엔티티->!this.지라이슈_데이터_키_목록().contains(지라이슈_엔티티.getKey()))
                 .collect(Collectors.toList()));
-    }
-
-    public void 데이터_목록_추가(지라이슈_데이터 지라이슈_데이터값){
-
-        if (지라이슈_데이터값 != null) {
-            지라이슈_데이터_목록.add(지라이슈_데이터값);
-        }
-    }
-
-    public void 데이터_목록_리스트_전체_추가(List<지라이슈_데이터> 지라이슈_데이터_목록){
-        if(지라이슈_데이터_목록!=null){
-            this.지라이슈_데이터_목록.addAll(지라이슈_데이터_목록);
-        }
     }
 
 

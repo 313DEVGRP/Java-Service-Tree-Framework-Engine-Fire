@@ -1,4 +1,4 @@
-package com.arms.api.alm.issue.base.service;
+package com.arms.api.alm.issue.base.service.jiraissue;
 
 import com.arms.api.alm.issue.base.model.dto.지라이슈_엔티티;
 import com.arms.egovframework.javaservice.esframework.EsQuery;
@@ -17,7 +17,7 @@ import java.util.List;
 @Service
 @Slf4j
 @AllArgsConstructor
-public class 지라이슈_서비스_프로세스 implements 지라이슈_서비스{
+public class 지라이슈_서비스_프로세스 implements 지라이슈_서비스 {
 
     private final 지라이슈_저장소 지라이슈_저장소;
 
@@ -55,5 +55,20 @@ public class 지라이슈_서비스_프로세스 implements 지라이슈_서비�
         기본_검색_요청 기본_검색_요청 = new 기본_검색_요청() {};
         기본_검색_요청.set크기(10000);
         return 지라이슈_저장소.normalSearch(기본_쿼리_생성기.기본검색(기본_검색_요청,esQuery).생성());
+    }
+
+    public 지라이슈_엔티티 이슈_조회하기(String 조회조건_아이디){
+
+        EsQuery esQuery = new EsQueryBuilder()
+            .bool(
+                new TermQueryMust("id", 조회조건_아이디)
+            );
+        List<지라이슈_엔티티> 검색결과 = 지라이슈_저장소.normalSearch(기본_쿼리_생성기.기본검색(new 기본_검색_요청(){}, esQuery).생성());
+
+        if (검색결과 == null || 검색결과.isEmpty()) {
+            return null;
+        }
+
+        return 검색결과.stream().findFirst().orElseGet(지라이슈_엔티티::new);
     }
 }

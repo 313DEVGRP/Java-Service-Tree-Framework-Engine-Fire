@@ -1,4 +1,4 @@
-package com.arms.api.alm.issue.base.service;
+package com.arms.api.alm.issue.base.service.jiraissue_search;
 
 import com.arms.api.alm.issue.base.model.dto.지라이슈_엔티티;
 import com.arms.api.util.model.dto.request.검색어_검색_집계_하위_요청;

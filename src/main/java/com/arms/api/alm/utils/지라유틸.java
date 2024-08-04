@@ -17,16 +17,22 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
+@Slf4j
 public class 지라유틸 {
 
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
@@ -216,5 +222,38 @@ public class 지라유틸 {
                 .collect(Collectors.toMap(com.arms.api.alm.issue.base.model.dto.클라우드_이슈생성필드_메타데이터.필드_메타데이터::getFieldId, field -> field));
 
         return 필드맵;
+    }
+
+    public static  boolean 전일_업데이트여부(String dateTimeStr) {
+
+        // 가능한 날짜와 시간 형식 목록
+        String[] possibleFormats = {
+            "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+            "yyyy-MM-dd'T'HH:mm:ssZ",
+            "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+            "yyyy-MM-dd'T'HH:mm:ssXXX",
+        };
+
+        ZonedDateTime inputDateTime = null;
+
+        for (String format : possibleFormats) {
+            try {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+                inputDateTime = ZonedDateTime.parse(dateTimeStr, formatter);
+                break;
+            } catch (DateTimeParseException e) {
+                // 날짜 형식이 일치하지 않을 시 다음 형식으로 시도
+            }
+        }
+
+        if (inputDateTime == null) {
+            log.error("해당 날짜포맷은 지원하지 않는 포맷입니다.: " + dateTimeStr);
+            return false;
+        }
+
+        ZonedDateTime startOfYesterday = ZonedDateTime.now().minusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        ZonedDateTime endOfYesterday = startOfYesterday.withHour(23).withMinute(59).withSecond(59);
+
+        return inputDateTime.isAfter(startOfYesterday) && inputDateTime.isBefore(endOfYesterday);
     }
 }

@@ -2,7 +2,7 @@ package com.arms.api.alm.issue.base.controller;
 
 import com.arms.api.alm.issue.base.model.dto.지라이슈_데이터;
 import com.arms.api.alm.issue.base.model.dto.지라이슈생성_데이터;
-import com.arms.api.alm.issue.base.service.이슈전략_호출;
+import com.arms.api.alm.issue.base.service.jiraissue_schedule.alm_streategy.이슈전략_호출;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

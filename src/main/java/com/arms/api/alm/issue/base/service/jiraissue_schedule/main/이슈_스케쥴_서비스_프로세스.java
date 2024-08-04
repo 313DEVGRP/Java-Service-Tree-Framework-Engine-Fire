@@ -1,9 +1,11 @@
-package com.arms.api.alm.issue.base.service;
+package com.arms.api.alm.issue.base.service.jiraissue_schedule.main;
 
 import com.arms.api.alm.issue.base.model.dto.지라이슈_데이터;
 import com.arms.api.alm.issue.base.model.vo.지라이슈_벌크_추가_요청;
 import com.arms.api.alm.issue.base.model.dto.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
+import com.arms.api.alm.issue.base.service.jiraissue_schedule.alm_entity_sync.ALM_수집_데이터_지라이슈_엔티티_동기화;
+import com.arms.api.alm.issue.base.service.jiraissue_schedule.alm_entity_sync.ALM_수집_데이터_증분_지라이슈_엔티티_동기화;
 import com.arms.api.util.common.constrant.index.인덱스자료;
 import com.arms.egovframework.javaservice.esframework.EsQuery;
 import com.arms.egovframework.javaservice.esframework.filter.RangeQueryFilter;
@@ -29,7 +31,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static com.arms.api.alm.issue.base.service.ALM_수집_데이터_지라이슈_엔티티_동기화.*;
+import static com.arms.api.alm.issue.base.service.jiraissue_schedule.alm_entity_sync.ALM_수집_데이터_지라이슈_엔티티_동기화_팩토리.*;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
@@ -41,8 +43,9 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     private 지라이슈_저장소 지라이슈_저장소;
-    private 서브테스크_조회 서브테스크_조회;
-    private 이슈전략_호출 이슈전략_호출;
+    private com.arms.api.alm.issue.base.service.jiraissue_schedule.subtask_repository.서브테스크_조회 서브테스크_조회;
+    private com.arms.api.alm.issue.base.service.jiraissue.지라이슈_서비스_프로세스 지라이슈_서비스_프로세스;
+    private com.arms.api.alm.issue.base.service.jiraissue_schedule.alm_streategy.이슈전략_호출 이슈전략_호출;
 
     @Override
     public 지라이슈_엔티티 이슈_추가하기(지라이슈_엔티티 지라이슈_엔티티) {
@@ -62,17 +65,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     @Override
     public 지라이슈_엔티티 이슈_조회하기(String 조회조건_아이디){
 
-        EsQuery esQuery = new EsQueryBuilder()
-                .bool(
-                    new TermQueryMust("id", 조회조건_아이디)
-                );
-        List<지라이슈_엔티티> 검색결과 = 지라이슈_저장소.normalSearch(기본_쿼리_생성기.기본검색(new 기본_검색_요청(){}, esQuery).생성());
-
-        if (검색결과 == null || 검색결과.isEmpty()) {
-            return null;
-        }
-
-        return 검색결과.stream().findFirst().orElseGet(지라이슈_엔티티::new);
+        return 지라이슈_서비스_프로세스.이슈_조회하기(조회조건_아이디);
     }
 
     @Override
@@ -116,37 +109,6 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
 
         ALM_수집_데이터_지라이슈_엔티티_동기화 ALM_수집_데이터_지라이슈_엔티티_동기화 =  ALM_수집_데이터_지라이슈_엔티티_동기화_생성(지라이슈_벌크_추가_요청값);
 
-        if (ALM_수집_데이터_지라이슈_엔티티_동기화.가져온_ALM_이슈_없음()) {
-
-            /**
-             * ALM 서버 조회 후 반환된 데이터가 Null -> 1. 삭제되어 조회가 안 되는 경우 2. 서버에서 에러가 터진 경우
-             * ES 데이터에 있는지 조회 후 암스에서 관리하지 않는 요구사항으로 처리하는 로직
-             **/
-
-            // ES에도 해당 정보가 없는 경우
-            ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_요구사항_연결_끊고_삭제_적용(
-                this.이슈_조회하기(지라이슈_벌크_추가_요청값.조회조건_아이디())
-            );
-
-            // 하위이슈의 경우 요구사항 이슈가 삭제되었을 때 전부 삭제된다(모든 도큐먼트에 삭제 flag 추가)
-            ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_일괄_삭제_적용();
-
-        }
-
-        if (ALM_수집_데이터_지라이슈_엔티티_동기화.가져온_ALM_이슈_있음()) {
-
-            // 삭제된 하위이슈 flag 처리
-            ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_데이터에_존재하지_않는_지라이슈_엔티티_삭제_적용();
-
-            ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_엔티티_요구사항_적용();
-
-            ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_엔티티_하위이슈_목록_적용();
-
-            ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_엔티티_연결이슈_적용();
-
-        }
-
-
         return 대량이슈_추가하기(ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_앤티티_저장할_목록_가져오기());
     }
 
@@ -154,37 +116,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
     @Override
     public int 증분이슈_링크드이슈_서브테스크_벌크추가(@Valid 지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값) throws Exception {
 
-        ALM_수집_데이터_지라이슈_엔티티_동기화 ALM_수집_데이터_지라이슈_엔티티_동기화 =  ALM_수집_데이터_증분_지라이슈_엔티티_동기화_생성(지라이슈_벌크_추가_요청값);
-
-        if (ALM_수집_데이터_지라이슈_엔티티_동기화.가져온_ALM_이슈_없음()) {
-
-            /**
-             * ALM 서버 조회 후 반환된 데이터가 Null -> 1. 삭제되어 조회가 안 되는 경우 2. 서버에서 에러가 터진 경우
-             * ES 데이터에 있는지 조회 후 암스에서 관리하지 않는 요구사항으로 처리하는 로직
-             **/
-
-            // ES에도 해당 정보가 없는 경우
-            ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_요구사항_연결_끊고_삭제_적용(
-                    this.이슈_조회하기(지라이슈_벌크_추가_요청값.조회조건_아이디())
-            );
-
-            // 하위이슈의 경우 요구사항 이슈가 삭제되었을 때 전부 삭제된다(모든 도큐먼트에 삭제 flag 추가)
-            ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_일괄_삭제_적용();
-
-        }
-
-        if (ALM_수집_데이터_지라이슈_엔티티_동기화.가져온_ALM_이슈_있음()) {
-
-            // 삭제된 하위이슈 flag 처리
-            ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_데이터에_존재하지_않는_지라이슈_엔티티_삭제_적용();
-
-            ALM_수집_데이터_지라이슈_엔티티_동기화.증분_지라이슈_엔티티_요구사항_적용();
-
-            ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_엔티티_하위이슈_목록_적용();
-
-            ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_엔티티_연결이슈_적용();
-        }
-
+        ALM_수집_데이터_증분_지라이슈_엔티티_동기화 ALM_수집_데이터_지라이슈_엔티티_동기화 =  ALM_수집_데이터_증분_지라이슈_엔티티_동기화_생성(지라이슈_벌크_추가_요청값);
 
         return 대량이슈_추가하기(ALM_수집_데이터_지라이슈_엔티티_동기화.지라이슈_앤티티_저장할_목록_가져오기());
     }

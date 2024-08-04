@@ -3,7 +3,7 @@ package com.arms.api.alm.search.controller;
 import com.arms.api.alm.fluentd.model.플루언트디_엔티티;
 import com.arms.api.alm.fluentd.service.플루언트디_서비스;
 import com.arms.api.alm.issue.base.model.dto.지라이슈_엔티티;
-import com.arms.api.alm.issue.base.service.지라이슈_검색_서비스;
+import com.arms.api.alm.issue.base.service.jiraissue_search.지라이슈_검색_서비스;
 import com.arms.api.util.model.dto.response.검색어_검색결과;
 import com.arms.api.util.model.dto.request.검색어_날짜포함_검색_요청;
 import com.arms.api.util.model.dto.request.검색어_검색_집계_하위_요청;

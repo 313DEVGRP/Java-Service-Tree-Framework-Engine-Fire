@@ -2,7 +2,7 @@ package com.arms.api.alm.issue.base.controller;
 
 import com.arms.api.alm.issue.base.model.vo.지라이슈_벌크_추가_요청;
 import com.arms.api.alm.issue.base.model.dto.지라이슈_엔티티;
-import com.arms.api.alm.issue.base.service.이슈_스케쥴_서비스;
+import com.arms.api.alm.issue.base.service.jiraissue_schedule.main.이슈_스케쥴_서비스;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
