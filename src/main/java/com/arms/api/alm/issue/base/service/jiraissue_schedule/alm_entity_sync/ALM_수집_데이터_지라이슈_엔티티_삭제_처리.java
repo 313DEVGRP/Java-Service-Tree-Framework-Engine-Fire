@@ -16,7 +16,6 @@ import static com.arms.config.ApplicationContextProvider.getBean;
 public class ALM_수집_데이터_지라이슈_엔티티_삭제_처리 implements ALM_수집_데이터_지라이슈_엔티티_동기화_인터페이스{
 
 	private final 지라이슈_엔티티_컬렉션 지라이슈_엔티티_저장_목록 = new 지라이슈_엔티티_컬렉션(new ArrayList<>());
-	private final List<지라이슈_엔티티> 지라이슈_엔티티_요구사항_하위이슈_목록;
 	private final 지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값;
 
 	@Override
@@ -25,7 +24,6 @@ public class ALM_수집_데이터_지라이슈_엔티티_삭제_처리 implement
 	}
 
 	public ALM_수집_데이터_지라이슈_엔티티_삭제_처리(지라이슈_벌크_추가_요청 지라이슈_벌크_추가_요청값){
-		this.지라이슈_엔티티_요구사항_하위이슈_목록 = getBean(서브테스크_조회.class).요구사항_서브테스크_검색하기(지라이슈_벌크_추가_요청값);
 		this.지라이슈_벌크_추가_요청값 = 지라이슈_벌크_추가_요청값;
 	}
 
@@ -35,6 +33,8 @@ public class ALM_수집_데이터_지라이슈_엔티티_삭제_처리 implement
 	}
 
 	private void 지라이슈_일괄_삭제_적용(){
+
+		List<지라이슈_엔티티> 지라이슈_엔티티_요구사항_하위이슈_목록 = getBean(서브테스크_조회.class).요구사항_서브테스크_검색하기(지라이슈_벌크_추가_요청값);
 		지라이슈_엔티티_요구사항_하위이슈_목록.forEach(
 			this::지라이슈_삭제_적용
 		);
