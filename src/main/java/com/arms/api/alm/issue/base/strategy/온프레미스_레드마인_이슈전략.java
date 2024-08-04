@@ -299,39 +299,53 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
 
         RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
 
-        Issue 부모이슈 = null;
+        Set<String> 이슈아이디_세트 = new HashSet<>();
+        이슈아이디_세트.add(이슈_키_또는_아이디);
+
+        List<지라이슈_데이터> 이슈링크_목록 = new ArrayList<>();
+
+        이슈링크_가져오기_재귀(레드마인_매니저, 서버정보, 이슈_키_또는_아이디, 이슈아이디_세트, 이슈링크_목록);
+
+        return 이슈링크_목록;
+    }
+
+    public void 이슈링크_가져오기_재귀(RedmineManager 레드마인_매니저, 서버정보_데이터 서버정보, String 이슈_키_또는_아이디, Set<String> 이슈아이디_세트, List<지라이슈_데이터> 이슈링크_목록) {
+
+        Issue 이슈 = null;
         try {
-            부모이슈 = 레드마인_매니저.getIssueManager().getIssueById(Integer.parseInt(이슈_키_또는_아이디), Include.relations);
+            이슈 = 레드마인_매니저.getIssueManager().getIssueById(Integer.parseInt(이슈_키_또는_아이디), Include.relations);
         }
         catch (RedmineException e) {
             에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
                     "레드마인_온프레미스 ["+ 서버정보.getUri() +"] :: 이슈_키_또는_아이디 :: "
                             + 이슈_키_또는_아이디+ " :: 이슈링크_가져오기 오류");
+            return;
         }
 
-        if (부모이슈 == null || 부모이슈.getRelations() == null || 부모이슈.getRelations().isEmpty()) {
+        if (이슈 == null || 이슈.getRelations() == null || 이슈.getRelations().isEmpty()) {
             로그.info("레드마인_온프레미스 ["+ 서버정보.getUri() +"] :: 이슈_키_또는_아이디 :: "
                     + 이슈_키_또는_아이디 + " :: 이슈링크 데이터가 없습니다.");
-            return null;
+            return;
         }
 
-        List<지라이슈_데이터> 이슈_목록 = new ArrayList<>();
-        for (IssueRelation 연관이슈 : 부모이슈.getRelations()) {
+        for (IssueRelation 연결이슈 : 이슈.getRelations()) {
 
-            String 연관이슈_아이디;
-
-            if (이슈_키_또는_아이디.equals(String.valueOf(연관이슈.getIssueId()))) {
-                연관이슈_아이디 = String.valueOf(연관이슈.getIssueToId());
+            String 연결이슈_아이디 = null;
+            if (이슈_키_또는_아이디.equals(String.valueOf(연결이슈.getIssueId()))) {
+                연결이슈_아이디 = String.valueOf(연결이슈.getIssueToId());
             } else {
-                연관이슈_아이디 = String.valueOf(연관이슈.getIssueId());
+                연결이슈_아이디 = String.valueOf(연결이슈.getIssueId());
             }
 
-            Optional.ofNullable(연관이슈_아이디)
-                    .map(이슈_아이디 -> 이슈_상세정보_가져오기(서버정보, 이슈_아이디))
-                    .ifPresent(이슈_목록::add);
+            if (연결이슈_아이디 != null && !이슈아이디_세트.contains(연결이슈_아이디)) {
+                이슈아이디_세트.add(연결이슈_아이디);
+                지라이슈_데이터 연결이슈_데이터 = 이슈_상세정보_가져오기(서버정보, 연결이슈_아이디);
+                if (연결이슈_데이터 != null) {
+                    이슈링크_목록.add(연결이슈_데이터);
+                    이슈링크_가져오기_재귀(레드마인_매니저, 서버정보, 연결이슈_아이디, 이슈아이디_세트, 이슈링크_목록);
+                }
+            }
         }
-
-        return 이슈_목록;
     }
 
     @Override
