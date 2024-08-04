@@ -516,44 +516,58 @@ public class 클라우드_지라_이슈전략 implements 이슈전략 {
 
         WebClient webClient = 지라유틸.클라우드_통신기_생성(서버정보.getUri(), 서버정보.getUserId(), 서버정보.getPasswordOrToken());
 
+        Set<String> 이슈아이디_세트 = new HashSet<>();
+        이슈아이디_세트.add(이슈_키_또는_아이디);
+
+        List<지라이슈_데이터> 이슈링크_목록 = new ArrayList<>();
+
+        증분이슈링크_가져오기_재귀(webClient, 서버정보.getUri(), 이슈_키_또는_아이디, 이슈아이디_세트, 이슈링크_목록);
+
+        return 이슈링크_목록;
+    }
+
+    public void 증분이슈링크_가져오기_재귀(WebClient webClient, String 서버URI, String 이슈_키_또는_아이디, Set<String> 이슈아이디_세트, List<지라이슈_데이터> 이슈링크_목록) {
+
         int 검색_시작_지점 = 0;
         int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
         boolean isLast = false;
 
-        List<지라이슈_데이터> 이슈링크_목록 = new ArrayList<>(); // 이슈 저장
-
         try {
             while (!isLast) {
-                String linkedIssueEndpoint = 지라API_정보.getEndpoint().getIssue().getIncrement().getLinkedIssue();
-                String endpoint = 지라API_정보.이슈키_대체하기(linkedIssueEndpoint, 이슈_키_또는_아이디)
+                String endpoint = "/rest/api/3/search?jql=issue in linkedIssues(" + 이슈_키_또는_아이디 + ")&" + 지라API_정보.getParameter().getFields()
                         + "&startAt=" + 검색_시작_지점 + "&maxResults=" + 최대_검색수;
 
-                지라이슈조회_데이터 이슈링크_조회결과
-                        = 지라유틸.get(webClient, endpoint, 지라이슈조회_데이터.class).block();
+                지라이슈조회_데이터 이슈링크_조회결과 = 지라유틸.get(webClient, endpoint, 지라이슈조회_데이터.class).block();
 
-                // 증분 데이터가 없는 경우
                 if (이슈링크_조회결과 == null) {
-                    return null;
+                    로그.info("클라우드 지라("+ 서버URI +") :: 이슈 키("+ 이슈_키_또는_아이디+ ") :: 링크드 이슈 목록이 Null입니다.");
+                    return;
                 }
                 else if (이슈링크_조회결과.getIssues() == null || 이슈링크_조회결과.getIssues().size() == 0) {
-                    return null;
+                    로그.info("클라우드 지라("+ 서버URI +") :: 이슈 키("+ 이슈_키_또는_아이디+ ") :: 링크드 이슈 목록이 없습니다.");
+                    return;
                 }
 
-                이슈링크_목록.addAll(이슈링크_조회결과.getIssues());
+                for (지라이슈_데이터 연결이슈 : 이슈링크_조회결과.getIssues()) {
+                    if (!이슈아이디_세트.contains(연결이슈.getKey())) {
+                        이슈아이디_세트.add(연결이슈.getKey());
 
-                if (이슈링크_조회결과.getTotal() == 이슈링크_목록.size()) {
+                        if (지라유틸.전일_업데이트여부(연결이슈.getFields().getUpdated())) {
+                            이슈링크_목록.add(연결이슈);
+                        }
+                        증분이슈링크_가져오기_재귀(webClient, 서버URI, 연결이슈.getKey(), 이슈아이디_세트, 이슈링크_목록);
+                    }
+                }
+
+                검색_시작_지점 += 최대_검색수;
+                if (검색_시작_지점 >= 이슈링크_조회결과.getTotal()) {
                     isLast = true;
-                } else {
-                    검색_시작_지점 += 최대_검색수;
                 }
             }
-
-            return 이슈링크_목록;
         }
         catch (Exception e) {
             에러로그_유틸.예외로그출력(e, this.getClass().getName(),
-                    "클라우드 지라("+ 서버정보.getUri() +") :: 이슈 키("+ 이슈_키_또는_아이디+ ") :: 증분_링크드이슈_가져오기에 실패하였습니다.");
-            return null;
+                    "클라우드 지라("+ 서버URI +") :: 이슈 키("+ 이슈_키_또는_아이디+ ") :: 증분 링크드 이슈 조회에 실패하였습니다.");
         }
     }
 

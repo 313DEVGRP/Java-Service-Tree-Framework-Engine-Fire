@@ -428,41 +428,31 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
     public List<지라이슈_데이터> 증분이슈링크_가져오기(서버정보_데이터 서버정보, String 이슈_키_또는_아이디) {
 
         RedmineManager 레드마인_매니저 = 레드마인유틸.레드마인_온프레미스_통신기_생성(서버정보.getUri(), 서버정보.getPasswordOrToken());
+        Set<String> 이슈아이디_세트 = new HashSet<>();
+        이슈아이디_세트.add(이슈_키_또는_아이디);
 
-        Issue 부모이슈 = null;
-        try {
-            부모이슈 = 레드마인_매니저.getIssueManager().getIssueById(Integer.parseInt(이슈_키_또는_아이디), Include.relations);
-        }
-        catch (RedmineException e) {
-            에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
-                    "레드마인_온프레미스 ["+ 서버정보.getUri() +"] :: 이슈_키_또는_아이디 :: "
-                            + 이슈_키_또는_아이디+ " :: 증분이슈링크_가져오기 오류");
-        }
+        List<지라이슈_데이터> 이슈링크_목록 = new ArrayList<>();
 
-        if (부모이슈 == null || 부모이슈.getRelations().isEmpty()) {
-            로그.info("레드마인_온프레미스 ["+ 서버정보.getUri() +"] :: 이슈_키_또는_아이디 :: "
-                    + 이슈_키_또는_아이디+ " 연관된 이슈가 없습니다");
-            return null;
-        }
+        이슈링크_가져오기_재귀(레드마인_매니저, 서버정보, 이슈_키_또는_아이디, 이슈아이디_세트, 이슈링크_목록);
 
-        List<지라이슈_데이터> 이슈_목록 = new ArrayList<>();
-        for (IssueRelation 연관이슈 : 부모이슈.getRelations()) {
+        LocalDate 어제날짜 = 어제날짜_얻기();
 
-            String 연관이슈_아이디;
+        // 업데이트된 이슈들만 필터링
+        List<지라이슈_데이터> 업데이트된_이슈링크_목록 = 이슈링크_목록.stream()
+                .filter(이슈 -> {
+                    String 업데이트 = 이슈.getFields().getUpdated();
+                    try {
+                        ZonedDateTime 업데이트_날짜 = ZonedDateTime.parse(업데이트, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                        LocalDate 업데이트_날짜_로컬 = 업데이트_날짜.toLocalDate();
+                        return 업데이트_날짜_로컬 != null && 업데이트_날짜_로컬.isEqual(어제날짜);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return false; // 파싱에 실패한 경우 필터링에서 제외
+                    }
+                })
+                .collect(Collectors.toList());
 
-            if (이슈_키_또는_아이디.equals(String.valueOf(연관이슈.getIssueId()))) {
-                연관이슈_아이디 = String.valueOf(연관이슈.getIssueToId());
-            }
-            else {
-                연관이슈_아이디 = String.valueOf(연관이슈.getIssueId());
-            }
-
-            Optional.ofNullable(연관이슈_아이디)
-                    .map(이슈_아이디 -> 증분이슈_상세정보_가져오기(서버정보, 이슈_아이디))
-                    .ifPresent(이슈_목록::add);
-        }
-
-        return 이슈_목록;
+        return 업데이트된_이슈링크_목록;
     }
 
     @Override
@@ -481,7 +471,7 @@ public class 온프레미스_레드마인_이슈전략 implements 이슈전략 {
                     try {
                         ZonedDateTime 업데이트_날짜 = ZonedDateTime.parse(업데이트, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
                         LocalDate 업데이트_날짜_로컬 = 업데이트_날짜.toLocalDate();
-                        return 업데이트_날짜_로컬 != null && !업데이트_날짜_로컬.isBefore(어제날짜);
+                        return 업데이트_날짜_로컬 != null && 업데이트_날짜_로컬.isEqual(어제날짜);
                     } catch (Exception e) {
                         e.printStackTrace();
                         return false; // 파싱에 실패한 경우 필터링에서 제외

@@ -799,50 +799,69 @@ public class 온프레미스_지라_이슈전략 implements 이슈전략 {
     public List<지라이슈_데이터> 증분이슈링크_가져오기(서버정보_데이터 서버정보, String 이슈_키_또는_아이디) {
 
         JiraRestClient restClient = null;
+
         try {
             restClient = 지라유틸.온프레미스_통신기_생성(서버정보.getUri(),
                     서버정보.getUserId(),
                     서버정보.getPasswordOrToken());
+
+            Set<String> 이슈아이디_세트 = new HashSet<>();
+            이슈아이디_세트.add(이슈_키_또는_아이디);
+
+            List<지라이슈_데이터> 이슈링크_목록 = new ArrayList<>();
+
+            증분이슈링크_가져오기_재귀(restClient, 서버정보.getUri(), 이슈_키_또는_아이디, 이슈아이디_세트, 이슈링크_목록);
+
+            return 이슈링크_목록;
         }
         catch (URISyntaxException | IOException e) {
             에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
-                    "온프레미스 지라(" + 서버정보.getUri() + ") ::  이슈_키_또는_아이디 :: "+ 이슈_키_또는_아이디 + ", 증분이슈링크 가져오기 온프레미스_통신기_생성 중 오류");
+                    "온프레미스 지라(" + 서버정보.getUri() + ") ::  이슈_키_또는_아이디 :: "+ 이슈_키_또는_아이디 + ", 증분이슈링크_가져오기 온프레미스_통신기_생성 중 오류");
             return null;
         }
+    }
 
-        String linkedIssueJql = 지라API_정보.이슈키_대체하기(지라API_정보.getParameter().getJql().getLinkedIssue(), 이슈_키_또는_아이디);
-        String updateJql = 지라API_정보.getParameter().getJql().getUpdated();
-        String jql = linkedIssueJql + " and " + updateJql;
+    public void 증분이슈링크_가져오기_재귀(JiraRestClient restClient, String 서버URI, String 이슈_키_또는_아이디, Set<String> 이슈아이디_세트, List<지라이슈_데이터> 이슈링크_목록) {
+
+        String jql = "issue in linkedIssues("+이슈_키_또는_아이디+")";
 
         int startAt = 0;
         int 최대_검색수 = 지라API_정보.getParameter().getMaxResults();
-
         Set<String> fields = new HashSet<>(Arrays.asList("*all")); // 검색 필드
 
         // 이슈 건수가 1000이 넘을때 이슈 조회를 위한 처리
-        List<지라이슈_데이터> 반환할_이슈링크_목록 = new ArrayList<>();
         SearchResult searchResult;
 
         try {
             do {
                 searchResult = restClient.getSearchClient()
                         .searchJql(jql, 최대_검색수, startAt, fields)
-                        .claim();
+                        .get();
                 for (Issue issue : searchResult.getIssues()) {
-                    지라이슈_데이터 지라이슈_데이터 = 지라이슈_데이터로_변환(issue);
-                    반환할_이슈링크_목록.add(지라이슈_데이터);
+                    if (!이슈아이디_세트.contains(issue.getKey())) {
+                        이슈아이디_세트.add(issue.getKey());
+
+                        if (지라유틸.전일_업데이트여부(String.valueOf(issue.getUpdateDate()))) {
+                            이슈링크_목록.add(지라이슈_데이터로_변환(issue));
+                        }
+                        증분이슈링크_가져오기_재귀(restClient, 서버URI, issue.getKey(), 이슈아이디_세트, 이슈링크_목록);
+                    }
                 }
 
                 startAt += 최대_검색수;
 
             } while (searchResult.getTotal() > startAt);
 
-            return 반환할_이슈링크_목록;
+        }
+        catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // 스레드를 다시 interrupt
+
+            에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
+                    "온프레미스 지라(" + 서버URI + ") ::  이슈_키_또는_아이디 :: "+ 이슈_키_또는_아이디 + ", 증분이슈링크_가져오기 중 오류");
         }
         catch (Exception e) {
             에러로그_유틸.예외로그출력_및_반환(e, this.getClass().getName(),
-                    "온프레미스 지라(" + 서버정보.getUri() + ") ::  이슈_키_또는_아이디 :: "+ 이슈_키_또는_아이디 + ", 증분이슈링크 가져오기 중 오류");
-            return null;
+                    "온프레미스 지라(" + 서버URI + ") ::  이슈_키_또는_아이디 :: "+ 이슈_키_또는_아이디 + ", 증분이슈링크_가져오기 중 오류");
         }
     }
 
