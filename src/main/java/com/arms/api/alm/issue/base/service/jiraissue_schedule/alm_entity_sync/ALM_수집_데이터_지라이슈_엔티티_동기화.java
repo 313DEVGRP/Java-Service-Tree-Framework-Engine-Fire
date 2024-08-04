@@ -108,9 +108,22 @@ public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
         );
     }
 
+    /**
+     * 스케줄러 작동 시 암스에서 생성한 요구사항 자체가 전날 업데이트가 일어났는지 확인 시 업데이트가 없을 시 null 반환(삭제된 이슈를 조회할 때 또한)
+     * 따라서 암스 생성 요구사항 상세정보를 JIRA에서 조회 후 어플리케이션 단에서 updated 항목을 검증 후 증분 데이터 판단 후 저장시키는 방법
+     **/
+
+    public void 증분_지라이슈_엔티티_요구사항_적용() {
+        if(전일_업데이트여부(지라이슈_데이터.getFields().getUpdated())){
+            this.지라이슈_엔티티_저장_목록.엔티티_목록_추가(
+                요구사항_이슈()
+            );
+        }
+    }
+
     public void 지라이슈_엔티티_요구사항_적용() {
         this.지라이슈_엔티티_저장_목록.엔티티_목록_추가(
-            this.요구사항_이슈()
+            요구사항_이슈()
         );
     }
 
@@ -176,7 +189,7 @@ public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
 
         Set<String> 연결이슈_아이디_세트 = new HashSet<>();
 
-        이슈링크_가져오기(요청값, 요청값.get이슈_키(), 연결이슈_아이디_세트);
+        이슈링크_가져오기_재귀(요청값, 요청값.get이슈_키(), 연결이슈_아이디_세트);
 
         if (연결이슈_아이디_세트.isEmpty()) {
             return new String[0];
@@ -185,15 +198,23 @@ public class ALM_수집_데이터_지라이슈_엔티티_동기화 {
         }
     }
 
-    private void 이슈링크_가져오기(지라이슈_벌크_추가_요청 요청값, String 현재_이슈_키, Set<String> 연결이슈_아이디_세트) {
+    private void 이슈링크_가져오기_재귀(지라이슈_벌크_추가_요청 요청값, String 현재_이슈_키, Set<String> 연결이슈_아이디_세트) {
 
         List<지라이슈_데이터> 이슈링크_가져오기 =
-            Optional.ofNullable(ALM_이슈링크_가져오기(요청값.get지라서버_아이디(),요청값.get이슈_키()))
-                .orElse(Collections.emptyList());
-        if (!이슈링크_가져오기.isEmpty()) {
+                Optional.ofNullable(ALM_이슈링크_가져오기(요청값.get지라서버_아이디(),요청값.get이슈_키()))
+                        .orElse(Collections.emptyList());
+        if(!이슈링크_가져오기.isEmpty()){
             for (지라이슈_데이터 ALM_데이터 : 이슈링크_가져오기) {
                 String 조회조건_아이디 = 요청값.get지라서버_아이디()+"_"+ALM_데이터.getFields().getProject().getKey()+"_"+ALM_데이터.getKey();
-                연결이슈_아이디_세트.add(조회조건_아이디);
+
+                if (ALM_데이터.getKey().equals(요청값.get이슈_키()) || 연결이슈_아이디_세트.contains(조회조건_아이디)) {
+                    continue;
+                } else {
+                    연결이슈_아이디_세트.add(조회조건_아이디);
+                }
+
+                // 내부 연결 이슈를 재귀적으로 가져오기
+                이슈링크_가져오기_재귀(요청값, ALM_데이터.getKey(), 연결이슈_아이디_세트);
             }
         }
     }
