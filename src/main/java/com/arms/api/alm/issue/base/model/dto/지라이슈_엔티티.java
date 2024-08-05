@@ -499,4 +499,10 @@ public class 지라이슈_엔티티 {
     public boolean izNotEmpty(){
         return !this.izEmpty();
     }
+
+    public String 조회조건_아이디(){
+        return this.getJira_server_id() + "_" +
+                this.getProject().getKey() + "_" +
+                this.getKey();
+    }
 }

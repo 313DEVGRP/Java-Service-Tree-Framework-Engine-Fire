@@ -106,9 +106,7 @@ public class ALM_수집_데이터_지라이슈_엔티티_저장_처리 implement
 				지라이슈_엔티티 조회_결과 = getBean(이슈_스케쥴_서비스_프로세스.class).이슈_조회하기(조회_아이디);
 				Optional<지라이슈_엔티티> 저장할_이슈_엔티티 = 지라이슈_엔티티_저장_목록.get지라이슈_엔티티_목록().stream()
 						.filter(이슈 -> {
-							String 비교_아이디 = 이슈.getJira_server_id() + "_" +
-									이슈.getProject().getKey() + "_" +
-									이슈.getKey();
+							String 비교_아이디 = 이슈.조회조건_아이디();
 							return 비교_아이디.equals(조회_아이디);
 						})
 						.findFirst();
