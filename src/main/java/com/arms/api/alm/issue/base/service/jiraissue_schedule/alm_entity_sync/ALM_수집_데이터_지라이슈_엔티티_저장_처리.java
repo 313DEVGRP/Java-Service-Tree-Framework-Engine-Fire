@@ -3,6 +3,7 @@ package com.arms.api.alm.issue.base.service.jiraissue_schedule.alm_entity_sync;
 import com.arms.api.alm.issue.base.model.dto.지라이슈_데이터;
 import com.arms.api.alm.issue.base.model.dto.지라이슈_엔티티;
 import com.arms.api.alm.issue.base.model.vo.지라이슈_벌크_추가_요청;
+import com.arms.api.alm.issue.base.service.jiraissue_schedule.alm_streategy.이슈전략_호출;
 import com.arms.api.alm.issue.base.service.jiraissue_schedule.main.이슈_스케쥴_서비스_프로세스;
 import com.arms.api.alm.issue.base.service.jiraissue_schedule.subtask_repository.서브테스크_조회;
 import com.arms.api.alm.utils.지라이슈_생성;
@@ -65,7 +66,7 @@ public class ALM_수집_데이터_지라이슈_엔티티_저장_처리 implement
 	}
 
 	private void 지라이슈_데이터에_존재하지_않는_지라이슈_엔티티_삭제_적용(){
-		지라이슈_데이터_컬렉션 지라이슈_데이터_컬렉션 = new 지라이슈_데이터_컬렉션(지라이슈_데이터_하위이슈_목록);
+		지라이슈_데이터_컬렉션 지라이슈_데이터_컬렉션 = new 지라이슈_데이터_컬렉션(getBean(이슈전략_호출.class).서브테스크_가져오기(지라이슈_벌크_추가_요청값));
 		지라이슈_엔티티_컬렉션 지라이슈_엔티티_컬렉션 = new 지라이슈_엔티티_컬렉션(getBean(서브테스크_조회.class).요구사항_서브테스크_검색하기(지라이슈_벌크_추가_요청값));
 		this.지라이슈_일괄_삭제_적용(
 			지라이슈_데이터_컬렉션.지라이슈_데이터에_존재하지_않는_지라이슈_목록(지라이슈_엔티티_컬렉션)
