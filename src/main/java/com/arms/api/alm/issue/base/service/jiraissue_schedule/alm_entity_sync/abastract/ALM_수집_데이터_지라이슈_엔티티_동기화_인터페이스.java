@@ -1,4 +1,4 @@
-package com.arms.api.alm.issue.base.service.jiraissue_schedule.alm_entity_sync;
+package com.arms.api.alm.issue.base.service.jiraissue_schedule.alm_entity_sync.abastract;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
