@@ -5,11 +5,6 @@ import com.arms.api.alm.requirement.service.요구사항_서비스;
 import com.arms.api.alm.issue.base.model.dto.지라이슈_엔티티;
 import com.arms.api.util.model.dto.request.지라이슈_기본_검색_집계_하위_요청;
 import com.arms.api.util.model.dto.request.지라이슈_제품_및_제품버전_검색_집계_하위_요청;
-import com.arms.egovframework.javaservice.esframework.EsQuery;
-import com.arms.egovframework.javaservice.esframework.esquery.EsQueryBuilder;
-import com.arms.egovframework.javaservice.esframework.must.TermQueryMust;
-import com.arms.egovframework.javaservice.esframework.factory.creator.기본_쿼리_생성기;
-import com.arms.egovframework.javaservice.esframework.filter.TermsQueryFilter;
 import com.arms.egovframework.javaservice.esframework.model.vo.버킷_집계_결과;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,15 +24,7 @@ public class 요구사항_컨트롤러 {
     // Requirement - ReqStatus
     @PostMapping("/requirement-linkedissue/{pdServiceId}")
     public ResponseEntity<List<지라이슈_엔티티>> 제품별_요구사항_연결이슈_조회(@PathVariable Long pdServiceId, 지라이슈_기본_검색_집계_하위_요청 지라이슈_일반_집계_요청) {
-
-        EsQuery esQuery
-                = new EsQueryBuilder()
-                .bool(
-                        new TermQueryMust("pdServiceId",pdServiceId),
-                        new TermsQueryFilter("pdServiceVersions",지라이슈_일반_집계_요청.getPdServiceVersionLinks())
-                );
-
-        return ResponseEntity.ok(요구사항_서비스.지라이슈_조회(기본_쿼리_생성기.기본검색(지라이슈_일반_집계_요청, esQuery)));
+        return ResponseEntity.ok(요구사항_서비스.제품별_요구사항_연결이슈_조회(pdServiceId, 지라이슈_일반_집계_요청));
     }
 
     // Requirement - ReqStatus, Dashboard, Detail_Dashboard

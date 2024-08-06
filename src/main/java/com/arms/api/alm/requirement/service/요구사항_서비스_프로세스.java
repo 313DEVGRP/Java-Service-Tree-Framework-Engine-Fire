@@ -21,6 +21,7 @@ import com.arms.egovframework.javaservice.esframework.model.vo.버킷_집계_결
 import com.arms.egovframework.javaservice.esframework.model.vo.버킷_집계_결과_목록_합계;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,53 @@ public class 요구사항_서비스_프로세스 implements 요구사항_서비�
     private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     private 지라이슈_저장소 지라이슈_저장소;
+
+    @Override
+    public List<지라이슈_엔티티> 제품별_요구사항_연결이슈_조회(Long pdServiceId, 지라이슈_기본_검색_집계_하위_요청 지라이슈_일반_집계_요청) {
+
+        List<지라이슈_엔티티> 모든_이슈_목록 = new ArrayList<>();
+
+        // 요구사항 조회
+        EsQuery esQuery
+                = new EsQueryBuilder()
+                .bool(
+                        new TermQueryMust("pdServiceId", pdServiceId),
+                        new TermQueryMust("isReq", true),
+                        new TermsQueryFilter("pdServiceVersions", 지라이슈_일반_집계_요청.getPdServiceVersionLinks())
+                );
+        List<지라이슈_엔티티> 요구사항_목록 = 지라이슈_조회(기본_쿼리_생성기.기본검색(지라이슈_일반_집계_요청, esQuery));
+        모든_이슈_목록.addAll(요구사항_목록);
+
+        // 하위 이슈 및 연결 이슈 조회
+        요구사항_목록.parallelStream()
+                .forEach(요구사항 -> {
+                    EsQuery esQuery1
+                            = new EsQueryBuilder()
+                            .bool(
+                                    new TermQueryMust("parentReqKey", 요구사항.getKey())
+                            );
+                    모든_이슈_목록.addAll(지라이슈_조회(기본_쿼리_생성기.기본검색(new 기본_검색_요청(), esQuery1)));
+
+                    // linkedIssues 필드가 있는 경우
+                    if (ArrayUtils.isNotEmpty(요구사항.getLinkedIssues())) {
+                        for (String 연결이슈_아이디 : 요구사항.getLinkedIssues()) {
+                            EsQuery esQuery2
+                                    = new EsQueryBuilder()
+                                    .bool(
+                                            new TermQueryMust("id", 연결이슈_아이디)
+                                    );
+                            지라이슈_조회(기본_쿼리_생성기.기본검색(new 기본_검색_요청(), esQuery2)).stream()
+                                    .findFirst()
+                                    .ifPresent(연결이슈 -> {
+                                        연결이슈.setEtc(요구사항.getKey());
+                                        모든_이슈_목록.add(연결이슈);
+                                    });
+                        }
+                    }
+                });
+
+        return 모든_이슈_목록;
+    }
 
     @Override
     public Map<String, Long> 제품서비스별_담당자_이름_통계(Long 지라서버_아이디, Long 제품서비스_아이디) {
