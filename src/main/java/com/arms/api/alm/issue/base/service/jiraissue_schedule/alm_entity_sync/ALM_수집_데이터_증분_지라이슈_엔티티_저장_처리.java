@@ -20,7 +20,7 @@ public class ALM_수집_데이터_증분_지라이슈_엔티티_저장_처리 ex
 
 	@Override
 	public List<지라이슈_엔티티> 지라이슈_앤티티_저장할_목록_가져오기(){
-		return 지라이슈_엔티티_저장_목록.get지라이슈_엔티티_목록();
+		return get지라이슈_엔티티_저장_목록().get지라이슈_엔티티_목록();
 	}
 
 	@Override
