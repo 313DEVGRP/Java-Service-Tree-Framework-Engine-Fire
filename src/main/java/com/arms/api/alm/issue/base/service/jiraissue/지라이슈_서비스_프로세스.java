@@ -9,6 +9,7 @@ import com.arms.egovframework.javaservice.esframework.model.dto.기본_검색_�
 import com.arms.egovframework.javaservice.esframework.must.TermQueryMust;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.stereotype.Service;
 import com.arms.api.alm.issue.base.repository.지라이슈_저장소;
 
@@ -70,5 +71,21 @@ public class 지라이슈_서비스_프로세스 implements 지라이슈_서비�
         }
 
         return 검색결과.stream().findFirst().orElseGet(지라이슈_엔티티::new);
+    }
+
+    public SearchHit<지라이슈_엔티티> 이슈상세_조회하기(String 조회조건_아이디){
+
+        EsQuery esQuery = new EsQueryBuilder()
+                .bool(
+                        new TermQueryMust("id", 조회조건_아이디)
+                );
+        List<SearchHit<지라이슈_엔티티>> 검색결과 = 지라이슈_저장소.normalSearchHits(기본_쿼리_생성기.기본검색(new 기본_검색_요청() {
+        }, esQuery).생성());
+
+        if (검색결과 == null || 검색결과.isEmpty()) {
+            return null;
+        }
+
+        return 검색결과.get(0);
     }
 }

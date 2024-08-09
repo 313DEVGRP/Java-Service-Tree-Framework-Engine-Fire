@@ -66,6 +66,11 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
         return 지라이슈_서비스_프로세스.이슈_조회하기(조회조건_아이디);
     }
 
+    private SearchHit<지라이슈_엔티티> 이슈상세_조회하기(String 조회조건_아이디){
+
+        return 지라이슈_서비스_프로세스.이슈상세_조회하기(조회조건_아이디);
+    }
+
     @Override
     public String ALM이슈_도큐먼트삭제(String 인덱스_이름, String 도큐먼트_아이디){
         return 지라이슈_저장소.deleteDocumentById(인덱스_이름, 도큐먼트_아이디);
@@ -195,6 +200,26 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
 
         List<지라이슈_데이터> ALM_서브테스크_목록 = 이슈전략_호출.서브테스크_가져오기(지라서버_아이디, 이슈_키); // ALM에서 조회한 서브테스크 목록
 
+        Set<String> 연결이슈_아이디_세트 = new HashSet<>();
+
+        List<지라이슈_데이터> 이슈링크_가져오기 =이슈전략_호출.이슈링크_가져오기(지라이슈_벌크_추가_요청값);
+
+        if (이슈링크_가져오기 != null && !이슈링크_가져오기.isEmpty()) {
+            이슈링크_가져오기.stream()
+                    .map(almData -> almData.조회조건_아이디(지라이슈_벌크_추가_요청값))
+                    .filter(Objects::nonNull)
+                    .forEach(연결이슈_아이디_세트::add);
+        }
+
+        if(!연결이슈_아이디_세트.isEmpty()) {
+            SearchHit<지라이슈_엔티티> 요구사항_이슈 = 이슈상세_조회하기(지라이슈_벌크_추가_요청값.조회조건_아이디());
+
+            요구사항_이슈.getContent().setLinkedIssues(연결이슈_아이디_세트.toArray(new String[0]));
+
+            지라이슈_저장소.updateSave(요구사항_이슈.getContent(), 요구사항_이슈.getIndex());
+        }
+
+
         List<SearchHit<지라이슈_엔티티>> ES_서브테크_이슈링크_목록 = 서브테스크_조회.요구사항_링크드이슈_서브테스크_인덱스포함_검색하기(지라서버_아이디, 이슈_키); // ES에서 조회한 서브테스크 및 이슈링크 목록
 
         Map<String, 지라이슈_데이터> ALM_서브테스크_데이터_맵 = Optional.ofNullable(ALM_서브테스크_목록) // ALM 서브테스크 (키, 데이터) 맵
@@ -224,7 +249,7 @@ public class 이슈_스케쥴_서비스_프로세스 implements 이슈_스케쥴
             return 서브테스크_이슈링크;
         }).collect(toList());
 
-        int 업데이트된_개수 = (int) 업데이트_데이터_목록.stream()
+        int 업데이트된_개수 = (int) 업데이트_데이터_목록.parallelStream()
                 .filter(도큐먼트_데이터 -> {
                     try {
                         // 해당 인덱스의 도큐먼트 데이터를 업데이트 하기위함
